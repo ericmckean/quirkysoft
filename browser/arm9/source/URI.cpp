@@ -3,7 +3,7 @@
 #include <functional>
 
 
-URI::URI(std::string & uriString):
+URI::URI(const std::string & uriString):
   m_protocol(""), m_address("")
 {
   int sep(uriString.find(":"));

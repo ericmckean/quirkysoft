@@ -9,10 +9,15 @@
 
 using namespace std;
 
-Controller::Controller(string & uriString)
-  : m_document(*(new Document(uriString))),
+Controller::Controller()
+  : m_document(*(new Document())),
   m_view(*(new View(m_document, *this)))
 {
+}
+
+void Controller::doUri(const std::string & uriString)
+{
+  m_document.setUri(uriString);
   // split the URI into sections
   URI uri(uriString);
   if (uri.isFile()) {
@@ -64,6 +69,8 @@ class HttpClient: public nds::Client
       char * buffer = (char*)bufferIn;
       buffer[amountRead] = 0;
       m_data.append(buffer);
+      // TODO: parse headers, chunks, end of chunks.
+
       // write buffer to stdout
       // printf("%s",buffer);
     }
@@ -77,7 +84,7 @@ class HttpClient: public nds::Client
 
     void debug(const char * s)
     {
-       //printf("\ndebug:%s\n",s);
+       printf("\ndebug:%s\n",s);
        // cout << "debug:"<< s << endl;
     }
 
@@ -106,8 +113,6 @@ class HttpClient: public nds::Client
   private:
     int m_total;
     string m_data;
-
-
 };
 
 void Controller::fetchHttp(const URI & uri)

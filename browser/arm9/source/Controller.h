@@ -11,8 +11,9 @@ class URI;
 class Controller : public ControllerI
 {
   public:
-    Controller(std::string & uri);
+    Controller();
 
+    void doUri(const std::string & uriString);
     void mainLoop();
     void keyPress();
 

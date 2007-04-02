@@ -4,7 +4,7 @@
 class URI
 {
   public:
-    URI(std::string & uriString);
+    URI(const std::string & uriString);
     bool isFile() const;
     bool isValid() const;
     std::string server() const;
