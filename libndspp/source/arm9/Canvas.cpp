@@ -11,7 +11,6 @@ Canvas & Canvas::instance()
   return s_canvas;
 }
 
-
 Canvas::~Canvas(){}
 
 Canvas::Canvas():
@@ -30,10 +29,30 @@ Canvas::Canvas():
   m_bgSub->update();
 }
 
+int Canvas::height() const
+{
+  // from nds/arm9/video.h
+  return SCREEN_HEIGHT;
+}
+int Canvas::width() const
+{
+  // from nds/arm9/video.h
+  return SCREEN_WIDTH;
+}
+
 void Canvas::drawPixel(int x, int y, int colour)
 {
   uint16 * gfx( (y < 192) ? BG_GFX:BG_GFX_SUB );
   if (y >= 192)
     y -= 192;
   gfx[x+y*256] = colour|BIT(15);
+}
+
+void Canvas::fillRectangle(int x, int y, int w, int h, int colour)
+{
+  for (int j = 0; j < h; j++) {
+    for (int i = 0; i < w; i++) {
+      drawPixel(x+i, y+j, colour);
+    }
+  }
 }
