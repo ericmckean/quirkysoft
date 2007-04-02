@@ -32,7 +32,7 @@ Canvas::Canvas():
 int Canvas::height() const
 {
   // from nds/arm9/video.h
-  return SCREEN_HEIGHT;
+  return SCREEN_HEIGHT*2;
 }
 int Canvas::width() const
 {
@@ -42,6 +42,9 @@ int Canvas::width() const
 
 void Canvas::drawPixel(int x, int y, int colour)
 {
+  if (x >= SCREEN_WIDTH or y >= (2*SCREEN_HEIGHT)) {
+    return;
+  }
   uint16 * gfx( (y < 192) ? BG_GFX:BG_GFX_SUB );
   if (y >= 192)
     y -= 192;
