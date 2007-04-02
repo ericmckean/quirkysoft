@@ -20,6 +20,15 @@ Canvas::Canvas()
   main.setMode(5);
 }
 
+int Canvas::height() const
+{
+  return SDLhandler::HEIGHT;
+}
+int Canvas::width() const
+{
+  return SDLhandler::WIDTH;
+}
+
 void Canvas::drawPixel(int x, int y, int colour)
 {
   int layer = ( (y < 192) ? 0:1 );
@@ -27,4 +36,13 @@ void Canvas::drawPixel(int x, int y, int colour)
     y-=192;
   }
   SDLhandler::instance().drawPixel(x,y,layer,colour);
+}
+
+void Canvas::fillRectangle(int x, int y, int w, int h, int colour)
+{
+  for (int j = 0; j < h; j++) {
+    for (int i = 0; i < w; i++) {
+      drawPixel(x+i, y+j, colour);
+    }
+  }
 }
