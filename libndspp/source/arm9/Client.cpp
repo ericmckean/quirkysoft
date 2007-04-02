@@ -6,8 +6,9 @@
 #include <arpa/inet.h>
 #endif
 #include <string.h>
-#include <iostream>
+#if 0
 #include <sstream>
+#endif
 #include <unistd.h>
 #include <stdio.h>
 #include <algorithm>
@@ -41,16 +42,20 @@ bool Client::connect(sockaddr_in & socketAddress)
   if (result != -1)
   {
     m_connected = true;
+#if 0
     stringstream dbg;
     dbg << "Connected to " << m_ip << ":" << m_port;
     debug(dbg.str().c_str());
+#endif
     return m_connected;
   }
   else
   {
+#if 0
     stringstream dbg;
     dbg << "Unable to connect to\n" << m_ip << ":" << m_port << "\nError:"<<result;
     debug(dbg.str().c_str());
+#endif
     return false;
   }
 }
@@ -77,9 +82,11 @@ Client::connect()
     int i = 0;
     while (host->h_addr_list[i] != NULL) {
       memcpy(&socketAddress.sin_addr, host->h_addr_list[i], sizeof(struct in_addr));
+#if 0
       stringstream dbg;
       dbg << "Trying: " << host->h_aliases[i] << endl;
       debug(dbg.str().c_str());
+#endif
       if ( this->connect(socketAddress) ) {
         break;
       }
@@ -104,9 +111,11 @@ unsigned int Client::write(const void * data, unsigned int length)
   do
   {
     {
+#if 0
       stringstream dbg;
       dbg << "About to send " << length << " bytes of data" << endl;
       debug(dbg.str().c_str());
+#endif
     }
     int sent = ::send(m_tcp_socket, cdata, length, 0);
     if (sent <= 0)
@@ -116,9 +125,11 @@ unsigned int Client::write(const void * data, unsigned int length)
     total += sent;
     // wait for the cores to sync
     {
+#if 0
       stringstream dbg;
       dbg << "Remaining: " << length << " bytes of data" << endl;
       debug(dbg.str().c_str());
+#endif
     }
   } while (length);
   debug("Done write\n");
@@ -151,14 +162,18 @@ void Client::read()
       break;
     handle(buffer, amountRead);
     total += amountRead;
+#if 0
     stringstream dbg;
     dbg << "Read " << total << " bytes" << endl;;
     debug(dbg.str().c_str());
+#endif
     if (finished())
       break;
   }
+#if 0
   stringstream dbg;
   dbg << "Done: " << total << " bytes";
   debug(dbg.str().c_str());
+#endif
   finish();
 }
