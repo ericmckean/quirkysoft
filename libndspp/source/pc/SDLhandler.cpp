@@ -9,6 +9,7 @@
 #include "BackgroundHandler.h"
 #include "SpriteHandler.h"
 #include "Keys.h"
+#include "Video.h"
 
 using namespace std;
 const int SDLhandler::WIDTH(32*8);
@@ -299,7 +300,9 @@ void SDLhandler::clear()
   if (not m_mainOnTop) {
     colour = m_subBackgroundPaletteSDL[0];
   }
-  SDL_FillRect (m_screen, &rect, colour);
+  if (Video::instance(0).mode() != 5) {
+    SDL_FillRect (m_screen, &rect, colour);
+  }
   if (m_mainOnTop) {
     colour = m_subBackgroundPaletteSDL[0];
   } else {
@@ -309,7 +312,9 @@ void SDLhandler::clear()
   rect.y = GAP.y+GAP.h;
   rect.w = WIDTH;
   rect.h = HEIGHT/2;
-  SDL_FillRect (m_screen, &rect, colour);
+  if (Video::instance(1).mode() != 5) {
+    SDL_FillRect (m_screen, &rect, colour);
+  }
 
   drawGap();
 }
@@ -341,21 +346,30 @@ void SDLhandler::drawPixel(int x, int y, unsigned int layer, unsigned int palett
   rect.x = x*m_scale;
   rect.y = y*m_scale;
   Uint32 colour(0);
-  switch (layer) {
-    case 1:
-      colour = m_subBackgroundPaletteSDL[palette];
-      break;
-    case 2:
-      colour = m_spritePaletteSDL[palette];
-      break;
-    case 3:
-      colour = m_subSpritePaletteSDL[palette];
-      break;
+  
+  bool usePalette(true);
+  if (layer == 0 or layer == 1) {
+    if (nds::Video::instance(layer).mode() == 5) {
+      colour = decodeColor(palette);
+      usePalette = false;
+    }
+  }
+  if (usePalette) {
+    switch (layer) {
+      case 1:
+        colour = m_subBackgroundPaletteSDL[palette];
+        break;
+      case 2:
+        colour = m_spritePaletteSDL[palette];
+        break;
+      case 3:
+        colour = m_subSpritePaletteSDL[palette];
+        break;
 
-    default:
-      colour = m_backgroundPaletteSDL[palette];
-      break;
-
+      default:
+        colour = m_backgroundPaletteSDL[palette];
+        break;
+    }
   }
 #if 0
   if (layer == 2 )

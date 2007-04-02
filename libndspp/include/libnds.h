@@ -98,7 +98,6 @@ void dmaCopy(const void * source, void * destination, unsigned int length);
 #define POWER_ALL_2D
 void powerON(void);
 
-// Setup the Main screen for 3D 
 #define MODE_0_2D      0x10000
 #define MODE_1_2D      0x10001
 #define MODE_2_2D      0x10002
