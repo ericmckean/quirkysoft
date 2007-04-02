@@ -73,7 +73,8 @@ bool FileImplementation::is_open()
 }
 void FileImplementation::close()
 {
-  fclose(m_stream);
+  if (m_stream) 
+    fclose(m_stream);
   m_stream = 0;
 }
 
