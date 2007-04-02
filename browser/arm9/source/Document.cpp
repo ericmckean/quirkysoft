@@ -1,12 +1,16 @@
 #include "Document.h"
 #include <wchar.h>
-#include <iostream>
 
 using namespace std;
 
-Document::Document(std::string & uri):
-  m_uri(uri), m_data(0)
+Document::Document():
+  m_data(0)
 {
+}
+
+void Document::setUri(const std::string & uriString)
+{
+  m_uri = uriString;
 }
 
 const std::string & Document::uri() const

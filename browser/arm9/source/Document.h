@@ -7,8 +7,9 @@
 class Document
 {
   public:
-    Document(std::string & uri);
+    Document();
 
+    void setUri(const std::string & uriString);
     void setData(const char * data, int size); 
     const std::string & uri() const;
     const char * asText() const;

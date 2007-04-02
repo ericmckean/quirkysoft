@@ -8,14 +8,14 @@ int main(int argc, char * argv[])
 
   irqInit();
   irqSet(IRQ_VBLANK,(VoidFunctionPointer)0);
+  Controller c;
   if (argc > 1) {
     std::string fileName(argv[1]);
-    Controller c(fileName);
-    c.mainLoop();
+    c.doUri(fileName);
   } else {
     std::string fileName("http://www.gbadev.org/");
-    Controller c(fileName);
-    c.mainLoop();
+    c.doUri(fileName);
   }
+  c.mainLoop();
 
 }
