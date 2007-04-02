@@ -6,6 +6,8 @@
 class Document;
 class ControllerI;
 
+class TextArea;
+
 class View : public ViewI
 {
   public:
@@ -20,6 +22,7 @@ class View : public ViewI
   private:
     Document & m_document;
     ControllerI & m_controller;
+    TextArea * m_textArea;
 
 };
 #endif
