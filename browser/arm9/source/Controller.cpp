@@ -1,12 +1,11 @@
 #include "Wifi9.h"
 #include <vector>
-#include <iostream>
-#include <fstream>
 #include "Controller.h"
 #include "Document.h"
 #include "View.h"
 #include "URI.h"
 #include "Client.h"
+#include "File.h"
 
 using namespace std;
 
@@ -35,16 +34,14 @@ void Controller::keyPress()
 
 void Controller::localFile(const string & fileName)
 {
-  ifstream uriFile;
-  uriFile.open(fileName.c_str(), ios::in);
+  nds::File uriFile;
+  uriFile.open(fileName.c_str());
   // read the lot
   if (uriFile.is_open())
   {
-    uriFile.seekg(0, ios::end);
-    int size = uriFile.tellg();
+    int size = uriFile.size();
     char * data = new char[size+2];
-    uriFile.seekg(0, ios::beg);
-    uriFile.read(data, size);
+    uriFile.read(data);
     data[size] = 0;
     m_document.setData(data, size);
     delete [] data;
@@ -81,7 +78,7 @@ class HttpClient: public nds::Client
     void debug(const char * s)
     {
        //printf("\ndebug:%s\n",s);
-       cout << "debug:"<< s << endl;
+       // cout << "debug:"<< s << endl;
     }
 
     // GET stuff
