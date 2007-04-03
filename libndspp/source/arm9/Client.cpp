@@ -14,6 +14,7 @@
 #include <algorithm>
 #include <functional>
 #include <string>
+#include <errno.h>
 /*
  * Simple TCP/IP client. 
  * */
@@ -24,7 +25,8 @@ using namespace nds;
 Client::Client(const char * ip, int port):
   m_ip(ip),
   m_port(port),
-  m_connected(false)
+  m_connected(false),
+  m_timeout(1)
 { }
 
 Client::~Client()
@@ -38,30 +40,65 @@ Client::~Client()
 bool Client::connect(sockaddr_in & socketAddress)
 {
   int addrlen = sizeof(struct sockaddr_in);
-  int result = ::connect(m_tcp_socket, (struct sockaddr*)&socketAddress, addrlen);
-  if (result != -1)
-  {
-    m_connected = true;
-#if 0
-    stringstream dbg;
-    dbg << "Connected to " << m_ip << ":" << m_port;
-    debug(dbg.str().c_str());
-#endif
-    return m_connected;
-  }
-  else
-  {
-#if 0
-    stringstream dbg;
-    dbg << "Unable to connect to\n" << m_ip << ":" << m_port << "\nError:"<<result;
-    debug(dbg.str().c_str());
-#endif
+  int i(1);
+  int iotclResult = ::ioctl(m_tcp_socket, FIONBIO, &i);
+  if (iotclResult == -1) {
+    debug("iotcl non blocking failed");
     return false;
   }
+  int result = ::connect(m_tcp_socket, (struct sockaddr*)&socketAddress, addrlen);
+  if (result == 0) {
+    // connected immediately
+    m_connected = true;
+  }
+  else {
+    switch (errno) {
+      case EINPROGRESS:
+        {
+          // select connect for write
+          fd_set wfds;
+          timeval tv;
+          int retval;
+          FD_ZERO(&wfds);
+          FD_SET(m_tcp_socket, &wfds);
+          while (not m_connected) {
+            tv.tv_sec = m_timeout;
+            tv.tv_usec = 0;
+            retval = select(m_tcp_socket+1, NULL, &wfds, NULL, &tv);
+            if (retval == -1) {
+              debug("Select error");
+              m_connected = false;
+              return m_connected;
+            }
+            else if (retval) {
+              debug("Data is available now.");
+              m_connected = true;
+              break;
+            }
+            else {
+              debug("No data within 1 second.");
+              // keep trying - let the client know what is happening.
+              connectCallback();
+            }
+          }
+        }
+        break;
+      default:
+        {
+#if 0
+          stringstream dbg;
+          dbg << "Unable to connect to\n" << m_ip << ":" << m_port << "\nError:"<<result;
+          debug(dbg.str().c_str());
+#endif
+          return false;
+        }
+        break;
+    }
+  }
+  return m_connected;
 }
 
-void
-Client::connect()
+void Client::connect()
 {
   if (!m_ip)
     return;
@@ -97,8 +134,6 @@ Client::connect()
   } else {
     this->connect(socketAddress);
   }
-
-
 }
 
 
@@ -110,12 +145,22 @@ unsigned int Client::write(const void * data, unsigned int length)
 #define SEND_SIZE 2048
   do
   {
-    {
 #if 0
       stringstream dbg;
       dbg << "About to send " << length << " bytes of data" << endl;
       debug(dbg.str().c_str());
 #endif
+    writeCallback();
+    fd_set wfds;
+    timeval tv;
+    int retval;
+    FD_ZERO(&wfds);
+    FD_SET(m_tcp_socket, &wfds);
+    tv.tv_sec = m_timeout;
+    tv.tv_usec = 0;
+    retval = select(m_tcp_socket+1, NULL, &wfds, NULL, &tv);
+    if (retval < 0) {
+      continue;
     }
     int sent = ::send(m_tcp_socket, cdata, length, 0);
     if (sent <= 0)
@@ -124,13 +169,13 @@ unsigned int Client::write(const void * data, unsigned int length)
     length -= sent;
     total += sent;
     // wait for the cores to sync
-    {
 #if 0
+    {
       stringstream dbg;
       dbg << "Remaining: " << length << " bytes of data" << endl;
       debug(dbg.str().c_str());
-#endif
     }
+#endif
   } while (length);
   debug("Done write\n");
   return total;
@@ -145,21 +190,42 @@ void Client::read()
   const static int bufferSize(BUFFER_SIZE);
   char buffer[bufferSize];
   int total = 0;
+  int notReadyCount = 0;
   while (true)
   {
-    // after the first read, check the end condition
-    // this requires a patch to dswifi :-(
-    if (total) {
-      int potential = ::recv(m_tcp_socket, buffer, bufferSize,MSG_PEEK);
-      if (potential == 0) 
-      {
-        debug("PEEK 0 bytes. Aborting\n");
-        break;
-      }
-    }
-    int amountRead = ::recv(m_tcp_socket, buffer, bufferSize,0);
-    if (amountRead == -1 or amountRead == 0)
+    readCallback();
+    fd_set rfds;
+    timeval tv;
+    int retval;
+    FD_ZERO(&rfds);
+    FD_SET(m_tcp_socket, &rfds);
+    tv.tv_sec = 1;
+    tv.tv_usec = 0;
+    retval = select(m_tcp_socket+1, &rfds, NULL, NULL, &tv);
+    if (retval == -1) {
+      debug("Select error");
       break;
+    } 
+    else if (retval) {
+      debug("Data available");
+    }
+    else
+    {
+      debug("not ready");
+      notReadyCount++;
+      if (notReadyCount == 2)
+        break;
+      continue;
+    }
+    int amountRead = ::recv(m_tcp_socket, buffer, bufferSize, 0 /*MSG_DONTWAIT*/);
+    int tmpErrno = errno;
+    if (amountRead <= 0) {
+      debug("Error on recv");
+      break;
+    }
+    if (tmpErrno == EWOULDBLOCK) {
+      break;
+    }
     handle(buffer, amountRead);
     total += amountRead;
 #if 0
