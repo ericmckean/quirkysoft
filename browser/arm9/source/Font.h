@@ -25,8 +25,8 @@ class Font
         int textLength, 
         int & width, 
         int & height, 
-        const std::string & encoding="utf-8");
-    void glyph(unsigned int glyphId, Glyph & g);
+        const std::string & encoding="utf-8") const;
+    void glyph(unsigned int glyphId, Glyph & g) const;
 
     inline int totalWidth() const;
     inline int height() const;
@@ -43,8 +43,8 @@ class Font
     std::vector<Range*> m_range;
     std::string m_encoding;
 
-    int valueToIndex(unsigned int glyphId);
-    int minGlyph();
+    int valueToIndex(unsigned int glyphId) const;
+    int minGlyph() const;
     void init(unsigned char * imageData, unsigned char * mapData);
 };
 

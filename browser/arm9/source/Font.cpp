@@ -131,7 +131,7 @@ Font::~Font()
   delete [] m_glyphPosition;
 }
 
-int Font::minGlyph()
+int Font::minGlyph() const
 {
   if (m_range.size()) {
     const Range *range(m_range[0]);
@@ -140,7 +140,7 @@ int Font::minGlyph()
     return -1;
   }
 }
-int Font::valueToIndex(unsigned int glyphId)
+int Font::valueToIndex(unsigned int glyphId) const
 {
   vector<Range*>::const_iterator it(m_range.begin());
   int total = 0;
@@ -157,7 +157,7 @@ int Font::valueToIndex(unsigned int glyphId)
   return -1;
 }
 
-void Font::glyph(unsigned int value, Glyph & glyphData)
+void Font::glyph(unsigned int value, Glyph & glyphData) const
 {
   int glyph = valueToIndex(value);
   if (glyph == -1)
@@ -170,7 +170,6 @@ void Font::glyph(unsigned int value, Glyph & glyphData)
     value = min;
     glyph = valueToIndex(value);
   }
-  //cout << "glyph value " << glyph << endl;
   unsigned int position = m_glyphPosition[glyph];
   int offset = position / 2;
 
@@ -179,7 +178,7 @@ void Font::glyph(unsigned int value, Glyph & glyphData)
   glyphData.data = (const unsigned char*)(&m_glyphData[offset]);
 }
 
-void Font::textSize(const char * text, int amount, int & width, int & height, const string & encoding)
+void Font::textSize(const char * text, int amount, int & width, int & height, const string & encoding) const
 {
   // length of text in bytes.
   width = 0;

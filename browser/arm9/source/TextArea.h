@@ -19,6 +19,10 @@ class TextArea
     void setEncoding(const std::string & encoding="utf-8");
     void setCursor(int x, int y);
 
+    inline const Font & font() const {
+      return *m_font;
+    }
+
   private:
     Font * m_font;
     unsigned short * m_palette;
