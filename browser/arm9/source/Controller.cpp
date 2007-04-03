@@ -63,6 +63,11 @@ class HttpClient: public nds::Client
       : nds::Client(ip,port), m_total(0)
     {}
 
+    void setDocument(Document & d)
+    {
+      m_document = &d;
+    }
+
     // implement the pure virtual functions
     void handle(void * bufferIn, int amountRead)
     {
@@ -73,8 +78,19 @@ class HttpClient: public nds::Client
 
       // write buffer to stdout
       // printf("%s",buffer);
+      //m_document->setData(buffer, amountRead);
     }
     
+    void connectCallback() {
+      printf("Connecting...\n");
+    }
+    void writeCallback() {
+      printf("write...\n");
+    }
+    void readCallback() {
+      m_document->setLoading(1);
+    }
+
     bool finished() 
     {
       return false;
@@ -84,7 +100,8 @@ class HttpClient: public nds::Client
 
     void debug(const char * s)
     {
-       printf("\ndebug:%s\n",s);
+       //printf("\ndebug:%s\n",s);
+       m_document->setData(s, strlen(s));
        // cout << "debug:"<< s << endl;
     }
 
@@ -113,6 +130,7 @@ class HttpClient: public nds::Client
   private:
     int m_total;
     string m_data;
+    Document * m_document;
 };
 
 void Controller::fetchHttp(const URI & uri)
@@ -120,7 +138,9 @@ void Controller::fetchHttp(const URI & uri)
   nds::Wifi9::instance().connect();
   if (nds::Wifi9::instance().connected()) {
     // open a socket to the server.
+    // FIXME - hardcoded 80 port.
     HttpClient client(uri.server().c_str(), 80);
+    client.setDocument(m_document);
     client.connect();
     client.get(uri);
     client.read();

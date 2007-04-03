@@ -15,9 +15,28 @@ void View::notify()
 {
   //std::cout << "URI: " << m_document.uri() << std::endl;
   //std::cout << "Content: " << m_document.asText() << std::endl;
-  const char * text(m_document.asText());
-  m_textArea->print(text, strlen(text), 0,0);
+  Document::Status status(m_document.status());
 
+  switch (status) {
+    case Document::LOADED:
+      {
+        const char * text(m_document.asText());
+        if (text != 0) {
+          m_textArea->print(text, strlen(text), 0,0);
+        }
+        swiWaitForVBlank();
+      }
+      break;
+    case Document::INPROGRESS:
+      {
+        const char * l = "Loading..";
+        m_textArea->print(l, strlen(l), 0,0);
+        swiWaitForVBlank();
+      }
+      break;
+    default:
+      break;
+  }
 }
 
 void View::mainLoop()
