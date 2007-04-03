@@ -30,9 +30,11 @@ void TextArea::printAt(Font::Glyph & g, int xPosition, int yPosition)
     {
       unsigned char pixelPair = *data++;
       int pix1 = ((pixelPair)&0xf);
-      Canvas::instance().drawPixel(xPosition+(x*2), yPosition+y, m_palette[pix1]);
+      if (pix1)
+        Canvas::instance().drawPixel(xPosition+(x*2), yPosition+y, m_palette[pix1]);
       int pix2 = ((pixelPair>>4)&0xf);
-      Canvas::instance().drawPixel(xPosition+(x*2)+1, yPosition+y, m_palette[pix2]);
+      if (pix2)
+        Canvas::instance().drawPixel(xPosition+(x*2)+1, yPosition+y, m_palette[pix2]);
     }
     data += dataInc;
   }
@@ -101,6 +103,8 @@ void TextArea::setPalette(const std::string & fileName)
     palFile.read(data);
     data[size] = 0;
     m_palette = (unsigned short*) data;
+    Canvas & canvas( Canvas::instance());
+    canvas.fillRectangle(0,0,canvas.width(), canvas.height(), m_palette[0]);
   } else {
     Canvas::instance().fillRectangle(130,0,10,128,Color(31,0,0));
   }
