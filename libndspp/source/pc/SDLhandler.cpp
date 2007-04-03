@@ -402,6 +402,11 @@ unsigned short * SDLhandler::vramMain(int offset)
   return &m_vramMain[offset];
 }
 
+bool SDLhandler::inGap(int y) const
+{
+  return (y >= GAP.y and y < (GAP.y+GAP.h));
+}
+
 unsigned short * SDLhandler::vramSub(int offset) {
   return &m_vramSub[offset];
 }
@@ -445,6 +450,19 @@ void SDLhandler::waitVsync()
     switch( event.type ) {
       case SDL_QUIT:
         exit(0);
+        break;
+
+      case SDL_MOUSEBUTTONDOWN:
+      case SDL_MOUSEBUTTONUP:
+        // offset the y position
+        if (event.button.y > 191) {
+          if (inGap(event.button.y)) {
+            break;
+          }
+          event.button.y -= GAP.h;
+          event.button.y -= 192;
+          Keys::instance().handleMouseEvent(event.button);
+        }
         break;
 
       case SDL_KEYUP:
