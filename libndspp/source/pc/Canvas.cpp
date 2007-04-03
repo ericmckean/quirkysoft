@@ -46,3 +46,25 @@ void Canvas::fillRectangle(int x, int y, int w, int h, int colour)
     }
   }
 }
+
+void Canvas::verticalLine(int x, int y, int length, int colour)
+{
+  for (int i = 0 ; i < length; ++i)
+  {
+    drawPixel(x, y+i, colour);
+  }
+}
+void Canvas::horizontalLine(int x, int y, int length, int colour)
+{
+  for (int i = 0 ; i < length; ++i)
+  {
+    drawPixel(x+i, y, colour);
+  }
+}
+void Canvas::drawRectangle(int x, int y, int w, int h, int colour)
+{
+  horizontalLine(x,y,w,colour);
+  horizontalLine(x,y+h,w,colour);
+  verticalLine(x,y,h,colour);
+  verticalLine(x+w,y,h,colour);
+}

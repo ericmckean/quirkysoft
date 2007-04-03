@@ -11,6 +11,9 @@ namespace nds
       static Canvas & instance();
       void drawPixel(int x, int y, int color);
       void fillRectangle(int x, int y, int w, int h, int color);
+      void drawRectangle(int x, int y, int w, int h, int color);
+      void verticalLine(int x, int y, int length, int colour);
+      void horizontalLine(int x, int y, int length, int colour);
       int width() const;
       int height() const;
 
