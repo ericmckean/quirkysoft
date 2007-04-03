@@ -4,7 +4,8 @@
 using namespace std;
 
 Document::Document():
-  m_data(0)
+  m_data(0),
+  m_amount(0)
 {
 }
 
@@ -37,13 +38,13 @@ void Document::unregisterView(ViewI * view)
      m_views.erase(it);
 }
 
-
 void Document::setData(const char * data, int size)
 {
   if (m_data) {
     delete [] m_data;
     m_data = 0;
   }
+  m_status = LOADED;
 
   if (size) {
     m_data = new char[size];
@@ -53,5 +54,24 @@ void Document::setData(const char * data, int size)
     m_data = new char[s.length()+1];
     bcopy(s.c_str(), m_data, s.length());
   }
+  notifyAll();
+}
+
+void Document::setLoading(int amount)
+{
+  m_status = INPROGRESS;
+  if (amount != m_amount) {
+    notifyAll();
+  }
+  m_amount = amount;
+}
+
+void Document::notifyAll() const
+{
   for_each(m_views.begin(), m_views.end(), mem_fun(&ViewI::notify));
+}
+
+Document::Status Document::status() const
+{
+  return m_status;
 }
