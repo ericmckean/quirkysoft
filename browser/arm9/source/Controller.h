@@ -5,7 +5,6 @@ class Document;
 class View;
 class URI;
 
-#include <string>
 #include "ControllerI.h"
 
 class Controller : public ControllerI
@@ -15,7 +14,6 @@ class Controller : public ControllerI
 
     void doUri(const std::string & uriString);
     void mainLoop();
-    void keyPress();
 
   private:
     Document & m_document;

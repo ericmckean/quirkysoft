@@ -1,8 +1,12 @@
+#include <iostream>
 #include "ndspp.h"
 #include "libnds.h"
 #include "View.h"
 #include "Document.h"
 #include "TextArea.h"
+#include "Canvas.h"
+#include "ControllerI.h"
+#include "Keyboard.h"
 
 
 View::View(Document & doc, ControllerI & c):m_document(doc), m_controller(c)
@@ -41,14 +45,22 @@ void View::notify()
 
 void View::mainLoop()
 {
+  Keyboard * keyboard = new Keyboard(*m_textArea);
   for(;;) {
     scanKeys();
-    u16 keys = keysDownRepeat();
-    if (keys & KEY_A)
-    {
-      // show the board thingy
+    if (keyboard->visible()) {
+      keyboard->handleInput();
+      if (not keyboard->visible())
+      {
+        nds::Canvas::instance().fillRectangle(0, SCREEN_HEIGHT, SCREEN_WIDTH, SCREEN_HEIGHT, nds::Color(31,31,31));
+        m_controller.doUri(keyboard->result());
+      }
+    } else {
+      u16 keys = keysDownRepeat();
+      if (keys & KEY_START) {
+        keyboard->setVisible();
+      }
     }
-
     swiWaitForVBlank();
   }
 }

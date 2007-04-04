@@ -13,8 +13,8 @@ int main(int argc, char * argv[])
     std::string fileName(argv[1]);
     c.doUri(fileName);
   } else {
-    std::string fileName("http://www.gbadev.org/");
-    c.doUri(fileName);
+    //std::string fileName("http://www.gbadev.org/");
+    //c.doUri(fileName);
   }
   c.mainLoop();
 
