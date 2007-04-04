@@ -115,7 +115,7 @@ void Client::connect()
     // it is not an IP address, it contains letters
     struct hostent * host = gethostbyname(m_ip);
     int i = 0;
-    while (host->h_addr_list[i] != NULL) {
+    while (host and host->h_addr_list[i] != NULL) {
       memcpy(&socketAddress.sin_addr, host->h_addr_list[i], sizeof(struct in_addr));
       stringstream dbg;
       dbg << "Trying: " << host->h_aliases[i];
@@ -127,7 +127,6 @@ void Client::connect()
       }
       i++;
     }
-
 
   } else {
     this->connect(socketAddress);
