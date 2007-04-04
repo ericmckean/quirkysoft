@@ -1,4 +1,5 @@
 #include "Wifi9.h"
+#include <iostream>
 #include <vector>
 #include "Controller.h"
 #include "Document.h"
@@ -31,10 +32,6 @@ void Controller::doUri(const std::string & uriString)
 void Controller::mainLoop()
 {
   m_view.mainLoop();
-}
-
-void Controller::keyPress()
-{
 }
 
 void Controller::localFile(const string & fileName)
@@ -139,6 +136,7 @@ void Controller::fetchHttp(const URI & uri)
   if (nds::Wifi9::instance().connected()) {
     // open a socket to the server.
     // FIXME - hardcoded 80 port.
+    std::cout << "Go to " << uri.server() << std::endl;
     HttpClient client(uri.server().c_str(), 80);
     client.setDocument(m_document);
     client.connect();

@@ -150,7 +150,7 @@ class SubFont:
       #fp.write('%2d // h: %2d val:'%self.glyphSize(unichr(i)))
       w,h = self.__ttf.getsize(unichr(i))
       w = align(w,2)
-      print unichr(i) +' '+ str(position) +' ' +str(w)
+      #print unichr(i) +' '+ str(position) +' ' +str(w)
       fp.write8(w)
       fp.write16(position)
       position += w
