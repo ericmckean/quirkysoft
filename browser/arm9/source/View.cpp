@@ -25,6 +25,7 @@ void View::notify()
     case Document::LOADED:
       {
         const char * text(m_document.asText());
+        std::cout << text;
         if (text != 0) {
           m_textArea->print(text, strlen(text), 0,0);
         }

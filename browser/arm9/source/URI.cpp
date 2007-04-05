@@ -6,11 +6,16 @@
 URI::URI(const std::string & uriString):
   m_protocol(""), m_address("")
 {
-  int sep(uriString.find(":"));
+  std::string tmpUri = uriString;
+  int sep(tmpUri.find(":"));
+  if (sep == -1) {
+    tmpUri = "http://" + uriString;
+    sep = tmpUri.find(":");
+  }
   if (sep != -1) {
-    m_protocol = uriString.substr(0,sep);
+    m_protocol = tmpUri.substr(0,sep);
     std::transform(m_protocol.begin(), m_protocol.end(), m_protocol.begin(), tolower);
-    m_address = uriString.substr(sep+3, uriString.length());
+    m_address = tmpUri.substr(sep+3, tmpUri.length());
   }
 }
 
@@ -28,7 +33,11 @@ std::string URI::server() const
 {
   if (isValid() and not isFile())
   {
-    return m_address.substr(0, m_address.find("/"));
+    int firstSlash(m_address.find("/"));
+    if (firstSlash == -1) {
+      return m_address;
+    }
+    return m_address.substr(0, firstSlash);
   }
   return "";
 }
@@ -40,6 +49,9 @@ const std::string URI::fileName() const
   } else {
     // strip off server
     std::string serverName(server());
+    if (m_address.length() == serverName.length()) {
+      return "/";
+    }
     return m_address.substr(serverName.length(), m_address.length());
   }
 }
