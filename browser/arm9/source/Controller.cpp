@@ -18,14 +18,16 @@ Controller::Controller()
 
 void Controller::doUri(const std::string & uriString)
 {
-  m_document.setUri(uriString);
-  // split the URI into sections
-  URI uri(uriString);
-  if (uri.isFile()) {
-    localFile(uri.fileName());
-  } else {
-    // http
-    fetchHttp(uri);
+  if (uriString.size()) {
+    m_document.setUri(uriString);
+    // split the URI into sections
+    URI uri(uriString);
+    if (uri.isFile()) {
+      localFile(uri.fileName());
+    } else {
+      // http
+      fetchHttp(uri);
+    }
   }
 }
 
@@ -98,8 +100,8 @@ class HttpClient: public nds::Client
     void debug(const char * s)
     {
        //printf("\ndebug:%s\n",s);
-       m_document->setData(s, strlen(s));
-       // cout << "debug:"<< s << endl;
+       //m_document->setData(s, strlen(s));
+       //cout << "debug:"<< s << endl;
     }
 
     // GET stuff

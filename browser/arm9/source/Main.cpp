@@ -5,17 +5,12 @@
 using namespace nds;
 int main(int argc, char * argv[])
 {
-
   irqInit();
-  irqSet(IRQ_VBLANK,(VoidFunctionPointer)0);
-  Controller c;
+  irqSet(IRQ_VBLANK,0);
+  Controller * c = new Controller;
   if (argc > 1) {
     std::string fileName(argv[1]);
-    c.doUri(fileName);
-  } else {
-    //std::string fileName("http://www.gbadev.org/");
-    //c.doUri(fileName);
+    c->doUri(fileName);
   }
-  c.mainLoop();
-
+  c->mainLoop();
 }
