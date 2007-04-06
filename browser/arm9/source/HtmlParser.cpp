@@ -122,6 +122,7 @@ class HtmlParserImpl
 
     string asUnconsumedCharString(int amount);
     void consume(int amount);
+    void addAttribute();
     void handleData();
     void handleEntityData();
     void handleTagOpen();
@@ -394,6 +395,14 @@ void HtmlParserImpl::handleTagName()
     }
 }
 
+void HtmlParserImpl::addAttribute()
+{
+  if (m_attribute) {
+    m_tagAttributes.push_back(m_attribute);
+  }
+  m_attribute = 0;
+}
+
 void HtmlParserImpl::handleBeforeAttributeName()
 {
   next();
@@ -424,9 +433,7 @@ void HtmlParserImpl::handleBeforeAttributeName()
       {
         m_value = ::tolower(m_value);
       }
-      if (m_attribute) {
-        m_tagAttributes.push_back(m_attribute);
-      }
+      addAttribute();
       m_attribute = new HtmlParser::Attribute;
       m_attribute->name = m_value;
       m_attribute->value = "";
@@ -524,9 +531,7 @@ void HtmlParserImpl::handleAfterAttributeName()
         {
           m_value = ::tolower(m_value);
         }
-        if (m_attribute) {
-          m_tagAttributes.push_back(m_attribute);
-        }
+        addAttribute();
         m_attribute = new HtmlParser::Attribute;
         m_attribute->name=m_value;
         m_attribute->value="";
@@ -572,7 +577,9 @@ void HtmlParserImpl::handleBeforeAttributeValue()
       break;
     default:
       {
-        m_attribute->value += m_value;
+        if (m_attribute) {
+          m_attribute->value += m_value;
+        }
         m_state = ATTRIBUTE_VALUE_UNQUOTED;
       }
       break;
@@ -587,8 +594,7 @@ void HtmlParserImpl::handleAttributeValueQuote()
   {
     m_state = BEFORE_ATTRIBUTE_NAME;
     // append m_attribute to list ?? TODO
-    m_tagAttributes.push_back(m_attribute);
-    m_attribute = 0;
+    addAttribute();
   }
   else {
     switch (m_value)
@@ -619,8 +625,7 @@ void HtmlParserImpl::handleAttributeValueUnquoted()
     case 0x000C:
     case 0x0020:
       m_state = BEFORE_ATTRIBUTE_NAME;
-      m_tagAttributes.push_back(m_attribute);
-      m_attribute = 0;
+      addAttribute();
       break;
     case '&':
       m_lastState = m_state;
@@ -631,13 +636,14 @@ void HtmlParserImpl::handleAttributeValueUnquoted()
       // parse error - emit token but redo this value.
       rewind();
     case '>':
-      m_tagAttributes.push_back(m_attribute);
-      m_attribute = 0;
+      addAttribute();
       emitTagToken();
       m_state = DATA;
       break;
     default:
-      m_attribute->value += m_value;
+      if (m_attribute) {
+        m_attribute->value += m_value;
+      }
       break;
   }
 }
