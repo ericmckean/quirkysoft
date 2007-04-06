@@ -1,5 +1,4 @@
 #include "Wifi9.h"
-#include <iostream>
 #include <vector>
 #include "Controller.h"
 #include "Document.h"
@@ -47,7 +46,7 @@ void Controller::localFile(const string & fileName)
     char * data = new char[size+2];
     uriFile.read(data);
     data[size] = 0;
-    m_document.setData(data, size);
+    m_document.appendData(data, size);
     delete [] data;
   }
   uriFile.close();
@@ -59,7 +58,7 @@ class HttpClient: public nds::Client
 {
   public:
     HttpClient(const char * ip, int port)
-      : nds::Client(ip,port), m_total(0)
+      : nds::Client(ip,port), m_total(0), m_finished(false)
     {}
 
     void setDocument(Document & d)
@@ -72,12 +71,7 @@ class HttpClient: public nds::Client
     {
       char * buffer = (char*)bufferIn;
       buffer[amountRead] = 0;
-      m_data.append(buffer);
-      // TODO: parse headers, chunks, end of chunks.
-
-      // write buffer to stdout
-      // printf("%s",buffer);
-      //m_document->setData(buffer, amountRead);
+      m_document->appendData(buffer, amountRead);
     }
     
     void connectCallback() {
@@ -92,16 +86,18 @@ class HttpClient: public nds::Client
 
     bool finished() 
     {
-      return false;
+      return m_finished;
     }
 
-    void finish() { }
+    void finish() { 
+      m_document->setStatus(Document::LOADED);
+    }
 
     void debug(const char * s)
     {
-       //printf("\ndebug:%s\n",s);
-       //m_document->setData(s, strlen(s));
-       //cout << "debug:"<< s << endl;
+      //printf("\ndebug:%s\n",s);
+      //m_document->setData(s, strlen(s));
+      //cout << "debug:"<< s << endl;
     }
 
     // GET stuff
@@ -119,17 +115,17 @@ class HttpClient: public nds::Client
         s += "User-Agent: Homebrew Browser\n";
         s += "\n";
         write(s.c_str(), s.length());
+        m_finished = false;
+        m_uri = uri;
       }
-      m_data = "";
-    }
-    const string & data() const
-    {
-      return m_data;
+      // reset the document for downloading
+      m_document->reset();
     }
   private:
     int m_total;
-    string m_data;
+    bool m_finished;
     Document * m_document;
+    URI m_uri;
 };
 
 void Controller::fetchHttp(const URI & uri)
@@ -138,16 +134,21 @@ void Controller::fetchHttp(const URI & uri)
   if (nds::Wifi9::instance().connected()) {
     // open a socket to the server.
     // FIXME - hardcoded 80 port.
-    std::cout << "Go to " << uri.server() << std::endl;
     HttpClient client(uri.server().c_str(), 80);
     client.setDocument(m_document);
     client.connect();
     client.get(uri);
     client.read();
-    m_document.setData(client.data().c_str(), client.data().size());
+
+    URI docUri(m_document.uri());
+    if (docUri != uri)
+    {
+      // redirected
+      doUri(m_document.uri());
+    }
   } else {
     char * woops = "Woops, wifi not done";
-    m_document.setData(woops, strlen(woops));
+    m_document.appendData(woops, strlen(woops));
   }
 }
 

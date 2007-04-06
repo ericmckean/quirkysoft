@@ -1,4 +1,3 @@
-#include <iostream>
 #include "ndspp.h"
 #include "libnds.h"
 #include "View.h"
@@ -24,10 +23,13 @@ void View::notify()
   switch (status) {
     case Document::LOADED:
       {
-        const char * text(m_document.asText());
-        std::cout << text;
-        if (text != 0) {
-          m_textArea->print(text, strlen(text), 0,0);
+        nds::Canvas::instance().fillRectangle(0, 0, SCREEN_WIDTH, 2*SCREEN_HEIGHT, nds::Color(31,31,31));
+        // const char * text(m_document.asText());
+        // std::cout << text;
+        const std::basic_string<unsigned int> & text(m_document.asText());
+        if (text.length()) {
+          m_textArea->printu(text, 0, 0);
+          // m_textArea->print(text, strlen(text), 0,0);
         }
         swiWaitForVBlank();
       }

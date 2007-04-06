@@ -2,9 +2,18 @@
 #include <algorithm>
 #include <functional>
 
+URI::URI()
+  : m_protocol(""),m_address("")
+{
+}
 
 URI::URI(const std::string & uriString):
   m_protocol(""), m_address("")
+{
+  setUri(uriString);
+}
+
+void URI::setUri(const std::string & uriString)
 {
   std::string tmpUri = uriString;
   int sep(tmpUri.find(":"));
@@ -54,4 +63,13 @@ const std::string URI::fileName() const
     }
     return m_address.substr(serverName.length(), m_address.length());
   }
+}
+
+bool URI::operator==(const URI & other)
+{
+  return m_protocol == other.m_protocol and m_address==other.m_address;
+}
+bool URI::operator!=(const URI & other)
+{
+  return not operator==(other);
 }

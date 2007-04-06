@@ -1,12 +1,13 @@
 #include "Document.h"
-#include <wchar.h>
+#include "HeaderParser.h"
 
 using namespace std;
 
-Document::Document():
-  m_data(0),
-  m_amount(0)
+Document::Document():HtmlParser(),
+  m_amount(0),
+  m_headerParser(new HeaderParser(this))
 {
+  m_data.clear();
 }
 
 void Document::setUri(const std::string & uriString)
@@ -19,9 +20,16 @@ const std::string & Document::uri() const
   return m_uri;
 }
 
-const char * Document::asText() const
+// const char * Document::asText() const
+const std::basic_string<unsigned int> & Document::asText() const
 {
-  return m_data;
+  return m_data; // .c_str();
+}
+
+void Document::reset() 
+{
+  m_data.clear();
+  m_headerParser->reset();
 }
 
 void Document::registerView(ViewI * view)
@@ -38,22 +46,17 @@ void Document::unregisterView(ViewI * view)
      m_views.erase(it);
 }
 
-void Document::setData(const char * data, int size)
+void Document::appendData(const char * data, int size)
 {
-  if (m_data) {
-    delete [] m_data;
-    m_data = 0;
-  }
-  m_status = LOADED;
-
+  // cout << "Append data: "  << size << endl;
+  m_status = INPROGRESS;
   if (size) {
-    m_data = new char[size];
-    bcopy(data, m_data, size);
-  } else {
-    const string s("Unable to connect");
-    m_data = new char[s.length()+1];
-    bcopy(s.c_str(), m_data, s.length());
-  }
+    m_headerParser->feed(data,size);
+    if (not m_headerParser->redirect().empty()) 
+    {
+      m_uri = m_headerParser->redirect();
+    }
+  } 
   notifyAll();
 }
 
@@ -71,7 +74,57 @@ void Document::notifyAll() const
   for_each(m_views.begin(), m_views.end(), mem_fun(&ViewI::notify));
 }
 
+void Document::setStatus(Document::Status status)
+{
+  m_status = status;
+  notifyAll();
+}
 Document::Status Document::status() const
 {
   return m_status;
+}
+
+void Document::handleStartEndTag(const std::string & tag, const std::vector<Attribute*> & attrs)
+{
+  /*
+  cout << "+- tag token:" << tag << endl;
+  vector<Attribute*>::const_iterator it(attrs.begin());
+  for (; it != attrs.end(); ++it)
+  {
+    cout << "Attribute:" << (*it)->name << " = " << (*it)->value << endl;
+  }
+  */
+}
+
+void Document::handleStartTag(const std::string & tag, const std::vector<Attribute*> & attrs)
+{
+  /*
+  if ( tag == "br") {
+    cout << endl;
+  }
+  if ( tag == "p") {
+    cout << endl;
+  }
+  */
+  if ( tag == "meta") {
+    vector<Attribute*>::const_iterator it(attrs.begin());
+    for (; it != attrs.end(); ++it)
+    {
+      if ( (*it)->name == "content" and (*it)->value == "text/html; charset=iso-8859-1") {
+        // parse charset...
+        this->setEncoding(ISO_ENCODING);
+        break;
+      }
+    }
+  }
+}
+void Document::handleEndTag(const std::string & tag)
+{
+}
+
+//void Document::handleData(const std::string & data)
+void Document::handleData(unsigned int ucodeChar)
+{
+  // m_data.append(data.c_str(), data.length());
+  m_data += ucodeChar;
 }

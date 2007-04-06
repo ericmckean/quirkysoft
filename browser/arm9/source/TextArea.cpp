@@ -6,6 +6,7 @@
 #include "File.h"
 
 using namespace nds;
+using namespace std;
 
 TextArea::TextArea() : 
   m_font(0),
@@ -14,7 +15,7 @@ TextArea::TextArea() :
   init("fonts/vera");
 }
 
-void TextArea::init(const std::string & fontBase)
+void TextArea::init(const string & fontBase)
 {
   m_font=new Font(fontBase);
   setPalette(fontBase+".pal");
@@ -44,6 +45,44 @@ void TextArea::setCursor(int x, int y)
 {
   m_cursorx = x;
   m_cursory = x;
+}
+
+void TextArea::printu(const basic_string<unsigned int> & unicodeString, int x, int y)
+{
+  basic_string<unsigned int>::const_iterator it(unicodeString.begin());
+  for (; it != unicodeString.end(); ++it)
+  {
+    unsigned int value(*it);
+    if (m_palette) {
+      // cout << "Value " << (void*)value << "("<< (char)value << ")" << endl;
+      if (value == UTF8::MALFORMED) {
+        value = '?';
+      }
+      Font::Glyph g;
+      m_font->glyph(value, g);
+      if (value == '\n')
+      {
+        x = 0; 
+        y += g.height;
+      } else {
+        if (g.data) {
+          printAt(g, x, y);
+        }
+        x += g.width;
+      }
+    } else {
+      Font::Glyph g;
+      m_font->glyph(' ', g);
+      Canvas::instance().fillRectangle(x, y, 
+          g.width, g.height, Color(31,0,0));
+      x += g.width;
+    }
+    if (x > Canvas::instance().width())
+    {
+      x = 0;
+      y += m_font->height();
+    }
+  }
 }
 
 void TextArea::print(const char * text, int amount, int x, int y)
