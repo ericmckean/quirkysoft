@@ -414,7 +414,7 @@ void SDLhandler::waitVsync()
 {
   int tmpGF = m_frames;
   while (tmpGF == m_frames) {
-    SDL_Delay(1);
+    SDL_Delay(5);
   }
 
   if (m_fn)
