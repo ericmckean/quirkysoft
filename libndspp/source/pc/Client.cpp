@@ -20,7 +20,6 @@
  * */
 using namespace std;
 using namespace nds;
-#define BUFFER_SIZE 256
 
 Client::Client(const char * ip, int port):
   m_ip(ip),
@@ -179,7 +178,7 @@ void Client::read()
 {
   if (!isConnected())
     return;
-  const static int bufferSize(BUFFER_SIZE);
+  const static int bufferSize(BUFSIZ);
   char buffer[bufferSize];
   int total = 0;
   while ( not finished() )
