@@ -14,6 +14,7 @@ class TextArea
     void init(const std::string & fontBase);
     void setPalette(const std::string & fileName);
     void print(const char * data, int amount, int x, int y);
+    void printu(const std::basic_string<unsigned int> & unicodeString, int x, int y);
     void printAt(Font::Glyph & g, int xPosition, int yPosition);
 
     void setEncoding(const std::string & encoding="utf-8");

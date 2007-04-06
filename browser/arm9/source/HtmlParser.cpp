@@ -1,6 +1,5 @@
 #include <assert.h>
 #include <stdlib.h>
-#include <iostream>
 #include <ctype.h>
 #include <algorithm>
 #include "HtmlParser.h"
@@ -14,10 +13,6 @@ class HtmlParserImpl
 
   public:
     static bool isWhitespace(unsigned int value);
-    enum Encoding {
-      UTF8_ENCODING,
-      ISO_ENCODING
-    };
     enum TokeniserState {
       DATA,
       ENTITY_DATA,
@@ -58,16 +53,21 @@ class HtmlParserImpl
 
     HtmlParserImpl(HtmlParser & self) 
       : m_self(self) ,
-      m_encoding(UTF8_ENCODING)
+      m_encoding(HtmlParser::UTF8_ENCODING)
     {}
 
     void initialise(const char * data, unsigned int length);
 
     void fire();
 
-    inline void setEncoding(Encoding enc)
+    inline void setEncoding(HtmlParser::Encoding enc)
     {
       m_encoding = enc;
+    }
+
+    inline HtmlParser::Encoding encoding()
+    {
+      return m_encoding;
     }
 
     inline unsigned int value() const
@@ -82,6 +82,8 @@ class HtmlParserImpl
       return m_end;
     }
 
+    void reset();
+
   private:
     const char * m_input;
     const char * m_position;
@@ -89,7 +91,7 @@ class HtmlParserImpl
     const char * m_end;
     unsigned int m_value;
     HtmlParser & m_self;
-    Encoding m_encoding;
+    HtmlParser::Encoding m_encoding;
     //! last state is for the entity in tokenise
     TokeniserState m_lastState;
     TokeniserState m_state;
@@ -147,13 +149,22 @@ class HtmlParserImpl
 void HtmlParserImpl::next()
 {
   m_lastPosition = m_position;
-  if (m_encoding == UTF8_ENCODING) {
+  if (m_encoding == HtmlParser::UTF8_ENCODING) {
     unsigned int read = UTF8::decode(m_position, m_value);
     m_position += read;
   } else {
-    m_value = (unsigned int)(*m_position);
+    m_value = (*m_position)&0xff;
     m_position++;
   }
+}
+
+void HtmlParserImpl::reset()
+{
+  m_attribute = 0;
+  m_tagAttributes.clear();
+  m_state = DATA;
+  m_contentModel = PCDATA;
+  m_encoding = HtmlParser::UTF8_ENCODING;
 }
 
 void HtmlParserImpl::initialise(const char * data, unsigned int length)
@@ -163,10 +174,6 @@ void HtmlParserImpl::initialise(const char * data, unsigned int length)
   m_lastPosition = data;
   m_end = data+length;
   m_value = 0;
-  m_attribute = 0;
-  m_tagAttributes.clear();
-  m_state = DATA;
-  m_contentModel = PCDATA;
 }
 
 bool HtmlParserImpl::isWhitespace(unsigned int value)
@@ -191,21 +198,25 @@ void HtmlParserImpl::rewind()
 
 void HtmlParserImpl::emit(unsigned int toEmit)
 {
+#if 0
   static unsigned int last = 0;
   if (toEmit == '\n' or toEmit == '\r')
     return;
   if (::isblank(toEmit) and toEmit == last)
     return;
   last = toEmit;
-  if (m_encoding == UTF8_ENCODING)
+  if (m_encoding == HtmlParser::UTF8_ENCODING) 
+  {
     wcout << (wchar_t)toEmit;
   else
     cout << (char)toEmit;
+#endif
+  m_self.handleData(toEmit);
 }
 
 void HtmlParserImpl::emitDoctype(string & token, bool isError)
 {
-  cout << "DOCTYPE: " << token << (isError?" (Erroneous)":" OK") << endl;
+  // cout << "DOCTYPE: " << token << (isError?" (Erroneous)":" OK") << endl;
 }
 
 void HtmlParserImpl::handleTagOpen()
@@ -471,7 +482,7 @@ void HtmlParserImpl::handleAttributeName()
         // discard attribute...
         delete m_attribute;
         m_attribute = 0;
-        cout << "Discarding attribute" << endl;
+        // cout << "Discarding attribute" << endl;
         break;
       }
     }
@@ -713,7 +724,6 @@ unsigned int HtmlParserImpl::consumeEntity()
       consume(5);
       return 0xa0;
     }
-    // else, naive checking...
     const char * start = m_position;
     unsigned int found(0);
     // the longest entity is 10 characters.
@@ -737,6 +747,7 @@ unsigned int HtmlParserImpl::consumeEntity()
         if (match >= 0) {
           // exact match
           found = s_entity[match].value;
+          next(); // consume ;
           break;
         }
         if (match == -2) {
@@ -744,6 +755,10 @@ unsigned int HtmlParserImpl::consumeEntity()
         }
 
       }
+    }
+    if (m_value != ';')
+    {
+      rewind();
     }
     if (not found) {
       m_position = start;
@@ -1197,6 +1212,22 @@ void HtmlParser::feed(const char * data, unsigned int length)
   }
 }
 
+void HtmlParser::setEncoding(HtmlParser::Encoding enc)
+{
+  m_details.setEncoding(enc);
+}
+
+HtmlParser::Encoding HtmlParser::encoding() const
+{
+  return m_details.encoding();
+}
+
+void HtmlParser::setToStart()
+{
+  m_details.reset();
+}
+
+
 void HtmlParser::handleStartEndTag(const std::string & tag, const std::vector<Attribute*> & attrs)
 {
   /*
@@ -1211,6 +1242,7 @@ void HtmlParser::handleStartEndTag(const std::string & tag, const std::vector<At
 
 void HtmlParser::handleStartTag(const std::string & tag, const std::vector<Attribute*> & attrs)
 {
+#if 0
   //cout << "+ tag token:" << tag << endl;
   vector<Attribute*>::const_iterator it(attrs.begin());
   for (; it != attrs.end(); ++it)
@@ -1235,11 +1267,13 @@ void HtmlParser::handleStartTag(const std::string & tag, const std::vector<Attri
       }
     }
   }
+#endif
 }
 void HtmlParser::handleEndTag(const std::string & tag)
 {
   //cout << "- tag token:" << tag << endl;
 }
-void HtmlParser::handleData(const std::string & data)
+//void HtmlParser::handleData(const std::string & data)
+void HtmlParser::handleData(unsigned int ucodeChar)
 {
 }

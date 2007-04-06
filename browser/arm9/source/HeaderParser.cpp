@@ -1,16 +1,21 @@
-#include <iostream>
 #include "HeaderParser.h"
 #include "HtmlParser.h"
 
 using namespace std;
-HeaderParser::HeaderParser()
+HeaderParser::HeaderParser(HtmlParser * htmlParser):
+  m_htmlParser(htmlParser)
+{
+  reset();
+}
+
+void HeaderParser::reset()
 {
   m_state = HTTP_RESPONSE;
   m_redirect = "";
   m_chunked = false;
   m_chunkLength = 0;
   m_chunkLengthString = "";
-  m_htmlParser = new HtmlParser;
+  m_htmlParser->setToStart();
 }
 
 void HeaderParser::rewind()
@@ -68,16 +73,30 @@ void HeaderParser::feed(const char * data, unsigned int length)
   }
 }
 
+const std::string HeaderParser::redirect() const
+{
+  return m_redirect;
+}
+
 void HeaderParser::handleHeader(const string & field, const string & value)
 {
-  cout << "Header: " << field << " = \"" << value << "\"" << endl;
+  // cout << "Header: " << field << " = \"" << value << "\"" << endl;
   if (field == "transfer-encoding" and value == "chunked") {
     m_chunked = true;
   }
   if (field == "location" and m_httpStatusCode >= 300 and m_httpStatusCode < 400)
   {
-    cout << " Really should go to " << value << endl;
+    // cout << " Really should go to " << value << endl;
     m_redirect = value;
+  }
+  if (field == "content-type") {
+    string lowerValue = value;
+    transform(lowerValue.begin(), lowerValue.end(), lowerValue.begin(), ::tolower);
+    if (lowerValue == "text/html; charset=iso-8859-1")
+    {
+      // cout << "ISO encoding" << endl;
+      m_htmlParser->setEncoding(HtmlParser::ISO_ENCODING);
+    }
   }
 }
 
@@ -87,7 +106,7 @@ void HeaderParser::handleEndHeaders()
 
 void HeaderParser::handleData(const char * data, unsigned int length)
 {
-  cout << "Data of " << length << " bytes" << endl;
+  // cout << "Data of " << length << " bytes" << endl;
   m_htmlParser->feed(data, length);
 }
 
@@ -97,7 +116,7 @@ void HeaderParser::parseError()
     return;
   }
   // woops
-  cout << "Parse error !" << endl;
+  // cout << "Parse error !" << endl;
   m_position = m_end;
 }
 
@@ -232,7 +251,7 @@ void HeaderParser::httpResponse()
   if (response.substr(0,9) == "HTTP/1.1 ") {
     // cout << "HTTP status code: " << response.substr(9,response.length()) << endl;
     m_httpStatusCode = strtol(response.substr(9,3).c_str(), 0, 0);
-    cout << "HTTP status: " << m_httpStatusCode << endl;
+    // cout << "HTTP status: " << m_httpStatusCode << endl;
     m_state = BEFORE_FIELD;
   } else {
     m_state = PARSE_ERROR;
@@ -242,11 +261,19 @@ void HeaderParser::httpResponse()
 void HeaderParser::fireData()
 {
   rewind();
-  unsigned int length = (m_end - m_position);
+  int length = (m_end - m_position);
   if (m_chunked) {
-    length = m_chunkLength;
+    if (length >= m_chunkLength) {
+      length = m_chunkLength;
+      m_state = BEFORE_FIELD;
+      m_chunkLengthString = "";
+      m_chunkLength = 0;
+    }
+    else 
+    {
+      m_chunkLength -= length;
+    }
   }
   handleData(m_position, length);
   m_position += length;
-  m_state = BEFORE_FIELD;
 }

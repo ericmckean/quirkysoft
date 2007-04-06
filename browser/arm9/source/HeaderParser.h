@@ -6,13 +6,17 @@ class HeaderParser
 {
   // parse the headers / chunks
   public:
-    HeaderParser();
+    HeaderParser(HtmlParser * html);
     void feed(const char * data, unsigned int length);
 
     void handleHeader(const std::string & field, const std::string & value);
     void handleEndHeaders();
     void handleData(const char * data, unsigned int length);
     void parseError();
+
+    const std::string redirect() const;
+
+    void reset();
 
   private:
     enum HeaderState

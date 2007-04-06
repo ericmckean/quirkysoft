@@ -1,5 +1,4 @@
 #include "libnds.h"
-#include <iostream>
 #include <string>
 #include "Palette.h"
 #include "Keyboard.h"
