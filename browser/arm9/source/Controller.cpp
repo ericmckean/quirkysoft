@@ -107,13 +107,13 @@ class HttpClient: public nds::Client
       {
         string s("GET ");
         s += uri.fileName();
-        s += " HTTP/1.1\n";
-        s += "Host:" + uri.server()+"\n";
-        s += "Connection: close\n";
-        s += "Accept-charset: ISO-8859-1,UTF-8\n";
-        s += "Accept: text/html\n";
-        s += "User-Agent: Homebrew Browser\n";
-        s += "\n";
+        s += " HTTP/1.1\r\n";
+        s += "Host:" + uri.server()+"\r\n";
+        s += "Connection: close\r\n";
+        s += "Accept-charset: ISO-8859-1,UTF-8\r\n";
+        s += "Accept: text/html\r\n";
+        s += "User-Agent: Homebrew Browser\r\n";
+        s += "\r\n";
         write(s.c_str(), s.length());
         m_finished = false;
         m_uri = uri;
