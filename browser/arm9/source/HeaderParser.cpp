@@ -78,6 +78,12 @@ const std::string HeaderParser::redirect() const
   return m_redirect;
 }
 
+
+unsigned int HeaderParser::expected() const
+{
+  return m_expected;
+}
+
 void HeaderParser::handleHeader(const string & field, const string & value)
 {
   // cout << "Header: " << field << " = \"" << value << "\"" << endl;
@@ -88,6 +94,9 @@ void HeaderParser::handleHeader(const string & field, const string & value)
   {
     // cout << " Really should go to " << value << endl;
     m_redirect = value;
+  }
+  if (field == "content-length") {
+    m_expected = strtol(value.c_str(), 0 , 0);
   }
   if (field == "content-type") {
     string lowerValue = value;
@@ -236,9 +245,15 @@ void HeaderParser::chunkLine()
     }
     if (m_value == '\n') {
       m_chunkLength = strtol(m_chunkLengthString.c_str(),0,0);
+      m_expected = m_chunkLength;
       m_state = DATA;
     }
   }
+}
+
+void HeaderParser::setDataState()
+{
+  m_state = DATA;
 }
 
 void HeaderParser::httpResponse()

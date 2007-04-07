@@ -199,19 +199,19 @@ void HtmlParserImpl::rewind()
 
 void HtmlParserImpl::emit(unsigned int toEmit)
 {
-#if 0
   static unsigned int last = 0;
-  if (toEmit == '\n' or toEmit == '\r')
+  if (last == '\r' and toEmit == '\n') {
+    last = toEmit;
     return;
+  }
   if (::isblank(toEmit) and toEmit == last)
     return;
-  last = toEmit;
-  if (m_encoding == HtmlParser::UTF8_ENCODING) 
-  {
-    wcout << (wchar_t)toEmit;
-  else
-    cout << (char)toEmit;
-#endif
+  if (toEmit == '\r') {
+    last = toEmit;
+    toEmit = '\n';
+  } else {
+    last = toEmit;
+  }
   m_self.handleData(toEmit);
 }
 
