@@ -1,3 +1,4 @@
+#include <assert.h>
 #include "HeaderParser.h"
 #include "HtmlParser.h"
 
@@ -84,6 +85,35 @@ unsigned int HeaderParser::expected() const
   return m_expected;
 }
 
+static void stripWhitespace(string & modify)
+{
+  if (modify.empty())
+    return;
+  static const string delimter(" \r\n	");
+  int firstNonBlank = modify.find_first_not_of(delimter);
+  int lastNonBlank = modify.find_last_not_of(delimter);
+  modify = modify.substr(firstNonBlank, (lastNonBlank-firstNonBlank+1));
+}
+
+static void extractCharset(const string & value, string & mimeType, string & charset)
+{
+  unsigned int position(value.find(";"));
+  if (position != string::npos)
+  {
+    mimeType = value.substr(0,position);
+    position++;
+    unsigned int nextPosition(value.find(";",position));
+    nextPosition = nextPosition==string::npos?value.length():nextPosition;
+    charset = value.substr(position, (nextPosition-position+1));
+  } 
+  else {
+    mimeType = value.substr(0,value.length());
+    charset.clear();
+  }
+  stripWhitespace(mimeType);
+  stripWhitespace(charset);
+}
+
 void HeaderParser::handleHeader(const string & field, const string & value)
 {
   // cout << "Header: " << field << " = \"" << value << "\"" << endl;
@@ -92,31 +122,47 @@ void HeaderParser::handleHeader(const string & field, const string & value)
   }
   if (field == "location" and m_httpStatusCode >= 300 and m_httpStatusCode < 400)
   {
-    // cout << " Really should go to " << value << endl;
     m_redirect = value;
   }
   if (field == "content-length") {
     m_expected = strtol(value.c_str(), 0 , 0);
   }
   if (field == "content-type") {
-    string lowerValue = value;
+    string lowerValue(value);
     transform(lowerValue.begin(), lowerValue.end(), lowerValue.begin(), ::tolower);
-    if (lowerValue == "text/html; charset=iso-8859-1")
+    string charset, mimeType;
+    extractCharset(lowerValue, charset, mimeType);
+    if (mimeType == "charset=iso-8859-1")
     {
       // cout << "ISO encoding" << endl;
       m_htmlParser->setEncoding(HtmlParser::ISO_ENCODING);
     }
+    bool isPlain = lowerValue.find("text/plain") != string::npos;
+    if (isPlain)
+    {
+      m_htmlParser->setPlainText();
+    }
+
   }
 }
 
-void HeaderParser::handleEndHeaders()
+void HeaderParser::checkMetaTagHttpEquiv(const std::vector<HtmlParser::Attribute*> & attrs)
 {
-}
-
-void HeaderParser::handleData(const char * data, unsigned int length)
-{
-  // cout << "Data of " << length << " bytes" << endl;
-  m_htmlParser->feed(data, length);
+  vector<HtmlParser::Attribute*>::const_iterator it(attrs.begin());
+  string httpEquiv; httpEquiv.clear();
+  for (; it != attrs.end(); ++it)
+  {
+    if (not httpEquiv.empty() and (*it)->name == "content")
+    {
+      transform(httpEquiv.begin(), httpEquiv.end(), httpEquiv.begin(), ::tolower);
+      handleHeader(httpEquiv, (*it)->value);
+      break;
+    }
+    if ( (*it)->name == "http-equiv")
+    {
+      httpEquiv = (*it)->value;
+    }
+  }
 }
 
 void HeaderParser::parseError()
@@ -124,8 +170,8 @@ void HeaderParser::parseError()
   if (m_chunked and m_chunkLength == 0) {
     return;
   }
-  // woops
-  // cout << "Parse error !" << endl;
+  // woops "this should never happen" so catch it when it does.
+  assert(m_state != PARSE_ERROR);
   m_position = m_end;
 }
 
@@ -157,8 +203,8 @@ void HeaderParser::endingHeaders()
   {
     m_state = DATA;
   }
-  handleEndHeaders();
 }
+
 void HeaderParser::field()
 {
   if (m_value == '-' or ::isalpha(m_value)) {
@@ -256,6 +302,11 @@ void HeaderParser::setDataState()
   m_state = DATA;
 }
 
+unsigned int HeaderParser::httpStatusCode() const
+{
+  return m_httpStatusCode;
+}
+
 void HeaderParser::httpResponse()
 {
   string response;
@@ -264,9 +315,7 @@ void HeaderParser::httpResponse()
     next();
   }
   if (response.substr(0,9) == "HTTP/1.1 ") {
-    // cout << "HTTP status code: " << response.substr(9,response.length()) << endl;
     m_httpStatusCode = strtol(response.substr(9,3).c_str(), 0, 0);
-    // cout << "HTTP status: " << m_httpStatusCode << endl;
     m_state = BEFORE_FIELD;
   } else {
     m_state = PARSE_ERROR;
@@ -289,6 +338,7 @@ void HeaderParser::fireData()
       m_chunkLength -= length;
     }
   }
-  handleData(m_position, length);
+  // once done, feed the data to the html parser.
+  m_htmlParser->feed(m_position, length);
   m_position += length;
 }

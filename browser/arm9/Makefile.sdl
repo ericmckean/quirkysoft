@@ -3,7 +3,7 @@ SOURCES		:=	source
 INCLUDES	:=	include
 DATA		:=
 
-CFLAGS	:=	-g -Wall -fno-rtti
+CFLAGS	:=	-g -Wall 
 
 CFLAGS	+=	$(INCLUDE)
 CXXFLAGS	:=	$(CFLAGS)

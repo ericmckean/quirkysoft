@@ -31,11 +31,11 @@ class Document : public HtmlParser
     void registerView(ViewI * v);
     void unregisterView(ViewI * v);
 
+  protected:
     // Html callbacks
     virtual void handleStartEndTag(const std::string & tag, const std::vector<Attribute*> & attrs);
     virtual void handleStartTag(const std::string & tag, const std::vector<Attribute*> & attrs);
     virtual void handleEndTag(const std::string & tag);
-    // virtual void handleData(const std::string & data);
     virtual void handleData(unsigned int ucodeChar);
 
   private:

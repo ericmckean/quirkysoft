@@ -1,25 +1,49 @@
 #ifndef HeaderParser_h_seen
 #define HeaderParser_h_seen
 #include <string>
-class HtmlParser;
+#include "HtmlParser.h"
+
+/** Parse the headers and chunks from a HTTP GET request. 
+ * The payload is then passed on to the HtmlParser.
+ */
 class HeaderParser
 {
-  // parse the headers / chunks
   public:
+    /** Constructor for the parser.
+     * @param html a pointer to the HtmlParser for parsing the rest of the message.
+     */
     HeaderParser(HtmlParser * html);
+
+    /** Feed data to the parser. Call this with any amount of data, the state is kept between feeds.
+     * To reset the state, call reset().
+     * @param data data to be parsed.
+     * @param length the amount of data in bytes.
+     */
     void feed(const char * data, unsigned int length);
 
-    void handleHeader(const std::string & field, const std::string & value);
-    void handleEndHeaders();
-    void handleData(const char * data, unsigned int length);
-    void parseError();
     void setDataState();
 
-    // how much HTML is expected (from Content-length)
+    /** Fetch how much HTML is expected. From Content-Length header or chunks.
+     * @return the amount of HTML expected in bytes.
+     */
     unsigned int expected() const;
 
+    /** Get a redirect URL, if available. This only applies for 3XX HTTP responses.
+     * @return The new location URL.
+     */
     const std::string redirect() const;
 
+    /** Get the HTTP status code. This is the numeric part of HTTP/1.1 NNN Blah blah.
+     * @return the status code.
+     */
+    unsigned int httpStatusCode() const;
+
+    /** Call this when you have a "meta" tag, it will check if any http-equiv attributes apply.
+     * @param attrs a vector of pointers-to-Attribute for the meta tag.
+     */
+    void checkMetaTagHttpEquiv(const std::vector<HtmlParser::Attribute*> & attrs);
+
+    //! Reset the internal parser state.
     void reset();
 
   private:
@@ -35,26 +59,6 @@ class HeaderParser
       CHUNK_LINE,
       DATA,
       PARSE_ERROR
-    };
-
-    // RFC 2616
-    enum Response
-    {
-      //CONTINUE=100,
-      //SWITCHING_PROTOCOLS=101,
-
-      OK=200,
-      //CREATED=201,
-      //ACCEPTED=202,
-
-      // redirection
-      MULTIPLE_CHOICES=300,
-      MOVED_PERMANENTLY=301,
-      FOUND=302,
-      SEE_OTHER=303,
-      NOT_MODIFIED=304,
-      USE_OTHER=305,
-      TEMPORARY_REDIRECT=307,
     };
 
     HeaderState m_state;
@@ -74,6 +78,8 @@ class HeaderParser
 
     HtmlParser * m_htmlParser;
 
+    void parseError();
+    void handleHeader(const std::string & field, const std::string & value);
     void rewind();
     void next();
     void httpResponse();
