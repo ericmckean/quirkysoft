@@ -10,9 +10,22 @@ using namespace std;
 
 TextArea::TextArea() : 
   m_font(0),
-  m_encoding("utf-8")
+  m_encoding("utf-8"),
+  m_startLine(0)
 {
   init("fonts/vera");
+}
+
+void TextArea::setStartLine(int line)
+{
+  if (line < 0)
+    line = 0;
+  m_startLine = line;
+}
+
+int TextArea::startLine() const
+{
+  return m_startLine;
 }
 
 void TextArea::init(const string & fontBase)
@@ -47,9 +60,59 @@ void TextArea::setCursor(int x, int y)
   m_cursory = x;
 }
 
-void TextArea::printu(const basic_string<unsigned int> & unicodeString, int x, int y)
+void TextArea::incrLine(int height)
 {
-  basic_string<unsigned int>::const_iterator it(unicodeString.begin());
+  m_cursorx = 0; 
+  m_cursory += height;
+}
+
+void TextArea::printu(const UnicodeString & unicodeString)
+{
+  // skip until we reach startLine
+  int tmpx = m_cursorx;
+  int tmpy = m_cursorx;
+  m_cursorx = 0;
+  m_cursory = 0;
+  UnicodeString::const_iterator it(unicodeString.begin());
+  int position(0);
+  int lines(0);
+  for (; it != unicodeString.end() and lines < m_startLine; ++it, ++position)
+  {
+    unsigned int value(*it);
+    if (value == UTF8::MALFORMED) {
+      value = '?';
+    }
+    Font::Glyph g;
+    m_font->glyph(value, g);
+    if (value == '\n')
+    {
+      incrLine(m_font->height());
+      lines++;
+    } 
+    else {
+      if (m_cursorx + g.width > Canvas::instance().width())
+      {
+        incrLine(g.height);
+        lines++;
+      }
+      m_cursorx += g.width;
+    }
+    if (m_cursorx > Canvas::instance().width())
+    {
+      incrLine(m_font->height());
+      lines++;
+    }
+  }
+  m_cursorx = tmpx;
+  m_cursory = tmpy;
+  printuImpl(unicodeString.substr(position , unicodeString.length()-position));
+}
+
+void TextArea::printuImpl(const UnicodeString & unicodeString)
+{
+  int & x(m_cursorx);
+  int & y(m_cursory);
+  UnicodeString::const_iterator it(unicodeString.begin());
   for (; it != unicodeString.end(); ++it)
   {
     unsigned int value(*it);
@@ -62,9 +125,13 @@ void TextArea::printu(const basic_string<unsigned int> & unicodeString, int x, i
       m_font->glyph(value, g);
       if (value == '\n')
       {
-        x = 0; 
-        y += g.height;
-      } else {
+        incrLine(g.height);
+      } 
+      else {
+        if (x+g.width > Canvas::instance().width())
+        {
+          incrLine(g.height);
+        }
         if (g.data) {
           printAt(g, x, y);
         }
@@ -79,14 +146,19 @@ void TextArea::printu(const basic_string<unsigned int> & unicodeString, int x, i
     }
     if (x > Canvas::instance().width())
     {
-      x = 0;
-      y += m_font->height();
+      incrLine(m_font->height());
+    }
+    if (y > Canvas::instance().height())
+    {
+      break;
     }
   }
 }
 
-void TextArea::print(const char * text, int amount, int x, int y)
+void TextArea::print(const char * text, int amount)
 {
+  int x = m_cursorx;
+  int y = m_cursory;
   int total = 0;
   while (total < amount)
   {
@@ -128,6 +200,8 @@ void TextArea::print(const char * text, int amount, int x, int y)
     text += read;
     total += read;
   }
+  m_cursorx = x;
+  m_cursory = y;
 }
 
 void TextArea::setPalette(const std::string & fileName)

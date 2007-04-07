@@ -24,12 +24,10 @@ void View::notify()
     case Document::LOADED:
       {
         nds::Canvas::instance().fillRectangle(0, 0, SCREEN_WIDTH, 2*SCREEN_HEIGHT, nds::Color(31,31,31));
-        // const char * text(m_document.asText());
-        // std::cout << text;
-        const std::basic_string<unsigned int> & text(m_document.asText());
+        const UnicodeString & text(m_document.asText());
         if (text.length()) {
-          m_textArea->printu(text, 0, 0);
-          // m_textArea->print(text, strlen(text), 0,0);
+          m_textArea->setCursor(0, 0);
+          m_textArea->printu(text);
         }
         swiWaitForVBlank();
       }
@@ -37,7 +35,11 @@ void View::notify()
     case Document::INPROGRESS:
       {
         const char * l = "Loading..";
-        m_textArea->print(l, strlen(l), 0,0);
+        m_textArea->setCursor(0, 0);
+        m_textArea->print(l, strlen(l));
+        unsigned int pc = m_document.percentLoaded();
+        nds::Canvas::instance().fillRectangle(0,40, SCREEN_WIDTH, 20, nds::Color(31,31,31));
+        nds::Canvas::instance().fillRectangle(0,40, pc*SCREEN_WIDTH / 100, 20, nds::Color(30,20,0));
         swiWaitForVBlank();
       }
       break;
@@ -63,6 +65,17 @@ void View::mainLoop()
       if (keys & KEY_START) {
         keyboard->setVisible();
       }
+      if (keys & KEY_DOWN) {
+        // scroll down ...
+        m_textArea->setStartLine(m_textArea->startLine()+10);
+        notify();
+      }
+      if (keys & KEY_UP) {
+        // scroll up ...
+        m_textArea->setStartLine(m_textArea->startLine()-10);
+        notify();
+      }
+
     }
     swiWaitForVBlank();
   }

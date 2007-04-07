@@ -46,7 +46,8 @@ void Controller::localFile(const string & fileName)
     char * data = new char[size+2];
     uriFile.read(data);
     data[size] = 0;
-    m_document.appendData(data, size);
+    m_document.appendLocalData(data, size);
+    m_document.setStatus(Document::LOADED);
     delete [] data;
   }
   uriFile.close();

@@ -21,7 +21,7 @@ const std::string & Document::uri() const
 }
 
 // const char * Document::asText() const
-const std::basic_string<unsigned int> & Document::asText() const
+const UnicodeString & Document::asText() const
 {
   return m_data; // .c_str();
 }
@@ -29,6 +29,7 @@ const std::basic_string<unsigned int> & Document::asText() const
 void Document::reset() 
 {
   m_data.clear();
+  m_dataGot = 0; 
   m_headerParser->reset();
 }
 
@@ -46,12 +47,31 @@ void Document::unregisterView(ViewI * view)
      m_views.erase(it);
 }
 
+unsigned int Document::percentLoaded() const
+{
+    unsigned int dataExpected = m_headerParser->expected();
+    if (dataExpected) {
+      return (m_dataGot*100) / dataExpected;
+    }
+    return 0;
+}
+
+void Document::appendLocalData(const char * data, int size)
+{
+  m_headerParser->setDataState();
+  appendData(data, size);
+}
 void Document::appendData(const char * data, int size)
 {
   // cout << "Append data: "  << size << endl;
   m_status = INPROGRESS;
   if (size) {
     m_headerParser->feed(data,size);
+    unsigned int dataExpected = m_headerParser->expected();
+    if (dataExpected < m_dataGot)
+    {
+      m_dataGot = 0;
+    }
     if (not m_headerParser->redirect().empty()) 
     {
       m_uri = m_headerParser->redirect();
@@ -126,5 +146,6 @@ void Document::handleEndTag(const std::string & tag)
 void Document::handleData(unsigned int ucodeChar)
 {
   // m_data.append(data.c_str(), data.length());
+  m_dataGot += 1;
   m_data += ucodeChar;
 }

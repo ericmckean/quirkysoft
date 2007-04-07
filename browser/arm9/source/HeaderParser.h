@@ -13,6 +13,10 @@ class HeaderParser
     void handleEndHeaders();
     void handleData(const char * data, unsigned int length);
     void parseError();
+    void setDataState();
+
+    // how much HTML is expected (from Content-length)
+    unsigned int expected() const;
 
     const std::string redirect() const;
 
@@ -66,6 +70,7 @@ class HeaderParser
     int m_chunkLength;
     std::string m_chunkLengthString;
     unsigned int m_httpStatusCode;
+    unsigned int m_expected;
 
     HtmlParser * m_htmlParser;
 
