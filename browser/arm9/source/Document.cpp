@@ -127,15 +127,7 @@ void Document::handleStartTag(const std::string & tag, const std::vector<Attribu
   }
   */
   if ( tag == "meta") {
-    vector<Attribute*>::const_iterator it(attrs.begin());
-    for (; it != attrs.end(); ++it)
-    {
-      if ( (*it)->name == "content" and (*it)->value == "text/html; charset=iso-8859-1") {
-        // parse charset...
-        this->setEncoding(ISO_ENCODING);
-        break;
-      }
-    }
+    m_headerParser->checkMetaTagHttpEquiv(attrs);
   }
 }
 void Document::handleEndTag(const std::string & tag)

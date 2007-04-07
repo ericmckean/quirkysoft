@@ -8,6 +8,7 @@
 
 using namespace std;
 
+//! The private implementation of the parser.
 class HtmlParserImpl
 {
 
@@ -83,6 +84,11 @@ class HtmlParserImpl
     }
 
     void reset();
+
+    inline void setContentModel(ContentModel model)
+    {
+      m_contentModel = model;
+    }
 
   private:
     const char * m_input;
@@ -187,7 +193,6 @@ bool HtmlParserImpl::isWhitespace(unsigned int value)
       or value == 0x000A  // LINE FEED
       or value == 0x000B  // LINE TABULATION
       or value == 0x000C  // FORM FEED
-      or value == 0x000D  // CARRIAGE RETURN
       );
 }
 
@@ -349,7 +354,7 @@ void HtmlParserImpl::emitTagToken()
     case START_END:
       m_self.handleStartEndTag(m_currentTagToken, m_tagAttributes);
       break;
-  } 
+  }
   for_each( m_tagAttributes.begin(), m_tagAttributes.end(), deleteAttribute);
   m_tagAttributes.clear();
   if (m_attribute) {
@@ -910,7 +915,7 @@ void HtmlParserImpl::handleCommentEnd()
 void HtmlParserImpl::handleDoctype()
 {
   next();
-  if (m_value != 0x000D and  isWhitespace(m_value))
+  if (isWhitespace(m_value))
   {
     m_state = BEFORE_DOCTYPE_NAME;
   } 
@@ -925,7 +930,7 @@ void HtmlParserImpl::handleDoctype()
 void HtmlParserImpl::handleBeforeDoctypeName()
 {
   next();
-  if (m_value != 0x000D and  isWhitespace(m_value))
+  if (isWhitespace(m_value))
   {
     m_state = BEFORE_DOCTYPE_NAME;
   } 
@@ -962,7 +967,7 @@ void HtmlParserImpl::handleBeforeDoctypeName()
 void HtmlParserImpl::handleDoctypeName()
 {
   next();
-  if (m_value != 0x000D and  isWhitespace(m_value))
+  if (isWhitespace(m_value))
   {
     m_state = AFTER_DOCTYPE_NAME;
   } 
@@ -997,7 +1002,7 @@ void HtmlParserImpl::handleDoctypeName()
 void HtmlParserImpl::handleAfterDoctypeName()
 {
   next();
-  if (m_value != 0x000D and  isWhitespace(m_value))
+  if (isWhitespace(m_value))
   {
     // stay in this state
     m_state = AFTER_DOCTYPE_NAME;
@@ -1221,6 +1226,11 @@ void HtmlParser::feed(const char * data, unsigned int length)
 void HtmlParser::setEncoding(HtmlParser::Encoding enc)
 {
   m_details.setEncoding(enc);
+}
+
+void HtmlParser::setPlainText()
+{
+  m_details.setContentModel(HtmlParserImpl::PLAINTEXT);
 }
 
 HtmlParser::Encoding HtmlParser::encoding() const

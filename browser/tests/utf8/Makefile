@@ -8,7 +8,7 @@ all : tester run
 clean:
 	rm -f *.o tester
 
-tester: $(OFILES) ../../arm9/build.sdl/UTF8.o
+tester: $(OFILES) ../../arm9/build.sdl/UTF8.o ../Main.o
 	g++ -o $@ $^ -L.. -lcppunit -ldl
 
 run: tester
