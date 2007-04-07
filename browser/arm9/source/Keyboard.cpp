@@ -63,6 +63,7 @@ class Key {
           rect.w, rect.h, col);
       nds::Canvas::instance().drawRectangle(rect.x, rect.y, 
           rect.w, rect.h, nds::Color(0,0,6));
+      textArea->setStartLine(0);
       textArea->setCursor(m_x, m_y);
       textArea->print(m_value.c_str(),m_value.length());//,m_x,m_y);
     }
@@ -183,6 +184,7 @@ void Keyboard::undrawResult()
 }
 void Keyboard::drawResult()
 {
+  m_textArea.setStartLine(0);
   m_textArea.setCursor(KEYBOARD_RESULT_POSITION_X, KEYBOARD_RESULT_POSITION_Y);
   m_textArea.print(m_result.c_str(),m_result.length());
 //      KEYBOARD_RESULT_POSITION_X, KEYBOARD_RESULT_POSITION_Y

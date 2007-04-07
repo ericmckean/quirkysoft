@@ -57,7 +57,7 @@ void TextArea::printAt(Font::Glyph & g, int xPosition, int yPosition)
 void TextArea::setCursor(int x, int y)
 {
   m_cursorx = x;
-  m_cursory = x;
+  m_cursory = y;
 }
 
 void TextArea::incrLine(int height)
@@ -157,8 +157,8 @@ void TextArea::printuImpl(const UnicodeString & unicodeString)
 
 void TextArea::print(const char * text, int amount)
 {
-  int x = m_cursorx;
-  int y = m_cursory;
+  int & x = m_cursorx;
+  int & y = m_cursory;
   int total = 0;
   while (total < amount)
   {
@@ -200,8 +200,6 @@ void TextArea::print(const char * text, int amount)
     text += read;
     total += read;
   }
-  m_cursorx = x;
-  m_cursory = y;
 }
 
 void TextArea::setPalette(const std::string & fileName)
