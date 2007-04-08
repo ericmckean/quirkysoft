@@ -116,3 +116,10 @@ void ParserTest::testMetaIso()
   HtmlParser::Encoding expected = HtmlParser::ISO_ENCODING;
   CPPUNIT_ASSERT_EQUAL( expected , result);
 }
+void ParserTest::testSlashdot()
+{
+  readFile("slashdot.txt");
+  m_headerParser->feed(m_data, m_length);
+  int size = m_htmlParser->m_tags.size();
+  CPPUNIT_ASSERT_EQUAL( 2 , size);
+}

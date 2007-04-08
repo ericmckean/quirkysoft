@@ -13,6 +13,7 @@ class Controller : public ControllerI
     Controller();
 
     void doUri(const std::string & uriString);
+    void showLicence();
     void mainLoop();
 
   private:

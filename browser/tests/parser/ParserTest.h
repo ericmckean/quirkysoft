@@ -15,6 +15,7 @@ class ParserTest : public CPPUNIT_NS::TestFixture
   CPPUNIT_TEST( testIso );
   CPPUNIT_TEST( testBogusDoctype );
   CPPUNIT_TEST( testMetaIso );
+  CPPUNIT_TEST( testSlashdot );
   CPPUNIT_TEST_SUITE_END();
 
 public:
@@ -27,6 +28,7 @@ public:
   void testIso();
   void testBogusDoctype();
   void testMetaIso();
+  void testSlashdot();
 
   void readFile(const char * fileName);
 private:

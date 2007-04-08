@@ -9,11 +9,22 @@
 
 using namespace std;
 
+static const char s_licenceText[] = {
+#include "licence"
+};
+
 Controller::Controller()
   : m_document(*(new Document())),
   m_view(*(new View(m_document, *this)))
 {
 }
+
+void Controller::showLicence()
+{
+  m_document.appendLocalData(s_licenceText, strlen(s_licenceText));
+  m_document.setStatus(Document::LOADED);
+}
+
 
 void Controller::doUri(const std::string & uriString)
 {

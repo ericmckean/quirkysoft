@@ -20,7 +20,7 @@ static const int KEYBOARD_RESULT_POSITION_Y(10+SCREEN_HEIGHT);
 
 static const char * s_characterMap[2]={
   "1234567890qwertyuiopasdfghjkl/zxcvbnm.",
-  "!\"#$%&*()=QWERTYUIOPASDFGHJKL\\ZXCVBNM:",
+  "!-#$%&*_?=QWERTYUIOPASDFGHJKL\\ZXCVBNM:",
 };
 
 struct Rectangle
@@ -46,7 +46,8 @@ class Key {
       int recty = m_y - m_size/4;
       int width, height;
       font.textSize(m_value.c_str(), m_value.length(), width, height);
-      width *= 2;
+      width *= 3;
+      width /= 2;
       width = width<m_size?m_size:width;
       height = height<m_size?m_size:height;
       rect.x = rectx;
