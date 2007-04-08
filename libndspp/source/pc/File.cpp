@@ -1,5 +1,7 @@
 #include "File.h"
+#include <string>
 #include <stdio.h>
+#include <unistd.h>
 
 using namespace nds;
 
@@ -84,6 +86,12 @@ File::File():m_details(new FileImplementation())
 
 void File::open(const char * name, const char * mode)
 {
+  // append name to cwd to emulate FAT behaviour.
+  char * dirname = get_current_dir_name();
+  std::string fullpath(dirname);
+  free(dirname);
+  fullpath += "/";
+  fullpath += name;
   m_details->open(name, mode);
 }
 
