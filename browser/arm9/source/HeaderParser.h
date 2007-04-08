@@ -84,6 +84,7 @@ class HeaderParser
     void next();
     void httpResponse();
     void beforeField();
+    bool isFieldValue() const;
     void field();
     void afterField();
     void beforeValue();

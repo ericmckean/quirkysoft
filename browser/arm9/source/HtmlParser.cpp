@@ -91,6 +91,7 @@ class HtmlParserImpl
     }
 
   private:
+    static const unsigned int NBSP = 160;
     const char * m_input;
     const char * m_position;
     const char * m_lastPosition;
@@ -126,6 +127,7 @@ class HtmlParserImpl
       delete a;
     }
 
+    bool isBlank(unsigned int value);
     string asUnconsumedCharString(int amount);
     void consume(int amount);
     void addAttribute();
@@ -202,6 +204,11 @@ void HtmlParserImpl::rewind()
   m_position = m_lastPosition;
 }
 
+bool HtmlParserImpl::isBlank(unsigned int value)
+{
+  return value == NBSP or ::isblank(value);
+}
+
 void HtmlParserImpl::emit(unsigned int toEmit)
 {
   static unsigned int last = 0;
@@ -209,13 +216,18 @@ void HtmlParserImpl::emit(unsigned int toEmit)
     last = toEmit;
     return;
   }
-  if (::isblank(toEmit) and toEmit == last)
+  // collapse multiple concurrent blanks into a single space.
+  if (isBlank(toEmit) and toEmit == last)
     return;
   if (toEmit == '\r') {
     last = toEmit;
     toEmit = '\n';
   } else {
     last = toEmit;
+  }
+  if (toEmit == '\t' or toEmit == NBSP)
+  {
+    toEmit = ' ';
   }
   m_self.handleData(toEmit);
 }

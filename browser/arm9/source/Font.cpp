@@ -195,23 +195,16 @@ void Font::textSize(const char * text, int amount, int & width, int & height, co
       value = (int)(text[0]&0xff);
     }
     if (value == UTF8::MALFORMED) {
-      width += m_height;
+      value = '?';
     }
-    else {
-      if (value == '\n')
-      {
-        height += m_height;
-        width = 0;
-      } else {
-        Glyph g;
-        this->glyph(value, g);
-        if (g.width) {
-          width += g.width;
-        }
-        else {
-          width += g.width;
-        }
-      }
+    if (value == '\n')
+    {
+      height += m_height;
+      width = 0;
+    } else {
+      Glyph g;
+      this->glyph(value, g);
+      width += g.width;
     }
     if (width >= maxWidth) {
       maxWidth = width;

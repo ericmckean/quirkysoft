@@ -23,21 +23,27 @@ class TextArea
 
     void setEncoding(const std::string & encoding="utf-8");
 
+    void setColor(unsigned short color);
     void setStartLine(int line);
     int startLine() const;
 
   private:
     Font * m_font;
     unsigned short * m_palette;
+    unsigned short * m_basePalette;
+    int m_paletteLength;
     std::string m_encoding;
     int m_startLine;
 
     int m_cursorx;
     int m_cursory;
     void printAt(Font::Glyph & g, int xPosition, int yPosition);
-    void incrLine(int height);
-
+    void incrLine();
+    void checkLetter(Font::Glyph & g);
     void printuImpl(const UnicodeString & unicodeString);
+    bool doSingleChar(unsigned int value);
+    int textSize(const UnicodeString & unicodeString) const;
+    void printuWord(const UnicodeString & word);
 
 };
 #endif

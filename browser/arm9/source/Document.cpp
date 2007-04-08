@@ -3,6 +3,16 @@
 
 using namespace std;
 
+#if 0
+struct Node
+{
+  string name;
+  UnicodeString text;
+  std::vector<HtmlParser::Attribute*> m_attributes;
+  std::vector<Node*> subNodes;
+};
+#endif
+
 Document::Document():HtmlParser(),
   m_amount(0),
   m_headerParser(new HeaderParser(this))

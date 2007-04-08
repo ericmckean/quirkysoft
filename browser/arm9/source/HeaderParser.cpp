@@ -205,9 +205,17 @@ void HeaderParser::endingHeaders()
   }
 }
 
+bool HeaderParser::isFieldValue() const
+{
+  return (m_value == '-' 
+      or m_value == '_' 
+      or ::isalpha(m_value));
+
+}
+
 void HeaderParser::field()
 {
-  if (m_value == '-' or ::isalpha(m_value)) {
+  if (isFieldValue()) {
     m_value = ::tolower(m_value);
     m_field += m_value;
   } else {
