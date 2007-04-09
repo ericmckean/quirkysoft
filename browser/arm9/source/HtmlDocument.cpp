@@ -31,8 +31,8 @@ void HtmlDocument::reset()
   
   while (not m_openElements.empty())
   {
-    ElementFactory::remove(m_openElements.front());
-    m_openElements.pop_front();
+    ElementFactory::remove(m_openElements.back());
+    m_openElements.pop_back();
   }
 
   for_each(m_activeFormatters.begin(), m_activeFormatters.end(), ElementFactory::remove);
@@ -54,8 +54,8 @@ void HtmlDocument::beforeHead(const std::string & tag, const std::vector<Attribu
   if (tag == HEAD_TAG)
   {
     m_head = ElementFactory::create(tag, attrs);
-    m_openElements.front()->append(m_head);
-    m_openElements.push_front(m_head);
+    m_openElements.back()->append(m_head);
+    m_openElements.push_back(m_head);
     m_insertionMode = IN_HEAD;
   } 
   else
@@ -87,7 +87,7 @@ void HtmlDocument::inHead(const std::string & tag, const std::vector<Attribute*>
   {
     HtmlElement * element = ElementFactory::create(tag, attrs);
     m_head->append(element);
-    // m_openElements.push_front(element); // no, this is an error, do not push
+    // m_openElements.push_back(element); // no, this is an error, do not push
     if (tag == "title") {
       setContentModel(RCDATA);
     }
@@ -110,7 +110,7 @@ void HtmlDocument::inHead(const std::string & tag, const std::vector<Attribute*>
   {
     if (tag != HEAD_TAG)
     {
-      if (m_openElements.front()->isa(HEAD_TAG))
+      if (m_openElements.back()->isa(HEAD_TAG))
       {
         handleEndTag(HEAD_TAG);
       }
@@ -128,15 +128,15 @@ void HtmlDocument::inHead(const std::string & tag)
 {
   if (tag == HEAD_TAG)
   {
-    if (m_openElements.front()->isa(HEAD_TAG))
+    if (m_openElements.back()->isa(HEAD_TAG))
     {
-      m_openElements.pop_front();
+      m_openElements.pop_back();
     }
     m_insertionMode = AFTER_HEAD;
   }
   else /*if (tag == HTML_TAG)*/
   {
-    if (m_openElements.front()->isa(HEAD_TAG))
+    if (m_openElements.back()->isa(HEAD_TAG))
     {
       handleEndTag(HEAD_TAG);
     }
@@ -154,15 +154,15 @@ void HtmlDocument::afterHead(const std::string & tag, const std::vector<Attribut
   if (tag == BODY_TAG)
   {
     HtmlElement * body = ElementFactory::create(tag, attrs);
-    m_openElements.front()->append(body);
-    m_openElements.push_front(body);
+    m_openElements.back()->append(body);
+    m_openElements.push_back(body);
     m_insertionMode = IN_BODY;
   }
   else if (tag == FRAMESET_TAG)
   {
     HtmlElement * element = ElementFactory::create(tag, attrs);
-    m_openElements.front()->append(element);
-    m_openElements.push_front(element);
+    m_openElements.back()->append(element);
+    m_openElements.push_back(element);
     m_insertionMode = IN_FRAMESET;
   }
   else if (   tag == "base" 
@@ -210,9 +210,9 @@ void HtmlDocument::inBody(const std::string & tag, const std::vector<Attribute*>
   else if (tag == BODY_TAG)
   {
     // parse error - update any attributes though
-    if (m_openElements.front()->isa(BODY_TAG))
+    if (m_openElements.back()->isa(BODY_TAG))
     {
-      HtmlElement * body(m_openElements.front());
+      HtmlElement * body(m_openElements.back());
       setNewAttributes(body, attrs);
     }
   }
@@ -236,8 +236,8 @@ void HtmlDocument::inBody(const std::string & tag, const std::vector<Attribute*>
       handleEndTag(P_TAG);
     }
     HtmlElement * element = ElementFactory::create(tag, attrs);
-    m_openElements.front()->append(element);
-    m_openElements.push_front(element);
+    m_openElements.back()->append(element);
+    m_openElements.push_back(element);
     // FIXME: if tag == "pre" then eat following LF (if any)
   }
   else if (tag == FORM_TAG)
@@ -249,8 +249,8 @@ void HtmlDocument::inBody(const std::string & tag, const std::vector<Attribute*>
         handleEndTag(P_TAG);
       }
       m_form = ElementFactory::create(tag, attrs);
-      m_openElements.front()->append(m_form);
-      m_openElements.push_front(m_form);
+      m_openElements.back()->append(m_form);
+      m_openElements.push_back(m_form);
 
     }
   }
@@ -271,8 +271,8 @@ void HtmlDocument::inBody(const std::string & tag, const std::vector<Attribute*>
      * active formatting elements.
      */
     HtmlElement * element = ElementFactory::create(tag, attrs);
-    m_openElements.front()->append(element);
-    m_openElements.push_front(element);
+    m_openElements.back()->append(element);
+    m_openElements.push_back(element);
   }
   else
   {
@@ -284,10 +284,10 @@ void HtmlDocument::inBody(const std::string & tag)
 {
   if (tag == BODY_TAG)
   {
-    if (m_openElements.front()->isa(BODY_TAG))
+    if (m_openElements.back()->isa(BODY_TAG))
     {
       m_insertionMode = AFTER_BODY;
-      m_openElements.pop_front();
+      m_openElements.pop_back();
     }
     // else ignore the token, parse error
   }
@@ -308,20 +308,21 @@ void HtmlDocument::inBody(const std::string & tag)
     while (inScope(P_TAG))
     {
       // pop until P not in scope.
-      m_openElements.pop_front();
+      m_openElements.pop_back();
     }
   }
   else
   {
     bool popToNode(false);
     HtmlElement * node(0);
+    int index(1);
     while (m_openElements.size())
     {
-      node = m_openElements.front();
+      node = m_openElements[m_openElements.size()-index];
       if (node->isa(tag)) {
         popToNode = true;
         generateImpliedEndTags();
-        node = m_openElements.front();
+        node = m_openElements.back();
         break;
       }
       else if (not isFormatting(node) and not isPhrasing(node))
@@ -329,17 +330,18 @@ void HtmlDocument::inBody(const std::string & tag)
         // ignore end tag
         break;
       }
+      index++;
     }
     if (popToNode)
     {
       // pop m_openElements up to and including node
       while (m_openElements.size())
       {
-        if (m_openElements.front() == node) {
-          m_openElements.pop_front();
+        if (m_openElements.back() == node) {
+          m_openElements.pop_back();
           break;
         }
-        m_openElements.pop_front();
+        m_openElements.pop_back();
       }
     }
   }
@@ -372,7 +374,7 @@ void HtmlDocument::mainPhase(const std::string & tag, const std::vector<Attribut
     if (m_isFirst)
     {
       // add the attributes to the html node..
-      HtmlElement * html = m_openElements.front();
+      HtmlElement * html = m_openElements.back();
       setNewAttributes(html, attrs);
     }
     // else parse error.
@@ -443,7 +445,7 @@ void HtmlDocument::handleStartTag(const std::string & tag, const std::vector<Att
     case ROOT_ELEMENT:
       m_state = MAIN;
       m_insertionMode = BEFORE_HEAD;
-      m_openElements.push_front(ElementFactory::create(HTML_TAG));
+      m_openElements.push_back(ElementFactory::create(HTML_TAG));
       m_isFirst = true;
       /* FALL THROUGH */
     case TRAILING_END:
@@ -469,7 +471,7 @@ void HtmlDocument::handleEndTag(const std::string & tag)
       // if an end tag appears first, then append a html tag and redo this tag,
       m_state = MAIN;
       m_insertionMode = BEFORE_HEAD;
-      m_openElements.push_front(ElementFactory::create(HTML_TAG));
+      m_openElements.push_back(ElementFactory::create(HTML_TAG));
       m_isFirst = true;
       /* FALL THROUGH */
     case TRAILING_END:
@@ -489,14 +491,14 @@ void HtmlDocument::handleData(unsigned int ucodeChar)
 {
   m_dataGot += 1;
   if (m_openElements.size())
-    m_openElements.front()->append(ucodeChar);
+    m_openElements.back()->append(ucodeChar);
   // m_data += ucodeChar;
 }
 
 const HtmlElement * HtmlDocument::rootNode() const
 {
   if (not m_openElements.empty()) {
-    return m_openElements.front();
+    return m_openElements.back();
   }
   return 0;
 }
@@ -512,7 +514,7 @@ void HtmlDocument::setNewAttributes(HtmlElement * element, const std::vector<Att
 
 bool HtmlDocument::inScope(const std::string & element)
 {
-   list<HtmlElement*>::const_reverse_iterator it(m_openElements.rbegin());
+   vector<HtmlElement*>::const_reverse_iterator it(m_openElements.rbegin());
    for (; it != m_openElements.rend(); ++it) {
      HtmlElement * node = *it;
      if (node->isa(element))
@@ -550,8 +552,8 @@ void HtmlDocument::removeFromActiveFormat(HtmlElement* element)
 
 void HtmlDocument::removeFromOpenElements(HtmlElement* element)
 {
-  list<HtmlElement*>::iterator it = find(m_openElements.begin(), m_openElements.end(), element);
-  if (it != m_activeFormatters.end())
+  vector<HtmlElement*>::iterator it = find(m_openElements.begin(), m_openElements.end(), element);
+  if (it != m_openElements.end())
   {
     m_openElements.erase(it);
   }
@@ -560,7 +562,7 @@ void HtmlDocument::removeFromOpenElements(HtmlElement* element)
 
 void HtmlDocument::generateImpliedEndTags(const string & except)
 {
-  HtmlElement * node(m_openElements.front());
+  HtmlElement * node(m_openElements.back());
   if (   node->isa(P_TAG)
       or node->isa("dd")
       or node->isa("dt")
