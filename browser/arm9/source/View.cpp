@@ -1,17 +1,54 @@
+#include <list>
 #include "ndspp.h"
 #include "libnds.h"
 #include "View.h"
 #include "Document.h"
+#include "HtmlElement.h"
 #include "TextArea.h"
 #include "Canvas.h"
 #include "ControllerI.h"
 #include "Keyboard.h"
 
+using namespace std;
 
 View::View(Document & doc, ControllerI & c):m_document(doc), m_controller(c)
 {
   m_document.registerView(this);
   m_textArea = new TextArea(/*"fonts/vera"*/);
+}
+
+void View::walkNode(const HtmlElement * node)
+{
+  if (node->hasChildren())
+  {
+    const list<HtmlElement*> & theChildren = node->children();
+    list<HtmlElement*>::const_iterator it(theChildren.begin());
+    for (; it != theChildren.end(); ++it)
+    {
+      const HtmlElement * element(*it);
+      if (element->isa("a"))
+      {
+        m_textArea->setColor(nds::Color(0,0,31));
+      } 
+      else
+      {
+        m_textArea->setColor(nds::Color(0,0,0));
+      }
+      if (element->text().size())
+      {
+        m_textArea->printu(element->text());
+      }
+      walkNode(element);
+    }
+  }
+}
+
+void View::render()
+{
+  nds::Canvas::instance().fillRectangle(0, 0, SCREEN_WIDTH, 2*SCREEN_HEIGHT, nds::Color(31,31,31));
+  m_textArea->setCursor(0, 0);
+  const HtmlElement * root = m_document.rootNode();
+  walkNode(root);
 }
 
 void View::notify()
@@ -23,12 +60,7 @@ void View::notify()
   switch (status) {
     case Document::LOADED:
       {
-        nds::Canvas::instance().fillRectangle(0, 0, SCREEN_WIDTH, 2*SCREEN_HEIGHT, nds::Color(31,31,31));
-        const UnicodeString & text(m_document.asText());
-        if (text.length()) {
-          m_textArea->setCursor(0, 0);
-          m_textArea->printu(text);
-        }
+        render();
         swiWaitForVBlank();
       }
       break;

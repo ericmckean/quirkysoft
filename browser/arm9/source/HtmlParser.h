@@ -14,6 +14,7 @@ class HtmlParser
       UTF8_ENCODING, //!< char stream is parsed using UTF-8.
       ISO_ENCODING   //!< char stream is parsed as ISO-8859-1.
     };
+
     //! Attributes for an element.
     struct Attribute
     {
@@ -50,6 +51,13 @@ class HtmlParser
     void setPlainText();
 
   protected:
+    enum ContentModel {
+      PCDATA,
+      RCDATA,
+      CDATA,
+      PLAINTEXT
+    };
+
     friend class HtmlParserImpl;
     /** Called when a start-end tag is found.
      * @param tag the tag name (lowercase).
@@ -71,6 +79,8 @@ class HtmlParser
      * @param ucodeChar unicode character index of the data.
      */
     virtual void handleData(unsigned int ucodeChar);
+
+    void setContentModel(ContentModel newModel);
 
   private:
     //! Nothing to see here.

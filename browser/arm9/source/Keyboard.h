@@ -9,16 +9,34 @@ class Sprite;
 #include <string>
 #include <vector>
 
+/** Show a virtual keyboard. Accepts touch input and keypad input. */
 class Keyboard
 {
   public:
 
+    /** Construct a keyboard for the given TextArea.
+     * @param textArea the thing that draws text.
+     */
     Keyboard(TextArea & textArea);
+
+    /** Destructor. */
     ~Keyboard();
 
+    /** Set the keyboard visible or not.
+     * @param visible true to make the keyboard visible, false otherwise.
+     */
     void setVisible(bool visible=true);
+
+    /** Get the current visibility.
+     * @return true if visible false otherwise
+     */
     bool visible() const;
+    /** Call this each frame to handle keyboard input.*/
     void handleInput();
+
+    /** Get the result of the last string entered (after Enter is "pressed").
+     * @return the last string entered.
+     */
     std::string result() const;
 
   private:
