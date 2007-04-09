@@ -5,6 +5,7 @@ class ViewI
 {
 
   public:
+    /** Notify the view for updates.*/
     virtual void notify() = 0;
 
     virtual ~ViewI() {}

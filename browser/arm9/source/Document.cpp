@@ -1,23 +1,17 @@
 #include "Document.h"
+#include "HtmlDocument.h"
 #include "HeaderParser.h"
+#include "HtmlElement.h"
 
 using namespace std;
 
-#if 0
-struct Node
-{
-  string name;
-  UnicodeString text;
-  std::vector<HtmlParser::Attribute*> m_attributes;
-  std::vector<Node*> subNodes;
-};
-#endif
-
-Document::Document():HtmlParser(),
+Document::Document():
   m_amount(0),
-  m_headerParser(new HeaderParser(this))
+  m_htmlDocument(new HtmlDocument),
+  m_headerParser(new HeaderParser(m_htmlDocument))
 {
-  m_data.clear();
+  // I don't like this but can't think of a better way :(
+  m_htmlDocument->setHeaderParser(m_headerParser);
 }
 
 void Document::setUri(const std::string & uriString)
@@ -33,13 +27,18 @@ const std::string & Document::uri() const
 // const char * Document::asText() const
 const UnicodeString & Document::asText() const
 {
-  return m_data; // .c_str();
+  return m_htmlDocument->data();
+}
+
+const HtmlElement * Document::rootNode() const
+{
+  return m_htmlDocument->rootNode();
 }
 
 void Document::reset() 
 {
-  m_data.clear();
-  m_dataGot = 0; 
+  m_status = NOTHING;
+  m_htmlDocument->reset();
   m_headerParser->reset();
 }
 
@@ -61,7 +60,7 @@ unsigned int Document::percentLoaded() const
 {
     unsigned int dataExpected = m_headerParser->expected();
     if (dataExpected) {
-      return (m_dataGot*100) / dataExpected;
+      return (m_htmlDocument->dataGot()*100) / dataExpected;
     }
     return 0;
 }
@@ -71,6 +70,7 @@ void Document::appendLocalData(const char * data, int size)
   m_headerParser->setDataState();
   appendData(data, size);
 }
+
 void Document::appendData(const char * data, int size)
 {
   // cout << "Append data: "  << size << endl;
@@ -78,9 +78,9 @@ void Document::appendData(const char * data, int size)
   if (size) {
     m_headerParser->feed(data,size);
     unsigned int dataExpected = m_headerParser->expected();
-    if (dataExpected < m_dataGot)
+    if (dataExpected < m_htmlDocument->dataGot())
     {
-      m_dataGot = 0;
+      m_htmlDocument->setDataGot(0);
     }
     if (not m_headerParser->redirect().empty()) 
     {
@@ -88,15 +88,6 @@ void Document::appendData(const char * data, int size)
     }
   } 
   notifyAll();
-}
-
-void Document::setLoading(int amount)
-{
-  m_status = INPROGRESS;
-  if (amount != m_amount) {
-    notifyAll();
-  }
-  m_amount = amount;
 }
 
 void Document::notifyAll() const
@@ -114,40 +105,3 @@ Document::Status Document::status() const
   return m_status;
 }
 
-void Document::handleStartEndTag(const std::string & tag, const std::vector<Attribute*> & attrs)
-{
-  /*
-  cout << "+- tag token:" << tag << endl;
-  vector<Attribute*>::const_iterator it(attrs.begin());
-  for (; it != attrs.end(); ++it)
-  {
-    cout << "Attribute:" << (*it)->name << " = " << (*it)->value << endl;
-  }
-  */
-}
-
-void Document::handleStartTag(const std::string & tag, const std::vector<Attribute*> & attrs)
-{
-  /*
-  if ( tag == "br") {
-    cout << endl;
-  }
-  if ( tag == "p") {
-    cout << endl;
-  }
-  */
-  if ( tag == "meta") {
-    m_headerParser->checkMetaTagHttpEquiv(attrs);
-  }
-}
-void Document::handleEndTag(const std::string & tag)
-{
-}
-
-//void Document::handleData(const std::string & data)
-void Document::handleData(unsigned int ucodeChar)
-{
-  // m_data.append(data.c_str(), data.length());
-  m_dataGot += 1;
-  m_data += ucodeChar;
-}

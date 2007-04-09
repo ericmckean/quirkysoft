@@ -32,7 +32,9 @@ $(TARGET).nds	:	$(TARGET).arm7 $(TARGET).arm9
 	  -o common/data/logo.bmp > /dev/null
 
 %-unpatched.nds : %.nds
-	cp -p $< $@ && dlditool ~/data/ez5s.dldi $< && touch -r $@ $<
+	@cp -p $< $@ 
+	@-dlditool ~/data/ez5s.dldi $<
+	@-touch -r $@ $<
 #---------------------------------------------------------------------------------
 $(TARGET).arm7	: arm7/$(TARGET).elf
 $(TARGET).arm9	: arm9/$(TARGET).elf

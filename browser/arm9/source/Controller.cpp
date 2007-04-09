@@ -93,7 +93,6 @@ class HttpClient: public nds::Client
       printf("write...\n");
     }
     void readCallback() {
-      m_document->setLoading(1);
     }
 
     bool finished() 

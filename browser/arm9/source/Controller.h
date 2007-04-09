@@ -7,13 +7,23 @@ class URI;
 
 #include "ControllerI.h"
 
+/** Controller maps user actions to model updates. For example, responds to setting the URI.
+ */
 class Controller : public ControllerI
 {
   public:
+    //!Constructor.
     Controller();
 
+    /** Handle the user request for setting a URI.
+     * @param uriString the URI string to use.
+     */
     void doUri(const std::string & uriString);
+    
+    /** Show the software licence.*/
     void showLicence();
+
+    /** Loops forever.*/
     void mainLoop();
 
   private:

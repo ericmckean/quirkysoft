@@ -7,15 +7,21 @@ class Document;
 class ControllerI;
 
 class TextArea;
+class HtmlElement;
 
+/** Handle the displaying of HTML data.*/
 class View : public ViewI
 {
   public:
-    View(Document &, ControllerI &);
+    /** Create a View for the given document and controller.
+     * @param doc the model.
+     * @param controller the controller.
+     */
+    View(Document & doc, ControllerI & controller);
 
     void notify();
 
-    /** Show the view, handle key events, etc.
+    /** Show the view, handle key events, etc. Never returns.
      */
     void mainLoop();
 
@@ -23,6 +29,9 @@ class View : public ViewI
     Document & m_document;
     ControllerI & m_controller;
     TextArea * m_textArea;
+
+    void render();
+    void walkNode(const HtmlElement * node);
 
 };
 #endif

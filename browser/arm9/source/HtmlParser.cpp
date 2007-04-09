@@ -39,12 +39,6 @@ class HtmlParserImpl
       AFTER_DOCTYPE_NAME,
       BOGUS_DOCTYPE,
     };
-    enum ContentModel {
-      PCDATA,
-      RCDATA,
-      CDATA,
-      PLAINTEXT
-    };
 
     enum TagType {
       START,
@@ -85,7 +79,7 @@ class HtmlParserImpl
 
     void reset();
 
-    inline void setContentModel(ContentModel model)
+    inline void setContentModel(HtmlParser::ContentModel model)
     {
       m_contentModel = model;
     }
@@ -102,7 +96,7 @@ class HtmlParserImpl
     //! last state is for the entity in tokenise
     TokeniserState m_lastState;
     TokeniserState m_state;
-    ContentModel m_contentModel;
+    HtmlParser::ContentModel m_contentModel;
     string m_lastStartTagToken;
     TagType m_tagTokenType;
     string m_currentTagToken;
@@ -172,7 +166,7 @@ void HtmlParserImpl::reset()
   m_attribute = 0;
   m_tagAttributes.clear();
   m_state = DATA;
-  m_contentModel = PCDATA;
+  m_contentModel = HtmlParser::PCDATA;
   m_encoding = HtmlParser::UTF8_ENCODING;
 }
 
@@ -239,8 +233,8 @@ void HtmlParserImpl::emitDoctype(string & token, bool isError)
 
 void HtmlParserImpl::handleTagOpen()
 {
-  assert(m_contentModel == PCDATA or m_contentModel == RCDATA or m_contentModel == CDATA);
-  if (m_contentModel == RCDATA or m_contentModel == CDATA)
+  assert(m_contentModel == HtmlParser::PCDATA or m_contentModel == HtmlParser::RCDATA or m_contentModel == HtmlParser::CDATA);
+  if (m_contentModel == HtmlParser::RCDATA or m_contentModel == HtmlParser::CDATA)
   {
     next();
     if (m_value == '/') {
@@ -253,7 +247,7 @@ void HtmlParserImpl::handleTagOpen()
       m_state = DATA;
     }
   }
-  else if (m_contentModel == PCDATA)
+  else if (m_contentModel == HtmlParser::PCDATA)
   {
     next();
     if (isalpha(m_value))
@@ -289,8 +283,8 @@ void HtmlParserImpl::handleTagOpen()
 
 void HtmlParserImpl::handleCloseTagOpen()
 {
-  assert(m_contentModel == PCDATA or m_contentModel == RCDATA or m_contentModel == CDATA);
-  if (m_contentModel == RCDATA or m_contentModel == CDATA)
+  assert(m_contentModel == HtmlParser::PCDATA or m_contentModel == HtmlParser::RCDATA or m_contentModel == HtmlParser::CDATA);
+  if (m_contentModel == HtmlParser::RCDATA or m_contentModel == HtmlParser::CDATA)
   {
     bool parseError(true);
     string nextFew = asUnconsumedCharString(m_lastStartTagToken.length()+1);
@@ -304,9 +298,9 @@ void HtmlParserImpl::handleCloseTagOpen()
         case 0x000B:
         case 0x000C:
         case 0x0020:
-        case 0x003E:
-        case 0x002F:
-        case 0x003C:
+        case 0x003E: // >
+        case 0x002F: // /
+        case 0x003C: // <
         case EOF:
           parseError = false;
           break;
@@ -323,6 +317,7 @@ void HtmlParserImpl::handleCloseTagOpen()
     }
   }
   // PCDATA  ( or CDATA with matching token)
+  m_contentModel = HtmlParser::PCDATA;
   next();
   if (::isalpha(m_value))
   {
@@ -809,7 +804,7 @@ void HtmlParserImpl::handleEntityInAttributeValue()
 
 void HtmlParserImpl::handleBogusComment()
 {
-  assert(m_contentModel == PCDATA);
+  assert(m_contentModel == HtmlParser::PCDATA);
   while (m_position != m_end) {
     next();
     if (m_value == '>' or (int)m_value == EOF) {
@@ -839,7 +834,7 @@ string HtmlParserImpl::asUnconsumedCharString(int amount)
 
 void HtmlParserImpl::handleMarkupDeclarationOpen()
 {
-  assert(m_contentModel == PCDATA);
+  assert(m_contentModel == HtmlParser::PCDATA);
 
   string next2 = asUnconsumedCharString(2);
   if (next2 == "--")
@@ -1065,14 +1060,14 @@ void HtmlParserImpl::handleData()
   // consume next character.
   next();
   if ( m_value == '&'
-      and (m_contentModel == PCDATA
-        or m_contentModel == RCDATA))
+      and (m_contentModel == HtmlParser::PCDATA
+        or m_contentModel == HtmlParser::RCDATA))
   {
     // entity data state.
     m_state = ENTITY_DATA;
   }
   else if ( m_value == '<'
-      and m_contentModel != PLAINTEXT)
+      and m_contentModel != HtmlParser::PLAINTEXT)
   {
     // tag open state
     m_state = TAG_OPEN;
@@ -1085,7 +1080,7 @@ void HtmlParserImpl::handleData()
 }
 void HtmlParserImpl::handleEntityData()
 {
-  assert(m_contentModel != CDATA);
+  assert(m_contentModel != HtmlParser::CDATA);
   unsigned int value = consumeEntity();
   if (value == 0)
   {
@@ -1226,7 +1221,6 @@ HtmlParser::HtmlParser():
 HtmlParser::~HtmlParser()
 {}
 
-
 void HtmlParser::feed(const char * data, unsigned int length)
 {
   m_details.initialise(data, length);
@@ -1242,7 +1236,12 @@ void HtmlParser::setEncoding(HtmlParser::Encoding enc)
 
 void HtmlParser::setPlainText()
 {
-  m_details.setContentModel(HtmlParserImpl::PLAINTEXT);
+  m_details.setContentModel(PLAINTEXT);
+}
+
+void HtmlParser::setContentModel(ContentModel newModel)
+{
+  m_details.setContentModel(newModel);
 }
 
 HtmlParser::Encoding HtmlParser::encoding() const

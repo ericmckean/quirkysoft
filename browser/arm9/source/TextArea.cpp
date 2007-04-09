@@ -81,6 +81,7 @@ void TextArea::checkLetter(Font::Glyph & g)
 void TextArea::printu(const UnicodeString & unicodeString)
 {
   // skip until we reach startLine
+#if 0
   int tmpx = m_cursorx;
   int tmpy = m_cursorx;
   m_cursorx = 0;
@@ -112,6 +113,8 @@ void TextArea::printu(const UnicodeString & unicodeString)
   m_cursorx = tmpx;
   m_cursory = tmpy;
   printuImpl(unicodeString.substr(position , unicodeString.length()-position));
+#endif
+  printuImpl(unicodeString);
 }
 
 int TextArea::textSize(const UnicodeString & unicodeString) const
@@ -163,6 +166,9 @@ void TextArea::printuImpl(const UnicodeString & unicodeString)
     printuWord(word);
     it += word.length()-1;
     currPosition += word.length()-1;
+    if (m_cursory > Canvas::instance().height()) {
+      break;
+    }
   }
 }
 
