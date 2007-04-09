@@ -90,9 +90,11 @@ void File::open(const char * name, const char * mode)
   char * dirname = get_current_dir_name();
   std::string fullpath(dirname);
   free(dirname);
-  fullpath += "/";
+  if (name[0] != '/') {
+    fullpath += "/";
+  }
   fullpath += name;
-  m_details->open(name, mode);
+  m_details->open(fullpath.c_str(), mode);
 }
 
 File::~File()
