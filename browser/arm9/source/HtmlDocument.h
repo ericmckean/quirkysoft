@@ -90,7 +90,8 @@ class HtmlDocument : public HtmlParser
     InsertionMode m_insertionMode;
     bool m_isFirst;
     //std::stack<HtmlElement*> m_openElements;
-    std::list<HtmlElement*> m_openElements;
+    //std::list<HtmlElement*> m_openElements;
+    std::vector<HtmlElement*> m_openElements;
     std::list<HtmlElement*> m_activeFormatters;
     HtmlElement * m_head;
     HtmlElement * m_form;
