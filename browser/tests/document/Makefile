@@ -5,7 +5,16 @@ CPPFLAGS += -I../../arm9/source/ -g
 
 all : tester run
 
-LINKFILES:=Document.o UTF8.o Entity.o HeaderParser.o HtmlParser.o HtmlDocument.o  ElementFactory.o HtmlElement.o
+LINKFILES:=Document.o \
+	   UTF8.o \
+	   Entity.o \
+	   HeaderParser.o \
+	   HtmlParser.o \
+	   HtmlDocument.o \
+	   ElementFactory.o \
+	   HtmlElement.o \
+	   HtmlMetaElement.o \
+	   HtmlAnchorElement.o
 
 clean:
 	rm -f *.o tester

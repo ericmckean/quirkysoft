@@ -30,13 +30,16 @@ void View::walkNode(const HtmlElement * node)
       {
         m_textArea->setColor(nds::Color(0,0,31));
       } 
-      else
-      {
-        m_textArea->setColor(nds::Color(0,0,0));
-      }
       if (element->text().size())
       {
         m_textArea->printu(element->text());
+        m_textArea->setColor(nds::Color(0,0,0));
+      }
+      if (element->isa("p"))
+      {
+        m_textArea->setParseNewline(true);
+        m_textArea->print("\n",1);
+        m_textArea->setParseNewline(false);
       }
       walkNode(element);
     }
@@ -47,6 +50,7 @@ void View::render()
 {
   nds::Canvas::instance().fillRectangle(0, 0, SCREEN_WIDTH, 2*SCREEN_HEIGHT, nds::Color(31,31,31));
   m_textArea->setCursor(0, 0);
+  m_textArea->setParseNewline(false);
   const HtmlElement * root = m_document.rootNode();
   walkNode(root);
 }

@@ -1,5 +1,6 @@
 #include <assert.h>
 #include "HeaderParser.h"
+#include "HtmlElement.h"
 #include "HtmlParser.h"
 
 using namespace std;
@@ -146,22 +147,14 @@ void HeaderParser::handleHeader(const string & field, const string & value)
   }
 }
 
-void HeaderParser::checkMetaTagHttpEquiv(const std::vector<HtmlParser::Attribute*> & attrs)
+void HeaderParser::checkMetaTagHttpEquiv(const HtmlElement * meta)
 {
-  vector<HtmlParser::Attribute*>::const_iterator it(attrs.begin());
-  string httpEquiv; httpEquiv.clear();
-  for (; it != attrs.end(); ++it)
+  string httpEquiv = meta->attribute("http-equiv");
+  string content = meta->attribute("content");
+  if (not httpEquiv.empty() and not content.empty())
   {
-    if (not httpEquiv.empty() and (*it)->name == "content")
-    {
-      transform(httpEquiv.begin(), httpEquiv.end(), httpEquiv.begin(), ::tolower);
-      handleHeader(httpEquiv, (*it)->value);
-      break;
-    }
-    if ( (*it)->name == "http-equiv")
-    {
-      httpEquiv = (*it)->value;
-    }
+    transform(httpEquiv.begin(), httpEquiv.end(), httpEquiv.begin(), ::tolower);
+    handleHeader(httpEquiv, content);
   }
 }
 

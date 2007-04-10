@@ -180,11 +180,9 @@ bool TextArea::doSingleChar(unsigned int value)
     }
     Font::Glyph g;
     m_font->glyph(value, g);
-    if (value == '\n')
-    {
+    if (m_parseNewline and value == '\n') {
       incrLine();
-    } 
-    else {
+    } else if (value != '\n') {
       checkLetter(g);
       if (g.data) {
         printAt(g, m_cursorx, m_cursory);

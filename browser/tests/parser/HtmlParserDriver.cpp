@@ -1,5 +1,7 @@
 #include "HtmlParserDriver.h"
 #include "HeaderParser.h"
+#include "ElementFactory.h"
+#include "HtmlElement.h"
 using namespace std;
 
 void HtmlParserDriver::handleStartEndTag(const string & tag, const vector<Attribute*> & attrs)
@@ -19,7 +21,11 @@ void HtmlParserDriver::handleStartTag(const string & tag, const vector<Attribute
     newVector.push_back(newAttr);
   }
   // gah - copy paste from Document, no other way
-  if (tag == "meta") { m_headerParser->checkMetaTagHttpEquiv(attrs); }
+  HtmlElement * element = ElementFactory::create(tag, attrs);
+  if (tag == "meta") { 
+    m_headerParser->checkMetaTagHttpEquiv(element); 
+  }
+  delete element;
   m_attributes.push_back(newVector);
 }
 
