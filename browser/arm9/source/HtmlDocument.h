@@ -3,11 +3,10 @@
 
 #include "UnicodeString.h"
 #include "HtmlParser.h"
+#include "ElementList.h"
 #include <stack>
-#include <list>
 
 class HeaderParser;
-class HtmlElement;
 
 /** Parse the HTML tokens after the tokenisation phase.
  */
@@ -45,6 +44,10 @@ class HtmlDocument : public HtmlParser
      * @return The root node.
      */
     const HtmlElement * rootNode() const;
+
+    void dumpDOM();
+
+    void handleEOF();
 
   protected:
     virtual void handleStartEndTag(const std::string & tag, const std::vector<Attribute*> & attrs);
@@ -89,10 +92,10 @@ class HtmlDocument : public HtmlParser
     TreeState m_state;
     InsertionMode m_insertionMode;
     bool m_isFirst;
-    //std::stack<HtmlElement*> m_openElements;
-    //std::list<HtmlElement*> m_openElements;
-    std::vector<HtmlElement*> m_openElements;
-    std::list<HtmlElement*> m_activeFormatters;
+    typedef std::vector<HtmlElement*> ElementVector;
+    ElementVector m_openElements;
+    // things are added to the front of the list.
+    ElementList m_activeFormatters;
     HtmlElement * m_head;
     HtmlElement * m_form;
     HtmlElement * m_currentNode;
@@ -101,6 +104,8 @@ class HtmlDocument : public HtmlParser
     void mainPhase(const std::string & tag);
     // start tag in main phase.
     void mainPhase(const std::string & tag, const std::vector<Attribute*> & attrs);
+    // unicode char in the mainPhase
+    void mainPhase(unsigned int ucodeChar);
 
     // BEFORE_HEAD phase, start tag.
     void beforeHead(const std::string & tag, const std::vector<Attribute*> & attrs);
@@ -128,12 +133,18 @@ class HtmlDocument : public HtmlParser
     void removeFromActiveFormat(HtmlElement* element);
     void removeFromOpenElements(HtmlElement* element);
 
+    void insertElement(HtmlElement * element);
+    void addActiveFormatter(HtmlElement * element);
     void generateImpliedEndTags(const std::string & except="");
     bool isFormatting(HtmlElement * node);
     bool isPhrasing(HtmlElement * node);
+    void reconstructActiveFormatters();
     // disable copies
     HtmlDocument (const HtmlDocument&);
     const HtmlDocument& operator=(const HtmlDocument&);
+    // debug
+    int m_depth;
+    void walkNode(const HtmlElement * node);
 };
 
 

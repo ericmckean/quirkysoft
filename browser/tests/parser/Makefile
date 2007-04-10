@@ -8,7 +8,18 @@ all : tester run
 clean:
 	rm -f *.o tester
 
-tester: $(OFILES) $(wildcard ../../arm9/build.sdl/*Parser.o)  ../../arm9/build.sdl/UTF8.o ../../arm9/build.sdl/Entity.o ../Main.o
+LINKFILES:=Document.o \
+	   UTF8.o \
+	   Entity.o \
+	   HeaderParser.o \
+	   HtmlParser.o \
+	   HtmlDocument.o \
+	   ElementFactory.o \
+	   HtmlElement.o \
+	   HtmlMetaElement.o \
+	   HtmlAnchorElement.o
+
+tester: $(OFILES) $(LINKFILES:%.o=../../arm9/build.sdl/%.o)  ../Main.o
 	$(CXX) -o $@ $^ -L.. -lcppunit -ldl
 
 run: tester

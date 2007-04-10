@@ -69,6 +69,9 @@ class TextArea
      */
     int startLine() const;
 
+    inline bool parseNewline() const;
+    inline void setParseNewline(bool parse=true);
+
   private:
     Font * m_font;
     unsigned short * m_palette;
@@ -76,6 +79,7 @@ class TextArea
     int m_paletteLength;
     std::string m_encoding;
     int m_startLine;
+    bool m_parseNewline;
 
     int m_cursorx;
     int m_cursory;
@@ -93,5 +97,13 @@ class TextArea
 
 const Font & TextArea::font() const {
   return *m_font;
+}
+bool TextArea::parseNewline() const
+{
+  return m_parseNewline;
+}
+void TextArea::setParseNewline(bool parse)
+{
+  m_parseNewline = parse;
 }
 #endif

@@ -92,7 +92,7 @@ void DocumentTest::testEmpty()
   readFile("empty.html");
   m_document->appendLocalData(m_data, m_length);
   const HtmlElement * result = m_document->rootNode();
-  CPPUNIT_ASSERT(result == 0);
+  CPPUNIT_ASSERT(result != 0);
 }
 
 void DocumentTest::testHead2()
@@ -138,6 +138,7 @@ void DocumentTest::testTitle()
 {
   readFile("title.html");
   m_document->appendLocalData(m_data, m_length);
+  m_document->setStatus(Document::LOADED);
   const HtmlElement * root = m_document->rootNode();
   CPPUNIT_ASSERT(root->hasChildren());
   const HtmlElement * child = root->firstChild();
@@ -167,4 +168,155 @@ void DocumentTest::testGoogle()
   m_document->appendLocalData(m_data, m_length);
   const HtmlElement * root = m_document->rootNode();
   CPPUNIT_ASSERT(root != 0);
+}
+
+
+void DocumentTest::testAnchor()
+{
+  readFile("anchor.html");
+  m_document->appendLocalData(m_data, m_length);
+  const HtmlElement * root = m_document->rootNode();
+  CPPUNIT_ASSERT(root != 0);
+
+  const HtmlElement * child = root->firstChild();
+  CPPUNIT_ASSERT(child != 0);
+  CPPUNIT_ASSERT(child->isa("head"));
+
+  const list<HtmlElement*> & rootChilds = root->children();
+  list<HtmlElement*>::const_iterator it(rootChilds.begin());
+  int index(0);
+  for (; it != rootChilds.end(); ++it,++index)
+  {
+    HtmlElement * element(*it);
+    if (index == 1) {
+      CPPUNIT_ASSERT(element->isa("body"));
+      CPPUNIT_ASSERT(element->hasChildren());
+      const HtmlElement * a = element->firstChild();
+      CPPUNIT_ASSERT(a != 0);
+      CPPUNIT_ASSERT(a->isa("a"));
+      string href = a->attribute("href");
+      string expected("anchor");
+      CPPUNIT_ASSERT_EQUAL(expected, href);
+    }
+  }
+}
+
+
+void DocumentTest::testBrokenAnchor()
+{
+  readFile("anchor-broken.html");
+  m_document->appendLocalData(m_data, m_length);
+  const HtmlElement * root = m_document->rootNode();
+  CPPUNIT_ASSERT(root != 0);
+
+  const HtmlElement * child = root->firstChild();
+  CPPUNIT_ASSERT(child != 0);
+  CPPUNIT_ASSERT(child->isa("head"));
+
+  const list<HtmlElement*> & rootChilds = root->children();
+  list<HtmlElement*>::const_iterator it(rootChilds.begin());
+  int index(0);
+  for (; it != rootChilds.end(); ++it,++index)
+  {
+    HtmlElement * element(*it);
+    if (index == 1) {
+      CPPUNIT_ASSERT(element->isa("body"));
+      CPPUNIT_ASSERT(element->hasChildren());
+      const HtmlElement * a = element->firstChild();
+      CPPUNIT_ASSERT(a != 0);
+      CPPUNIT_ASSERT(a->isa("a"));
+      string href = a->attribute("href");
+      string expected("anchor");
+      CPPUNIT_ASSERT_EQUAL(expected, href);
+    }
+  }
+}
+
+void DocumentTest::testCharacterStart()
+{
+  readFile("character-start.html");
+  m_document->appendLocalData(m_data, m_length);
+  const HtmlElement * root = m_document->rootNode();
+  CPPUNIT_ASSERT(root != 0);
+}
+void DocumentTest::testEndTagStart()
+{
+  readFile("endtag-start.html");
+  m_document->appendLocalData(m_data, m_length);
+  m_document->setStatus(Document::LOADED);
+  const HtmlElement * root = m_document->rootNode();
+  CPPUNIT_ASSERT(root != 0);
+  string rootType = root->tagName();
+  string expected("html");
+  CPPUNIT_ASSERT_EQUAL(expected, rootType);
+}
+
+void DocumentTest::testSimpleBodyA()
+{
+  readFile("simple.html");
+  m_document->appendLocalData(m_data, m_length);
+  m_document->setStatus(Document::LOADED);
+  const HtmlElement * root = m_document->rootNode();
+  CPPUNIT_ASSERT(root != 0);
+  string expected("html");
+  CPPUNIT_ASSERT_EQUAL( expected, root->tagName());
+
+  CPPUNIT_ASSERT(root->hasChildren());
+
+  const ElementList & children = root->children();
+  ElementList::const_iterator childIt(children.begin());
+  expected = "head";
+  CPPUNIT_ASSERT_EQUAL(expected, (*childIt)->tagName());
+  // now check the head:
+  {
+    // meta and title
+    HtmlElement * head = *childIt;
+    ElementList::const_iterator headIt(head->children().begin());
+    expected = "meta";
+    CPPUNIT_ASSERT_EQUAL(expected, (*headIt)->tagName());
+    expected = "content-type";
+    CPPUNIT_ASSERT_EQUAL(expected, (*headIt)->attribute("http-equiv"));
+    ++headIt;
+    expected = "title";
+    CPPUNIT_ASSERT_EQUAL(expected, (*headIt)->tagName());
+    HtmlElement * title = *headIt;
+    CPPUNIT_ASSERT(title->hasChildren());
+    expected = "#text";
+    CPPUNIT_ASSERT_EQUAL(expected, title->firstChild()->tagName());
+    ++headIt;
+  }
+  ++childIt;
+  expected = "body";
+  CPPUNIT_ASSERT_EQUAL(expected, (*childIt)->tagName());
+  ++childIt;
+  CPPUNIT_ASSERT(children.end() == childIt);
+}
+
+void DocumentTest::testMismatchFormat()
+{
+  readFile("mismatch-format.html");
+  // should produce this:
+  // html >
+  //   head >
+  //     body >
+  //        #text
+  //        b > 
+  //           #text (bold)
+  //           i > 
+  //              #text (bolditalic)
+  //        i >
+  //           #text (italic)
+  //           a > 
+  //               #text (link?italic?) 
+  //        #text  ()
+  //        a >
+  //            #text ()
+  m_document->appendLocalData(m_data, m_length);
+  m_document->setStatus(Document::LOADED);
+  const HtmlElement * root = m_document->rootNode();
+  CPPUNIT_ASSERT(root != 0);
+  string rootType = root->tagName();
+  string expected("html");
+  CPPUNIT_ASSERT_EQUAL(expected, rootType);
+
 }

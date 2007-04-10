@@ -13,7 +13,6 @@ class HtmlParserImpl
 {
 
   public:
-    static bool isWhitespace(unsigned int value);
     enum TokeniserState {
       DATA,
       ENTITY_DATA,
@@ -179,7 +178,7 @@ void HtmlParserImpl::initialise(const char * data, unsigned int length)
   m_value = 0;
 }
 
-bool HtmlParserImpl::isWhitespace(unsigned int value)
+bool HtmlParser::isWhitespace(unsigned int value)
 {
   if (value > 0x0020)
     return false;
@@ -922,7 +921,7 @@ void HtmlParserImpl::handleCommentEnd()
 void HtmlParserImpl::handleDoctype()
 {
   next();
-  if (isWhitespace(m_value))
+  if (HtmlParser::isWhitespace(m_value))
   {
     m_state = BEFORE_DOCTYPE_NAME;
   } 
@@ -937,7 +936,7 @@ void HtmlParserImpl::handleDoctype()
 void HtmlParserImpl::handleBeforeDoctypeName()
 {
   next();
-  if (isWhitespace(m_value))
+  if (HtmlParser::isWhitespace(m_value))
   {
     m_state = BEFORE_DOCTYPE_NAME;
   } 
@@ -974,7 +973,7 @@ void HtmlParserImpl::handleBeforeDoctypeName()
 void HtmlParserImpl::handleDoctypeName()
 {
   next();
-  if (isWhitespace(m_value))
+  if (HtmlParser::isWhitespace(m_value))
   {
     m_state = AFTER_DOCTYPE_NAME;
   } 
@@ -1009,7 +1008,7 @@ void HtmlParserImpl::handleDoctypeName()
 void HtmlParserImpl::handleAfterDoctypeName()
 {
   next();
-  if (isWhitespace(m_value))
+  if (HtmlParser::isWhitespace(m_value))
   {
     // stay in this state
     m_state = AFTER_DOCTYPE_NAME;

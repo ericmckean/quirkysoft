@@ -1,5 +1,6 @@
 #include "HtmlElementTest.h"
 #include "HtmlElement.h"
+#include "HtmlAnchorElement.h"
 #include "ElementFactory.h"
 
 using namespace std;
@@ -10,9 +11,12 @@ CPPUNIT_TEST_SUITE_REGISTRATION( HtmlElementTest );
 void HtmlElementTest::tearDown()
 {
   delete m_element;
+  delete m_clone;
 }
 void HtmlElementTest::setUp()
 {
+  m_element = 0;
+  m_clone = 0;
 }
 
 void HtmlElementTest::test0()
@@ -71,3 +75,26 @@ void HtmlElementTest::testIsa()
   m_element = ElementFactory::create("head");
   CPPUNIT_ASSERT( m_element->isa("head"));
 }
+
+
+void HtmlElementTest::testAnchor()
+{
+  m_element = ElementFactory::create("a");
+  CPPUNIT_ASSERT( m_element->isa("a"));
+  HtmlAnchorElement * a = dynamic_cast<HtmlAnchorElement*>(m_element);
+  CPPUNIT_ASSERT( a != 0 );
+}
+
+
+void HtmlElementTest::testClone()
+{
+  m_element = ElementFactory::create("a");
+  m_element->setAttribute("href", "http://localhost");
+  m_element->setAttribute("id", "myElement");
+  m_clone = m_element->clone();
+  CPPUNIT_ASSERT( m_clone != 0);
+  CPPUNIT_ASSERT( m_clone->isa("a"));
+  CPPUNIT_ASSERT_EQUAL(m_element->attribute("href"), m_clone->attribute("href"));
+  CPPUNIT_ASSERT_EQUAL(m_element->attribute("id"), m_clone->attribute("id"));
+}
+

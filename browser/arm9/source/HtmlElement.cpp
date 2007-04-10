@@ -47,10 +47,50 @@ void HtmlElement::setAttribute(const string & name, const string & value)
 void HtmlElement::append(HtmlElement * child)
 {
   m_children.push_back(child);
+  child->setParent(this);
+}
+
+void HtmlElement::remove(HtmlElement * child)
+{
+  list<HtmlElement*>::iterator forRemoval = find(m_children.begin(), m_children.end(), child);
+  if (forRemoval != m_children.end())
+  {
+    m_children.erase(forRemoval);
+  }
+}
+
+void HtmlElement::appendText(unsigned int value)
+{
+  if (m_children.size())
+  {
+    if (m_children.back()->isa("#text"))
+    {
+      m_children.back()->m_text += value;
+      return;
+    }
+  }
+  HtmlElement* textNode = new HtmlElement("#text");
+  textNode->m_text = value;
+  append(textNode);
 }
 
 HtmlElement::~HtmlElement()
 {
   for_each(m_children.begin(), m_children.end(), ElementFactory::remove);
+}
+
+void HtmlElement::copyAttributes(HtmlElement * copyTo) const
+{
+  copyTo->m_id = m_id;
+  copyTo->m_title = m_title;
+  copyTo->m_lang = m_lang;
+  copyTo->m_dir = m_dir;
+}
+
+HtmlElement * HtmlElement::clone() const
+{
+  HtmlElement * theClone = new HtmlElement(m_tagName);
+  copyAttributes(theClone);
+  return theClone;
 }
 

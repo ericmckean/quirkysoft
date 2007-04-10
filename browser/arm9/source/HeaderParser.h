@@ -1,8 +1,9 @@
 #ifndef HeaderParser_h_seen
 #define HeaderParser_h_seen
 #include <string>
-#include "HtmlParser.h"
 
+class HtmlParser;
+class HtmlElement;
 /** Parse the headers and chunks from a HTTP GET request. 
  * The payload is then passed on to the HtmlParser.
  */
@@ -39,9 +40,9 @@ class HeaderParser
     unsigned int httpStatusCode() const;
 
     /** Call this when you have a "meta" tag, it will check if any http-equiv attributes apply.
-     * @param attrs a vector of pointers-to-Attribute for the meta tag.
+     * @param meta a meta tag element.
      */
-    void checkMetaTagHttpEquiv(const std::vector<HtmlParser::Attribute*> & attrs);
+    void checkMetaTagHttpEquiv(const HtmlElement* meta);
 
     //! Reset the internal parser state.
     void reset();

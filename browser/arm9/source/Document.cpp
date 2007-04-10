@@ -99,6 +99,11 @@ void Document::setStatus(Document::Status status)
 {
   m_status = status;
   notifyAll();
+  if (m_status == LOADED)
+  {
+    m_htmlDocument->handleEOF();
+  }
+
 }
 Document::Status Document::status() const
 {

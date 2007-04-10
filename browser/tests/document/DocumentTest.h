@@ -16,6 +16,12 @@ class DocumentTest : public CPPUNIT_NS::TestFixture
   CPPUNIT_TEST( testTitle );
   CPPUNIT_TEST( testHead3 );
   CPPUNIT_TEST( testGoogle );
+  CPPUNIT_TEST( testAnchor );
+  CPPUNIT_TEST( testBrokenAnchor );
+  CPPUNIT_TEST( testCharacterStart );
+  CPPUNIT_TEST( testEndTagStart );
+  CPPUNIT_TEST( testMismatchFormat );
+  CPPUNIT_TEST( testSimpleBodyA );
   CPPUNIT_TEST_SUITE_END();
 
 public:
@@ -30,6 +36,12 @@ public:
   void testTitle();
   void testHead3();
   void testGoogle();
+  void testAnchor();
+  void testBrokenAnchor();
+  void testCharacterStart();
+  void testEndTagStart();
+  void testMismatchFormat();
+  void testSimpleBodyA();
 private:
   Document * m_document;
   char * m_data;
