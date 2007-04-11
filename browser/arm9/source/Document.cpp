@@ -105,7 +105,7 @@ void Document::setStatus(Document::Status status)
   if (m_status == LOADED)
   {
     m_htmlDocument->handleEOF();
-    m_htmlDocument->dumpDOM();
+    //m_htmlDocument->dumpDOM();
   }
   notifyAll();
 }

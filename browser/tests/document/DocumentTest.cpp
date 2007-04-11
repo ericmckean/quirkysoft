@@ -362,3 +362,14 @@ void DocumentTest::testPlaintext()
   CPPUNIT_ASSERT(root != 0);
   CPPUNIT_ASSERT(root->isa("html"));
 }
+
+
+void DocumentTest::testFont()
+{
+  readFile("font.html");
+  m_document->appendLocalData(m_data, m_length);
+  m_document->setStatus(Document::LOADED);
+  const HtmlElement * root = m_document->rootNode();
+  CPPUNIT_ASSERT(root != 0);
+  CPPUNIT_ASSERT(root->isa("html"));
+}

@@ -25,6 +25,7 @@ class DocumentTest : public CPPUNIT_NS::TestFixture
   CPPUNIT_TEST( testLi );
   CPPUNIT_TEST( testDD );
   CPPUNIT_TEST( testPlaintext );
+  CPPUNIT_TEST( testFont );
   CPPUNIT_TEST_SUITE_END();
 
 public:
@@ -48,6 +49,7 @@ public:
   void testLi();
   void testDD();
   void testPlaintext();
+  void testFont();
 private:
   Document * m_document;
   char * m_data;
