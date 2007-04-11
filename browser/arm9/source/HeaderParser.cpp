@@ -5,10 +5,13 @@
 
 using namespace std;
 HeaderParser::HeaderParser(HtmlParser * htmlParser):
+  m_expected(0),
   m_htmlParser(htmlParser)
 {
   reset();
 }
+HeaderParser::~HeaderParser()
+{ }
 
 void HeaderParser::reset()
 {

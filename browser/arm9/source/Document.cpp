@@ -8,11 +8,14 @@ using namespace std;
 Document::Document():
   m_amount(0),
   m_htmlDocument(new HtmlDocument),
-  m_headerParser(new HeaderParser(m_htmlDocument))
+  m_headerParser(new HeaderParser(m_htmlDocument.get()))
 {
   // I don't like this but can't think of a better way :(
-  m_htmlDocument->setHeaderParser(m_headerParser);
+  m_htmlDocument->setHeaderParser(m_headerParser.get());
 }
+
+Document::~Document()
+{}
 
 void Document::setUri(const std::string & uriString)
 {
@@ -77,8 +80,9 @@ void Document::appendData(const char * data, int size)
   m_status = INPROGRESS;
   if (size) {
     m_headerParser->feed(data,size);
-    unsigned int dataExpected = m_headerParser->expected();
-    if (dataExpected < m_htmlDocument->dataGot())
+    unsigned int dataExpected(m_headerParser->expected());
+    unsigned int dataGot(m_htmlDocument->dataGot());
+    if (dataExpected < dataGot)
     {
       m_htmlDocument->setDataGot(0);
     }
@@ -98,13 +102,14 @@ void Document::notifyAll() const
 void Document::setStatus(Document::Status status)
 {
   m_status = status;
-  notifyAll();
   if (m_status == LOADED)
   {
     m_htmlDocument->handleEOF();
+    m_htmlDocument->dumpDOM();
   }
-
+  notifyAll();
 }
+
 Document::Status Document::status() const
 {
   return m_status;

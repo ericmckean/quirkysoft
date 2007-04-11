@@ -19,6 +19,12 @@ Controller::Controller()
 {
 }
 
+Controller::~Controller()
+{
+  delete &m_document;
+  delete &m_view;
+}
+
 void Controller::showLicence()
 {
   m_document.appendLocalData(s_licenceText, strlen(s_licenceText));

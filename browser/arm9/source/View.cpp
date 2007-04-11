@@ -21,8 +21,8 @@ void View::walkNode(const HtmlElement * node)
 {
   if (node->hasChildren())
   {
-    const list<HtmlElement*> & theChildren = node->children();
-    list<HtmlElement*>::const_iterator it(theChildren.begin());
+    const ElementList & theChildren = node->children();
+    ElementList::const_iterator it(theChildren.begin());
     for (; it != theChildren.end(); ++it)
     {
       const HtmlElement * element(*it);

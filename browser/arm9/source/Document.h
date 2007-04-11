@@ -1,6 +1,7 @@
 #ifndef Document_h_seen
 #define Document_h_seen
 #include <vector>
+#include <memory>
 #include "UnicodeString.h"
 #include "ViewI.h"
 
@@ -21,6 +22,8 @@ class Document
     };
     //! Constructor.
     Document();
+
+    ~Document();
 
     /** Set the URI.
      * @param uriString a string representing the URI.
@@ -89,10 +92,14 @@ class Document
     Status m_status;
     int m_amount;
     std::vector<ViewI*> m_views;
-    HtmlDocument * m_htmlDocument;
-    HeaderParser * m_headerParser;
+    std::auto_ptr<HtmlDocument> m_htmlDocument;
+    std::auto_ptr<HeaderParser> m_headerParser;
 
     //! Notify all registered views that there are model changes.
     void notifyAll() const;
+
+    //! No copies.
+    Document (const Document&);
+    const Document& operator=(const Document&);
 };
 #endif

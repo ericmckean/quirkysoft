@@ -2,10 +2,12 @@
 #include <iostream>
 #include <list>
 #include <fstream>
-#include "Document.h"
 #include "HtmlParser.h"
 #include "DocumentTest.h"
 #include "HtmlElement.h"
+#include "HtmlDocument.h"
+#include "HeaderParser.h"
+#include "Document.h"
 
 using namespace std;
 
@@ -62,6 +64,7 @@ void DocumentTest::test1()
 {
   readFile("test1.txt");
   m_document->appendData(m_data, m_length);
+  m_document->setStatus(Document::LOADED);
   const HtmlElement * result = m_document->rootNode();
   CPPUNIT_ASSERT( result != 0);
 }
@@ -119,7 +122,7 @@ void DocumentTest::testHead3()
   CPPUNIT_ASSERT(meta != 0);
   CPPUNIT_ASSERT(meta->isa("meta"));
 
-  list<HtmlElement*>::const_iterator it(result->children().begin());
+  ElementList::const_iterator it(result->children().begin());
   int index(0);
   for (; it != result->children().end(); ++it,++index)
   {
@@ -148,9 +151,9 @@ void DocumentTest::testTitle()
   CPPUNIT_ASSERT(meta != 0);
   CPPUNIT_ASSERT(meta->isa("title"));
 
-  const list<HtmlElement*> & rootChilds = root->children();
+  const ElementList & rootChilds = root->children();
   CPPUNIT_ASSERT(rootChilds.size() > 1);
-  list<HtmlElement*>::const_iterator it(rootChilds.begin());
+  ElementList::const_iterator it(rootChilds.begin());
   int index(0);
   for (; it != rootChilds.end(); ++it,++index)
   {
@@ -182,8 +185,8 @@ void DocumentTest::testAnchor()
   CPPUNIT_ASSERT(child != 0);
   CPPUNIT_ASSERT(child->isa("head"));
 
-  const list<HtmlElement*> & rootChilds = root->children();
-  list<HtmlElement*>::const_iterator it(rootChilds.begin());
+  const ElementList & rootChilds = root->children();
+  ElementList::const_iterator it(rootChilds.begin());
   int index(0);
   for (; it != rootChilds.end(); ++it,++index)
   {
@@ -213,8 +216,8 @@ void DocumentTest::testBrokenAnchor()
   CPPUNIT_ASSERT(child != 0);
   CPPUNIT_ASSERT(child->isa("head"));
 
-  const list<HtmlElement*> & rootChilds = root->children();
-  list<HtmlElement*>::const_iterator it(rootChilds.begin());
+  const ElementList & rootChilds = root->children();
+  ElementList::const_iterator it(rootChilds.begin());
   int index(0);
   for (; it != rootChilds.end(); ++it,++index)
   {
@@ -236,6 +239,7 @@ void DocumentTest::testCharacterStart()
 {
   readFile("character-start.html");
   m_document->appendLocalData(m_data, m_length);
+  m_document->setStatus(Document::LOADED);
   const HtmlElement * root = m_document->rootNode();
   CPPUNIT_ASSERT(root != 0);
 }
@@ -319,4 +323,42 @@ void DocumentTest::testMismatchFormat()
   string expected("html");
   CPPUNIT_ASSERT_EQUAL(expected, rootType);
 
+}
+
+void DocumentTest::testLi()
+{
+  readFile("test-li.html");
+  m_document->appendLocalData(m_data, m_length);
+  m_document->setStatus(Document::LOADED);
+  const HtmlElement * root = m_document->rootNode();
+  CPPUNIT_ASSERT(root != 0);
+  CPPUNIT_ASSERT(root->isa("html"));
+  HtmlElement * body = root->lastChild();
+  CPPUNIT_ASSERT(body != 0);
+  CPPUNIT_ASSERT(body->isa("body"));
+  CPPUNIT_ASSERT(body->firstChild()->isa("li"));
+}
+
+void DocumentTest::testDD()
+{
+  readFile("test-dd.html");
+  m_document->appendLocalData(m_data, m_length);
+  m_document->setStatus(Document::LOADED);
+  const HtmlElement * root = m_document->rootNode();
+  CPPUNIT_ASSERT(root != 0);
+  CPPUNIT_ASSERT(root->isa("html"));
+  HtmlElement * body = root->lastChild();
+  CPPUNIT_ASSERT(body != 0);
+  CPPUNIT_ASSERT(body->isa("body"));
+  CPPUNIT_ASSERT(body->firstChild()->isa("dd"));
+}
+
+void DocumentTest::testPlaintext()
+{
+  readFile("plaintext.html");
+  m_document->appendLocalData(m_data, m_length);
+  m_document->setStatus(Document::LOADED);
+  const HtmlElement * root = m_document->rootNode();
+  CPPUNIT_ASSERT(root != 0);
+  CPPUNIT_ASSERT(root->isa("html"));
 }

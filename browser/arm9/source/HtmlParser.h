@@ -1,8 +1,11 @@
 #ifndef HtmlParser_h_seen
 #define HtmlParser_h_seen
 
-#include <vector>
+#include <memory>
 #include <string>
+#include "Attribute.h"
+class HtmlParserImpl;
+
 /**
  * A parser for HTML. Consumes bytes and calls the handler functions for tags.
  */
@@ -17,12 +20,6 @@ class HtmlParser
       ISO_ENCODING   //!< char stream is parsed as ISO-8859-1.
     };
 
-    //! Attributes for an element.
-    struct Attribute
-    {
-      std::string name;   //!< name of the attribute.
-      std::string value;  //!< value, stripped of leading/trailing quotes.
-    };
     //! Constructor.
     HtmlParser();
     //! Destructor.
@@ -65,13 +62,12 @@ class HtmlParser
      * @param tag the tag name (lowercase).
      * @param attrs a vector of attributes for the tag.
      **/
-    virtual void handleStartEndTag(const std::string & tag, const std::vector<Attribute*> & attrs);
+    virtual void handleStartEndTag(const std::string & tag, const AttributeVector & attrs);
     /** Called when a start tag is found.
      * @param tag the tag name (lowercase).
      * @param attrs a vector of attributes for the tag.
      **/
-    virtual void handleStartTag(const std::string & tag, const std::vector<Attribute*> & attrs);
-
+    virtual void handleStartTag(const std::string & tag, const AttributeVector & attrs); 
     /** Called when an end tag is found.
      * @param tag the tag name (lowercase).
      */
@@ -86,6 +82,6 @@ class HtmlParser
 
   private:
     //! Nothing to see here.
-    class HtmlParserImpl & m_details;
+    const std::auto_ptr<HtmlParserImpl> m_details;
 };
 #endif

@@ -15,7 +15,8 @@ TextArea::TextArea() :
   m_basePalette(0),
   m_paletteLength(0),
   m_encoding("utf-8"),
-  m_startLine(0)
+  m_startLine(0),
+  m_parseNewline(true)
 {
   init("data/bunjalloo/fonts/vera");
 }

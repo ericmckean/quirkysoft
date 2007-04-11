@@ -4,16 +4,16 @@
 #include "HtmlElement.h"
 using namespace std;
 
-void HtmlParserDriver::handleStartEndTag(const string & tag, const vector<Attribute*> & attrs)
+void HtmlParserDriver::handleStartEndTag(const string & tag, const AttributeVector & attrs)
 {
   handleStartTag(tag, attrs);
 }
 
-void HtmlParserDriver::handleStartTag(const string & tag, const vector<Attribute*> & attrs)
+void HtmlParserDriver::handleStartTag(const string & tag, const AttributeVector & attrs)
 {
   m_tags.push_back(tag);
-  vector<Attribute*> newVector;
-  vector<Attribute*>::const_iterator it(attrs.begin());
+  AttributeVector newVector;
+  AttributeVector::const_iterator it(attrs.begin());
   for (; it != attrs.end(); ++it)
   {
     Attribute * at(*it);

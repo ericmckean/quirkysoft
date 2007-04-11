@@ -14,6 +14,8 @@ class Controller : public ControllerI
   public:
     //!Constructor.
     Controller();
+    //! Destructor
+    ~Controller();
 
     /** Handle the user request for setting a URI.
      * @param uriString the URI string to use.

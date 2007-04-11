@@ -100,9 +100,9 @@ class HtmlParserImpl
     TagType m_tagTokenType;
     string m_currentTagToken;
     //! All the attributes for this tag.
-    vector<HtmlParser::Attribute*> m_tagAttributes;
+    AttributeVector m_tagAttributes;
     //! Current attribute to be added to this tag..
-    HtmlParser::Attribute* m_attribute;
+    Attribute* m_attribute;
     string m_commentToken;
     string m_doctypeToken;
     bool m_doctypeTokenIsError;
@@ -115,7 +115,7 @@ class HtmlParserImpl
     void emitTagToken();
     void emitComment();
     unsigned int consumeEntity();
-    static void deleteAttribute(HtmlParser::Attribute * a)
+    static void deleteAttribute(Attribute * a)
     {
       delete a;
     }
@@ -445,7 +445,7 @@ void HtmlParserImpl::handleBeforeAttributeName()
         m_value = ::tolower(m_value);
       }
       addAttribute();
-      m_attribute = new HtmlParser::Attribute;
+      m_attribute = new Attribute;
       m_attribute->name = m_value;
       m_attribute->value = "";
       m_state = ATTRIBUTE_NAME;
@@ -492,7 +492,7 @@ void HtmlParserImpl::handleAttributeName()
       break;
   }
   if (m_state != ATTRIBUTE_NAME) {
-    vector<HtmlParser::Attribute*>::iterator it(m_tagAttributes.begin());
+    AttributeVector::iterator it(m_tagAttributes.begin());
     for (; it != m_tagAttributes.end(); ++it)
     {
       if ((*it)->name == m_attribute->name)
@@ -543,7 +543,7 @@ void HtmlParserImpl::handleAfterAttributeName()
           m_value = ::tolower(m_value);
         }
         addAttribute();
-        m_attribute = new HtmlParser::Attribute;
+        m_attribute = new Attribute;
         m_attribute->name=m_value;
         m_attribute->value="";
         m_state = ATTRIBUTE_NAME;
@@ -1213,7 +1213,7 @@ void HtmlParserImpl::fire()
 }
 
 HtmlParser::HtmlParser():
-  m_details(*(new HtmlParserImpl(*this)))
+  m_details(new HtmlParserImpl(*this))
 {
 }
 
@@ -1222,43 +1222,43 @@ HtmlParser::~HtmlParser()
 
 void HtmlParser::feed(const char * data, unsigned int length)
 {
-  m_details.initialise(data, length);
-  while (m_details.position() < m_details.end()) {
-    m_details.fire();
+  m_details->initialise(data, length);
+  while (m_details->position() < m_details->end()) {
+    m_details->fire();
   }
 }
 
 void HtmlParser::setEncoding(HtmlParser::Encoding enc)
 {
-  m_details.setEncoding(enc);
+  m_details->setEncoding(enc);
 }
 
 void HtmlParser::setPlainText()
 {
-  m_details.setContentModel(PLAINTEXT);
+  m_details->setContentModel(PLAINTEXT);
 }
 
 void HtmlParser::setContentModel(ContentModel newModel)
 {
-  m_details.setContentModel(newModel);
+  m_details->setContentModel(newModel);
 }
 
 HtmlParser::Encoding HtmlParser::encoding() const
 {
-  return m_details.encoding();
+  return m_details->encoding();
 }
 
 void HtmlParser::setToStart()
 {
-  m_details.reset();
+  m_details->reset();
 }
 
 
-void HtmlParser::handleStartEndTag(const std::string & tag, const std::vector<Attribute*> & attrs)
+void HtmlParser::handleStartEndTag(const std::string & tag, const AttributeVector & attrs)
 {
   /*
   cout << "+- tag token:" << tag << endl;
-  vector<Attribute*>::const_iterator it(attrs.begin());
+  AttributeVector::const_iterator it(attrs.begin());
   for (; it != attrs.end(); ++it)
   {
     cout << "Attribute:" << (*it)->name << " = " << (*it)->value << endl;
@@ -1266,11 +1266,11 @@ void HtmlParser::handleStartEndTag(const std::string & tag, const std::vector<At
   */
 }
 
-void HtmlParser::handleStartTag(const std::string & tag, const std::vector<Attribute*> & attrs)
+void HtmlParser::handleStartTag(const std::string & tag, const AttributeVector & attrs)
 {
 #if 0
   //cout << "+ tag token:" << tag << endl;
-  vector<Attribute*>::const_iterator it(attrs.begin());
+  AttributeVector::const_iterator it(attrs.begin());
   for (; it != attrs.end(); ++it)
   {
    // cout << "Attribute:" << (*it)->name << " = " << (*it)->value << endl;
@@ -1283,7 +1283,7 @@ void HtmlParser::handleStartTag(const std::string & tag, const std::vector<Attri
     cout << endl;
   }
   if ( tag == "meta") {
-    vector<Attribute*>::const_iterator it(attrs.begin());
+    AttributeVector::const_iterator it(attrs.begin());
     for (; it != attrs.end(); ++it)
     {
       if ( (*it)->name == "content" and (*it)->value == "text/html; charset=iso-8859-1") {

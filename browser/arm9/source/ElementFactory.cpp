@@ -20,12 +20,12 @@ HtmlElement * ElementFactory::create(const std::string & elementType)
 }
 
 HtmlElement * ElementFactory::create(const std::string & elementType,
-    const std::vector<HtmlParser::Attribute*> & attrs)
+    const AttributeVector & attrs)
 {
   HtmlElement * element(create(elementType));
-  std::vector<HtmlParser::Attribute*>::const_iterator it(attrs.begin());
+  AttributeVector::const_iterator it(attrs.begin());
   for (; it != attrs.end(); ++it) {
-    HtmlParser::Attribute * attr(*it);
+    Attribute * attr(*it);
     element->setAttribute(attr->name, attr->value);
   }
   return element;
