@@ -38,8 +38,18 @@ void View::walkNode(const HtmlElement * node)
       if (element->isa("p"))
       {
         m_textArea->setParseNewline(true);
+        m_textArea->print("\n\n",2);
+        m_textArea->setParseNewline(false);
+      }
+      if (element->isa("br"))
+      {
+        m_textArea->setParseNewline(true);
         m_textArea->print("\n",1);
         m_textArea->setParseNewline(false);
+      }
+      if (element->isa("script") or element->isa("style"))
+      {
+        continue;
       }
       walkNode(element);
     }
