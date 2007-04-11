@@ -901,11 +901,7 @@ void HtmlDocument::adoptionAgency(const std::string & tag)
     if (openElement == m_openElements.end())
     {
       // woops - this is a parse error - <tag> is not on the open elements list.
-      m_activeFormatters.erase(
-          find(m_activeFormatters.begin(), 
-            m_activeFormatters.end(), 
-            formattingElement)
-          );
+      removeFromActiveFormat(formattingElement);
       return;
     }
     // have a format element, it is in scope and on the open stack. if it is
@@ -942,14 +938,14 @@ void HtmlDocument::adoptionAgency(const std::string & tag)
          */
       while (currentNode() != formattingElement)
       {
+        if (isFormatting(currentNode())) {
+          removeFromActiveFormat(currentNode());
+        }
         m_openElements.pop_back();
       }
+      removeFromActiveFormat(currentNode());
       // pop the formatting element too
       m_openElements.pop_back();
-      // remove from the active formatting elements
-      m_activeFormatters.erase( find(m_activeFormatters.begin(), 
-            m_activeFormatters.end(), 
-            formattingElement));
       return;
     }
 
@@ -994,11 +990,7 @@ void HtmlDocument::adoptionAgency(const std::string & tag)
           node);
       if (activeFormat == m_activeFormatters.end())
       {
-
-        ElementVector::iterator nodeOnOE = find(m_openElements.begin(), 
-            m_openElements.end(),
-            node);
-        m_openElements.erase(nodeOnOE);
+        removeFromOpenElements(node);
         continue;
       }
 
@@ -1082,18 +1074,14 @@ void HtmlDocument::adoptionAgency(const std::string & tag)
     /* 12.  Remove the formatting element from the list of active formatting
      * elements, and insert the clone into the list of active formatting
      * elements at the position of the aforementioned bookmark. */
-    m_activeFormatters.erase( find(m_activeFormatters.begin(), 
-          m_activeFormatters.end(), 
-          formattingElement));
+    removeFromActiveFormat(formattingElement);
     m_activeFormatters.insert(bookmark, clone);
 
     /* 13.  Remove the formatting element from the stack of open elements, and
      * insert the clone into the stack of open elements immediately after (i.e.
      * in a more deeply nested position than) the position of the furthest
      * block in that stack.  */
-    m_openElements.erase(find(m_openElements.begin(), 
-          m_openElements.end(), 
-          formattingElement));
+    removeFromOpenElements(formattingElement);
     ElementVector::iterator clonePosition = find(m_openElements.begin(), 
         m_openElements.end(), 
         furthestBlock);

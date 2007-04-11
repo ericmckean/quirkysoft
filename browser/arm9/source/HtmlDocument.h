@@ -138,6 +138,7 @@ class HtmlDocument : public HtmlParser
 
     void insertElement(HtmlElement * element);
     void addActiveFormatter(HtmlElement * element);
+
     inline HtmlElement * currentNode() const;
     void generateImpliedEndTags(const std::string & except="");
     bool isFormatting(HtmlElement * node);
