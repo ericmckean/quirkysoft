@@ -15,6 +15,9 @@ class HeaderParser
      */
     HeaderParser(HtmlParser * html);
 
+    /** Destructor.*/
+    ~HeaderParser();
+
     /** Feed data to the parser. Call this with any amount of data, the state is kept between feeds.
      * To reset the state, call reset().
      * @param data data to be parsed.
@@ -77,7 +80,7 @@ class HeaderParser
     unsigned int m_httpStatusCode;
     unsigned int m_expected;
 
-    HtmlParser * m_htmlParser;
+    HtmlParser* m_htmlParser;
 
     void parseError();
     void handleHeader(const std::string & field, const std::string & value);

@@ -13,6 +13,10 @@ class HtmlElementTest : public CPPUNIT_NS::TestFixture
   CPPUNIT_TEST( testIsa );
   CPPUNIT_TEST( testAnchor );
   CPPUNIT_TEST( testClone );
+  CPPUNIT_TEST( testParent );
+  CPPUNIT_TEST( testAppendText );
+  CPPUNIT_TEST( testMeta );
+  CPPUNIT_TEST( testRemove );
   CPPUNIT_TEST_SUITE_END();
 
 public:
@@ -24,6 +28,11 @@ public:
   void testIsa();
   void testAnchor();
   void testClone();
+
+  void testParent();
+  void testAppendText();
+  void testMeta();
+  void testRemove();
 
 private:
   HtmlElement * m_element;

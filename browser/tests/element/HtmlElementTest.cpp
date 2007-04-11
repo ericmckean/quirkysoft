@@ -1,5 +1,6 @@
 #include "HtmlElementTest.h"
 #include "HtmlElement.h"
+#include "HtmlMetaElement.h"
 #include "HtmlAnchorElement.h"
 #include "ElementFactory.h"
 
@@ -58,7 +59,6 @@ void HtmlElementTest::testAttributes()
 
 }
 
-
 void HtmlElementTest::testAppend()
 {
   m_element = ElementFactory::create("html");
@@ -96,5 +96,72 @@ void HtmlElementTest::testClone()
   CPPUNIT_ASSERT( m_clone->isa("a"));
   CPPUNIT_ASSERT_EQUAL(m_element->attribute("href"), m_clone->attribute("href"));
   CPPUNIT_ASSERT_EQUAL(m_element->attribute("id"), m_clone->attribute("id"));
+}
+
+
+void HtmlElementTest::testParent()
+{
+  // add a node, check its parent is the right one
+  m_element = ElementFactory::create("html");
+  HtmlElement * child = ElementFactory::create("head");
+  m_element->append(child);
+
+  CPPUNIT_ASSERT( child->parent() == m_element);
+}
+
+void HtmlElementTest::testAppendText()
+{
+  // parentNode -> add text, add node, add text 
+  // check the text nodes are correct
+  m_element = ElementFactory::create("body");
+  m_element->appendText('T');
+  CPPUNIT_ASSERT(m_element->hasChildren());
+  HtmlElement * text = m_element->firstChild();
+  string expected("#text");
+  CPPUNIT_ASSERT_EQUAL(expected, text->tagName());
+  HtmlElement * a = ElementFactory::create("a");
+  a->appendText('L');
+  m_element->append(a);
+  CPPUNIT_ASSERT_EQUAL(a, m_element->lastChild());
+  CPPUNIT_ASSERT(a->hasChildren());
+  m_element->appendText('2');
+  CPPUNIT_ASSERT_EQUAL(expected, m_element->lastChild()->tagName());
+
+}
+
+void HtmlElementTest::testMeta()
+{
+  // create a meta node, then check the type
+  m_element = ElementFactory::create("meta");
+  CPPUNIT_ASSERT( m_element->isa("meta"));
+  HtmlMetaElement * meta = dynamic_cast<HtmlMetaElement*>(m_element);
+  CPPUNIT_ASSERT( meta != 0 );
+
+  string expected("content-type");
+  m_element->setAttribute("http-equiv", "content-type");
+  CPPUNIT_ASSERT_EQUAL(expected, m_element->attribute("http-equiv"));
+}
+
+void HtmlElementTest::testRemove()
+{
+  // create a node, add another, check removal
+  m_element = ElementFactory::create("body");
+  m_element->appendText('T');
+  HtmlElement * a = ElementFactory::create("a");
+  HtmlElement * b = ElementFactory::create("b");
+  m_element->append(a);
+  m_element->append(b);
+  size_t expected(3);
+  CPPUNIT_ASSERT_EQUAL(expected, m_element->children().size());
+
+  m_element->remove(a);
+  expected = 2;
+  CPPUNIT_ASSERT_EQUAL(expected, m_element->children().size());
+
+  string expectedText("#text");
+  CPPUNIT_ASSERT_EQUAL(expectedText, m_element->firstChild()->tagName());
+  expectedText = "b";
+  CPPUNIT_ASSERT_EQUAL(expectedText, m_element->lastChild()->tagName());
+  delete a;
 }
 

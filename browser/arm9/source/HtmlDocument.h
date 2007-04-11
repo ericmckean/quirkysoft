@@ -17,6 +17,9 @@ class HtmlDocument : public HtmlParser
 
     //! Constructor.
     HtmlDocument();
+    //! Destructor.
+    ~HtmlDocument();
+
     /** Get the data contents.
      * @return reference to the data.
      */
@@ -50,14 +53,14 @@ class HtmlDocument : public HtmlParser
     void handleEOF();
 
   protected:
-    virtual void handleStartEndTag(const std::string & tag, const std::vector<Attribute*> & attrs);
-    virtual void handleStartTag(const std::string & tag, const std::vector<Attribute*> & attrs);
+    virtual void handleStartEndTag(const std::string & tag, const AttributeVector & attrs);
+    virtual void handleStartTag(const std::string & tag, const AttributeVector & attrs);
     virtual void handleEndTag(const std::string & tag);
     virtual void handleData(unsigned int ucodeChar);
 
   private:
 
-    static void setNewAttributes(HtmlElement * element, const std::vector<Attribute*> & attrs);
+    static void setNewAttributes(HtmlElement * element, const AttributeVector & attrs);
 
     enum TreeState
     {
@@ -103,28 +106,28 @@ class HtmlDocument : public HtmlParser
     // end tag in main phase.
     void mainPhase(const std::string & tag);
     // start tag in main phase.
-    void mainPhase(const std::string & tag, const std::vector<Attribute*> & attrs);
+    void mainPhase(const std::string & tag, const AttributeVector & attrs);
     // unicode char in the mainPhase
     void mainPhase(unsigned int ucodeChar);
 
     // BEFORE_HEAD phase, start tag.
-    void beforeHead(const std::string & tag, const std::vector<Attribute*> & attrs);
+    void beforeHead(const std::string & tag, const AttributeVector & attrs);
     // end tag.
     void beforeHead(const std::string & tag);
     // IN_HEAD phase, start tag.
-    void inHead(const std::string & tag, const std::vector<Attribute*> & attrs);
+    void inHead(const std::string & tag, const AttributeVector & attrs);
     // end tag
     void inHead(const std::string & tag);
     // AFTER_HEAD phase, start tag.
-    void afterHead(const std::string & tag, const std::vector<Attribute*> & attrs);
+    void afterHead(const std::string & tag, const AttributeVector & attrs);
     // end tag
     void afterHead(const std::string & tag);
     // IN_BODY phase, start tag.
-    void inBody(const std::string & tag, const std::vector<Attribute*> & attrs);
+    void inBody(const std::string & tag, const AttributeVector & attrs);
     // end tag
     void inBody(const std::string & tag);
     // AFTER_BODY phase, start tag.
-    void afterBody(const std::string & tag, const std::vector<Attribute*> & attrs);
+    void afterBody(const std::string & tag, const AttributeVector & attrs);
     // end tag
     void afterBody(const std::string & tag);
 
@@ -135,10 +138,13 @@ class HtmlDocument : public HtmlParser
 
     void insertElement(HtmlElement * element);
     void addActiveFormatter(HtmlElement * element);
+    inline HtmlElement * currentNode() const;
     void generateImpliedEndTags(const std::string & except="");
     bool isFormatting(HtmlElement * node);
     bool isPhrasing(HtmlElement * node);
     void reconstructActiveFormatters();
+    void adoptionAgency(const std::string & tag);
+    void startScopeClosedElement(const std::string & tag, const std::string & alternate="");
     // disable copies
     HtmlDocument (const HtmlDocument&);
     const HtmlDocument& operator=(const HtmlDocument&);
@@ -166,5 +172,9 @@ void HtmlDocument::setDataGot(unsigned int value)
 void HtmlDocument::setHeaderParser(HeaderParser * headerParser)
 {
   m_headerParser = headerParser;
+}
+inline HtmlElement * HtmlDocument::currentNode() const
+{
+  return m_openElements.back();
 }
 #endif

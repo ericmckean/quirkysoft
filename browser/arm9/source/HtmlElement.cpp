@@ -52,7 +52,7 @@ void HtmlElement::append(HtmlElement * child)
 
 void HtmlElement::remove(HtmlElement * child)
 {
-  list<HtmlElement*>::iterator forRemoval = find(m_children.begin(), m_children.end(), child);
+  ElementList::iterator forRemoval = find(m_children.begin(), m_children.end(), child);
   if (forRemoval != m_children.end())
   {
     m_children.erase(forRemoval);
