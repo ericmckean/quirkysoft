@@ -2,7 +2,6 @@
 #define HtmlElement_h_seen
 
 #include "ElementList.h"
-#include "HtmlParser.h"
 #include "UnicodeString.h"
 
 
@@ -10,30 +9,103 @@ class HtmlElement /* : public Element */
 {
 
   public:
+
+    /** Constructor. 
+     * @param tagName the name of the tag for this element.
+     */
     HtmlElement(const std::string & tagName) 
       : m_tagName(tagName),
         m_parent(0) 
     {}
 
+    //! Destructor.
     virtual ~HtmlElement();
 
+    /** Set an attribute value. Only the attributes valid for a particular element are stored.
+     * @param name the attribute name
+     * @param value the value
+     */
     virtual void setAttribute(const std::string & name, const std::string & value);
+    
+    /** Get an attribute value.
+     * @param name the attribute name.
+     * @return the attribute value as a string.
+     */
     virtual std::string attribute(const std::string & name) const;
+
+    /** Append a child node.
+     * @param child the node to append
+     */
     void append(HtmlElement * child);
+
+    /** Remove a previously appended child node.
+     * @param child the node to remove.
+     */
     void remove(HtmlElement * child);
+
+    /** Append a text character. If the last child node is not a text node,
+     * then one is created and appended. The text is appended to the last child
+     * node.
+     * @param value a unicode text value to append.
+     */
     void appendText(unsigned int value);
+
+    /** Get the has children status.
+     * @return true if there are children, false otherwise.
+     */
+    inline bool hasChildren() const;
+
+    /** Fetch the first child. 
+     * @return the first child of this node or null of no children.
+     */
     inline HtmlElement * firstChild() const;
+
+    /** Fetch the last child. 
+     * @return the last child of this node or null of no children.
+     */
     inline HtmlElement * lastChild() const;
+
+    /** Get the list of child elements.
+     * @return the list of child elements. May be empty.
+     */
     inline const ElementList & children() const;
 
+    /** Get the parent element.
+     * @return the parent element. May be null for top level element.
+     */
     inline HtmlElement* parent() const;
+
+    /** Set the parent of this element.
+     * @param newParent the new parent element.
+     */
     inline void setParent(HtmlElement * newParent);
-    inline bool hasChildren() const;
+
+    /** Is this element a particular type?.
+     * @param name the name to use for matching.
+     * @return true if the tag name matches the given name.
+     */
     inline bool isa(const std::string & name) const;
+
+    /** Is this element a particular type?. This ptr variation is for use as a
+     * matching function in find_if. @see isa() for the preferred version.
+     * @param name a pointer to the name to use for matching.
+     * @return true if the tag name matches the given name.
+     */
     inline bool isa_ptr(const std::string * name) const;
+
+    /** Get the tag name.
+     * @return the tag name
+     */
     inline const std::string & tagName() const;
+
+    /** Get the text value.
+     * @return the unicode text.
+     */
     inline const UnicodeString & text() const;
 
+    /** Make a shallow copy. Copies only the attributes, not the children.
+     * @return the cloned element.
+     */
     virtual HtmlElement * clone() const;
 
   protected:

@@ -4,9 +4,6 @@
 #include "UnicodeString.h"
 #include "HtmlParser.h"
 #include "ElementList.h"
-#include <stack>
-
-class HeaderParser;
 
 /** Parse the HTML tokens after the tokenisation phase.
  */
@@ -36,12 +33,6 @@ class HtmlDocument : public HtmlParser
 
     /** Reset the internal state of the parser. */
     void reset();
-
-    /** Set the header parser object. This is required for changes to the content model or for 
-     * parsing meta http-equiv tags.
-     * @param headerParser the header parser instance to use.
-     */
-    inline void setHeaderParser(HeaderParser * headerParser);
 
     /** Get the root node of the document model.
      * @return The root node.
@@ -91,7 +82,6 @@ class HtmlDocument : public HtmlParser
 
     UnicodeString m_data;
     unsigned int m_dataGot;
-    HeaderParser * m_headerParser;
     TreeState m_state;
     InsertionMode m_insertionMode;
     bool m_isFirst;
@@ -170,10 +160,6 @@ void HtmlDocument::setDataGot(unsigned int value)
   m_dataGot = value;
 }
 
-void HtmlDocument::setHeaderParser(HeaderParser * headerParser)
-{
-  m_headerParser = headerParser;
-}
 inline HtmlElement * HtmlDocument::currentNode() const
 {
   return m_openElements.back();

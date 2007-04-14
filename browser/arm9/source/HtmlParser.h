@@ -1,10 +1,10 @@
 #ifndef HtmlParser_h_seen
 #define HtmlParser_h_seen
 
-#include <memory>
 #include <string>
 #include "Attribute.h"
 class HtmlParserImpl;
+class HtmlElement;
 
 /**
  * A parser for HTML. Consumes bytes and calls the handler functions for tags.
@@ -45,9 +45,11 @@ class HtmlParser
      */
     Encoding encoding() const;
 
-    /** Set the current parsing to plain text mode.
+    /** Parse the content-type value and act accordingly. 
+     * May set teh model to plain text or the decoding to iso-8851.
+     * @param value the content-type value.
      */
-    void setPlainText();
+    void parseContentType(const std::string & value);
 
   protected:
     enum ContentModel {
@@ -80,8 +82,10 @@ class HtmlParser
 
     void setContentModel(ContentModel newModel);
 
+    void checkMetaTagHttpEquiv(const HtmlElement * meta);
+
   private:
     //! Nothing to see here.
-    const std::auto_ptr<HtmlParserImpl> m_details;
+    HtmlParserImpl* m_details;
 };
 #endif

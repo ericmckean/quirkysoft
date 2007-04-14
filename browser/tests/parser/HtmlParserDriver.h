@@ -5,7 +5,6 @@
 #include "HtmlParser.h"
 #include <vector>
 
-class HeaderParser;
 class HtmlParserDriver : public HtmlParser
 {
 
@@ -14,8 +13,6 @@ class HtmlParserDriver : public HtmlParser
     UnicodeString m_data;
     std::vector<std::string> m_tags;
     std::vector< AttributeVector > m_attributes;
-
-    HeaderParser * m_headerParser;
 
   protected:
     virtual void handleStartEndTag(const std::string & tag, const AttributeVector & attrs);

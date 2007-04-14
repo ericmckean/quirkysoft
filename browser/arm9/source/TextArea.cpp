@@ -1,3 +1,4 @@
+#include <iostream>
 #include "ndspp.h"
 #include "TextArea.h"
 #include "Palette.h"
@@ -5,9 +6,12 @@
 #include "Font.h"
 #include "UTF8.h"
 #include "File.h"
+#include "Link.h"
 
 using namespace nds;
 using namespace std;
+static const unsigned int intDelimiters[] = {0x0020, 0x0009, 0x000a, 0x000b, 0x000c, 0x000d};
+static const UnicodeString delimiters(intDelimiters,6);
 
 TextArea::TextArea() : 
   m_font(0),
@@ -16,16 +20,29 @@ TextArea::TextArea() :
   m_paletteLength(0),
   m_encoding("utf-8"),
   m_startLine(0),
-  m_parseNewline(true)
+  m_foundPosition(false),
+  m_parseNewline(true),
+  m_isLink(false)
 {
   init("data/bunjalloo/fonts/vera");
 }
 
 void TextArea::setStartLine(int line)
 {
-  if (line < 0)
-    line = 0;
   m_startLine = line;
+  m_foundPosition = false;
+  removeLinks();
+}
+
+static void deleteLink(Link * link)
+{
+  delete link;
+}
+
+void TextArea::removeLinks()
+{
+  for_each(m_links.begin(), m_links.end(), deleteLink);
+  m_links.clear();
 }
 
 int TextArea::startLine() const
@@ -33,7 +50,7 @@ int TextArea::startLine() const
   return m_startLine;
 }
 
-void TextArea::init(const string & fontBase)
+void TextArea::init(const std::string & fontBase)
 {
   m_font=new Font(fontBase);
   setPalette(fontBase+".pal");
@@ -63,6 +80,8 @@ void TextArea::setCursor(int x, int y)
 {
   m_cursorx = x;
   m_cursory = y;
+  m_initialCursorx = x;
+  m_initialCursory = y;
 }
 
 void TextArea::incrLine()
@@ -82,40 +101,67 @@ void TextArea::checkLetter(Font::Glyph & g)
 void TextArea::printu(const UnicodeString & unicodeString)
 {
   // skip until we reach startLine
-#if 0
-  int tmpx = m_cursorx;
-  int tmpy = m_cursorx;
-  m_cursorx = 0;
-  m_cursory = 0;
-  UnicodeString::const_iterator it(unicodeString.begin());
-  int position(0);
-  int finalLine(m_font->height()*m_startLine);
-  for (; it != unicodeString.end() and m_cursory < finalLine; ++it, ++position)
-  {
-    unsigned int value(*it);
-    if (value == UTF8::MALFORMED) {
-      value = '?';
-    }
-    Font::Glyph g;
-    m_font->glyph(value, g);
-    if (value == '\n')
+  int currPosition(0);
+  if (not m_foundPosition) {
+    UnicodeString::const_iterator it(unicodeString.begin());
+    int finalLine(m_font->height()*m_startLine);
+    if (finalLine < 0)
     {
-      incrLine();
-    } 
-    else {
-      checkLetter(g);
-      m_cursorx += g.width;
+      m_cursory = -finalLine;
+      m_initialCursory = m_cursory;
+      finalLine = 0;
     }
-    if (m_cursorx > Canvas::instance().width())
+    for (; it != unicodeString.end() and m_cursory < finalLine;)
     {
-      incrLine();
+      // find the next space character
+      unsigned int position = unicodeString.find_first_of(delimiters,currPosition);
+      position = position==string::npos?unicodeString.length():position;
+      const UnicodeString word(unicodeString.substr(currPosition,position-currPosition+1));
+      int size = textSize(word);
+      if (m_cursorx + size > Canvas::instance().width())
+      {
+        incrLine();
+      }
+      if ( m_cursory >= finalLine)
+        break;
+
+      UnicodeString::const_iterator wordIt(word.begin());
+      for (; wordIt != word.end() and m_cursory < finalLine; ++wordIt)
+      {
+        unsigned int value(*wordIt);
+        if (value == UTF8::MALFORMED) {
+          value = '?';
+        }
+        Font::Glyph g;
+        m_font->glyph(value, g);
+        if (m_parseNewline and value == '\n')
+        {
+          incrLine();
+          if ( m_cursory >= finalLine)
+            break;
+        } 
+        else if (value != '\n') {
+          checkLetter(g);
+          if ( m_cursory >= finalLine)
+            break;
+          m_cursorx += g.width;
+        }
+      }
+      it += word.length();
+      currPosition += word.length();
+      if (m_cursory > Canvas::instance().height()) {
+        break;
+      }
     }
+    if (m_cursory < finalLine) {
+      return;
+    }
+    m_foundPosition = true;
+    m_cursorx = m_initialCursorx;
+    m_cursory = m_initialCursory;
   }
-  m_cursorx = tmpx;
-  m_cursory = tmpy;
-  printuImpl(unicodeString.substr(position , unicodeString.length()-position));
-#endif
-  printuImpl(unicodeString);
+  UnicodeString printString = unicodeString.substr(currPosition , unicodeString.length()-currPosition);
+  printuImpl(printString);
 }
 
 int TextArea::textSize(const UnicodeString & unicodeString) const
@@ -150,8 +196,6 @@ void TextArea::printuWord(const UnicodeString & word)
 void TextArea::printuImpl(const UnicodeString & unicodeString)
 {
   UnicodeString::const_iterator it(unicodeString.begin());
-  const unsigned int intDelimiters[] = {0x0020, 0x0009, 0x000a, 0x000b, 0x000c, 0x000d};
-  const static UnicodeString delimiters(intDelimiters,6);
   int currPosition(0);
   for (; it != unicodeString.end(); ++it, ++currPosition)
   {
@@ -164,13 +208,39 @@ void TextArea::printuImpl(const UnicodeString & unicodeString)
     {
       incrLine();
     }
-    printuWord(word);
-    it += word.length()-1;
-    currPosition += word.length()-1;
     if (m_cursory > Canvas::instance().height()) {
       break;
     }
+    if (m_isLink)
+    {
+      Link * link = m_links.front();
+      link->appendClickZone(m_cursorx, m_cursory, 
+          size, m_font->height());
+    }
+    printuWord(word);
+    it += word.length()-1;
+    currPosition += word.length()-1;
   }
+}
+
+Link * TextArea::clickLink(int x, int y) const
+{
+  LinkList::const_iterator it = m_links.begin();
+  for (; it != m_links.end(); ++it)
+  {
+    Link * link = *it;
+    if ( link->hitTest(x, y))
+    {
+      return link;
+    }
+  }
+  return 0;
+}
+
+void TextArea::addLink(const HtmlElement * anchor)
+{
+  m_links.push_front(new Link(anchor));
+  setLink(true);
 }
 
 bool TextArea::doSingleChar(unsigned int value)

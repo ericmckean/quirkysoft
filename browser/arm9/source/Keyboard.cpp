@@ -22,14 +22,11 @@ static const char * s_characterMap[2]={
   "1234567890qwertyuiopasdfghjkl/zxcvbnm.",
   "!-#$%&*_?=QWERTYUIOPASDFGHJKL\\ZXCVBNM:",
 };
-
-struct Rectangle
+bool Rectangle::hit(int testx, int testy) const
 {
-  int x;
-  int y;
-  int w;
-  int h;
-};
+  return ( (testx >= x and testx < (x + w))
+      and  (testy >= y and testy < (y + h)));
+}
 
 class Key {
   public:
@@ -73,8 +70,7 @@ class Key {
       Rectangle rect;
       dimensions(rect, font);
       nds::Canvas::instance().drawPixel(testx,testy, nds::Color(31,0,0));
-      return ( (testx >= rect.x and testx < (rect.x + rect.w))
-          and  (testy >= rect.y and testy < (rect.y + rect.h)));
+      return rect.hit(testx, testy);
     }
 
     void setValue(const string & val) {

@@ -1,6 +1,7 @@
 #include "ndspp.h"
 #include "libnds.h"
 #include "Controller.h"
+#include "File.h"
 
 using namespace nds;
 int main(int argc, char * argv[])
@@ -10,7 +11,17 @@ int main(int argc, char * argv[])
   Controller * c = new Controller;
   if (argc > 1) {
     std::string fileName(argv[1]);
-    c->doUri(fileName);
+    File check;
+    check.open(fileName.c_str());
+    if (check.is_open()) {
+      check.close();
+      std::string localFile = "file:///";
+      localFile += fileName;
+      c->doUri(localFile);
+    }
+    else {
+      c->doUri(fileName);
+    }
   }
   else
   {
