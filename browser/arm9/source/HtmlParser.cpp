@@ -3,6 +3,7 @@
 #include <ctype.h>
 #include <algorithm>
 #include "HtmlParser.h"
+#include "HtmlElement.h"
 #include "Entity.h"
 #include "UTF8.h"
 
@@ -1218,7 +1219,9 @@ HtmlParser::HtmlParser():
 }
 
 HtmlParser::~HtmlParser()
-{}
+{
+  delete m_details;
+}
 
 void HtmlParser::feed(const char * data, unsigned int length)
 {
@@ -1233,15 +1236,74 @@ void HtmlParser::setEncoding(HtmlParser::Encoding enc)
   m_details->setEncoding(enc);
 }
 
-void HtmlParser::setPlainText()
-{
-  m_details->setContentModel(PLAINTEXT);
-}
-
 void HtmlParser::setContentModel(ContentModel newModel)
 {
   m_details->setContentModel(newModel);
 }
+
+
+static void stripWhitespace(string & modify)
+{
+  if (modify.empty())
+    return;
+  static const string delimter(" \r\n	");
+  int firstNonBlank = modify.find_first_not_of(delimter);
+  int lastNonBlank = modify.find_last_not_of(delimter);
+  modify = modify.substr(firstNonBlank, (lastNonBlank-firstNonBlank+1));
+}
+
+static void extractCharset(const string & value, string & mimeType, string & charset)
+{
+  unsigned int position(value.find(";"));
+  if (position != string::npos)
+  {
+    mimeType = value.substr(0,position);
+    position++;
+    unsigned int nextPosition(value.find(";",position));
+    nextPosition = nextPosition==string::npos?value.length():nextPosition;
+    charset = value.substr(position, (nextPosition-position+1));
+  } 
+  else {
+    mimeType = value.substr(0,value.length());
+    charset.clear();
+  }
+  stripWhitespace(mimeType);
+  stripWhitespace(charset);
+}
+
+void HtmlParser::parseContentType(const std::string & value)
+{
+  string lowerValue(value);
+  transform(lowerValue.begin(), lowerValue.end(), lowerValue.begin(), ::tolower);
+  string charset, mimeType;
+  extractCharset(lowerValue, charset, mimeType);
+  if (mimeType == "charset=iso-8859-1")
+  {
+    setEncoding(HtmlParser::ISO_ENCODING);
+  }
+  bool isPlain = lowerValue.find("text/plain") != string::npos;
+  if (isPlain)
+  {
+    setContentModel(PLAINTEXT);
+  }
+
+}
+
+void HtmlParser::checkMetaTagHttpEquiv(const HtmlElement * meta)
+{
+  string httpEquiv = meta->attribute("http-equiv");
+  string content = meta->attribute("content");
+  if (not httpEquiv.empty() and not content.empty())
+  {
+    transform(httpEquiv.begin(), httpEquiv.end(), httpEquiv.begin(), ::tolower);
+    if (httpEquiv == "content-type")
+    {
+      parseContentType(content);
+    }
+  }
+}
+
+
 
 HtmlParser::Encoding HtmlParser::encoding() const
 {

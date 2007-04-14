@@ -6,7 +6,7 @@ import Image, ImageDraw, ImageFont
 
 ## Align value to the given alignment
 # @param value the value to align
-# @param the even value to align to
+# @param alignment the even value to align to
 # @return aligned value
 # 
 def align(value, alignment):
@@ -17,22 +17,26 @@ def align(value, alignment):
 ## Crappy file wrapper that can write raw bytes.
 class FileWrapper:
   ## Constructor.
+  # @param self the self reference.
   # @param fileName the name of the file to open
   # @param mode the open mode
   def __init__(self, fileName, mode='r'):
     self.__fp = open(fileName, mode)
 
   ## Write a string or whatever to the file
+  # @param self the self reference.
   # @param whatever the stuff to write
   def write(self, whatever):
     self.__fp.write(whatever)
   
   ## Write a value as an 8 bit "byte"
+  # @param self the self reference.
   # @param uint8 the value to write, it is truncated to 8 bits
   def write8(self, uint8):
     self.__fp.write(struct.pack('B',uint8&0xff))
 
   ## Write a value as a 16 bit halfword
+  # @param self the self reference.
   # @param uint16 the value to write, it is truncated to 16 bits
   def write16(self, uint16):
     assert uint16 < 0x10000
@@ -40,6 +44,7 @@ class FileWrapper:
     self.write8(uint16)
 
   ## Write a value as a 32 bit word
+  # @param self the self reference.
   # @param uint32 the value to write
   def write32(self, uint32):
     self.write8(uint32>>24)
@@ -51,11 +56,11 @@ class FileWrapper:
   def close(self):
     self.__fp.close()
 
-  ## @var __fp File pointer
 
 ## SubFont class to wrap a TrueType Font
 class SubFont:
   ## Constructor.
+  # @param self the self reference.
   # @param fileName the name of the TTF file
   # @param size the height of the font
   def __init__(self, fileName, size):
@@ -71,6 +76,7 @@ class SubFont:
     self.__height = height
 
   ## Add a range of glyphs to export.
+  # @param self the self reference.
   # @param lower the lower boundary of the range.
   # @param upper the upper boundary of the range.
   def addRange(self, lower, upper):
@@ -160,6 +166,7 @@ class SubFont:
 ## Create a bitmap font.
 class BitmapFont:
   ## Constructor.
+  # @param self the self reference.
   # @param fileName the name of the TTF file.
   # @param size the height of the font.
   def __init__(self, fileName, size=8):
@@ -183,6 +190,7 @@ class BitmapFont:
     self._subfont.save()
 
   ## Add a range of glyphs to the sub font.
+  # @param self the self reference.
   # @param rangeArg the range, a string like "0,100"
   def addRange(self, rangeArg):
     bounds=rangeArg.split(',')

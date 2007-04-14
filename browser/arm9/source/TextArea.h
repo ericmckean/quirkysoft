@@ -3,7 +3,10 @@
 
 #include "Font.h"
 #include "UnicodeString.h"
+#include <list>
 
+class HtmlElement;
+class Link;
 /** A widget for displaying text.*/
 class TextArea
 {
@@ -71,6 +74,10 @@ class TextArea
 
     inline bool parseNewline() const;
     inline void setParseNewline(bool parse=true);
+    inline void setLink(bool isLink=true);
+
+    void addLink(const HtmlElement * anchor);
+    Link * clickLink(int x, int y) const;
 
   private:
     Font * m_font;
@@ -79,10 +86,17 @@ class TextArea
     int m_paletteLength;
     std::string m_encoding;
     int m_startLine;
+    bool m_foundPosition;
     bool m_parseNewline;
+    bool m_isLink;
 
     int m_cursorx;
     int m_cursory;
+    int m_initialCursorx;
+    int m_initialCursory;
+    typedef std::list<Link*> LinkList;
+    LinkList m_links;
+
     void printAt(Font::Glyph & g, int xPosition, int yPosition);
     void incrLine();
     void checkLetter(Font::Glyph & g);
@@ -90,6 +104,7 @@ class TextArea
     bool doSingleChar(unsigned int value);
     int textSize(const UnicodeString & unicodeString) const;
     void printuWord(const UnicodeString & word);
+    void removeLinks();
 
 };
 
@@ -105,5 +120,9 @@ bool TextArea::parseNewline() const
 void TextArea::setParseNewline(bool parse)
 {
   m_parseNewline = parse;
+}
+void TextArea::setLink(bool isLink)
+{
+  m_isLink = isLink;
 }
 #endif

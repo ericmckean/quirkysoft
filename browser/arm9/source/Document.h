@@ -1,7 +1,6 @@
 #ifndef Document_h_seen
 #define Document_h_seen
 #include <vector>
-#include <memory>
 #include "UnicodeString.h"
 #include "ViewI.h"
 
@@ -92,8 +91,8 @@ class Document
     Status m_status;
     int m_amount;
     std::vector<ViewI*> m_views;
-    std::auto_ptr<HtmlDocument> m_htmlDocument;
-    std::auto_ptr<HeaderParser> m_headerParser;
+    HtmlDocument* m_htmlDocument;
+    HeaderParser* m_headerParser;
 
     //! Notify all registered views that there are model changes.
     void notifyAll() const;

@@ -4,7 +4,7 @@
 
 using namespace std;
 
-const string * HtmlElement::attributePtr(const string & name) const
+const std::string * HtmlElement::attributePtr(const std::string & name) const
 {
   if (name == "id")
   {
@@ -25,7 +25,7 @@ const string * HtmlElement::attributePtr(const string & name) const
   return 0;
 }
 
-string HtmlElement::attribute(const string & name) const
+std::string HtmlElement::attribute(const std::string & name) const
 {
    const string * ptr = attributePtr(name);
    if (ptr)
@@ -35,7 +35,7 @@ string HtmlElement::attribute(const string & name) const
    return "";
 }
 
-void HtmlElement::setAttribute(const string & name, const string & value)
+void HtmlElement::setAttribute(const std::string & name, const std::string & value)
 {
    string * ptr = const_cast<string*>(attributePtr(name));
    if (ptr)

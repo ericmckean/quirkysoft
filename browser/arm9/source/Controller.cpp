@@ -52,7 +52,7 @@ void Controller::mainLoop()
   m_view.mainLoop();
 }
 
-void Controller::localFile(const string & fileName)
+void Controller::localFile(const std::string & fileName)
 {
   nds::File uriFile;
   uriFile.open(fileName.c_str());
@@ -151,7 +151,7 @@ void Controller::fetchHttp(const URI & uri)
   if (nds::Wifi9::instance().connected()) {
     // open a socket to the server.
     // FIXME - hardcoded 80 port.
-    HttpClient client(uri.server().c_str(), 80);
+    HttpClient client(uri.server().c_str(), uri.port());
     client.setDocument(m_document);
     client.connect();
     client.get(uri);

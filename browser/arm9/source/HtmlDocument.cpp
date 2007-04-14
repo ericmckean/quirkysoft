@@ -3,7 +3,6 @@
 #include "ElementFactory.h"
 #include "HtmlElement.h"
 #include "HtmlDocument.h"
-#include "HeaderParser.h"
 
 using namespace std;
 
@@ -12,6 +11,7 @@ const static char HTML_TAG[] = "html";
 const static char BODY_TAG[] = "body";
 const static char FRAMESET_TAG[] = "frameset";
 const static char A_TAG[] = "a";
+const static char UL_TAG[] = "ul";
 const static char LI_TAG[] = "li";
 const static char DD_TAG[] = "dd";
 const static char DT_TAG[] = "dt";
@@ -24,7 +24,6 @@ const static char META_TAG[] = "meta";
 
 HtmlDocument::HtmlDocument(): 
   m_dataGot(0), 
-  m_headerParser(0),
   m_state(INITIAL),
   m_head(0),
   m_form(0)
@@ -116,7 +115,7 @@ void HtmlDocument::inHead(const std::string & tag, const AttributeVector & attrs
     HtmlElement * element = ElementFactory::create(tag, attrs);
     m_head->append(element);
     if ( tag == META_TAG) {
-      m_headerParser->checkMetaTagHttpEquiv(element);
+      checkMetaTagHttpEquiv(element);
     }
     // do not push back
   }
@@ -239,7 +238,7 @@ void HtmlDocument::inBody(const std::string & tag, const AttributeVector & attrs
       or tag == "menu"
       or tag == "ol"
       or tag == P_TAG
-      or tag == "ul"
+      or tag == UL_TAG
       or tag == "pre"
       )
   {
@@ -343,6 +342,34 @@ void HtmlDocument::inBody(const std::string & tag)
     handleEndTag(BODY_TAG);
     if (m_insertionMode == AFTER_BODY) {
       handleEndTag(tag);
+    }
+  }
+  else if ( tag == "address"
+      or tag == "blockquote"
+      or tag == "center"
+      or tag == "dir"
+      or tag == "div"
+      or tag == "dl"
+      or tag == "fieldset"
+      or tag == "listing"
+      or tag == "menu"
+      or tag == "ol"
+      or tag == "pre"
+      or tag == UL_TAG
+      )
+  {
+    if (inScope(tag))
+    {
+      generateImpliedEndTags();
+    }
+    if (inScope(tag))
+    {
+      // if there is a tag like this in scope, keep poppin'
+      while (inScope(tag))
+      {
+        // pop until not in scope.
+        m_openElements.pop_back();
+      }
     }
   }
   else if (tag == P_TAG)
@@ -760,7 +787,7 @@ void HtmlDocument::addActiveFormatter(HtmlElement * element)
   m_activeFormatters.push_front(element);
 }
 
-void HtmlDocument::generateImpliedEndTags(const string & except)
+void HtmlDocument::generateImpliedEndTags(const std::string & except)
 {
   HtmlElement * node(currentNode());
   if (   node->isa(P_TAG)

@@ -1,15 +1,14 @@
 #include "HtmlParserDriver.h"
-#include "HeaderParser.h"
 #include "ElementFactory.h"
 #include "HtmlElement.h"
 using namespace std;
 
-void HtmlParserDriver::handleStartEndTag(const string & tag, const AttributeVector & attrs)
+void HtmlParserDriver::handleStartEndTag(const std::string & tag, const AttributeVector & attrs)
 {
   handleStartTag(tag, attrs);
 }
 
-void HtmlParserDriver::handleStartTag(const string & tag, const AttributeVector & attrs)
+void HtmlParserDriver::handleStartTag(const std::string & tag, const AttributeVector & attrs)
 {
   m_tags.push_back(tag);
   AttributeVector newVector;
@@ -23,13 +22,13 @@ void HtmlParserDriver::handleStartTag(const string & tag, const AttributeVector 
   // gah - copy paste from Document, no other way
   HtmlElement * element = ElementFactory::create(tag, attrs);
   if (tag == "meta") { 
-    m_headerParser->checkMetaTagHttpEquiv(element); 
+    checkMetaTagHttpEquiv(element); 
   }
   delete element;
   m_attributes.push_back(newVector);
 }
 
-void HtmlParserDriver::handleEndTag(const string & tag)
+void HtmlParserDriver::handleEndTag(const std::string & tag)
 {
   m_tags.push_back(tag);
 }

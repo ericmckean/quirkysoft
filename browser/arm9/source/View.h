@@ -32,6 +32,9 @@ class View : public ViewI
 
     void render();
     void walkNode(const HtmlElement * node);
+    bool applyFormatting(const HtmlElement * element);
+    //! Really add a newline or few to the text area
+    void addRealNewline(int count=1);
 
 };
 #endif

@@ -11,7 +11,7 @@ class URI
     /** Create an URI initialised to the given string.
      * @param uriString the URI location
      */
-    URI(const std::string & uriString);
+    URI(const std::string & uriString, bool fix=true);
 
     /** Set the URI location.
      * @param uriString the new location.
@@ -33,10 +33,26 @@ class URI
      */
     std::string server() const;
 
+    /** Get the port part of the URI.
+     * @return the port part of http uris.
+     */
+    int port() const;
+
     /** Get the file part of the URI.
      * @return the file part of the location.
      */
     const std::string fileName() const;
+
+    /** Get the lot.
+     * @return the whole URI.
+     */
+    const std::string asString() const;
+
+
+    /** Navigate to a new URI.
+     * @param newFile the relative or absolute URI.
+     */
+    void navigateTo(const std::string & newFile);
 
     /** Compare this URI to the @a other one. URIs are the same if they have
      * the same protocol and address.
@@ -51,5 +67,6 @@ class URI
   private:
     std::string m_protocol;
     std::string m_address;
+    bool m_fix;
 };
 #endif

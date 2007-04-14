@@ -8,14 +8,17 @@ using namespace std;
 Document::Document():
   m_amount(0),
   m_htmlDocument(new HtmlDocument),
-  m_headerParser(new HeaderParser(m_htmlDocument.get()))
+  m_headerParser(new HeaderParser(m_htmlDocument))
 {
   // I don't like this but can't think of a better way :(
-  m_htmlDocument->setHeaderParser(m_headerParser.get());
+  //m_htmlDocument->setHeaderParser(m_headerParser);
 }
 
 Document::~Document()
-{}
+{
+  delete m_htmlDocument;
+  delete m_headerParser;
+}
 
 void Document::setUri(const std::string & uriString)
 {
@@ -35,6 +38,7 @@ const UnicodeString & Document::asText() const
 
 const HtmlElement * Document::rootNode() const
 {
+  // m_htmlDocument->dumpDOM();
   return m_htmlDocument->rootNode();
 }
 

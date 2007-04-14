@@ -178,7 +178,7 @@ void Font::glyph(unsigned int value, Glyph & glyphData) const
   glyphData.data = (const unsigned char*)(&m_glyphData[offset]);
 }
 
-void Font::textSize(const char * text, int amount, int & width, int & height, const string & encoding) const
+void Font::textSize(const char * text, int amount, int & width, int & height, const std::string & encoding) const
 {
   // length of text in bytes.
   width = 0;

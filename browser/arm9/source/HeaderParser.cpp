@@ -4,6 +4,9 @@
 #include "HtmlParser.h"
 
 using namespace std;
+static const string HTTP1("HTTP/1.");
+static const int HTTP1_LEN = HTTP1.length();
+
 HeaderParser::HeaderParser(HtmlParser * htmlParser):
   m_expected(0),
   m_htmlParser(htmlParser)
@@ -89,36 +92,8 @@ unsigned int HeaderParser::expected() const
   return m_expected;
 }
 
-static void stripWhitespace(string & modify)
-{
-  if (modify.empty())
-    return;
-  static const string delimter(" \r\n	");
-  int firstNonBlank = modify.find_first_not_of(delimter);
-  int lastNonBlank = modify.find_last_not_of(delimter);
-  modify = modify.substr(firstNonBlank, (lastNonBlank-firstNonBlank+1));
-}
 
-static void extractCharset(const string & value, string & mimeType, string & charset)
-{
-  unsigned int position(value.find(";"));
-  if (position != string::npos)
-  {
-    mimeType = value.substr(0,position);
-    position++;
-    unsigned int nextPosition(value.find(";",position));
-    nextPosition = nextPosition==string::npos?value.length():nextPosition;
-    charset = value.substr(position, (nextPosition-position+1));
-  } 
-  else {
-    mimeType = value.substr(0,value.length());
-    charset.clear();
-  }
-  stripWhitespace(mimeType);
-  stripWhitespace(charset);
-}
-
-void HeaderParser::handleHeader(const string & field, const string & value)
+void HeaderParser::handleHeader(const std::string & field, const std::string & value)
 {
   // cout << "Header: " << field << " = \"" << value << "\"" << endl;
   if (field == "transfer-encoding" and value == "chunked") {
@@ -132,32 +107,7 @@ void HeaderParser::handleHeader(const string & field, const string & value)
     m_expected = strtol(value.c_str(), 0 , 0);
   }
   if (field == "content-type") {
-    string lowerValue(value);
-    transform(lowerValue.begin(), lowerValue.end(), lowerValue.begin(), ::tolower);
-    string charset, mimeType;
-    extractCharset(lowerValue, charset, mimeType);
-    if (mimeType == "charset=iso-8859-1")
-    {
-      // cout << "ISO encoding" << endl;
-      m_htmlParser->setEncoding(HtmlParser::ISO_ENCODING);
-    }
-    bool isPlain = lowerValue.find("text/plain") != string::npos;
-    if (isPlain)
-    {
-      m_htmlParser->setPlainText();
-    }
-
-  }
-}
-
-void HeaderParser::checkMetaTagHttpEquiv(const HtmlElement * meta)
-{
-  string httpEquiv = meta->attribute("http-equiv");
-  string content = meta->attribute("content");
-  if (not httpEquiv.empty() and not content.empty())
-  {
-    transform(httpEquiv.begin(), httpEquiv.end(), httpEquiv.begin(), ::tolower);
-    handleHeader(httpEquiv, content);
+    m_htmlParser->parseContentType(value);
   }
 }
 
@@ -225,6 +175,7 @@ void HeaderParser::field()
       default:
         // parse error?
         m_state = PARSE_ERROR;
+        assert(m_state != PARSE_ERROR);
         break;
     }
   }
@@ -242,6 +193,7 @@ void HeaderParser::afterField()
       default:
         // parse error.
         m_state = PARSE_ERROR;
+        assert(m_state != PARSE_ERROR);
         break;
     }
   }
@@ -253,6 +205,7 @@ void HeaderParser::beforeValue()
       break;
     case '\n':
       m_state = PARSE_ERROR;
+      assert(m_state != PARSE_ERROR);
       break;
     default:
       m_headerValue = m_value;
@@ -318,11 +271,12 @@ void HeaderParser::httpResponse()
     response += ::toupper(m_value);
     next();
   }
-  if (response.substr(0,9) == "HTTP/1.1 ") {
+  if (response.substr(0,HTTP1_LEN) == HTTP1 and response[HTTP1_LEN+1] == ' ') {
     m_httpStatusCode = strtol(response.substr(9,3).c_str(), 0, 0);
     m_state = BEFORE_FIELD;
   } else {
     m_state = PARSE_ERROR;
+    assert(m_state != PARSE_ERROR);
   }
 }
   
