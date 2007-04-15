@@ -29,10 +29,10 @@ class Controller : public ControllerI
     void mainLoop();
 
   private:
-    Document & m_document;
-    View & m_view;
+    Document * m_document;
+    View * m_view;
 
     void localFile(const std::string &);
-    void fetchHttp(const URI &);
+    void fetchHttp(URI &);
 };
 #endif

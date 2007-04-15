@@ -80,7 +80,6 @@ void Document::appendLocalData(const char * data, int size)
 
 void Document::appendData(const char * data, int size)
 {
-  // cout << "Append data: "  << size << endl;
   m_status = INPROGRESS;
   if (size) {
     m_headerParser->feed(data,size);

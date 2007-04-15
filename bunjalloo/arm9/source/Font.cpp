@@ -114,7 +114,6 @@ Font::Font(const std::string & fileName):
     mapFile.read((char*)data);
     data[size] = 0;
     mapFile.close();
-    //cout << "Size " << size << endl;
   }
   if (glyphData and data) {
     init(glyphData, data);
@@ -149,7 +148,6 @@ int Font::valueToIndex(unsigned int glyphId) const
     const Range * range(*it);
     if (range->contains(glyphId))
     {
-      //cout << "Found glyphId " << glyphId << " total " << total << " lower " << range->lower() <<  endl;
       return glyphId + total - range->lower();
     }
     total += range->range();

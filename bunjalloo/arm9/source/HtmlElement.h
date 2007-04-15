@@ -108,6 +108,9 @@ class HtmlElement /* : public Element */
      */
     virtual HtmlElement * clone() const;
 
+    void removeAllChildren();
+
+    //void dump() const;
   protected:
     std::string m_tagName;
     std::string m_id;

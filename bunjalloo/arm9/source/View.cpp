@@ -1,6 +1,6 @@
-#include <list>
+#include <assert.h>
 #include <iostream>
-#include <wchar.h>
+#include <list>
 #include "ndspp.h"
 #include "libnds.h"
 #include "View.h"
@@ -15,10 +15,14 @@
 
 using namespace std;
 
-View::View(Document & doc, ControllerI & c):m_document(doc), m_controller(c)
+View::View(Document & doc, ControllerI & c):
+  m_document(doc), 
+  m_controller(c),
+  m_textArea(new TextArea),
+  m_keyboard(new Keyboard(*m_textArea))
 {
   m_document.registerView(this);
-  m_textArea = new TextArea(/*"fonts/vera"*/);
+  keysSetRepeat( 10, 5 );
 }
 
 void View::addRealNewline(int count)
@@ -76,9 +80,12 @@ void View::render()
   m_textArea->setCursor(0, 0);
   m_textArea->setParseNewline(false);
   const HtmlElement * root = m_document.rootNode();
-  const HtmlElement * head = root->firstChild();
+  assert(root->isa("html"));
+  assert(root->hasChildren());
+  /*
   const HtmlElement * body = root->lastChild();
-  walkNode(body);
+  assert(body->hasChildren());*/
+  walkNode(root);
 }
 
 bool View::applyFormatting(const HtmlElement * element)
@@ -136,48 +143,44 @@ void View::notify()
   }
 }
 
-void View::mainLoop()
+void View::tick()
 {
-  Keyboard * keyboard = new Keyboard(*m_textArea);
-  for(;;) {
-    scanKeys();
-    if (keyboard->visible()) {
-      keyboard->handleInput();
-      if (not keyboard->visible())
+  scanKeys();
+  if (m_keyboard->visible()) {
+    m_keyboard->handleInput();
+    if (not m_keyboard->visible())
+    {
+      nds::Canvas::instance().fillRectangle(0, SCREEN_HEIGHT, SCREEN_WIDTH, SCREEN_HEIGHT, nds::Color(31,31,31));
+      m_controller.doUri(m_keyboard->result());
+    }
+  } else {
+    u16 keys = keysDownRepeat();
+    if (keys & KEY_START) {
+      m_keyboard->setVisible();
+    }
+    if (keys & KEY_DOWN) {
+      // scroll down ...
+      m_textArea->setStartLine(m_textArea->startLine()+1);
+      render();
+    }
+    if (keys & KEY_UP) {
+      // scroll up ...
+      m_textArea->setStartLine(m_textArea->startLine()-1);
+      render();
+    }
+    if (keys & KEY_TOUCH) {
+      touchPosition tp = touchReadXY();
+      Link * clicked = m_textArea->clickLink(tp.px, tp.py+SCREEN_HEIGHT);
+      if (clicked != 0)
       {
-        nds::Canvas::instance().fillRectangle(0, SCREEN_HEIGHT, SCREEN_WIDTH, SCREEN_HEIGHT, nds::Color(31,31,31));
-        m_controller.doUri(keyboard->result());
-      }
-    } else {
-      u16 keys = keysDownRepeat();
-      if (keys & KEY_START) {
-        keyboard->setVisible();
-      }
-      if (keys & KEY_DOWN) {
-        // scroll down ...
-        m_textArea->setStartLine(m_textArea->startLine()+1);
-        render();
-      }
-      if (keys & KEY_UP) {
-        // scroll up ...
-        m_textArea->setStartLine(m_textArea->startLine()-1);
-        render();
-      }
-      if (keys & KEY_TOUCH) {
-        touchPosition tp = touchReadXY();
-        Link * clicked = m_textArea->clickLink(tp.px, tp.py+SCREEN_HEIGHT);
-        if (clicked != 0)
-        {
-          string s = clicked->href();
-          string original = m_document.uri();
-          URI tmpURI(original);
-          tmpURI.navigateTo(s);
-          cout << "Do uri! " << tmpURI.asString() << endl;
-          m_textArea->setStartLine(0);
-          m_controller.doUri( tmpURI.asString() );
-        }
+        string s = clicked->href();
+        string original = m_document.uri();
+        URI tmpURI(original);
+        tmpURI.navigateTo(s);
+        m_textArea->setStartLine(0);
+        cout << "Navigated to " << tmpURI.asString() << endl;
+        m_controller.doUri( tmpURI.asString() );
       }
     }
-    swiWaitForVBlank();
   }
 }

@@ -1,8 +1,8 @@
-#include <iostream>
 #include "ndspp.h"
 #include "TextArea.h"
 #include "Palette.h"
 #include "Canvas.h"
+#include "Config.h"
 #include "Font.h"
 #include "UTF8.h"
 #include "File.h"
@@ -24,7 +24,8 @@ TextArea::TextArea() :
   m_parseNewline(true),
   m_isLink(false)
 {
-  init("data/bunjalloo/fonts/vera");
+  string fontname = Config::instance().font();
+  init(fontname);
 }
 
 void TextArea::setStartLine(int line)
@@ -149,9 +150,9 @@ void TextArea::printu(const UnicodeString & unicodeString)
       }
       it += word.length();
       currPosition += word.length();
-      if (m_cursory > Canvas::instance().height()) {
+      /*if (m_cursory > Canvas::instance().height()) {
         break;
-      }
+      }*/
     }
     if (m_cursory < finalLine) {
       return;

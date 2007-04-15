@@ -373,3 +373,91 @@ void DocumentTest::testFont()
   CPPUNIT_ASSERT(root != 0);
   CPPUNIT_ASSERT(root->isa("html"));
 }
+
+void DocumentTest::testFont2()
+{
+  readFile("font2.html");
+  m_document->appendLocalData(m_data, m_length);
+  m_document->setStatus(Document::LOADED);
+  const HtmlElement * root = m_document->rootNode();
+  CPPUNIT_ASSERT(root != 0);
+  CPPUNIT_ASSERT(root->isa("html"));
+}
+
+void DocumentTest::testPin8()
+{
+  readFile("pineight.txt");
+  // tests for end script tag after end of chunk
+  m_document->appendData(m_data, m_length);
+  m_document->setStatus(Document::LOADED);
+  const HtmlElement * root = m_document->rootNode();
+  CPPUNIT_ASSERT(root != 0);
+  CPPUNIT_ASSERT(root->isa("html"));
+}
+
+
+void DocumentTest::testClarin()
+{
+  readFile("clarin.txt");
+  // tests for end script tag after end of chunk
+  // send bytes in chunks, emulates http request.
+  int length = 1360;
+  char * data = m_data;
+  m_document->appendData(data, length);
+  data += length;
+  m_document->appendData(data, length);
+  data += length;
+  m_document->appendData(data, length);
+  data += length;
+  length = 4080;
+  m_document->appendData(data, length);
+  data += length;
+  length = 1360;
+  m_document->appendData(data, length);
+  data += length;
+  length = 2720;
+  m_document->appendData(data, 2720);
+  data += length;
+  length = 6800;
+  m_document->appendData(data, 6800);
+  data += length;
+  length = 1360;
+  m_document->appendData(data, 1360);
+  data += length;
+  m_document->appendData(data, 1360);
+  data += length;
+  length = 2252;
+  m_document->appendData(data, 2252);
+  m_document->setStatus(Document::LOADED);
+  const HtmlElement * root = m_document->rootNode();
+  CPPUNIT_ASSERT(root != 0);
+  CPPUNIT_ASSERT(root->isa("html"));
+  CPPUNIT_ASSERT(root->hasChildren());
+}
+
+
+void DocumentTest::testAdoption()
+{
+  readFile("adoption.html");
+  // test the adoption algorithm
+  m_document->appendLocalData(m_data, m_length);
+  m_document->setStatus(Document::LOADED);
+  const HtmlElement * root = m_document->rootNode();
+  CPPUNIT_ASSERT(root != 0);
+  CPPUNIT_ASSERT(root->isa("html"));
+  const HtmlElement * body = root->lastChild();
+  const ElementList & children = body->children();
+  int childcount = children.size();
+  CPPUNIT_ASSERT_EQUAL(2, childcount);
+}
+
+void DocumentTest::testAdoption2()
+{
+  readFile("adoption2.html");
+  // test the adoption algorithm
+  m_document->appendLocalData(m_data, m_length);
+  m_document->setStatus(Document::LOADED);
+  const HtmlElement * root = m_document->rootNode();
+  CPPUNIT_ASSERT(root != 0);
+  CPPUNIT_ASSERT(root->isa("html"));
+}

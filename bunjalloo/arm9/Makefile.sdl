@@ -3,7 +3,7 @@ SOURCES		:=	source
 INCLUDES	:=	include
 DATA		:=
 
-CFLAGS	:=	-g -Wall 
+CFLAGS	:=	-g -Wall  -DDATADIR=$(DATADIR)
 
 CFLAGS	+=	$(INCLUDE)
 CXXFLAGS	:=	$(CFLAGS)
