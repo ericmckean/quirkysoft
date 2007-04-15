@@ -1,3 +1,4 @@
+#include "libnds.h"
 #include "Wifi9.h"
 #include <vector>
 #include "Controller.h"
@@ -5,6 +6,7 @@
 #include "View.h"
 #include "URI.h"
 #include "Client.h"
+#include "Config.h"
 #include "File.h"
 
 using namespace std;
@@ -14,28 +16,30 @@ static const char s_licenceText[] = {
 };
 
 Controller::Controller()
-  : m_document(*(new Document())),
-  m_view(*(new View(m_document, *this)))
+  : m_document(new Document())
 {
+  Config::instance().initialise(m_document, this);
+  m_view = new View(*m_document, *this);
 }
 
 Controller::~Controller()
 {
-  delete &m_document;
-  delete &m_view;
+  delete m_document;
+  delete m_view;
 }
 
 void Controller::showLicence()
 {
-  m_document.appendLocalData(s_licenceText, strlen(s_licenceText));
-  m_document.setStatus(Document::LOADED);
+  m_document->reset();
+  m_document->setUri("file:///licence");
+  m_document->appendLocalData(s_licenceText, strlen(s_licenceText));
+  m_document->setStatus(Document::LOADED);
 }
-
 
 void Controller::doUri(const std::string & uriString)
 {
   if (uriString.size()) {
-    m_document.setUri(uriString);
+    m_document->setUri(uriString);
     // split the URI into sections
     URI uri(uriString);
     if (uri.isFile()) {
@@ -49,7 +53,10 @@ void Controller::doUri(const std::string & uriString)
 
 void Controller::mainLoop()
 {
-  m_view.mainLoop();
+  for (;;) {
+    m_view->tick();
+    swiWaitForVBlank();
+  }
 }
 
 void Controller::localFile(const std::string & fileName)
@@ -63,8 +70,9 @@ void Controller::localFile(const std::string & fileName)
     char * data = new char[size+2];
     uriFile.read(data);
     data[size] = 0;
-    m_document.appendLocalData(data, size);
-    m_document.setStatus(Document::LOADED);
+    m_document->reset();
+    m_document->appendLocalData(data, size);
+    m_document->setStatus(Document::LOADED);
     delete [] data;
   }
   uriFile.close();
@@ -79,9 +87,9 @@ class HttpClient: public nds::Client
       : nds::Client(ip,port), m_total(0), m_finished(false)
     {}
 
-    void setDocument(Document & d)
+    void setDocument(Document * d)
     {
-      m_document = &d;
+      m_document = d;
     }
 
     // implement the pure virtual functions
@@ -89,14 +97,14 @@ class HttpClient: public nds::Client
     {
       char * buffer = (char*)bufferIn;
       buffer[amountRead] = 0;
+      printf("%s", buffer);
       m_document->appendData(buffer, amountRead);
+      //printf("0x0x End of buffer x0x0", buffer);
     }
     
     void connectCallback() {
-      printf("Connecting...\n");
     }
     void writeCallback() {
-      printf("write...\n");
     }
     void readCallback() {
     }
@@ -114,7 +122,6 @@ class HttpClient: public nds::Client
     {
       //printf("\ndebug:%s\n",s);
       //m_document->setData(s, strlen(s));
-      //cout << "debug:"<< s << endl;
     }
 
     // GET stuff
@@ -145,7 +152,7 @@ class HttpClient: public nds::Client
     URI m_uri;
 };
 
-void Controller::fetchHttp(const URI & uri)
+void Controller::fetchHttp(URI & uri)
 {
   nds::Wifi9::instance().connect();
   if (nds::Wifi9::instance().connected()) {
@@ -157,15 +164,16 @@ void Controller::fetchHttp(const URI & uri)
     client.get(uri);
     client.read();
 
-    URI docUri(m_document.uri());
+    URI docUri(m_document->uri());
     if (docUri != uri)
     {
       // redirected
-      doUri(m_document.uri());
+      uri.navigateTo(m_document->uri());
+      doUri(uri.asString());
     }
   } else {
     char * woops = "Woops, wifi not done";
-    m_document.appendData(woops, strlen(woops));
+    m_document->appendData(woops, strlen(woops));
   }
 }
 

@@ -59,7 +59,7 @@ int URI::port() const
     string portStr = m_address.substr(portDots+1, amount);
     return strtol(portStr.c_str(), 0, 0);
   }
-  return 0;
+  return 80;
 }
 
 std::string URI::server() const
@@ -79,6 +79,9 @@ std::string URI::server() const
     // has : but not / ->  http://server:8080
     if (portDots != -1 and (firstSlash == -1 or portDots < firstSlash)) {
       return m_address.substr(0, portDots);
+    }
+    if (firstSlash != -1) {
+      return m_address.substr(0, firstSlash);
     }
     return m_address.substr(0, m_address.length());
   }

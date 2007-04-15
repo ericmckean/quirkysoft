@@ -26,9 +26,14 @@ class DocumentTest : public CPPUNIT_NS::TestFixture
   CPPUNIT_TEST( testDD );
   CPPUNIT_TEST( testPlaintext );
   CPPUNIT_TEST( testFont );
+  CPPUNIT_TEST( testFont2);
+  CPPUNIT_TEST( testPin8);
+  CPPUNIT_TEST( testClarin);
+  CPPUNIT_TEST( testAdoption);
+  CPPUNIT_TEST( testAdoption2);
   CPPUNIT_TEST_SUITE_END();
 
-public:
+  public:
   void setUp();
   void tearDown();
   void test0();
@@ -50,7 +55,12 @@ public:
   void testDD();
   void testPlaintext();
   void testFont();
-private:
+  void testFont2();
+  void testPin8();
+  void testClarin();
+  void testAdoption();
+  void testAdoption2();
+  private:
   Document * m_document;
   char * m_data;
   unsigned int m_length;

@@ -40,6 +40,7 @@ void HeaderParser::next()
 
 void HeaderParser::feed(const char * data, unsigned int length)
 {
+  //cout << "\nFeed " << length << " bytes." << endl;
   m_position = data;
   m_end = data+length;
   while (m_position < m_end)
@@ -95,19 +96,21 @@ unsigned int HeaderParser::expected() const
 
 void HeaderParser::handleHeader(const std::string & field, const std::string & value)
 {
-  // cout << "Header: " << field << " = \"" << value << "\"" << endl;
   if (field == "transfer-encoding" and value == "chunked") {
     m_chunked = true;
-  }
-  if (field == "location" and m_httpStatusCode >= 300 and m_httpStatusCode < 400)
+  } 
+  else if (field == "location" and m_httpStatusCode >= 300 and m_httpStatusCode < 400)
   {
     m_redirect = value;
   }
-  if (field == "content-length") {
+  else if (field == "content-length") {
     m_expected = strtol(value.c_str(), 0 , 0);
-  }
-  if (field == "content-type") {
+  } 
+  else if (field == "content-type") {
     m_htmlParser->parseContentType(value);
+  }
+  else if (field == "refresh") {
+    m_htmlParser->parseRefresh(value);
   }
 }
 
@@ -236,7 +239,7 @@ void HeaderParser::value()
 
 void HeaderParser::chunkLine()
 {
-  if (::isxdigit(m_value))
+  if (::isxdigit(m_value) or m_value == ' ')
   {
     m_chunkLengthString += m_value;
   }

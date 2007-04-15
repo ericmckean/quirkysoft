@@ -1,3 +1,4 @@
+#include <iostream>
 #include <assert.h>
 #include <stdlib.h>
 #include <ctype.h>
@@ -54,6 +55,7 @@ class HtmlParserImpl
     void initialise(const char * data, unsigned int length);
 
     void fire();
+    void debug();
 
     inline void setEncoding(HtmlParser::Encoding enc)
     {
@@ -106,6 +108,8 @@ class HtmlParserImpl
     Attribute* m_attribute;
     string m_commentToken;
     string m_doctypeToken;
+    //! Sometimes the chunking screws us over.
+    string m_leftOvers;
     bool m_doctypeTokenIsError;
     void next();
     //! rewind one character to reconsume it.
@@ -116,6 +120,8 @@ class HtmlParserImpl
     void emitTagToken();
     void emitComment();
     unsigned int consumeEntity();
+    // deal with wonky chunkers
+    void setLeftovers();
     static void deleteAttribute(Attribute * a)
     {
       delete a;
@@ -168,6 +174,7 @@ void HtmlParserImpl::reset()
   m_state = DATA;
   m_contentModel = HtmlParser::PCDATA;
   m_encoding = HtmlParser::UTF8_ENCODING;
+  m_leftOvers.clear();
 }
 
 void HtmlParserImpl::initialise(const char * data, unsigned int length)
@@ -281,6 +288,13 @@ void HtmlParserImpl::handleTagOpen()
   }
 }
 
+void HtmlParserImpl::setLeftovers()
+{
+  m_leftOvers = asUnconsumedCharString(m_end - m_position);
+  //printf("leftovers %s\n", m_leftOvers.c_str());
+  m_position = m_end;
+}
+
 void HtmlParserImpl::handleCloseTagOpen()
 {
   assert(m_contentModel == HtmlParser::PCDATA or m_contentModel == HtmlParser::RCDATA or m_contentModel == HtmlParser::CDATA);
@@ -288,6 +302,11 @@ void HtmlParserImpl::handleCloseTagOpen()
   {
     bool parseError(true);
     string nextFew = asUnconsumedCharString(m_lastStartTagToken.length()+1);
+    if (nextFew.empty())
+    {
+      setLeftovers();
+      return;
+    }
     if (nextFew.substr(0, nextFew.length()-1) == m_lastStartTagToken)
     {
       // check next
@@ -352,13 +371,16 @@ void HtmlParserImpl::emitTagToken()
   switch (m_tagTokenType)
   {
     case START:
+      // cout << "<" << m_currentTagToken << ">" << endl;
       m_self.handleStartTag(m_currentTagToken, m_tagAttributes);
       m_lastStartTagToken = m_currentTagToken;
       break;
     case END:
+      // cout << " </" << m_currentTagToken << ">" << endl;
       m_self.handleEndTag(m_currentTagToken);
       break;
     case START_END:
+      // cout << " <" << m_currentTagToken << "/>" << endl;
       m_self.handleStartEndTag(m_currentTagToken, m_tagAttributes);
       break;
   }
@@ -825,7 +847,13 @@ void HtmlParserImpl::consume(int amount)
 string HtmlParserImpl::asUnconsumedCharString(int amount)
 {
   string charString;
-  if (m_position + amount < m_end) {
+  if (not m_leftOvers.empty())
+  {
+    charString.append(m_leftOvers, 0, amount);
+    amount -= charString.length();
+    m_leftOvers.erase(0,amount);
+  }
+  if (amount and  ((m_position + amount) <= m_end)) {
     charString.append(m_position, amount);
     transform(charString.begin(), charString.end(), charString.begin(), ::tolower);
   }
@@ -837,6 +865,11 @@ void HtmlParserImpl::handleMarkupDeclarationOpen()
   assert(m_contentModel == HtmlParser::PCDATA);
 
   string next2 = asUnconsumedCharString(2);
+  if (next2.empty())
+  {
+    setLeftovers();
+    return;
+  }
   if (next2 == "--")
   {
     consume(2);
@@ -847,6 +880,11 @@ void HtmlParserImpl::handleMarkupDeclarationOpen()
   else 
   {
     string next7 = asUnconsumedCharString(7);
+    if (next7.empty())
+    {
+      setLeftovers();
+      return;
+    }
     if (next7 == "doctype")
     {
       consume(7);
@@ -1093,8 +1131,44 @@ void HtmlParserImpl::handleEntityData()
   m_state = DATA;
 }
 
+void HtmlParserImpl::debug()
+{
+#if 0
+  const char * stuff[] = {
+     "DATA",
+     "ENTITY_DATA",
+     "TAG_OPEN",
+     "CLOSE_TAG_OPEN",
+     "TAG_NAME",
+     "BEFORE_ATTRIBUTE_NAME",
+     "ATTRIBUTE_NAME",
+     "AFTER_ATTRIBUTE_NAME",
+     "BEFORE_ATTRIBUTE_VALUE",
+     "ATTRIBUTE_VALUE_DOUBLE_QUOTE",
+     "ATTRIBUTE_VALUE_SINGLE_QUOTE",
+     "ATTRIBUTE_VALUE_UNQUOTED",
+     "ENTITY_IN_ATTRIBUTE_VALUE",
+     "BOGUS_COMMENT",
+     "MARKUP_DECLARTION_OPEN",
+     "COMMENT",
+     "COMMENT_DASH",
+     "COMMENT_END",
+     "DOCTYPE",
+     "BEFORE_DOCTYPE_NAME",
+     "DOCTYPE_NAME",
+     "AFTER_DOCTYPE_NAME",
+     "BOGUS_DOCTYPE",
+  };
+  //cout << stuff[m_state] << " ";
+#ifndef ARM9
+  wcout << (wchar_t)m_value << endl;
+#endif
+#endif
+}
+
 void HtmlParserImpl::fire()
 {
+  //debug();
   switch (m_state) {
     case DATA:
       {
@@ -1286,7 +1360,14 @@ void HtmlParser::parseContentType(const std::string & value)
   {
     setContentModel(PLAINTEXT);
   }
+}
 
+void HtmlParser::parseRefresh(const std::string & value)
+{
+  string lowerValue(value);
+  transform(lowerValue.begin(), lowerValue.end(), lowerValue.begin(), ::tolower);
+  string time, url;
+  extractCharset(lowerValue, time, url);
 }
 
 void HtmlParser::checkMetaTagHttpEquiv(const HtmlElement * meta)
@@ -1300,10 +1381,12 @@ void HtmlParser::checkMetaTagHttpEquiv(const HtmlElement * meta)
     {
       parseContentType(content);
     }
+    else if (httpEquiv == "refresh")
+    {
+
+    }
   }
 }
-
-
 
 HtmlParser::Encoding HtmlParser::encoding() const
 {
@@ -1318,50 +1401,15 @@ void HtmlParser::setToStart()
 
 void HtmlParser::handleStartEndTag(const std::string & tag, const AttributeVector & attrs)
 {
-  /*
-  cout << "+- tag token:" << tag << endl;
-  AttributeVector::const_iterator it(attrs.begin());
-  for (; it != attrs.end(); ++it)
-  {
-    cout << "Attribute:" << (*it)->name << " = " << (*it)->value << endl;
-  }
-  */
 }
 
 void HtmlParser::handleStartTag(const std::string & tag, const AttributeVector & attrs)
 {
-#if 0
-  //cout << "+ tag token:" << tag << endl;
-  AttributeVector::const_iterator it(attrs.begin());
-  for (; it != attrs.end(); ++it)
-  {
-   // cout << "Attribute:" << (*it)->name << " = " << (*it)->value << endl;
-  }
-
-  if ( tag == "br") {
-    cout << endl;
-  }
-  if ( tag == "p") {
-    cout << endl;
-  }
-  if ( tag == "meta") {
-    AttributeVector::const_iterator it(attrs.begin());
-    for (; it != attrs.end(); ++it)
-    {
-      if ( (*it)->name == "content" and (*it)->value == "text/html; charset=iso-8859-1") {
-        // parse charset...
-        m_details.setEncoding(HtmlParserImpl::ISO_ENCODING);
-        break;
-      }
-    }
-  }
-#endif
 }
 void HtmlParser::handleEndTag(const std::string & tag)
 {
-  //cout << "- tag token:" << tag << endl;
 }
-//void HtmlParser::handleData(const std::string & data)
+
 void HtmlParser::handleData(unsigned int ucodeChar)
 {
 }

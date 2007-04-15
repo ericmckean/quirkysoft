@@ -51,6 +51,12 @@ class HtmlParser
      */
     void parseContentType(const std::string & value);
 
+    /** Parse the refresh value and act accordingly. 
+     * Refresh the page and possibly go to a new url.
+     * @param value the refresh value.
+     */
+    void parseRefresh(const std::string & value);
+
   protected:
     enum ContentModel {
       PCDATA,

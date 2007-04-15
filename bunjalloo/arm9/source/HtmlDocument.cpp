@@ -1,4 +1,3 @@
-#include <iostream>
 #include <assert.h>
 #include "ElementFactory.h"
 #include "HtmlElement.h"
@@ -16,11 +15,70 @@ const static char LI_TAG[] = "li";
 const static char DD_TAG[] = "dd";
 const static char DT_TAG[] = "dt";
 const static char P_TAG[] = "p";
+const static char DIV_TAG[] = "div";
 const static char PLAINTEXT_TAG[] = "plaintext";
 const static char TABLE_TAG[] = "table";
 const static char FORM_TAG[] = "form";
 const static char META_TAG[] = "meta";
 
+#if 1
+#include <iostream>
+void HtmlDocument::walkNode(const HtmlElement * node)
+{
+  for (int i =0; i < m_depth; i++)
+  {
+    cout << "    ";
+  }
+  if (node->hasChildren())
+  {
+    cout << "+ " <<node->tagName() << endl;
+    m_depth++;
+    const ElementList & theChildren = node->children();
+    ElementList::const_iterator it(theChildren.begin());
+    for (; it != theChildren.end(); ++it)
+    {
+      walkNode(*it);
+    }
+    m_depth--;
+  } 
+  else
+  {
+    cout << node->tagName() << endl;;
+  }
+}
+
+void HtmlDocument::dumpAF()
+{
+  ElementList::const_iterator it(m_activeFormatters.begin());
+  cout << "Active formatters " << endl;
+  cout << m_activeFormatters.size() << endl;
+  for (; it != m_activeFormatters.end(); ++it)
+  {
+    cout << (*it)->tagName() << endl;
+  }
+}
+void HtmlDocument::dumpDOM()
+{
+  cout << " Begin DOM: " << endl;
+  m_depth = 0;
+  cout << endl;
+  const HtmlElement * root = rootNode();
+  walkNode(root);
+  if (m_openElements.size() > 1)
+  {
+    cout << " ------------- " << endl;
+    ElementVector::const_iterator it(m_openElements.begin());
+    for (; it != m_openElements.end(); ++it)
+    {
+      if ( (*it) != root)
+      {
+        cout << "Open node:" << endl;
+        walkNode(*it);
+      }
+    }
+  }
+}
+#endif
 
 HtmlDocument::HtmlDocument(): 
   m_dataGot(0), 
@@ -231,7 +289,7 @@ void HtmlDocument::inBody(const std::string & tag, const AttributeVector & attrs
       or tag == "blockquote"
       or tag == "center"
       or tag == "dir"
-      or tag == "div"
+      or tag == DIV_TAG
       or tag == "dl"
       or tag == "fieldset"
       or tag == "listing"
@@ -348,7 +406,7 @@ void HtmlDocument::inBody(const std::string & tag)
       or tag == "blockquote"
       or tag == "center"
       or tag == "dir"
-      or tag == "div"
+      or tag == DIV_TAG
       or tag == "dl"
       or tag == "fieldset"
       or tag == "listing"
@@ -485,7 +543,6 @@ void HtmlDocument::afterBody(const std::string & tag)
 void HtmlDocument::mainPhase(const std::string & tag, 
                              const AttributeVector & attrs)
 {
-  // cout << "Main phase " << m_insertionMode << " open :" << tag << endl;
   if (tag == HTML_TAG)
   {
     if (m_isFirst)
@@ -525,7 +582,6 @@ void HtmlDocument::mainPhase(const std::string & tag,
 // main phase end tag
 void HtmlDocument::mainPhase(const std::string & tag)
 {
-  // cout << "main phase " << m_insertionMode << " close:" << tag << endl;
   switch (m_insertionMode)
   {
     case BEFORE_HEAD:
@@ -658,6 +714,13 @@ void HtmlDocument::mainPhase(unsigned int ucodeChar)
         if ((int)ucodeChar == EOF)
         {
           generateImpliedEndTags();
+          if (inScope(BODY_TAG)) {
+            while (not currentNode()->isa(BODY_TAG))
+            {
+              m_openElements.pop_back();
+            }
+          }
+
           if (m_openElements.size() == 2 and currentNode()->isa(BODY_TAG))
           {
             handleEndTag(BODY_TAG);
@@ -684,6 +747,7 @@ void HtmlDocument::mainPhase(unsigned int ucodeChar)
 void HtmlDocument::handleEOF()
 {
   handleData(EOF);
+  //dumpDOM();
 }
 void HtmlDocument::handleData(unsigned int ucodeChar)
 {
@@ -707,7 +771,14 @@ void HtmlDocument::handleData(unsigned int ucodeChar)
       mainPhase(ucodeChar);
       break;
     case MAIN_WAITING_TOKEN:
-      m_head->lastChild()->appendText(ucodeChar);
+      // WTF is this?
+      if (EOF == (int)ucodeChar) {
+        mainPhase(ucodeChar);
+      } 
+      else
+      {
+        m_head->lastChild()->appendText(ucodeChar);
+      }
       break;
   }
   // m_data += ucodeChar;
@@ -882,6 +953,31 @@ void HtmlDocument::reconstructActiveFormatters()
   }
 }
 
+
+struct Bookmark
+{
+  const HtmlElement * before;
+  const HtmlElement * after;
+};
+
+void HtmlDocument::createBookmark(Bookmark & marker, ElementList::iterator & bookmarkIt) const
+{
+  marker.before = 0;
+  marker.after = 0;
+  ++bookmarkIt;
+  if (bookmarkIt != m_activeFormatters.end())
+  {
+    marker.after = *bookmarkIt;
+  }
+  --bookmarkIt;
+  --bookmarkIt;
+  if (bookmarkIt != m_activeFormatters.end())
+  {
+    marker.before = *bookmarkIt;
+  }
+}
+
+
 void HtmlDocument::adoptionAgency(const std::string & tag)
 {
   /*
@@ -991,9 +1087,12 @@ void HtmlDocument::adoptionAgency(const std::string & tag)
     /* 6.  Let a bookmark note the position of the formatting element in the
      * list of active formatting elements relative to the elements on either
      * side of it in the list.*/
-    ElementList::iterator bookmark = find(m_activeFormatters.begin(), 
+    ElementList::iterator bookmarkIt = find(m_activeFormatters.begin(), 
         m_activeFormatters.end(), 
         formattingElement);
+    Bookmark marker;
+    createBookmark(marker, bookmarkIt);
+
     /* 7.  Let node and last node be the furthest block. Follow these steps: */
     HtmlElement * node(furthestBlock);
     HtmlElement * lastNode(furthestBlock);
@@ -1037,8 +1136,9 @@ void HtmlDocument::adoptionAgency(const std::string & tag)
       if (lastNode == furthestBlock)
       {
         // move bookmark 
-        bookmark = activeFormat;
-        ++bookmark; // or --?
+        createBookmark(marker, activeFormat);
+        //bookmark = activeFormat;
+        //++bookmark; // or --?
       }
       /*
        *   5. If node has any children, perform a shallow clone of node, replace
@@ -1094,6 +1194,7 @@ void HtmlDocument::adoptionAgency(const std::string & tag)
       {
         clone->append(*childIt);
       }
+      furthestBlock->removeAllChildren();
     }
 
     /* 11.  Append that clone to the furthest block. */
@@ -1102,7 +1203,36 @@ void HtmlDocument::adoptionAgency(const std::string & tag)
      * elements, and insert the clone into the list of active formatting
      * elements at the position of the aforementioned bookmark. */
     removeFromActiveFormat(formattingElement);
-    m_activeFormatters.insert(bookmark, clone);
+    bool inserted(false);
+    if (marker.before == 0 and marker.after == 0)
+    {
+      addActiveFormatter(clone);
+      inserted = true;
+    }
+    else
+    {
+      if (marker.before != 0) 
+      {
+        ElementList::iterator b4 = find(m_activeFormatters.begin(), m_activeFormatters.end(), marker.before);
+        if (b4 != m_activeFormatters.end())
+        {
+          ++b4;
+          m_activeFormatters.insert(b4, clone);
+          inserted = true;
+        }
+      }
+      if (not inserted and marker.after != 0)
+      {
+        ElementList::iterator after = find(m_activeFormatters.begin(), m_activeFormatters.end(), marker.after);
+        if (after != m_activeFormatters.end())
+        {
+          ++after;
+          m_activeFormatters.insert(after, clone);
+          inserted = true;
+        }
+      }
+    }
+    assert(inserted);
 
     /* 13.  Remove the formatting element from the stack of open elements, and
      * insert the clone into the stack of open elements immediately after (i.e.
@@ -1112,6 +1242,7 @@ void HtmlDocument::adoptionAgency(const std::string & tag)
     ElementVector::iterator clonePosition = find(m_openElements.begin(), 
         m_openElements.end(), 
         furthestBlock);
+    ++clonePosition;
     m_openElements.insert(clonePosition, clone);
 
     /* 14.  Jump back to step 1 in this series of steps. */
@@ -1147,7 +1278,7 @@ void HtmlDocument::startScopeClosedElement(const std::string & tag, const std::s
     /* 3. If node is not in the formatting category, and is not in the
      * phrasing category, and is not an address or div element, then stop
      * this algorithm.  */
-    if (not isFormatting(node) and not isPhrasing(node) and not node->isa("address") and not node->isa("div"))
+    if (not isFormatting(node) and not isPhrasing(node) and not node->isa("address") and not node->isa(DIV_TAG))
     {
       break;
     }
@@ -1156,49 +1287,3 @@ void HtmlDocument::startScopeClosedElement(const std::string & tag, const std::s
   }
 }
 
-#if 1
-void HtmlDocument::walkNode(const HtmlElement * node)
-{
-  for (int i =0; i < m_depth; i++)
-  {
-    cout << "    ";
-  }
-  if (node->hasChildren())
-  {
-    cout << "+ " <<node->tagName() << endl;
-    m_depth++;
-    const ElementList & theChildren = node->children();
-    ElementList::const_iterator it(theChildren.begin());
-    for (; it != theChildren.end(); ++it)
-    {
-      walkNode(*it);
-    }
-    m_depth--;
-  } 
-  else
-  {
-    cout << node->tagName() << endl;;
-  }
-}
-
-void HtmlDocument::dumpDOM()
-{
-  m_depth = 0;
-  cout << endl;
-  const HtmlElement * root = rootNode();
-  walkNode(root);
-  if (m_openElements.size() > 1)
-  {
-    cout << " ------------- " << endl;
-    ElementVector::const_iterator it(m_openElements.begin());
-    for (; it != m_openElements.end(); ++it)
-    {
-      if ( (*it) != root)
-      {
-        cout << "Open node:" << endl;
-        walkNode(*it);
-      }
-    }
-  }
-}
-#endif

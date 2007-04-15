@@ -5,6 +5,8 @@
 #include "HtmlParser.h"
 #include "ElementList.h"
 
+class Bookmark;
+
 /** Parse the HTML tokens after the tokenisation phase.
  */
 class HtmlDocument : public HtmlParser
@@ -40,6 +42,7 @@ class HtmlDocument : public HtmlParser
     const HtmlElement * rootNode() const;
 
     void dumpDOM();
+    void dumpAF();
 
     void handleEOF();
 
@@ -79,7 +82,6 @@ class HtmlDocument : public HtmlParser
       IN_FRAMESET,
       AFTER_FRAMESET
     };
-
     UnicodeString m_data;
     unsigned int m_dataGot;
     TreeState m_state;
@@ -134,6 +136,8 @@ class HtmlDocument : public HtmlParser
     bool isFormatting(HtmlElement * node);
     bool isPhrasing(HtmlElement * node);
     void reconstructActiveFormatters();
+
+    void createBookmark(Bookmark & marker, ElementList::iterator & bookmarkIt) const;
     void adoptionAgency(const std::string & tag);
     void startScopeClosedElement(const std::string & tag, const std::string & alternate="");
     // disable copies

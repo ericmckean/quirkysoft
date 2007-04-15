@@ -94,3 +94,21 @@ HtmlElement * HtmlElement::clone() const
   return theClone;
 }
 
+#if 0
+void HtmlElement::dump() const
+{
+  std::basic_string<wchar_t> dumper;
+  UnicodeString::const_iterator it(m_text.begin());
+  for (; it != m_text.end(); ++it)
+  {
+    dumper += *it;
+  }
+  
+  wcout << dumper << endl;
+}
+#endif
+
+void HtmlElement::removeAllChildren()
+{
+  m_children.clear();
+}

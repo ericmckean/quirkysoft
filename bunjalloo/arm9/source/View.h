@@ -7,6 +7,7 @@ class Document;
 class ControllerI;
 
 class TextArea;
+class Keyboard;
 class HtmlElement;
 
 /** Handle the displaying of HTML data.*/
@@ -21,14 +22,15 @@ class View : public ViewI
 
     void notify();
 
-    /** Show the view, handle key events, etc. Never returns.
+    /** Show the view, handle key events for one frame.
      */
-    void mainLoop();
+    void tick();
 
   private:
     Document & m_document;
     ControllerI & m_controller;
     TextArea * m_textArea;
+    Keyboard * m_keyboard;
 
     void render();
     void walkNode(const HtmlElement * node);

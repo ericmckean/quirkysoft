@@ -55,6 +55,13 @@ void UriTest::testPort()
   CPPUNIT_ASSERT_EQUAL( expectedPort, uri.port());
   CPPUNIT_ASSERT_EQUAL( expectedFile, uri.fileName());
 
+  uri.setUri("http://server/wiki/Documents:Main");
+  expectedPort = 80;
+  expectedFile = "/wiki/Documents:Main";
+  CPPUNIT_ASSERT_EQUAL( expectedServer, uri.server());
+  CPPUNIT_ASSERT_EQUAL( expectedPort, uri.port());
+  CPPUNIT_ASSERT_EQUAL( expectedFile, uri.fileName());
+
 }
 
 void UriTest::testNavigate()
@@ -99,5 +106,23 @@ void UriTest::testToString()
   CPPUNIT_ASSERT_EQUAL( expectedFile, uri.fileName());
   string expectedURI = "http://server/newPath/newfile.html";
   CPPUNIT_ASSERT_EQUAL( expectedURI, uri.asString());
+
+}
+
+void UriTest::testNavigateFile()
+{
+  URI uri("file:///path/file");
+
+  string expectedFile = "/path/file";
+  CPPUNIT_ASSERT( uri.isFile());
+  CPPUNIT_ASSERT_EQUAL( expectedFile, uri.fileName());
+
+  uri.navigateTo("newPath/newfile.html");
+  expectedFile = "/path/newPath/newfile.html";
+  CPPUNIT_ASSERT_EQUAL( expectedFile, uri.fileName());
+
+  uri.navigateTo("/root/index.txt");
+  expectedFile = "/root/index.txt";
+  CPPUNIT_ASSERT_EQUAL( expectedFile, uri.fileName());
 
 }
