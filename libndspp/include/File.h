@@ -7,6 +7,8 @@ namespace nds
   class File
   {
     public:
+      
+      static const char * base(const char * path);
       //! Create a file object.
       File();
 

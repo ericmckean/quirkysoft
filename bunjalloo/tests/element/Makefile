@@ -8,6 +8,8 @@ all : tester run
 LINKFILES:=HtmlElement.o\
            ElementFactory.o \
 	   HtmlMetaElement.o \
+	   HtmlImageElement.o \
+	   UnicodeString.o \
 	   HtmlAnchorElement.o
 #Document.o UTF8.o Entity.o HeaderParser.o HtmlParser.o HtmlDocument.o  ElementFactory.o 
 

@@ -18,6 +18,7 @@ const static char P_TAG[] = "p";
 const static char DIV_TAG[] = "div";
 const static char PLAINTEXT_TAG[] = "plaintext";
 const static char TABLE_TAG[] = "table";
+const static char BR_TAG[] = "br";
 const static char FORM_TAG[] = "form";
 const static char META_TAG[] = "meta";
 
@@ -339,6 +340,20 @@ void HtmlDocument::inBody(const std::string & tag, const AttributeVector & attrs
     insertElement(ElementFactory::create(tag, attrs));
     setContentModel(PLAINTEXT);
   }
+  else if (tag[0] == 'h' and 
+      (tag[1] >= '1' and tag[1] <= '6')
+      )
+  {
+    if (inScope(P_TAG))
+    {
+      handleEndTag(P_TAG);
+    }
+    while (headerInScope())
+    {
+      m_openElements.pop_back();
+    }
+    insertElement(ElementFactory::create(tag, attrs));
+  }
   else if (tag == A_TAG)
   {
     HtmlElement * activeFormatA = activeFormatContains(A_TAG);
@@ -377,6 +392,21 @@ void HtmlDocument::inBody(const std::string & tag, const AttributeVector & attrs
     HtmlElement * element = ElementFactory::create(tag, attrs);
     insertElement(element);
     addActiveFormatter(element);
+  }
+  else if (tag == "area"
+      or tag == "basefont"
+      or tag == "bgsound"
+      or tag == BR_TAG
+      or tag == "embed"
+      or tag == "img"
+      or tag == "param"
+      or tag == "spacer"
+      or tag == "wbr")
+  {
+    reconstructActiveFormatters();
+    HtmlElement * element = ElementFactory::create(tag, attrs);
+    insertElement(element);
+    m_openElements.pop_back();
   }
   else
   {
@@ -426,7 +456,10 @@ void HtmlDocument::inBody(const std::string & tag)
       while (inScope(tag))
       {
         // pop until not in scope.
+        const HtmlElement * popped = currentNode();
         m_openElements.pop_back();
+        if (popped->isa(tag))
+          break;
       }
     }
   }
@@ -476,6 +509,19 @@ void HtmlDocument::inBody(const std::string & tag)
       m_openElements.pop_back();
     }
   }
+  else if (tag[0] == 'h' and 
+      (tag[1] >= '1' and tag[1] <= '6')
+      )
+  {
+    if (headerInScope())
+    {
+      generateImpliedEndTags();
+    }
+    while (headerInScope())
+    {
+      m_openElements.pop_back();
+    }
+  }
   else if (tag == PLAINTEXT_TAG)
   {
     if (currentNode()->isa(PLAINTEXT_TAG))
@@ -483,6 +529,18 @@ void HtmlDocument::inBody(const std::string & tag)
       m_openElements.pop_back();
     }
     // else ignore.
+  }
+  else if (tag == "area"
+      or tag == "basefont"
+      or tag == "bgsound"
+      or tag == BR_TAG
+      or tag == "embed"
+      or tag == "img"
+      or tag == "param"
+      or tag == "spacer"
+      or tag == "wbr")
+  {
+    // do nothing
   }
   else
   {
@@ -801,7 +859,7 @@ void HtmlDocument::setNewAttributes(HtmlElement * element, const AttributeVector
   }
 }
 
-bool HtmlDocument::inScope(const std::string & element)
+bool HtmlDocument::inScope(const std::string & element) const
 {
    ElementVector::const_reverse_iterator it(m_openElements.rbegin());
    for (; it != m_openElements.rend(); ++it) {
@@ -1285,5 +1343,10 @@ void HtmlDocument::startScopeClosedElement(const std::string & tag, const std::s
     /* 4. Otherwise, set node to the previous entry in the stack of open
      * elements and return to step 2.  */
   }
+}
+
+bool HtmlDocument::headerInScope() const
+{
+  return inScope("h1") or inScope("h2") or inScope("h3") or inScope("h4") or inScope("h5") or inScope("h6");
 }
 

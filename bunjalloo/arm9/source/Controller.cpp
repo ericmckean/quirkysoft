@@ -8,11 +8,15 @@
 #include "Client.h"
 #include "Config.h"
 #include "File.h"
+#include "System.h"
 
 using namespace std;
 
 static const char s_licenceText[] = {
 #include "licence"
+};
+static const char s_errorText[] = {
+#include "error.txt"
 };
 
 Controller::Controller()
@@ -74,8 +78,19 @@ void Controller::localFile(const std::string & fileName)
     m_document->appendLocalData(data, size);
     m_document->setStatus(Document::LOADED);
     delete [] data;
+    uriFile.close();
   }
-  uriFile.close();
+  else
+  {
+    // could not load file.
+    m_document->reset();
+    string tmp("file://");
+    m_document->setUri(tmp+fileName);
+    m_document->appendLocalData(s_errorText, strlen(s_errorText));
+    m_document->appendLocalData(m_document->uri().c_str(), m_document->uri().length());
+    m_document->setStatus(Document::LOADED);
+  }
+
 }
 
 
@@ -97,12 +112,14 @@ class HttpClient: public nds::Client
     {
       char * buffer = (char*)bufferIn;
       buffer[amountRead] = 0;
-      printf("%s", buffer);
+      //printf("%s", buffer);
       m_document->appendData(buffer, amountRead);
+      m_total += amountRead;
       //printf("0x0x End of buffer x0x0", buffer);
     }
     
     void connectCallback() {
+      printf("Connect?...\n");
     }
     void writeCallback() {
     }
@@ -115,13 +132,18 @@ class HttpClient: public nds::Client
     }
 
     void finish() { 
+      printf("%d\n",m_total);
+      if (m_total == 0)
+      {
+        m_document->appendLocalData(s_errorText, strlen(s_errorText));
+        m_document->appendLocalData(m_document->uri().c_str(), m_document->uri().length());
+      }
       m_document->setStatus(Document::LOADED);
     }
 
     void debug(const char * s)
     {
-      //printf("\ndebug:%s\n",s);
-      //m_document->setData(s, strlen(s));
+      // printf("\ndebug:%s\n",s);
     }
 
     // GET stuff
@@ -136,7 +158,9 @@ class HttpClient: public nds::Client
         s += "Connection: close\r\n";
         s += "Accept-charset: ISO-8859-1,UTF-8\r\n";
         s += "Accept: text/html\r\n";
-        s += "User-Agent: Homebrew Browser\r\n";
+        s += "User-Agent: Bunjalloo (";
+        s += nds::System::uname();
+        s += ")\r\n";
         s += "\r\n";
         write(s.c_str(), s.length());
         m_finished = false;
@@ -161,15 +185,22 @@ void Controller::fetchHttp(URI & uri)
     HttpClient client(uri.server().c_str(), uri.port());
     client.setDocument(m_document);
     client.connect();
-    client.get(uri);
-    client.read();
-
-    URI docUri(m_document->uri());
-    if (docUri != uri)
+    if (client.isConnected())
     {
-      // redirected
-      uri.navigateTo(m_document->uri());
-      doUri(uri.asString());
+      client.get(uri);
+      client.read();
+
+      URI docUri(m_document->uri());
+      if (docUri != uri)
+      {
+        // redirected
+        uri.navigateTo(m_document->uri());
+        doUri(uri.asString());
+      }
+    }
+    else
+    {
+      doUri("file:///error");
     }
   } else {
     char * woops = "Woops, wifi not done";

@@ -7,6 +7,7 @@ all : tester run
 
 LINKFILES:=Document.o \
 	   UTF8.o \
+	   UnicodeString.o \
 	   Entity.o \
 	   HeaderParser.o \
 	   HtmlParser.o \
@@ -14,6 +15,7 @@ LINKFILES:=Document.o \
 	   ElementFactory.o \
 	   HtmlElement.o \
 	   HtmlMetaElement.o \
+	   HtmlImageElement.o \
 	   HtmlAnchorElement.o
 
 clean:

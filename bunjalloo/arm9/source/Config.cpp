@@ -46,7 +46,11 @@ void Config::notify()
             );
         if (font != children.end())
         {
-          m_font = (*font)->attribute("id"); 
+          UnicodeString tmp;
+          tmp = (*font)->attribute("id"); 
+          m_font.clear();
+          for (unsigned int i = 0; i < tmp.length();++i)
+            m_font += tmp[i];
           if (m_font[0] != '/')
           {
             m_font = "/"+m_font;

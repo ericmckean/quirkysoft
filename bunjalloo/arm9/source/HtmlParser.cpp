@@ -470,7 +470,7 @@ void HtmlParserImpl::handleBeforeAttributeName()
       addAttribute();
       m_attribute = new Attribute;
       m_attribute->name = m_value;
-      m_attribute->value = "";
+      m_attribute->value = UnicodeString();
       m_state = ATTRIBUTE_NAME;
       break;
   }
@@ -568,7 +568,7 @@ void HtmlParserImpl::handleAfterAttributeName()
         addAttribute();
         m_attribute = new Attribute;
         m_attribute->name=m_value;
-        m_attribute->value="";
+        m_attribute->value= UnicodeString();
         m_state = ATTRIBUTE_NAME;
       }
       break;
@@ -1372,8 +1372,8 @@ void HtmlParser::parseRefresh(const std::string & value)
 
 void HtmlParser::checkMetaTagHttpEquiv(const HtmlElement * meta)
 {
-  string httpEquiv = meta->attribute("http-equiv");
-  string content = meta->attribute("content");
+  string httpEquiv = unicode2string(meta->attribute("http-equiv"));
+  string content = unicode2string( meta->attribute("content"));
   if (not httpEquiv.empty() and not content.empty())
   {
     transform(httpEquiv.begin(), httpEquiv.end(), httpEquiv.begin(), ::tolower);

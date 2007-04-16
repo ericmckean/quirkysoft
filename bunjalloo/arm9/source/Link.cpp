@@ -40,5 +40,5 @@ bool Link::hitTest(int x, int y)
 }
 std::string Link::href() const
 {
-  return m_anchor->attribute("href");
+  return unicode2string(m_anchor->attribute("href"));
 }

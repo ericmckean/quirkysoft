@@ -4,9 +4,9 @@ HtmlMetaElement::HtmlMetaElement(const std::string & tagName)
 : HtmlElement(tagName)
 {}
 
-const std::string * HtmlMetaElement::attributePtr(const std::string & name) const
+const UnicodeString * HtmlMetaElement::attributePtr(const std::string & name) const
 {
-  const std::string * p = HtmlElement::attributePtr(name);
+  const UnicodeString * p = HtmlElement::attributePtr(name);
   if (p) {
     return p;
   }

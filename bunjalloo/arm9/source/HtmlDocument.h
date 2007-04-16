@@ -123,7 +123,7 @@ class HtmlDocument : public HtmlParser
     // end tag
     void afterBody(const std::string & tag);
 
-    bool inScope(const std::string & element);
+    bool inScope(const std::string & element) const;
     HtmlElement* activeFormatContains(const std::string & tagName);
     void removeFromActiveFormat(HtmlElement* element);
     void removeFromOpenElements(HtmlElement* element);
@@ -140,6 +140,8 @@ class HtmlDocument : public HtmlParser
     void createBookmark(Bookmark & marker, ElementList::iterator & bookmarkIt) const;
     void adoptionAgency(const std::string & tag);
     void startScopeClosedElement(const std::string & tag, const std::string & alternate="");
+
+    bool headerInScope() const;
     // disable copies
     HtmlDocument (const HtmlDocument&);
     const HtmlDocument& operator=(const HtmlDocument&);

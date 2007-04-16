@@ -31,12 +31,17 @@ class View : public ViewI
     ControllerI & m_controller;
     TextArea * m_textArea;
     Keyboard * m_keyboard;
+    int m_pendingNewLines;
+    bool m_haveShownSomething;
 
     void render();
     void walkNode(const HtmlElement * node);
     bool applyFormatting(const HtmlElement * element);
+    void preNodeFormatting(const HtmlElement * node);
+    void postNodeFormatting(const HtmlElement * node);
     //! Really add a newline or few to the text area
     void addRealNewline(int count=1);
+    void flushNewlines();
 
 };
 #endif
