@@ -75,7 +75,7 @@ void DocumentTest::testHtmlAttributes()
   m_document->appendLocalData(m_data, m_length);
   const HtmlElement * result = m_document->rootNode();
   string expected("en");
-  string attribResult = result->attribute("lang");
+  string attribResult = unicode2string(result->attribute("lang"));
   CPPUNIT_ASSERT_EQUAL(expected, attribResult);
 }
 
@@ -197,7 +197,7 @@ void DocumentTest::testAnchor()
       const HtmlElement * a = element->firstChild();
       CPPUNIT_ASSERT(a != 0);
       CPPUNIT_ASSERT(a->isa("a"));
-      string href = a->attribute("href");
+      string href = unicode2string(a->attribute("href"));
       string expected("anchor");
       CPPUNIT_ASSERT_EQUAL(expected, href);
     }
@@ -228,7 +228,7 @@ void DocumentTest::testBrokenAnchor()
       const HtmlElement * a = element->firstChild();
       CPPUNIT_ASSERT(a != 0);
       CPPUNIT_ASSERT(a->isa("a"));
-      string href = a->attribute("href");
+      string href = unicode2string(a->attribute("href"));
       string expected("anchor");
       CPPUNIT_ASSERT_EQUAL(expected, href);
     }
@@ -279,13 +279,13 @@ void DocumentTest::testSimpleBodyA()
     expected = "meta";
     CPPUNIT_ASSERT_EQUAL(expected, (*headIt)->tagName());
     expected = "content-type";
-    CPPUNIT_ASSERT_EQUAL(expected, (*headIt)->attribute("http-equiv"));
+    CPPUNIT_ASSERT_EQUAL(expected, unicode2string((*headIt)->attribute("http-equiv")));
     ++headIt;
     expected = "title";
     CPPUNIT_ASSERT_EQUAL(expected, (*headIt)->tagName());
     HtmlElement * title = *headIt;
     CPPUNIT_ASSERT(title->hasChildren());
-    expected = "#text";
+    expected = "#TEXT";
     CPPUNIT_ASSERT_EQUAL(expected, title->firstChild()->tagName());
     ++headIt;
   }
@@ -460,4 +460,62 @@ void DocumentTest::testAdoption2()
   const HtmlElement * root = m_document->rootNode();
   CPPUNIT_ASSERT(root != 0);
   CPPUNIT_ASSERT(root->isa("html"));
+}
+
+void DocumentTest::testHeader()
+{
+  readFile("header1.html");
+  // test the adoption algorithm
+  m_document->appendLocalData(m_data, m_length);
+  m_document->setStatus(Document::LOADED);
+  const HtmlElement * root = m_document->rootNode();
+  CPPUNIT_ASSERT(root != 0);
+  CPPUNIT_ASSERT(root->isa("html"));
+  const HtmlElement * body = root->lastChild();
+  CPPUNIT_ASSERT(body != 0);
+  CPPUNIT_ASSERT(body->isa("body"));
+  const HtmlElement * h1(0);
+  ElementList::const_iterator it(body->children().begin());
+  for (; it != body->children().end(); ++it)
+  {
+    const HtmlElement * element(*it);
+    if ( element->isa("h1"))
+    {
+      h1 = element;
+      break;
+    }
+  }
+  CPPUNIT_ASSERT(it != body->children().end());
+  CPPUNIT_ASSERT(h1 != 0);
+}
+
+void DocumentTest::testHeader2()
+{
+  readFile("header2.html");
+  // test the adoption algorithm
+  m_document->appendLocalData(m_data, m_length);
+  m_document->setStatus(Document::LOADED);
+  const HtmlElement * root = m_document->rootNode();
+  CPPUNIT_ASSERT(root != 0);
+  CPPUNIT_ASSERT(root->isa("html"));
+  const HtmlElement * body = root->lastChild();
+  CPPUNIT_ASSERT(body != 0);
+  CPPUNIT_ASSERT(body->isa("body"));
+  const HtmlElement * h1(0);
+  const HtmlElement * h2(0);
+  ElementList::const_iterator it(body->children().begin());
+  for (; it != body->children().end(); ++it)
+  {
+    const HtmlElement * element(*it);
+    if ( element->isa("h1"))
+    {
+      h1 = element;
+    }
+    if ( element->isa("h2"))
+    {
+      h2 = element;
+    }
+  }
+  CPPUNIT_ASSERT(h1 != 0);
+  CPPUNIT_ASSERT(h2 != 0);
 }

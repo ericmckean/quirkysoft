@@ -1,8 +1,8 @@
 #include "HtmlAnchorElement.h"
 
-const std::string * HtmlAnchorElement::attributePtr(const std::string & name) const
+const UnicodeString * HtmlAnchorElement::attributePtr(const std::string & name) const
 {
-  const std::string * p = HtmlElement::attributePtr(name);
+  const UnicodeString * p = HtmlElement::attributePtr(name);
   if (p) {
     return p;
   }

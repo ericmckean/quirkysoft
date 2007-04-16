@@ -1,4 +1,5 @@
 #include <assert.h>
+#include <libgen.h>
 #include <iostream>
 #include <list>
 #include "ndspp.h"
@@ -7,11 +8,13 @@
 #include "Document.h"
 #include "URI.h"
 #include "HtmlElement.h"
+#include "HtmlImageElement.h"
 #include "TextArea.h"
 #include "Canvas.h"
 #include "ControllerI.h"
 #include "Keyboard.h"
 #include "Link.h"
+#include "File.h"
 
 using namespace std;
 
@@ -19,7 +22,9 @@ View::View(Document & doc, ControllerI & c):
   m_document(doc), 
   m_controller(c),
   m_textArea(new TextArea),
-  m_keyboard(new Keyboard(*m_textArea))
+  m_keyboard(new Keyboard(*m_textArea)),
+  m_pendingNewLines(0),
+  m_haveShownSomething(false)
 {
   m_document.registerView(this);
   keysSetRepeat( 10, 5 );
@@ -33,20 +38,147 @@ void View::addRealNewline(int count)
   m_textArea->setParseNewline(false);
 }
 
-void View::walkNode(const HtmlElement * node)
+void View::preNodeFormatting(const HtmlElement * node)
 {
   if (node->isa("li"))
   {
-    UnicodeString p;
-    p += ' ';
-    p += '*';
-    p += ' ';
-    m_textArea->printu(p);
+    HtmlElement p("p");
+    p.appendText(' ');
+    p.appendText('*');
+    p.appendText(' ');
+    applyFormatting(p.firstChild());
   }
-  if (node->isa("ul"))
+  else if (node->isa("ul"))
   {
-    addRealNewline(1);
+    if ( node->parent()->isa("li") or node->parent()->isa("ul"))
+      m_pendingNewLines = 0;
+    else
+      m_pendingNewLines++;
   }
+  else if (node->tagName()[0] == 'h' and (node->tagName()[1] >= '1' and node->tagName()[1] <= '6'))
+  {
+    if (m_pendingNewLines < 2)
+      m_pendingNewLines++;;
+  }
+  else if (node->isa("p"))
+  {
+    m_pendingNewLines+=2;
+  }
+}
+
+void View::postNodeFormatting(const HtmlElement * node)
+{
+  if (node->isa("li"))
+  {
+    m_pendingNewLines++;
+  }
+  else if (node->isa("a"))
+  {
+    m_textArea->setColor(nds::Color(0,0,0));
+    m_textArea->setLink(false);
+  }
+  else if (node->isa("div"))
+  {
+    m_pendingNewLines++;
+  }
+  else if (node->tagName()[0] == 'h' and (node->tagName()[1] >= '1' and node->tagName()[1] <= '6'))
+  {
+    m_pendingNewLines += 2;
+  } 
+  else if (node->isa("ul"))
+  {
+    if (node->parent()->isa("li") or node->parent()->isa("ul"))
+      m_pendingNewLines = 0;
+    else
+      m_pendingNewLines++;
+  }
+  else if (node->isa("p"))
+  {
+    m_pendingNewLines+=2;
+  }
+  else if (node->isa("br"))
+  {
+    flushNewlines();
+    m_pendingNewLines++;
+    flushNewlines();
+  } 
+}
+
+void View::flushNewlines()
+{
+  if (m_pendingNewLines and m_haveShownSomething)
+  {
+    addRealNewline(m_pendingNewLines>2?2:m_pendingNewLines);
+  }
+  m_pendingNewLines = 0;
+}
+
+bool View::applyFormatting(const HtmlElement * element)
+{
+  if (element->isa("a"))
+  {
+    m_textArea->setColor(nds::Color(0,0,31));
+    m_textArea->addLink(element);
+  } 
+  else if (element->text().size())
+  {
+    UnicodeString delims((unsigned int)' ',1); delims += '\n';
+    unsigned int pos = element->text().find_first_not_of(delims);
+    if (pos != UnicodeString::npos) {
+      // if grandparent is a li then change of model
+      if ( ( element->parent()->isa("ul") or element->parent()->isa("ol") ) 
+          and element->parent()->parent()->isa("li"))
+        m_pendingNewLines = 1;
+      flushNewlines();
+      m_haveShownSomething = true;
+      m_textArea->printu(element->text());
+      if (element->parent()->isa("ul"))
+        m_pendingNewLines++;
+    }
+  }
+  else if (element->isa("script") or element->isa("style"))
+  {
+    return false;
+  }
+  else if (element->isa("img"))
+  {
+    // hurrah for alt text. some people set it to "", which screws up any
+    // nice ways to display it (see w3m google.com - Google [hp1] [hp2] [hp3]... huh?)
+    flushNewlines();
+    const UnicodeString & altText = element->attribute("alt");
+    bool hasAltText = ((HtmlImageElement*)element)->hasAltText();
+    if (hasAltText) {
+      if (not altText.empty()) {
+        m_textArea->setColor(nds::Color(0,31,0));
+        m_textArea->printu(altText);
+        m_textArea->setColor(nds::Color(0,0,0));
+      }
+      return true;
+    }
+    const UnicodeString & srcText = element->attribute("src");
+    m_textArea->setColor(nds::Color(0,31,0));
+    if (not srcText.empty())
+    {
+      string tmp = unicode2string(srcText);
+      const char * bname = nds::File::base(tmp.c_str());
+      string bnamestr(bname);
+      bnamestr = "["+ bnamestr+"]";
+      UnicodeString ustr ( string2unicode(bnamestr));
+      m_textArea->printu(ustr);
+      m_textArea->setColor(nds::Color(0,0,0));
+      return true;
+    }
+    UnicodeString ustr( string2unicode("[IMG]"));
+    m_textArea->printu(ustr);
+    m_textArea->setColor(nds::Color(0,0,0));
+    return true;
+  }
+  return true;
+}
+
+void View::walkNode(const HtmlElement * node)
+{
+  preNodeFormatting(node);
   if (node->hasChildren())
   {
     const ElementList & theChildren = node->children();
@@ -59,19 +191,7 @@ void View::walkNode(const HtmlElement * node)
       }
     }
   }
-  if (node->isa("li"))
-  {
-    m_textArea->setParseNewline(true);
-    UnicodeString p;
-    p += '\n';
-    m_textArea->printu(p);
-    m_textArea->setParseNewline(false);
-  }
-  if (node->isa("a"))
-  {
-    m_textArea->setColor(nds::Color(0,0,0));
-    m_textArea->setLink(false);
-  }
+  postNodeFormatting(node);
 }
 
 void View::render()
@@ -79,39 +199,14 @@ void View::render()
   nds::Canvas::instance().fillRectangle(0, 0, SCREEN_WIDTH, 2*SCREEN_HEIGHT, nds::Color(31,31,31));
   m_textArea->setCursor(0, 0);
   m_textArea->setParseNewline(false);
+  m_pendingNewLines = 0;
+  m_haveShownSomething = false;
   const HtmlElement * root = m_document.rootNode();
   assert(root->isa("html"));
   assert(root->hasChildren());
-  /*
   const HtmlElement * body = root->lastChild();
-  assert(body->hasChildren());*/
-  walkNode(root);
-}
-
-bool View::applyFormatting(const HtmlElement * element)
-{
-  if (element->isa("a"))
-  {
-    m_textArea->setColor(nds::Color(0,0,31));
-    m_textArea->addLink(element);
-  } 
-  if (element->text().size())
-  {
-    m_textArea->printu(element->text());
-  }
-  if (element->isa("p"))
-  {
-    addRealNewline(2);
-  }
-  if (element->isa("br"))
-  {
-    addRealNewline();
-  }
-  if (element->isa("script") or element->isa("style"))
-  {
-    return false;
-  }
-  return true;
+  assert(body->hasChildren());
+  walkNode(body);
 }
 
 
@@ -167,6 +262,10 @@ void View::tick()
       // scroll up ...
       m_textArea->setStartLine(m_textArea->startLine()-1);
       render();
+    }
+    if (keys & KEY_A) {
+      // render the node tree
+      m_document.dumpDOM();
     }
     if (keys & KEY_TOUCH) {
       touchPosition tp = touchReadXY();

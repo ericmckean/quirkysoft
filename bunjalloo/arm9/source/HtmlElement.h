@@ -25,13 +25,13 @@ class HtmlElement /* : public Element */
      * @param name the attribute name
      * @param value the value
      */
-    virtual void setAttribute(const std::string & name, const std::string & value);
+    virtual void setAttribute(const std::string & name, const UnicodeString & value);
     
     /** Get an attribute value.
      * @param name the attribute name.
      * @return the attribute value as a string.
      */
-    virtual std::string attribute(const std::string & name) const;
+    virtual UnicodeString attribute(const std::string & name) const;
 
     /** Append a child node.
      * @param child the node to append
@@ -113,10 +113,10 @@ class HtmlElement /* : public Element */
     //void dump() const;
   protected:
     std::string m_tagName;
-    std::string m_id;
-    std::string m_title;
-    std::string m_lang;
-    std::string m_dir;
+    UnicodeString m_id;
+    UnicodeString m_title;
+    UnicodeString m_lang;
+    UnicodeString m_dir;
     UnicodeString m_text;
     // not implemented
     //std::string m_className;
@@ -124,7 +124,7 @@ class HtmlElement /* : public Element */
     HtmlElement * m_parent;
     ElementList m_children;
 
-    virtual const std::string * attributePtr(const std::string & name) const;
+    virtual const UnicodeString * attributePtr(const std::string & name) const;
     virtual void copyAttributes(HtmlElement * copyTo) const;
 };
 

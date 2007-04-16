@@ -4,7 +4,7 @@
 
 using namespace std;
 
-const std::string * HtmlElement::attributePtr(const std::string & name) const
+const UnicodeString * HtmlElement::attributePtr(const std::string & name) const
 {
   if (name == "id")
   {
@@ -25,19 +25,19 @@ const std::string * HtmlElement::attributePtr(const std::string & name) const
   return 0;
 }
 
-std::string HtmlElement::attribute(const std::string & name) const
+UnicodeString HtmlElement::attribute(const std::string & name) const
 {
-   const string * ptr = attributePtr(name);
+   const UnicodeString * ptr = attributePtr(name);
    if (ptr)
    {
      return *ptr;
    }
-   return "";
+   return UnicodeString();
 }
 
-void HtmlElement::setAttribute(const std::string & name, const std::string & value)
+void HtmlElement::setAttribute(const std::string & name, const UnicodeString & value)
 {
-   string * ptr = const_cast<string*>(attributePtr(name));
+   UnicodeString * ptr = const_cast<UnicodeString*>(attributePtr(name));
    if (ptr)
    {
      *ptr = value;
@@ -63,13 +63,13 @@ void HtmlElement::appendText(unsigned int value)
 {
   if (m_children.size())
   {
-    if (m_children.back()->isa("#text"))
+    if (m_children.back()->isa("#TEXT"))
     {
       m_children.back()->m_text += value;
       return;
     }
   }
-  HtmlElement* textNode = new HtmlElement("#text");
+  HtmlElement* textNode = new HtmlElement("#TEXT");
   textNode->m_text = value;
   append(textNode);
 }

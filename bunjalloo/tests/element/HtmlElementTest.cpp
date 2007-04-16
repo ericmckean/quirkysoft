@@ -31,28 +31,28 @@ void HtmlElementTest::testAttributes()
   m_element = ElementFactory::create("html");
 
   string expected("en");
-  m_element->setAttribute("lang", expected);
-  string result = m_element->attribute("lang");
+  m_element->setAttribute("lang", string2unicode(expected));
+  string result = unicode2string(m_element->attribute("lang"));
   CPPUNIT_ASSERT_EQUAL( expected, result);
 
   expected = "newId";
-  m_element->setAttribute("id", expected);
-  result = m_element->attribute("id");
+  m_element->setAttribute("id", string2unicode(expected));
+  result = unicode2string(m_element->attribute("id"));
   CPPUNIT_ASSERT_EQUAL( expected, result);
 
   expected = "Test title";
-  m_element->setAttribute("title", expected);
-  result = m_element->attribute("title");
+  m_element->setAttribute("title", string2unicode(expected));
+  result = unicode2string(m_element->attribute("title"));
   CPPUNIT_ASSERT_EQUAL( expected, result);
 
   expected = "fichero";
-  m_element->setAttribute("dir", expected);
-  result = m_element->attribute("dir");
+  m_element->setAttribute("dir", string2unicode(expected));
+  result = unicode2string(m_element->attribute("dir"));
   CPPUNIT_ASSERT_EQUAL( expected, result);
 
   // try setting some unsupported attribute
-  m_element->setAttribute("test", expected);
-  result = m_element->attribute("test");
+  m_element->setAttribute("test", string2unicode(expected));
+  result = unicode2string(m_element->attribute("test"));
   expected = "";
   CPPUNIT_ASSERT_EQUAL( expected, result);
 
@@ -89,13 +89,15 @@ void HtmlElementTest::testAnchor()
 void HtmlElementTest::testClone()
 {
   m_element = ElementFactory::create("a");
-  m_element->setAttribute("href", "http://localhost");
-  m_element->setAttribute("id", "myElement");
+  m_element->setAttribute("href", string2unicode("http://localhost"));
+  m_element->setAttribute("id", string2unicode("myElement"));
   m_clone = m_element->clone();
   CPPUNIT_ASSERT( m_clone != 0);
   CPPUNIT_ASSERT( m_clone->isa("a"));
-  CPPUNIT_ASSERT_EQUAL(m_element->attribute("href"), m_clone->attribute("href"));
-  CPPUNIT_ASSERT_EQUAL(m_element->attribute("id"), m_clone->attribute("id"));
+  CPPUNIT_ASSERT_EQUAL(unicode2string(m_element->attribute("href")), 
+      unicode2string(m_clone->attribute("href")));
+  CPPUNIT_ASSERT_EQUAL(unicode2string(m_element->attribute("id")), 
+      unicode2string(m_clone->attribute("id")));
 }
 
 
@@ -117,7 +119,7 @@ void HtmlElementTest::testAppendText()
   m_element->appendText('T');
   CPPUNIT_ASSERT(m_element->hasChildren());
   HtmlElement * text = m_element->firstChild();
-  string expected("#text");
+  string expected("#TEXT");
   CPPUNIT_ASSERT_EQUAL(expected, text->tagName());
   HtmlElement * a = ElementFactory::create("a");
   a->appendText('L');
@@ -138,8 +140,8 @@ void HtmlElementTest::testMeta()
   CPPUNIT_ASSERT( meta != 0 );
 
   string expected("content-type");
-  m_element->setAttribute("http-equiv", "content-type");
-  CPPUNIT_ASSERT_EQUAL(expected, m_element->attribute("http-equiv"));
+  m_element->setAttribute("http-equiv", string2unicode("content-type"));
+  CPPUNIT_ASSERT_EQUAL(expected, unicode2string(m_element->attribute("http-equiv")));
 }
 
 void HtmlElementTest::testRemove()
@@ -158,10 +160,26 @@ void HtmlElementTest::testRemove()
   expected = 2;
   CPPUNIT_ASSERT_EQUAL(expected, m_element->children().size());
 
-  string expectedText("#text");
+  string expectedText("#TEXT");
   CPPUNIT_ASSERT_EQUAL(expectedText, m_element->firstChild()->tagName());
   expectedText = "b";
   CPPUNIT_ASSERT_EQUAL(expectedText, m_element->lastChild()->tagName());
   delete a;
+}
+
+void HtmlElementTest::testImg()
+{
+  // create a node, add another, check removal
+  m_element = ElementFactory::create("img");
+  m_element->setAttribute("src", string2unicode("image-src"));
+  string expected("image-src");
+  CPPUNIT_ASSERT_EQUAL(expected, unicode2string(m_element->attribute("src")));
+
+  expected = "alternate text";
+  m_element->setAttribute("alt", string2unicode(expected));
+  CPPUNIT_ASSERT_EQUAL(expected, unicode2string(m_element->attribute("alt")));
+  expected = "minombre";
+  m_element->setAttribute("name", string2unicode(expected));
+  CPPUNIT_ASSERT_EQUAL(expected, unicode2string( m_element->attribute("name")));
 }
 

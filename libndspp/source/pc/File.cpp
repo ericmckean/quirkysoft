@@ -2,6 +2,7 @@
 #include <string>
 #include <stdio.h>
 #include <unistd.h>
+#include <libgen.h>
 
 using namespace nds;
 
@@ -121,3 +122,10 @@ void File::close()
 {
   m_details->close();
 }
+
+const char * File::base(const char * path)
+{
+  // easy
+  return ::basename((char*)path);
+}
+

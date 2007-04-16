@@ -10,8 +10,8 @@ class HtmlAnchorElement : public HtmlElement
 
     HtmlElement * clone() const;
   protected:
-    std::string m_href;
-    const std::string * attributePtr(const std::string & name) const;
+    UnicodeString m_href;
+    const UnicodeString * attributePtr(const std::string & name) const;
     void copyAttributes(HtmlElement * copyTo) const;
 };
 #endif

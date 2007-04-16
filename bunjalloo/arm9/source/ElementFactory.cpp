@@ -1,6 +1,7 @@
 #include <vector>
 #include "ElementFactory.h"
 #include "HtmlAnchorElement.h"
+#include "HtmlImageElement.h"
 #include "HtmlMetaElement.h"
 #include "HtmlElement.h"
 
@@ -14,6 +15,10 @@ HtmlElement * ElementFactory::create(const std::string & elementType)
   else if (elementType == "meta")
   {
     return new HtmlMetaElement(elementType);
+  }
+  else if (elementType == "img")
+  {
+    return new HtmlImageElement(elementType);
   }
 
   return new HtmlElement(elementType);

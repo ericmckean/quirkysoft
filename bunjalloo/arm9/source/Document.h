@@ -86,6 +86,8 @@ class Document
      */
     void unregisterView(ViewI * v);
 
+    void dumpDOM();
+
   private:
     std::string m_uri;
     Status m_status;

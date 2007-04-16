@@ -10,6 +10,7 @@ clean:
 
 LINKFILES:=Document.o \
 	   UTF8.o \
+	   UnicodeString.o \
 	   Entity.o \
 	   HeaderParser.o \
 	   HtmlParser.o \
@@ -17,6 +18,7 @@ LINKFILES:=Document.o \
 	   ElementFactory.o \
 	   HtmlElement.o \
 	   HtmlMetaElement.o \
+	   HtmlImageElement.o \
 	   HtmlAnchorElement.o
 
 tester: $(OFILES) $(LINKFILES:%.o=../../arm9/build.sdl/%.o)  ../Main.o

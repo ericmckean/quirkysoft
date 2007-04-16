@@ -8,9 +8,9 @@ class HtmlMetaElement : public HtmlElement
     HtmlMetaElement(const std::string & tagName);
     HtmlElement * clone() const;
   protected:
-    std::string m_httpEquiv;
-    std::string m_content;
-    const std::string * attributePtr(const std::string & name) const;
+    UnicodeString m_httpEquiv;
+    UnicodeString m_content;
+    const UnicodeString * attributePtr(const std::string & name) const;
     void copyAttributes(HtmlElement * copyTo) const;
 };
 #endif

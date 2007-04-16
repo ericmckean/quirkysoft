@@ -3,14 +3,12 @@ SOURCES		:=	source
 INCLUDES	:=	include
 DATA		:=
 
-CFLAGS	:=	-g -Wall  -DDATADIR=$(DATADIR)
+CFLAGS	:=	-pg -Wall  -DDATADIR=$(DATADIR)
 
 CFLAGS	+=	$(INCLUDE)
 CXXFLAGS	:=	$(CFLAGS)
 
-ASFLAGS	:=	-g $(ARCH)
-
-LDFLAGS	=	-g -Wl,-Map,$(notdir $*.map)
+LDFLAGS	=	-pg -Wl,-Map,$(notdir $*.map)
 
 #---------------------------------------------------------------------------------
 # any extra libraries we wish to link with the project

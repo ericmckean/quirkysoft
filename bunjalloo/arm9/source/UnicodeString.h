@@ -7,4 +7,7 @@
  */
 typedef std::basic_string<unsigned int> UnicodeString;
 
+std::string unicode2string(const UnicodeString & ustr);
+UnicodeString string2unicode(const std::string & str);
+
 #endif

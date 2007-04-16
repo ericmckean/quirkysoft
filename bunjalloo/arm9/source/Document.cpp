@@ -36,6 +36,12 @@ const UnicodeString & Document::asText() const
   return m_htmlDocument->data();
 }
 
+
+void Document::dumpDOM() 
+{
+  m_htmlDocument->dumpDOM();
+}
+
 const HtmlElement * Document::rootNode() const
 {
   // m_htmlDocument->dumpDOM();
