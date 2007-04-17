@@ -77,7 +77,10 @@ bool Client::connect(sockaddr_in & socketAddress)
             else {
               debug("No data within 1 second.");
               // keep trying - let the client know what is happening.
-              connectCallback();
+              if ( connectCallback() == false ) 
+              {
+                break;
+              }
             }
           }
         }

@@ -52,8 +52,11 @@ namespace nds {
        */
       virtual bool finished()=0;
 
-      //! called during connection every second while waiting.
-      virtual void connectCallback()=0;
+      /** called during connection every second while waiting.
+       * @return true if should keep trying, false to give up.
+       */
+      virtual bool connectCallback()=0;
+
       //! called during write every second while waiting.
       virtual void writeCallback()=0;
       //! called during read every second while waiting.
