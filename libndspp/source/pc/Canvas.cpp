@@ -32,10 +32,13 @@ int Canvas::width() const
 void Canvas::drawPixel(int x, int y, int colour)
 {
   int layer = ( (y < 192) ? 0:1 );
+  u16 * vram = SDLhandler::instance().vramMain(0);
   if (layer) {
     y-=192;
+    vram = SDLhandler::instance().vramSub(0);
   }
-  SDLhandler::instance().drawPixel(x,y,layer,colour);
+  // SDLhandler::instance().drawPixel(x,y,layer,colour);
+  vram[x+y*SCREEN_WIDTH] = colour;
 }
 
 void Canvas::fillRectangle(int x, int y, int w, int h, int colour)
