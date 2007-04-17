@@ -3,23 +3,23 @@ SOURCES		:=	source
 INCLUDES	:=	include
 DATA		:=
 
-CFLAGS	:=	-pg -Wall  -DDATADIR=$(DATADIR)
+CFLAGS	:=	-g -Wall  -DDATADIR=$(DATADIR)
 
 CFLAGS	+=	$(INCLUDE)
 CXXFLAGS	:=	$(CFLAGS)
 
-LDFLAGS	=	-pg -Wl,-Map,$(notdir $*.map)
+LDFLAGS	=	-g -Wl,-Map,$(notdir $*.map)
 
 #---------------------------------------------------------------------------------
 # any extra libraries we wish to link with the project
 #---------------------------------------------------------------------------------
-LIBS	:= -lpcnds -lpthread `sdl-config --libs`
+LIBS	:= -lpcnds -lpthread `sdl-config --libs` -limg
  
 #---------------------------------------------------------------------------------
 # list of directories containing libraries, this must be the top level containing
 # include and lib
 #---------------------------------------------------------------------------------
-LIBDIRS	:=	$(TOPDIR)/../libndspp
+LIBDIRS	:=	$(TOPDIR)/../libndspp 
 
 #---------------------------------------------------------------------------------
 # no real need to edit anything past this point unless you need to add additional
@@ -58,9 +58,9 @@ export OFILES	:=	$(addsuffix .o,$(BINFILES)) \
  
 export INCLUDE	:=	$(foreach dir,$(INCLUDES),-I$(CURDIR)/$(dir)) \
 			$(foreach dir,$(LIBDIRS),-I$(dir)/include) \
-			-I$(CURDIR)/$(BUILD)
+			-I$(CURDIR)/$(BUILD) -I$(TOPDIR)/common/img
  
-export LIBPATHS	:=	$(foreach dir,$(LIBDIRS),-L$(dir)/lib)
+export LIBPATHS	:=	$(foreach dir,$(LIBDIRS),-L$(dir)/lib) -L$(TOPDIR)/common/img/build.sdl
  
 .PHONY: $(BUILD) clean
  

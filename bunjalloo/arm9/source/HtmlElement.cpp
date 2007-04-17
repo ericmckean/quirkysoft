@@ -1,5 +1,6 @@
 #include <vector>
 #include "HtmlElement.h"
+#include "HtmlParser.h"
 #include "ElementFactory.h"
 
 using namespace std;
@@ -65,10 +66,17 @@ void HtmlElement::appendText(unsigned int value)
   {
     if (m_children.back()->isa("#TEXT"))
     {
-      m_children.back()->m_text += value;
+      UnicodeString & text(m_children.back()->m_text);
+      if (not ::isblank(value) or (::isblank(value) and not ::isblank(text[text.length()-1])))
+      {
+        m_children.back()->m_text += value;
+      }
       return;
     }
   }
+  // ignore spaces at the start.
+  if (isWhitespace(value) or ::isblank(value))
+    return;
   HtmlElement* textNode = new HtmlElement("#TEXT");
   textNode->m_text = value;
   append(textNode);

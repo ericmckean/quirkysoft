@@ -63,6 +63,14 @@ void Controller::mainLoop()
   }
 }
 
+void Controller::loadError()
+{
+  m_document->reset();
+  m_document->appendLocalData(s_errorText, strlen(s_errorText));
+  m_document->appendLocalData(m_document->uri().c_str(), m_document->uri().length());
+  m_document->setStatus(Document::LOADED);
+}
+
 void Controller::localFile(const std::string & fileName)
 {
   nds::File uriFile;
@@ -83,28 +91,21 @@ void Controller::localFile(const std::string & fileName)
   else
   {
     // could not load file.
-    m_document->reset();
-    string tmp("file://");
-    m_document->setUri(tmp+fileName);
-    m_document->appendLocalData(s_errorText, strlen(s_errorText));
-    m_document->appendLocalData(m_document->uri().c_str(), m_document->uri().length());
-    m_document->setStatus(Document::LOADED);
+    loadError();
   }
 
 }
 
-
-// An implementation - prints out the bytes
 class HttpClient: public nds::Client
 {
   public:
     HttpClient(const char * ip, int port)
-      : nds::Client(ip,port), m_total(0), m_finished(false)
+      : nds::Client(ip,port), m_total(0), m_finished(false), m_connectAttempts(0)
     {}
 
-    void setDocument(Document * d)
+    void setController(Controller * c)
     {
-      m_document = d;
+      m_self = c;
     }
 
     // implement the pure virtual functions
@@ -113,14 +114,17 @@ class HttpClient: public nds::Client
       char * buffer = (char*)bufferIn;
       buffer[amountRead] = 0;
       //printf("%s", buffer);
-      m_document->appendData(buffer, amountRead);
+      m_self->m_document->appendData(buffer, amountRead);
       m_total += amountRead;
       //printf("0x0x End of buffer x0x0", buffer);
     }
     
-    void connectCallback() {
+    bool connectCallback() {
       printf("Connect?...\n");
+      m_connectAttempts++;
+      return m_connectAttempts < 10;
     }
+
     void writeCallback() {
     }
     void readCallback() {
@@ -132,13 +136,15 @@ class HttpClient: public nds::Client
     }
 
     void finish() { 
-      printf("%d\n",m_total);
+      //printf("%d\n",m_total);
       if (m_total == 0)
       {
-        m_document->appendLocalData(s_errorText, strlen(s_errorText));
-        m_document->appendLocalData(m_document->uri().c_str(), m_document->uri().length());
+        m_self->loadError();
       }
-      m_document->setStatus(Document::LOADED);
+      else
+      {
+        m_self->m_document->setStatus(Document::LOADED);
+      }
     }
 
     void debug(const char * s)
@@ -167,12 +173,13 @@ class HttpClient: public nds::Client
         m_uri = uri;
       }
       // reset the document for downloading
-      m_document->reset();
+      m_self->m_document->reset();
     }
   private:
     int m_total;
     bool m_finished;
-    Document * m_document;
+    int m_connectAttempts;
+    Controller * m_self;
     URI m_uri;
 };
 
@@ -183,7 +190,7 @@ void Controller::fetchHttp(URI & uri)
     // open a socket to the server.
     // FIXME - hardcoded 80 port.
     HttpClient client(uri.server().c_str(), uri.port());
-    client.setDocument(m_document);
+    client.setController(this);
     client.connect();
     if (client.isConnected())
     {
@@ -200,7 +207,7 @@ void Controller::fetchHttp(URI & uri)
     }
     else
     {
-      doUri("file:///error");
+      loadError();
     }
   } else {
     char * woops = "Woops, wifi not done";

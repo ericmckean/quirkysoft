@@ -7,10 +7,12 @@ class URI;
 
 #include "ControllerI.h"
 
+class HttpClient;
 /** Controller maps user actions to model updates. For example, responds to setting the URI.
  */
 class Controller : public ControllerI
 {
+  friend class HttpClient;
   public:
     //!Constructor.
     Controller();
@@ -34,5 +36,6 @@ class Controller : public ControllerI
 
     void localFile(const std::string &);
     void fetchHttp(URI &);
+    void loadError();
 };
 #endif

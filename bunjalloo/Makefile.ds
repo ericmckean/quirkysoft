@@ -45,6 +45,7 @@ arm7/$(TARGET).elf:
 	
 #---------------------------------------------------------------------------------
 arm9/$(TARGET).elf:
+	$(MAKE) -C common
 	$(MAKE) -C arm9
 
 cscope.out : $(shell find ../libndspp . $(DEVKITPRO)/libnds/  -type f -name '*.[chs]' -o -name '*.cpp' -o -name '*.inl')

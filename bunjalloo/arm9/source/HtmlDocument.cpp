@@ -721,14 +721,7 @@ void HtmlDocument::mainPhase(unsigned int ucodeChar)
   {
     case BEFORE_HEAD:
       {
-        if (isWhitespace(ucodeChar)) {
-          /*
-          m_dataGot += 1;
-          currentNode()->appendText(ucodeChar);
-          */
-        }
-        else
-        {
+        if (not isWhitespace(ucodeChar)) {
           handleStartTag(HEAD_TAG, AttributeVector());
           mainPhase(ucodeChar);
         }
@@ -737,12 +730,7 @@ void HtmlDocument::mainPhase(unsigned int ucodeChar)
 
     case IN_HEAD:
       {
-        if (isWhitespace(ucodeChar)) {
-          //m_dataGot += 1;
-          //currentNode()->appendText(ucodeChar);
-        }
-        else
-        {
+        if (not isWhitespace(ucodeChar)) {
           if (currentNode()->isa(HEAD_TAG))
           {
             handleEndTag(HEAD_TAG);
@@ -755,12 +743,7 @@ void HtmlDocument::mainPhase(unsigned int ucodeChar)
 
     case AFTER_HEAD:
       {
-        if (isWhitespace(ucodeChar)) {
-          //m_dataGot += 1;
-          //currentNode()->appendText(ucodeChar);
-        }
-        else
-        {
+        if (not isWhitespace(ucodeChar)) {
           handleStartTag(BODY_TAG, AttributeVector());
           mainPhase(ucodeChar);
         }
@@ -788,15 +771,13 @@ void HtmlDocument::mainPhase(unsigned int ucodeChar)
         else
         {
           reconstructActiveFormatters();
+          m_dataGot++;
           currentNode()->appendText(ucodeChar);
         }
       }
       break;
 
     default :
-      /*m_dataGot += 1;
-      currentNode()->appendText(ucodeChar);
-      */
       break;
   }
 }
@@ -835,6 +816,7 @@ void HtmlDocument::handleData(unsigned int ucodeChar)
       } 
       else
       {
+        m_dataGot++;
         m_head->lastChild()->appendText(ucodeChar);
       }
       break;

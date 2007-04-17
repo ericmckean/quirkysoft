@@ -21,3 +21,16 @@ UnicodeString string2unicode(const std::string & str)
   return ustr;
 }
 
+bool isWhitespace(unsigned int value)
+{
+  if (value > 0x0020)
+    return false;
+  return (
+         value == 0x0020  // SPACE
+      or value == 0x0009  // CHARACTER TABULATION
+      or value == 0x000A  // LINE FEED
+      or value == 0x000B  // LINE TABULATION
+      or value == 0x000C  // FORM FEED
+      );
+}
+

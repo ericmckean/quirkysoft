@@ -10,8 +10,6 @@ Document::Document():
   m_htmlDocument(new HtmlDocument),
   m_headerParser(new HeaderParser(m_htmlDocument))
 {
-  // I don't like this but can't think of a better way :(
-  //m_htmlDocument->setHeaderParser(m_headerParser);
 }
 
 Document::~Document()
