@@ -5,6 +5,7 @@
 #include "TextArea.h"
 #include "Canvas.h"
 #include "Sprite.h"
+#include "pointer.h"
 
 using namespace std;
 
@@ -61,9 +62,11 @@ class Key {
           rect.w, rect.h, col);
       nds::Canvas::instance().drawRectangle(rect.x, rect.y, 
           rect.w, rect.h, nds::Color(0,0,6));
+      textArea->setBackgroundColor(col);
       textArea->setStartLine(0);
       textArea->setCursor(m_x, m_y);
       textArea->print(m_value.c_str(),m_value.length());//,m_x,m_y);
+      textArea->setDefaultColor();
     }
 
     bool hit(int testx, int testy, const Font & font) {
@@ -107,7 +110,7 @@ class Key {
 Keyboard::Keyboard(TextArea & textArea):
   m_shift(0),
   m_textArea(textArea),
-  m_cursor(new nds::Sprite(1,0,0,0)),
+  m_cursor(new nds::Sprite(1,16,16)),
   m_visible(false),
   m_redraw(false),
   m_ticks(0)
@@ -149,9 +152,9 @@ void Keyboard::initKeys()
 void Keyboard::initCursor()
 {
   nds::ObjectPalette p(1);
-  p[1] = nds::Color(31,0,0);
+  p.load(_binary_pointer_pal_bin_start, (int)&_binary_pointer_pal_bin_size);
 
-  m_cursor->loadTileData(s_characterMap, 8);
+  m_cursor->loadTileData(_binary_pointer_img_bin_start, (int)&_binary_pointer_img_bin_size);
 
   m_cursor->x(KEYBOARD_POSITION_X+KEYBOARD_TILE_SIZE/2);
   m_cursor->y(KEYBOARD_POSITION_Y-SCREEN_HEIGHT+(KEYBOARD_TILE_SIZE/2));
@@ -265,7 +268,7 @@ string Keyboard::selected()
 void Keyboard::handleButtons(unsigned short keys)
 {
   if (keys & KEY_A) {
-    checkPress(m_cursor->x(), m_cursor->y()+SCREEN_HEIGHT);
+    checkPress(m_cursor->x(), m_cursor->y()+m_cursor->height()+SCREEN_HEIGHT);
   }
   if (keys & KEY_B) {
     deleteLetter();

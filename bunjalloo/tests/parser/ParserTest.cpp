@@ -82,7 +82,7 @@ void ParserTest::testNotHtml()
   int expected = 0;
   CPPUNIT_ASSERT_EQUAL( expected , result);
   result =  m_htmlParser->m_data.size();
-  expected = 48;
+  expected = 49;
   CPPUNIT_ASSERT_EQUAL( expected , result);
 }
 
@@ -94,7 +94,7 @@ void ParserTest::testIso()
   HtmlParser::Encoding expected = HtmlParser::ISO_ENCODING;
   CPPUNIT_ASSERT_EQUAL( expected , result);
   int dataSize =  m_htmlParser->m_data.length();
-  int expectedDataSize = 6;
+  int expectedDataSize = 7;
   CPPUNIT_ASSERT_EQUAL( expectedDataSize , dataSize);
 }
 
@@ -104,7 +104,7 @@ void ParserTest::testBogusDoctype()
   readFile("bogus-doctype.txt");
   m_headerParser->feed(m_data, m_length);
   int result = m_htmlParser->m_data.size();
-  CPPUNIT_ASSERT_EQUAL( 0 , result);
+  CPPUNIT_ASSERT_EQUAL( 4 , result);
 }
 
 void ParserTest::testMetaIso()

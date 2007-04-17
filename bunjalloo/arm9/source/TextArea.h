@@ -59,7 +59,16 @@ class TextArea
      * scale palette based on the original grey-scale palette.
      * @param color the new text colour in 15 bit RGB format.
      */
-    void setColor(unsigned short color);
+    void setTextColor(unsigned short color);
+
+    /** Set the background colour. Since the text is antialiased, this creates a coloured
+     * scale palette based on the original grey-scale palette.
+     * @param color the new text colour in 15 bit RGB format.
+     */
+    void setBackgroundColor(unsigned short color);
+
+    void setDefaultColor();
+    void clear();
 
     /** Set the start line to draw the text from. All text before the line is
      * reached is skipped. This can be used to "scroll" text up and down.
@@ -96,6 +105,8 @@ class TextArea
     int m_initialCursory;
     typedef std::list<Link*> LinkList;
     LinkList m_links;
+    unsigned short m_bgCol;
+    unsigned short m_fgCol;
 
     void printAt(Font::Glyph & g, int xPosition, int yPosition);
     void incrLine();

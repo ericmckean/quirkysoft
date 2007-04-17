@@ -12,8 +12,6 @@ class HtmlElement;
 class HtmlParser
 {
   public:
-    static bool isWhitespace(unsigned int value);
-
     //! Types of encoding of a page.
     enum Encoding {
       UTF8_ENCODING, //!< char stream is parsed using UTF-8.

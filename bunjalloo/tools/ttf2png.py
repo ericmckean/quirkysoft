@@ -215,7 +215,7 @@ if __name__ == '__main__':
     f.addRange('0xa0,0x100')
     f.addRange('0x20AC,0x20AD')
     f.addRange('8211,8212')
-    f.addRange('8216,8217')
+    f.addRange('8216,8218')
     f.addRange('8220,8221')
     f.addRange('8226,8226')
   f.save()  

@@ -186,19 +186,6 @@ void HtmlParserImpl::initialise(const char * data, unsigned int length)
   m_value = 0;
 }
 
-bool HtmlParser::isWhitespace(unsigned int value)
-{
-  if (value > 0x0020)
-    return false;
-  return (
-         value == 0x0020  // SPACE
-      or value == 0x0009  // CHARACTER TABULATION
-      or value == 0x000A  // LINE FEED
-      or value == 0x000B  // LINE TABULATION
-      or value == 0x000C  // FORM FEED
-      );
-}
-
 
 void HtmlParserImpl::rewind()
 {
@@ -226,7 +213,9 @@ void HtmlParserImpl::emit(unsigned int toEmit)
   } else {
     last = toEmit;
   }
-  if (toEmit == '\t' or toEmit == NBSP)
+  if (toEmit == '\n')
+    toEmit = ' ';
+  if (toEmit == '\t')// or toEmit == NBSP)
   {
     toEmit = ' ';
   }
@@ -762,7 +751,7 @@ unsigned int HtmlParserImpl::consumeEntity()
     if (nbspCheck == "nbsp;") {
       //cout << "Entity shortcut - nbsp." << endl;
       consume(5);
-      return 0xa0;
+      return NBSP;
     }
     const char * start = m_position;
     unsigned int found(0);
@@ -960,7 +949,7 @@ void HtmlParserImpl::handleCommentEnd()
 void HtmlParserImpl::handleDoctype()
 {
   next();
-  if (HtmlParser::isWhitespace(m_value))
+  if (isWhitespace(m_value))
   {
     m_state = BEFORE_DOCTYPE_NAME;
   } 
@@ -975,7 +964,7 @@ void HtmlParserImpl::handleDoctype()
 void HtmlParserImpl::handleBeforeDoctypeName()
 {
   next();
-  if (HtmlParser::isWhitespace(m_value))
+  if (isWhitespace(m_value))
   {
     m_state = BEFORE_DOCTYPE_NAME;
   } 
@@ -1012,7 +1001,7 @@ void HtmlParserImpl::handleBeforeDoctypeName()
 void HtmlParserImpl::handleDoctypeName()
 {
   next();
-  if (HtmlParser::isWhitespace(m_value))
+  if (isWhitespace(m_value))
   {
     m_state = AFTER_DOCTYPE_NAME;
   } 
@@ -1047,7 +1036,7 @@ void HtmlParserImpl::handleDoctypeName()
 void HtmlParserImpl::handleAfterDoctypeName()
 {
   next();
-  if (HtmlParser::isWhitespace(m_value))
+  if (isWhitespace(m_value))
   {
     // stay in this state
     m_state = AFTER_DOCTYPE_NAME;

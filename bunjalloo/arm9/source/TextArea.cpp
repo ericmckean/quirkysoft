@@ -22,7 +22,9 @@ TextArea::TextArea() :
   m_startLine(0),
   m_foundPosition(false),
   m_parseNewline(true),
-  m_isLink(false)
+  m_isLink(false),
+  m_bgCol(0),
+  m_fgCol(0)
 {
   string fontname = Config::instance().font();
   init(fontname);
@@ -297,13 +299,28 @@ void TextArea::print(const char * text, int amount)
   }
 }
 
-void TextArea::setColor(unsigned short color)
+void TextArea::setDefaultColor()
 {
+  m_bgCol = m_basePalette[0];
+  m_fgCol = 0;
+  setTextColor(m_fgCol);
+}
+
+void TextArea::setBackgroundColor(unsigned short color)
+{
+  m_bgCol = color;
+  setTextColor(m_fgCol);
+}
+
+void TextArea::setTextColor(unsigned short color)
+{
+  m_fgCol = color;
   Color newColor(color);
+  Color bgCol(m_bgCol);
   // assuming m_basePalette is black and white...
-  int mred = 31 - newColor.red();
-  int mgreen = 31 - newColor.green();
-  int mblue = 31 - newColor.blue();
+  int mred = bgCol.red() - newColor.red();
+  int mgreen = bgCol.green() - newColor.green();
+  int mblue = bgCol.blue() - newColor.blue();
 
   for (int i = 0; i < m_paletteLength; ++i)
   {
@@ -330,6 +347,12 @@ void TextArea::setColor(unsigned short color)
   }
 }
 
+void TextArea::clear()
+{
+  Canvas & canvas( Canvas::instance());
+  canvas.fillRectangle(0,0,canvas.width(), canvas.height(), m_bgCol);
+}
+
 void TextArea::setPalette(const std::string & fileName)
 {
   File palFile;
@@ -346,8 +369,7 @@ void TextArea::setPalette(const std::string & fileName)
     copy(data, data+size, baseData);
     m_basePalette = (unsigned short*)baseData;
     m_paletteLength = size/2;
-    Canvas & canvas( Canvas::instance());
-    canvas.fillRectangle(0,0,canvas.width(), canvas.height(), m_palette[0]);
+    setBackgroundColor(m_palette[0]);
   } else {
     Canvas::instance().fillRectangle(130,0,10,128,Color(31,0,0));
   }

@@ -3,6 +3,7 @@
 #include "HtmlAnchorElement.h"
 #include "HtmlImageElement.h"
 #include "HtmlMetaElement.h"
+#include "HtmlBodyElement.h"
 #include "HtmlElement.h"
 
 
@@ -19,6 +20,10 @@ HtmlElement * ElementFactory::create(const std::string & elementType)
   else if (elementType == "img")
   {
     return new HtmlImageElement(elementType);
+  }
+  else if (elementType == "body")
+  {
+    return new HtmlBodyElement(elementType);
   }
 
   return new HtmlElement(elementType);
