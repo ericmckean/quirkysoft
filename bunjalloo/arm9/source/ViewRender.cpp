@@ -1,3 +1,4 @@
+#include <iostream>
 #include <assert.h>
 #include "ndspp.h"
 #include "libnds.h"
@@ -9,180 +10,181 @@
 #include "HtmlElement.h"
 #include "HtmlImageElement.h"
 #include "HtmlBodyElement.h"
-#include "UnicodeString.h"
 #include "File.h"
 
 using namespace std;
 
 ViewRender::ViewRender(View * self):
-  m_self(self), 
-  m_pendingNewLines(0),
-  m_haveShownSomething(false)
+  m_self(self),
+  m_lastElement(0)
 {
 }
 
-void ViewRender::addRealNewline(int count)
-{
-  m_self->m_textArea->setParseNewline(true);
-  UnicodeString newlines(count, '\n');
-  m_self->m_textArea->printu(newlines);
-  m_self->m_textArea->setParseNewline(false);
-}
-
-void ViewRender::preNodeFormatting(const HtmlElement * node)
-{
-  if (node->isa("li"))
-  {
-    HtmlElement p("p");
-    p.appendText(' ');
-    p.appendText('*');
-    p.appendText(' ');
-    applyFormatting(p.firstChild());
-  }
-  else if (node->isa("ul"))
-  {
-    if ( node->parent()->isa("li") or node->parent()->isa("ul"))
-      m_pendingNewLines = 0;
-    else
-      m_pendingNewLines++;
-  }
-  else if (node->tagName()[0] == 'h' and (node->tagName()[1] >= '1' and node->tagName()[1] <= '6'))
-  {
-    if (m_pendingNewLines < 2)
-      m_pendingNewLines++;;
-  }
-  else if (node->isa("p"))
-  {
-    m_pendingNewLines+=2;
-  }
-}
-
-void ViewRender::postNodeFormatting(const HtmlElement * node)
-{
-  if (node->isa("li"))
-  {
-    m_pendingNewLines++;
-  }
-  else if (node->isa("a"))
-  {
-    m_self->m_textArea->setTextColor(nds::Color(0,0,0));
-    m_self->m_textArea->setLink(false);
-  }
-  else if (node->isa("div"))
-  {
-    m_pendingNewLines++;
-  }
-  else if (node->tagName()[0] == 'h' and (node->tagName()[1] >= '1' and node->tagName()[1] <= '6'))
-  {
-    m_pendingNewLines += 2;
-  } 
-  else if (node->isa("ul"))
-  {
-    if (node->parent()->isa("li") or node->parent()->isa("ul"))
-      m_pendingNewLines = 0;
-    else
-      m_pendingNewLines++;
-  }
-  else if (node->isa("p"))
-  {
-    m_pendingNewLines+=2;
-  }
-}
-
-void ViewRender::flushNewlines()
-{
-  if (m_pendingNewLines and m_haveShownSomething)
-  {
-    addRealNewline(m_pendingNewLines>2?2:m_pendingNewLines);
-  }
-  m_pendingNewLines = 0;
-}
-
-bool ViewRender::applyFormatting(const HtmlElement * element)
+void ViewRender::preFormat(const HtmlElement * element)
 {
   if (element->isa("a"))
   {
     m_self->m_textArea->setTextColor(nds::Color(0,0,31));
     m_self->m_textArea->addLink(element);
-  } 
-  else if (element->text().size())
+  }
+  else if (element->isa("pre"))
   {
-    UnicodeString delims((unsigned int)' ',1); delims += '\n';
-    unsigned int pos = element->text().find_first_not_of(delims);
-    if (pos != UnicodeString::npos) {
-      // if grandparent is a li then change of model
-      if ( ( element->parent()->isa("ul") or element->parent()->isa("ol") ) 
-          and element->parent()->parent()->isa("li"))
-        m_pendingNewLines = 1;
-      flushNewlines();
-      m_haveShownSomething = true;
-      m_self->m_textArea->printu(element->text());
-      if (element->parent()->isa("ul"))
-        m_pendingNewLines++;
+    m_self->m_textArea->setParseNewline(true);
+  }
+  else if (element->isa("ul") or element->isa("ol"))
+  {
+    m_self->m_textArea->increaseIndent();
+    if (not element->isBlock() and element->parent()->isa("li"))
+      m_self->m_textArea->insertNewline();
+  }
+  else if (element->isa("li")) {
+    const HtmlElement * prev(element->parent()->previousSibling(element));
+    if (prev and prev->isa("#TEXT"))
+    {
+      m_self->m_textArea->insertNewline();
     }
+  }
+
+  if (element->isBlock())
+  {
+    m_self->m_textArea->insertNewline();
+  }
+}
+
+void ViewRender::postFormat(const HtmlElement * element)
+{
+  if (element->isa("pre"))
+  {
+    m_self->m_textArea->setParseNewline(false);
+  }
+  else if (element->isa("ul") or element->isa("ol"))
+  {
+    m_self->m_textArea->decreaseIndent();
+    // only add an extra \n if the ul is a top level one
+    const HtmlElement * next = element->parent()->nextSibling(element);
+    if ( next 
+        and not next->isa("li") 
+        and not element->isBlock() )
+        //and not (element->parent()->isa("li") or element->parent()->isa("ul") or element->parent()->isa("ol")))
+    {
+      m_self->m_textArea->insertNewline();
+    }
+  }
+  else if (element->isa("li"))
+  {
+    ElementList::const_iterator it(element->children().begin());
+    bool hasBlock(false);
+    for (; it != element->children().end(); ++it)
+    {
+      if ( (*it)->isa("ul") or (*it)->isBlock()) {
+        hasBlock = true;
+        break;
+      }
+    }
+    if (not hasBlock)
+      m_self->m_textArea->insertNewline();
+  }
+  else if (element->isa("p") or (element->tagName()[0] == 'h' and (element->tagName()[1] >= '1' and element->tagName()[1] <= '6')))
+  {
+    m_self->m_textArea->insertNewline();
+  } 
+  else if (element->isa("a"))
+  {
+    m_self->m_textArea->setTextColor(nds::Color(0,0,0));
+    m_self->m_textArea->setLink(false);
+  }
+
+
+  if (element->isBlock())
+  {
+    m_self->m_textArea->insertNewline();
+  }
+}
+
+bool ViewRender::applyFormat(const HtmlElement * element)
+{
+  if (not element->text().empty())
+  {
+    m_self->m_textArea->printu(element->text());
   }
   else if (element->isa("script") or element->isa("style"))
   {
     return false;
   }
+  else if (element->isa("br"))
+  {
+    m_self->m_textArea->insertNewline();
+  } 
   else if (element->isa("img"))
   {
     // hurrah for alt text. some people set it to "", which screws up any
     // easy way to display it (see w3m google.com - Google [hp1] [hp2] [hp3]... huh?)
-    flushNewlines();
-    m_haveShownSomething = true;
     const UnicodeString & altText = element->attribute("alt");
     bool hasAltText = ((HtmlImageElement*)element)->hasAltText();
     if (hasAltText) {
       if (not altText.empty()) {
-        m_self->m_textArea->setTextColor(nds::Color(0,31,0));
-        m_self->m_textArea->printu(altText);
-        m_self->m_textArea->setTextColor(nds::Color(0,0,0));
+        doImage(altText);
       }
-      return true;
+      return false;
     }
     const UnicodeString & srcText = element->attribute("src");
-    m_self->m_textArea->setTextColor(nds::Color(0,31,0));
     if (not srcText.empty())
     {
       string tmp = unicode2string(srcText);
       const char * bname = nds::File::base(tmp.c_str());
       string bnamestr(bname);
       bnamestr = "["+ bnamestr+"]";
-      UnicodeString ustr ( string2unicode(bnamestr));
-      m_self->m_textArea->printu(ustr);
-      m_self->m_textArea->setTextColor(nds::Color(0,0,0));
-      return true;
+      UnicodeString ustr (string2unicode(bnamestr));
+      doImage(ustr);
+      return false;
     }
     UnicodeString ustr( string2unicode("[IMG]"));
-    m_self->m_textArea->printu(ustr);
-    m_self->m_textArea->setTextColor(nds::Color(0,0,0));
+    doImage(ustr);
+    return false;
   }
-  else if (element->isa("br"))
+  else if (element->isa("select"))
   {
-    flushNewlines();
-    m_pendingNewLines++;
-    flushNewlines();
-  } 
+    renderSelect(element);
+    return false; // do not walk the children
+  }
+  else if (element->isa("input"))
+  {
+    
+  }
   return true;
 }
 
-void ViewRender::walkNode(const HtmlElement * node)
+void ViewRender::walkTree(const HtmlElement * element)
 {
-  preNodeFormatting(node);
-  if (node->hasChildren())
+  preFormat(element);
+  if (element->hasChildren())
   {
-    const ElementList & theChildren = node->children();
+    const ElementList & theChildren = element->children();
     ElementList::const_iterator it(theChildren.begin());
+    bool hasBlock(false);
     for (; it != theChildren.end(); ++it)
     {
-      const HtmlElement * element(*it);
-      if (applyFormatting(element)) {
-        walkNode(element);
+      const HtmlElement * child(*it);
+      if (child->isBlock()) {
+        hasBlock = true;
+        break;
+      }
+    }
+
+    it = theChildren.begin();
+    for (; it != theChildren.end(); ++it)
+    {
+      const HtmlElement * child(*it);
+      if (hasBlock) {
+        ((HtmlElement*)child)->setBlock();
+      }
+      if (applyFormat(child)) {
+        walkTree(child);
       }
     }
   }
-  postNodeFormatting(node);
+  postFormat(element);
+  m_lastElement = element;
 }
 
 void ViewRender::setBgColor(const HtmlElement * body)
@@ -196,13 +198,17 @@ void ViewRender::setBgColor(const HtmlElement * body)
   }
 }
 
+void ViewRender::doImage(const UnicodeString & imgStr)
+{
+  m_self->m_textArea->setTextColor(nds::Color(0,31,0));
+  m_self->m_textArea->printu(imgStr);
+  m_self->m_textArea->setTextColor(nds::Color(0,0,0));
+}
+
 void ViewRender::render()
 {
-  nds::Canvas::instance().fillRectangle(0, 0, SCREEN_WIDTH, 2*SCREEN_HEIGHT, nds::Color(31,31,31));
   m_self->m_textArea->setCursor(0, 0);
   m_self->m_textArea->setParseNewline(false);
-  m_pendingNewLines = 0;
-  m_haveShownSomething = false;
   const HtmlElement * root = m_self->m_document.rootNode();
   assert(root->isa("html"));
   assert(root->hasChildren());
@@ -211,8 +217,10 @@ void ViewRender::render()
   m_self->m_textArea->clear();
   if (body->hasChildren())
   {
-    walkNode(body);
+    walkTree(body);
   }
 }
 
-
+void ViewRender::renderSelect(const HtmlElement * select)
+{
+}

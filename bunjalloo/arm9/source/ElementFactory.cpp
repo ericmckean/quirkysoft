@@ -4,6 +4,8 @@
 #include "HtmlImageElement.h"
 #include "HtmlMetaElement.h"
 #include "HtmlBodyElement.h"
+#include "HtmlBlockElement.h"
+#include "HtmlPreElement.h"
 #include "HtmlElement.h"
 
 
@@ -25,6 +27,21 @@ HtmlElement * ElementFactory::create(const std::string & elementType)
   {
     return new HtmlBodyElement(elementType);
   }
+  else if (elementType == "p" or elementType == "div")
+  {
+    return new HtmlBlockElement(elementType);
+  }
+  else if (elementType == "pre")
+  {
+    return new HtmlPreElement(elementType);
+  }
+  /*
+  else if (elementType == "ul" or elementType == "ol" or elementType == "li")
+  {
+    // lists have a pricipal box, then inline item boxes.
+    return new HtmlListElement(elementType);
+  }
+  */
 
   return new HtmlElement(elementType);
 }

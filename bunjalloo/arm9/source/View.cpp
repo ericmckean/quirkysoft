@@ -78,12 +78,12 @@ void View::tick()
     }
     if (keys & KEY_DOWN) {
       // scroll down ...
-      m_textArea->setStartLine(m_textArea->startLine()+1);
+      m_textArea->setStartLine(m_textArea->startLine()+10);
       m_renderer->render();
     }
     if (keys & KEY_UP) {
       // scroll up ...
-      m_textArea->setStartLine(m_textArea->startLine()-1);
+      m_textArea->setStartLine(m_textArea->startLine()-10);
       m_renderer->render();
     }
     if (keys & KEY_A) {

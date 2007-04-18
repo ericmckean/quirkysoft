@@ -83,10 +83,13 @@ class TextArea
 
     inline bool parseNewline() const;
     inline void setParseNewline(bool parse=true);
+    void insertNewline(int count=1);
     inline void setLink(bool isLink=true);
 
     void addLink(const HtmlElement * anchor);
     Link * clickLink(int x, int y) const;
+    void increaseIndent();
+    void decreaseIndent();
 
   private:
     Font * m_font;
@@ -107,6 +110,7 @@ class TextArea
     LinkList m_links;
     unsigned short m_bgCol;
     unsigned short m_fgCol;
+    int m_indentLevel;
 
     void printAt(Font::Glyph & g, int xPosition, int yPosition);
     void incrLine();
@@ -117,6 +121,10 @@ class TextArea
     void printuWord(const UnicodeString & word);
     void removeLinks();
 
+    const UnicodeString nextWord(const UnicodeString & unicodeString, 
+        int currPosition) const;
+    void advanceWord(const UnicodeString & unicodeString, int wordLength,
+        int & currPosition, UnicodeString::const_iterator & it) const;
 };
 
 // inline implementations

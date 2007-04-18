@@ -120,3 +120,27 @@ void HtmlElement::removeAllChildren()
 {
   m_children.clear();
 }
+
+const HtmlElement * HtmlElement::previousSibling(const HtmlElement * child)
+{
+
+  ElementList::const_iterator found = find(m_children.begin(), m_children.end(), child);
+  if (found != m_children.end()) {
+    --found;
+    if (found != m_children.end()) {
+      return *found;
+    }
+  }
+  return 0;
+}
+const HtmlElement * HtmlElement::nextSibling(const HtmlElement * child)
+{
+  ElementList::const_iterator found = find(m_children.begin(), m_children.end(), child);
+  if (found != m_children.end()) {
+    ++found;
+    if (found != m_children.end()) {
+      return *found;
+    }
+  }
+  return 0;
+}
