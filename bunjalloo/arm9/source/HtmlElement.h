@@ -15,7 +15,8 @@ class HtmlElement /* : public Element */
      */
     HtmlElement(const std::string & tagName) 
       : m_tagName(tagName),
-        m_parent(0) 
+        m_parent(0),
+        m_block(false) 
     {}
 
     //! Destructor.
@@ -43,12 +44,26 @@ class HtmlElement /* : public Element */
      */
     void remove(HtmlElement * child);
 
+    /** Get the child element that is the sibling immediately before "child".
+     * May return null.
+     * @param child the child node.
+     * @return the child node immediately before child, or 0 if no child present.
+     */
+    const HtmlElement * previousSibling(const HtmlElement * child);
+
+    /** Get the child element that is the sibling immediately afer "child".
+     * May return null.
+     * @param child the child node.
+     * @return the child node immediately after child, or 0 if no child present.
+     */
+    const HtmlElement * nextSibling(const HtmlElement * child);
+
     /** Append a text character. If the last child node is not a text node,
      * then one is created and appended. The text is appended to the last child
      * node.
      * @param value a unicode text value to append.
      */
-    void appendText(unsigned int value);
+    virtual void appendText(unsigned int value);
 
     /** Get the has children status.
      * @return true if there are children, false otherwise.
@@ -103,12 +118,20 @@ class HtmlElement /* : public Element */
      */
     inline const UnicodeString & text() const;
 
+    /** Get the text value.
+     * @return the unicode text.
+     */
+    inline UnicodeString & text();
+
     /** Make a shallow copy. Copies only the attributes, not the children.
      * @return the cloned element.
      */
     virtual HtmlElement * clone() const;
 
     void removeAllChildren();
+
+    inline bool isBlock() const;
+    inline void setBlock(bool isblock=true);
 
     //void dump() const;
   protected:
@@ -123,6 +146,7 @@ class HtmlElement /* : public Element */
     // std::vector<std::string> m_classList;
     HtmlElement * m_parent;
     ElementList m_children;
+    bool m_block;
 
     virtual const UnicodeString * attributePtr(const std::string & name) const;
     virtual void copyAttributes(HtmlElement * copyTo) const;
@@ -169,6 +193,10 @@ const UnicodeString & HtmlElement::text() const
 {
   return m_text;
 }
+UnicodeString & HtmlElement::text()
+{
+  return m_text;
+}
 
 HtmlElement* HtmlElement::parent() const
 {
@@ -177,5 +205,13 @@ HtmlElement* HtmlElement::parent() const
 void HtmlElement::setParent(HtmlElement * newParent)
 {
   m_parent = newParent;
+}
+bool HtmlElement::isBlock() const
+{
+  return m_block;
+}
+void HtmlElement::setBlock(bool isblock)
+{
+  m_block = isblock;
 }
 #endif

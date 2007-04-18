@@ -18,6 +18,8 @@ class HtmlElementTest : public CPPUNIT_NS::TestFixture
   CPPUNIT_TEST( testMeta );
   CPPUNIT_TEST( testRemove );
   CPPUNIT_TEST( testImg );
+  CPPUNIT_TEST( testPreviousSibling );
+  CPPUNIT_TEST( testNextSibling );
   CPPUNIT_TEST_SUITE_END();
 
 public:
@@ -35,6 +37,8 @@ public:
   void testMeta();
   void testRemove();
   void testImg();
+  void testPreviousSibling();
+  void testNextSibling();
 
 private:
   HtmlElement * m_element;

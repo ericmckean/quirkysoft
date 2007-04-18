@@ -9,6 +9,7 @@ LINKFILES:=HtmlElement.o\
            ElementFactory.o \
 	   HtmlMetaElement.o \
 	   HtmlBodyElement.o \
+	   HtmlPreElement.o \
 	   HtmlImageElement.o \
 	   UnicodeString.o \
 	   HtmlAnchorElement.o

@@ -183,3 +183,26 @@ void HtmlElementTest::testImg()
   CPPUNIT_ASSERT_EQUAL(expected, unicode2string( m_element->attribute("name")));
 }
 
+void HtmlElementTest::testPreviousSibling()
+{
+  m_element = ElementFactory::create("ul");
+  HtmlElement * li = ElementFactory::create("li");
+  HtmlElement * text = ElementFactory::create("#TEXT");
+  m_element->append(text);
+  m_element->append(li);
+  const HtmlElement * ps = m_element->previousSibling(li);
+  CPPUNIT_ASSERT(0 != ps);
+  CPPUNIT_ASSERT(text == ps);
+}
+
+void HtmlElementTest::testNextSibling()
+{
+  m_element = ElementFactory::create("ul");
+  HtmlElement * li = ElementFactory::create("li");
+  HtmlElement * text = ElementFactory::create("#TEXT");
+  m_element->append(text);
+  m_element->append(li);
+  const HtmlElement * ps = m_element->nextSibling(text);
+  CPPUNIT_ASSERT(0 != ps);
+  CPPUNIT_ASSERT(li == ps);
+}

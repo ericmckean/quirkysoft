@@ -62,6 +62,7 @@ class HtmlDocument : public HtmlParser
       ROOT_ELEMENT,
       MAIN,
       MAIN_WAITING_TOKEN,
+      TEXTAREA_WAITING_TOKEN,
       TRAILING_END
     };
 
@@ -118,12 +119,18 @@ class HtmlDocument : public HtmlParser
     void inBody(const std::string & tag, const AttributeVector & attrs);
     // end tag
     void inBody(const std::string & tag);
+    void inBody(unsigned int ucode);
+    void eofInBody();
+    // IN_SELECT phase, start tag.
+    void inSelect(const std::string & tag, const AttributeVector & attrs);
+    // end tag
+    void inSelect(const std::string & tag);
     // AFTER_BODY phase, start tag.
     void afterBody(const std::string & tag, const AttributeVector & attrs);
     // end tag
     void afterBody(const std::string & tag);
 
-    bool inScope(const std::string & element) const;
+    bool inScope(const std::string & element, bool inTableScope=false) const;
     HtmlElement* activeFormatContains(const std::string & tagName);
     void removeFromActiveFormat(HtmlElement* element);
     void removeFromOpenElements(HtmlElement* element);

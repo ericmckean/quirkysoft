@@ -1,3 +1,4 @@
+#include <assert.h>
 #include "ndspp.h"
 #include "TextArea.h"
 #include "Palette.h"
@@ -12,6 +13,7 @@ using namespace nds;
 using namespace std;
 static const unsigned int intDelimiters[] = {0x0020, 0x0009, 0x000a, 0x000b, 0x000c, 0x000d};
 static const UnicodeString delimiters(intDelimiters,6);
+static const int INDENT(16);
 
 TextArea::TextArea() : 
   m_font(0),
@@ -24,7 +26,8 @@ TextArea::TextArea() :
   m_parseNewline(true),
   m_isLink(false),
   m_bgCol(0),
-  m_fgCol(0)
+  m_fgCol(0),
+  m_indentLevel(0)
 {
   string fontname = Config::instance().font();
   init(fontname);
@@ -89,7 +92,7 @@ void TextArea::setCursor(int x, int y)
 
 void TextArea::incrLine()
 {
-  m_cursorx = 0; 
+  m_cursorx = m_indentLevel; 
   m_cursory += m_font->height();
 }
 
@@ -99,6 +102,59 @@ void TextArea::checkLetter(Font::Glyph & g)
   {
     incrLine();
   }
+}
+
+void TextArea::insertNewline(int count)
+{
+  bool parseNewline = m_parseNewline;
+  setParseNewline(true);
+  UnicodeString newlines(count, '\n');
+  printu(newlines);
+  setParseNewline(parseNewline);
+}
+
+const UnicodeString TextArea::nextWord(const UnicodeString & unicodeString, int currPosition) const
+{
+  if (m_parseNewline)
+  {
+    unsigned int position = unicodeString.find_first_of(delimiters,currPosition);
+    position = position==string::npos?unicodeString.length():position;
+    return unicodeString.substr(currPosition,position-currPosition+1);
+  }
+  else
+  {
+    unsigned int position = unicodeString.find_first_not_of(delimiters,currPosition);
+    position = unicodeString.find_first_of(delimiters,position);
+    position = position==string::npos?unicodeString.length():position;
+    UnicodeString word(unicodeString.substr(currPosition,position-currPosition));
+    word += ' ';
+    return word;
+  }
+}
+
+void TextArea::advanceWord(const UnicodeString & unicodeString, int wordLength,
+    int & currPosition, UnicodeString::const_iterator & it) const
+{
+  if (m_parseNewline) {
+    it += wordLength;
+    currPosition += wordLength;
+  }
+  else {
+    unsigned int position = unicodeString.find_first_not_of(delimiters,currPosition+wordLength);
+    position = position==string::npos?unicodeString.length():position;
+    it += position - currPosition;
+    currPosition = position;
+  }
+}
+void TextArea::increaseIndent()
+{
+  m_indentLevel += INDENT;
+  m_cursorx = m_indentLevel;
+}
+void TextArea::decreaseIndent()
+{
+  m_indentLevel -= INDENT;
+  m_cursorx = m_indentLevel;
 }
 
 void TextArea::printu(const UnicodeString & unicodeString)
@@ -117,9 +173,7 @@ void TextArea::printu(const UnicodeString & unicodeString)
     for (; it != unicodeString.end() and m_cursory < finalLine;)
     {
       // find the next space character
-      unsigned int position = unicodeString.find_first_of(delimiters,currPosition);
-      position = position==string::npos?unicodeString.length():position;
-      const UnicodeString word(unicodeString.substr(currPosition,position-currPosition+1));
+      const UnicodeString word(nextWord(unicodeString, currPosition));
       int size = textSize(word);
       if (m_cursorx + size > Canvas::instance().width())
       {
@@ -135,32 +189,25 @@ void TextArea::printu(const UnicodeString & unicodeString)
         if (value == UTF8::MALFORMED) {
           value = '?';
         }
+        //assert(value != '\n');
         Font::Glyph g;
         m_font->glyph(value, g);
-        if (m_parseNewline and value == '\n')
-        {
+        if (m_parseNewline and value == '\n') {
           incrLine();
-          if ( m_cursory >= finalLine)
-            break;
-        } 
-        else if (value != '\n') {
+        } else if (value != '\n') {
           checkLetter(g);
-          if ( m_cursory >= finalLine)
-            break;
-          m_cursorx += g.width;
         }
+        if ( m_cursory >= finalLine)
+          break;
+        m_cursorx += g.width;
       }
-      it += word.length();
-      currPosition += word.length();
-      /*if (m_cursory > Canvas::instance().height()) {
-        break;
-      }*/
+      advanceWord(unicodeString, word.length(), currPosition, it);
     }
     if (m_cursory < finalLine) {
       return;
     }
     m_foundPosition = true;
-    m_cursorx = m_initialCursorx;
+    m_cursorx = m_initialCursorx+m_indentLevel;
     m_cursory = m_initialCursory;
   }
   UnicodeString printString = unicodeString.substr(currPosition , unicodeString.length()-currPosition);
@@ -200,12 +247,10 @@ void TextArea::printuImpl(const UnicodeString & unicodeString)
 {
   UnicodeString::const_iterator it(unicodeString.begin());
   int currPosition(0);
-  for (; it != unicodeString.end(); ++it, ++currPosition)
+  for (; it != unicodeString.end(); )
   {
     // find the next space character
-    unsigned int position = unicodeString.find_first_of(delimiters,currPosition);
-    position = position==string::npos?unicodeString.length():position;
-    const UnicodeString word(unicodeString.substr(currPosition,position-currPosition+1));
+    const UnicodeString word(nextWord(unicodeString, currPosition));
     int size = textSize(word);
     if (m_cursorx + size > Canvas::instance().width())
     {
@@ -216,13 +261,13 @@ void TextArea::printuImpl(const UnicodeString & unicodeString)
     }
     if (m_isLink)
     {
+      assert(not m_links.empty());
       Link * link = m_links.front();
       link->appendClickZone(m_cursorx, m_cursory, 
           size, m_font->height());
     }
     printuWord(word);
-    it += word.length()-1;
-    currPosition += word.length()-1;
+    advanceWord(unicodeString, word.length(), currPosition, it);
   }
 }
 

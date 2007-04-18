@@ -519,3 +519,13 @@ void DocumentTest::testHeader2()
   CPPUNIT_ASSERT(h1 != 0);
   CPPUNIT_ASSERT(h2 != 0);
 }
+
+void DocumentTest::testAttribs()
+{
+  readFile("attrib.html");
+  m_document->appendLocalData(m_data, m_length);
+  m_document->setStatus(Document::LOADED);
+  const HtmlElement * root = m_document->rootNode();
+  CPPUNIT_ASSERT(root != 0);
+  CPPUNIT_ASSERT(root->isa("html"));
+}

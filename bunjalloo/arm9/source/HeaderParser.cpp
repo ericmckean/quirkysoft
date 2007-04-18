@@ -158,7 +158,7 @@ bool HeaderParser::isFieldValue() const
 {
   return (m_value == '-' 
       or m_value == '_' 
-      or ::isalpha(m_value));
+      or ::isalnum(m_value));
 
 }
 
@@ -178,6 +178,7 @@ void HeaderParser::field()
       default:
         // parse error?
         m_state = PARSE_ERROR;
+        printf("%s",m_position-1);
         assert(m_state != PARSE_ERROR);
         break;
     }

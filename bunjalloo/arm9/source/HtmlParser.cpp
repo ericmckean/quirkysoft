@@ -205,20 +205,16 @@ void HtmlParserImpl::emit(unsigned int toEmit)
     return;
   }
   // collapse multiple concurrent blanks into a single space.
-  if (isBlank(toEmit) and toEmit == last)
-    return;
+  //if (isBlank(toEmit) and toEmit == last)
+  //  return;
+  last = toEmit;
   if (toEmit == '\r') {
-    last = toEmit;
     toEmit = '\n';
-  } else {
-    last = toEmit;
-  }
-  if (toEmit == '\n')
-    toEmit = ' ';
-  if (toEmit == '\t')// or toEmit == NBSP)
-  {
-    toEmit = ' ';
-  }
+  } 
+  //if (toEmit == '\t')// or toEmit == NBSP)
+  //{
+  //  toEmit = ' ';
+  //}
   m_self.handleData(toEmit);
 }
 
@@ -632,7 +628,9 @@ void HtmlParserImpl::handleAttributeValueQuote()
         m_state = DATA;
         break;
       default:
-        m_attribute->value += m_value;
+        if (m_attribute) { 
+          m_attribute->value += m_value;
+        }
         break;
     }
   }

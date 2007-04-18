@@ -11,16 +11,23 @@ const static char BODY_TAG[] = "body";
 const static char FRAMESET_TAG[] = "frameset";
 const static char A_TAG[] = "a";
 const static char UL_TAG[] = "ul";
+const static char OL_TAG[] = "ol";
 const static char LI_TAG[] = "li";
 const static char DD_TAG[] = "dd";
 const static char DT_TAG[] = "dt";
 const static char P_TAG[] = "p";
+const static char HR_TAG[] = "hr";
 const static char DIV_TAG[] = "div";
 const static char PLAINTEXT_TAG[] = "plaintext";
 const static char TABLE_TAG[] = "table";
 const static char BR_TAG[] = "br";
 const static char FORM_TAG[] = "form";
 const static char META_TAG[] = "meta";
+const static char TEXTAREA_TAG[] = "textarea";
+const static char SELECT_TAG[] = "select";
+const static char INPUT_TAG[] = "input";
+const static char OPTION_TAG[] = "option";
+const static char OPTGROUP_TAG[] = "optgroup";
 
 #if 1
 #include <iostream>
@@ -295,7 +302,7 @@ void HtmlDocument::inBody(const std::string & tag, const AttributeVector & attrs
       or tag == "fieldset"
       or tag == "listing"
       or tag == "menu"
-      or tag == "ol"
+      or tag == OL_TAG
       or tag == P_TAG
       or tag == UL_TAG
       or tag == "pre"
@@ -307,6 +314,14 @@ void HtmlDocument::inBody(const std::string & tag, const AttributeVector & attrs
     }
     HtmlElement * element = ElementFactory::create(tag, attrs);
     insertElement(element);
+    if (tag == OL_TAG or tag == "ul")
+    {
+      HtmlElement * parent = element->parent();
+      if (not (parent->isa(OL_TAG) or parent->isa(UL_TAG) or parent->isa(LI_TAG)))
+      {
+        element->setBlock();
+      }
+    }
     // FIXME: if tag == "pre" then eat following LF (if any)
   }
   else if (tag == FORM_TAG)
@@ -352,7 +367,9 @@ void HtmlDocument::inBody(const std::string & tag, const AttributeVector & attrs
     {
       m_openElements.pop_back();
     }
-    insertElement(ElementFactory::create(tag, attrs));
+    HtmlElement * element = ElementFactory::create(tag, attrs);
+    element->setBlock();
+    insertElement(element);
   }
   else if (tag == A_TAG)
   {
@@ -408,6 +425,40 @@ void HtmlDocument::inBody(const std::string & tag, const AttributeVector & attrs
     insertElement(element);
     m_openElements.pop_back();
   }
+  else if (tag == HR_TAG)
+  {
+    if (inScope(P_TAG))
+    {
+      handleEndTag(P_TAG);
+    }
+    insertElement(ElementFactory::create(tag, attrs));
+    m_openElements.pop_back();
+  }
+  else if (tag == INPUT_TAG)
+  {
+    reconstructActiveFormatters();
+    HtmlElement * inputElement(ElementFactory::create(tag, attrs));
+    if (m_form) {
+      m_form->append(inputElement);
+    } else {
+      insertElement(inputElement);
+      m_openElements.pop_back();
+    }
+  }
+  else if (tag == TEXTAREA_TAG) {
+    HtmlElement * textArea = ElementFactory::create(tag, attrs);
+    setContentModel(RCDATA);
+    if (m_form) {
+      m_form->append(textArea);
+    }
+    m_openElements.push_back(textArea);
+    m_state = TEXTAREA_WAITING_TOKEN;
+  }
+  else if (tag == SELECT_TAG) {
+    reconstructActiveFormatters();
+    insertElement(ElementFactory::create(tag, attrs));
+    m_insertionMode = IN_SELECT;
+  }
   else
   {
 
@@ -441,7 +492,7 @@ void HtmlDocument::inBody(const std::string & tag)
       or tag == "fieldset"
       or tag == "listing"
       or tag == "menu"
-      or tag == "ol"
+      or tag == OL_TAG
       or tag == "pre"
       or tag == UL_TAG
       )
@@ -462,6 +513,31 @@ void HtmlDocument::inBody(const std::string & tag)
           break;
       }
     }
+  }
+  else if (tag == FORM_TAG)
+  {
+    /* If the stack of open elements has an element in scope with the same tag
+     * name as that of the token, then generate implied end tags. */
+    if (inScope(FORM_TAG))
+    {
+      generateImpliedEndTags();
+    }
+    /*  If the stack of open elements has an element in scope with the same tag
+     *  name as that of the token, then pop elements from this stack until an
+     *  element with that tag name has been popped from the stack. */
+    if (inScope(FORM_TAG))
+    {
+      while (inScope(tag))
+      {
+        // pop until not in scope.
+        const HtmlElement * popped = currentNode();
+        m_openElements.pop_back();
+        if (popped->isa(tag))
+          break;
+      }
+    }
+    /* In any case, set the form element pointer to null. */
+    m_form = 0;
   }
   else if (tag == P_TAG)
   {
@@ -579,6 +655,132 @@ void HtmlDocument::inBody(const std::string & tag)
 
 }
 
+void HtmlDocument::eofInBody()
+{
+  generateImpliedEndTags();
+  if (inScope(BODY_TAG)) {
+    while (not currentNode()->isa(BODY_TAG))
+    {
+      m_openElements.pop_back();
+    }
+  }
+
+  if (m_openElements.size() == 2 and currentNode()->isa(BODY_TAG))
+  {
+    handleEndTag(BODY_TAG);
+    handleEndTag(HTML_TAG);
+  }
+}
+
+void HtmlDocument::inBody(unsigned int ucodeChar)
+{
+  if ((int)ucodeChar == EOF)
+  {
+    eofInBody();
+  }
+  else
+  {
+    reconstructActiveFormatters();
+    m_dataGot++;
+    currentNode()->appendText(ucodeChar);
+  }
+}
+
+void HtmlDocument::inSelect(const std::string & tag, const AttributeVector & attrs)
+{
+  if (tag == OPTION_TAG)
+  {
+    if (currentNode()->isa(tag)) {
+      handleEndTag(tag);
+    }
+    insertElement(ElementFactory::create(tag, attrs));
+  }
+  else if (tag == OPTGROUP_TAG)
+  {
+    // TODO
+    if (currentNode()->isa(OPTION_TAG)) {
+      handleEndTag(OPTION_TAG);
+    }
+    if (currentNode()->isa(OPTGROUP_TAG)) {
+      handleEndTag(OPTGROUP_TAG);
+    }
+    insertElement(ElementFactory::create(tag, attrs));
+  }
+  else if (tag == "select")
+  {
+    // parse error
+    handleEndTag(tag);
+  }
+  // else parse error, ignore.
+}
+
+void HtmlDocument::inSelect(const std::string & tag)
+{
+  if (tag == OPTGROUP_TAG)
+  {
+    /* First, if the current node is an option element, and the node
+     * immediately before it in the stack of open elements is an optgroup
+     * element, then act as if an end tag with the tag name "option" had
+     * been seen.*/
+    if (currentNode()->isa(OPTION_TAG))
+    {
+      ElementVector::reverse_iterator end(m_openElements.rbegin());
+      ++end;
+      if (end != m_openElements.rend() and (*end)->isa(OPTGROUP_TAG))
+      {
+        handleEndTag(OPTION_TAG);
+      }
+    }
+    /* If the current node is an optgroup element, then pop that node from the
+     * stack of open elements. Otherwise, this is a parse error, ignore the
+     * token.*/
+    if (currentNode()->isa(OPTGROUP_TAG))
+    {
+      m_openElements.pop_back();
+    }
+  }
+  else if (tag == OPTION_TAG)
+  {
+    if (currentNode()->isa(OPTION_TAG))
+    {
+      m_openElements.pop_back();
+    }
+  }
+  else if (tag == SELECT_TAG)
+  {
+    if (inScope(SELECT_TAG, true))
+    {
+      // pop until SELECT is reached.
+      while (not currentNode()->isa(SELECT_TAG))
+      {
+        m_openElements.pop_back();
+      }
+      // pop the select
+      m_openElements.pop_back();
+      // FIXME
+      m_insertionMode = IN_BODY;
+    }
+  }
+  else if (tag == "caption"
+      or tag == "table"
+      or tag == "tbody"
+      or tag == "tfoot"
+      or tag == "thead"
+      or tag == "tr"
+      or tag == "td"
+      or tag == "th"
+      )
+  {
+    if (inScope(tag, true))
+    {
+      handleEndTag(SELECT_TAG);
+      // reprocess the end tag
+      handleEndTag(tag);
+    }
+    // otherwise ignore.
+  }
+}
+
 void HtmlDocument::afterBody(const std::string & tag, 
                              const AttributeVector & attrs)
 {
@@ -627,6 +829,9 @@ void HtmlDocument::mainPhase(const std::string & tag,
       case IN_BODY:
         inBody(tag, attrs);
         break;
+      case IN_SELECT:
+        inSelect(tag, attrs);
+        break;
       case AFTER_BODY:
         afterBody(tag, attrs);
         break;
@@ -653,6 +858,9 @@ void HtmlDocument::mainPhase(const std::string & tag)
       break;
     case IN_BODY:
       inBody(tag);
+      break;
+    case IN_SELECT:
+      inSelect(tag);
       break;
     case AFTER_BODY:
       afterBody(tag);
@@ -686,6 +894,10 @@ void HtmlDocument::handleStartTag(const std::string & tag, const AttributeVector
       m_state = MAIN;
       // either ignore, or a parse error.. either way do nowt.
       break;
+    case TEXTAREA_WAITING_TOKEN:
+      m_state = MAIN;
+      m_openElements.pop_back();
+      break;
   }
 }
 void HtmlDocument::handleEndTag(const std::string & tag)
@@ -711,6 +923,10 @@ void HtmlDocument::handleEndTag(const std::string & tag)
     case MAIN_WAITING_TOKEN:
       // ignore or a parse error.
       m_state = MAIN;
+      break;
+    case TEXTAREA_WAITING_TOKEN:
+      m_state = MAIN;
+      m_openElements.pop_back();
       break;
   }
 }
@@ -751,26 +967,15 @@ void HtmlDocument::mainPhase(unsigned int ucodeChar)
       break;
 
     case IN_BODY:
-      {
-        if ((int)ucodeChar == EOF)
-        {
-          generateImpliedEndTags();
-          if (inScope(BODY_TAG)) {
-            while (not currentNode()->isa(BODY_TAG))
-            {
-              m_openElements.pop_back();
-            }
-          }
+      inBody(ucodeChar);
+      break;
 
-          if (m_openElements.size() == 2 and currentNode()->isa(BODY_TAG))
-          {
-            handleEndTag(BODY_TAG);
-            handleEndTag(HTML_TAG);
-          }
+    case IN_SELECT:
+      {
+        if ((int)ucodeChar == EOF) {
+          eofInBody();
         }
-        else
-        {
-          reconstructActiveFormatters();
+        else {
           m_dataGot++;
           currentNode()->appendText(ucodeChar);
         }
@@ -820,6 +1025,18 @@ void HtmlDocument::handleData(unsigned int ucodeChar)
         m_head->lastChild()->appendText(ucodeChar);
       }
       break;
+    case TEXTAREA_WAITING_TOKEN:
+      if (EOF == (int)ucodeChar) {
+        m_openElements.pop_back();
+        mainPhase(ucodeChar);
+      } 
+      else
+      {
+        m_dataGot++;
+        currentNode()->appendText(ucodeChar);
+      }
+      break;
+
   }
   // m_data += ucodeChar;
 }
@@ -841,11 +1058,24 @@ void HtmlDocument::setNewAttributes(HtmlElement * element, const AttributeVector
   }
 }
 
-bool HtmlDocument::inScope(const std::string & element) const
+bool HtmlDocument::inScope(const std::string & element, bool inTableScope) const
 {
    ElementVector::const_reverse_iterator it(m_openElements.rbegin());
    for (; it != m_openElements.rend(); ++it) {
      HtmlElement * node = *it;
+     // FIXME - table scope ignores caption, td, th, button, marquee, object
+     // regular in scope should not. if a caption, etc, is seen then abort.
+     if (not inTableScope and (
+           node->isa("caption")
+           or node->isa("td")
+           or node->isa("th")
+           or node->isa("button")
+           or node->isa("marquee")
+           or node->isa("object")
+           ))
+     {
+       return false;
+     }
      if (node->isa(element))
      {
        return true;
