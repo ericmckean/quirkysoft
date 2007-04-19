@@ -455,7 +455,7 @@ void HtmlParserImpl::handleBeforeAttributeName()
       addAttribute();
       m_attribute = new Attribute;
       m_attribute->name = m_value;
-      m_attribute->value = UnicodeString();
+      m_attribute->value.clear();
       m_state = ATTRIBUTE_NAME;
       break;
   }
@@ -508,7 +508,6 @@ void HtmlParserImpl::handleAttributeName()
         // discard attribute...
         delete m_attribute;
         m_attribute = 0;
-        // cout << "Discarding attribute" << endl;
         break;
       }
     }
@@ -553,7 +552,7 @@ void HtmlParserImpl::handleAfterAttributeName()
         addAttribute();
         m_attribute = new Attribute;
         m_attribute->name=m_value;
-        m_attribute->value= UnicodeString();
+        m_attribute->value.clear();
         m_state = ATTRIBUTE_NAME;
       }
       break;
@@ -800,13 +799,15 @@ unsigned int HtmlParserImpl::consumeEntity()
 void HtmlParserImpl::handleEntityInAttributeValue()
 {
   unsigned int value = consumeEntity();
-  if (value == 0)
-  {
-    m_attribute->value += '&';
-  }
-  else
-  {
-    m_attribute->value += value;
+  if (m_attribute) {
+    if (value == 0)
+    {
+      m_attribute->value += '&';
+    }
+    else
+    {
+      m_attribute->value += value;
+    }
   }
   m_state = m_lastState;
 }
