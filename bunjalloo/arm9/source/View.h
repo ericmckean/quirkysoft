@@ -9,6 +9,7 @@ class ControllerI;
 class TextArea;
 class Keyboard;
 class ViewRender;
+class FormControl;
 
 /** Handle the displaying of HTML data.*/
 class View : public ViewI
@@ -28,12 +29,26 @@ class View : public ViewI
     void tick();
 
   private:
+
+    enum InputState
+    {
+      BROWSE,
+      FORM,
+      FORM_KEYBOARD,
+      KEYBOARD
+    };
+
     Document & m_document;
     ControllerI & m_controller;
     TextArea * m_textArea;
     Keyboard * m_keyboard;
     ViewRender * m_renderer;
+    InputState m_state;
+    FormControl * m_form;
 
+    void browse();
+    void keyboard();
+    void formKeyboard();
 
 };
 #endif

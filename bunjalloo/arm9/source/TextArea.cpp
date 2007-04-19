@@ -5,6 +5,7 @@
 #include "Canvas.h"
 #include "Config.h"
 #include "Font.h"
+#include "FormControl.h"
 #include "UTF8.h"
 #include "File.h"
 #include "Link.h"
@@ -24,7 +25,7 @@ TextArea::TextArea() :
   m_startLine(0),
   m_foundPosition(false),
   m_parseNewline(true),
-  m_isLink(false),
+  m_currentControl(TEXT),
   m_bgCol(0),
   m_fgCol(0),
   m_indentLevel(0)
@@ -33,22 +34,31 @@ TextArea::TextArea() :
   init(fontname);
 }
 
-void TextArea::setStartLine(int line)
+void TextArea::setStartLine(int line, bool rmclicks)
 {
   m_startLine = line;
   m_foundPosition = false;
-  removeLinks();
+  if (rmclicks)
+  {
+    removeClickables();
+  }
 }
 
 static void deleteLink(Link * link)
 {
   delete link;
 }
+static void deleteFormCntrl(FormControl * fc)
+{
+  delete fc;
+}
 
-void TextArea::removeLinks()
+void TextArea::removeClickables()
 {
   for_each(m_links.begin(), m_links.end(), deleteLink);
   m_links.clear();
+  for_each(m_formControls.begin(), m_formControls.end(), deleteFormCntrl);
+  m_formControls.clear();
 }
 
 int TextArea::startLine() const
@@ -245,6 +255,7 @@ void TextArea::printuWord(const UnicodeString & word)
 
 void TextArea::printuImpl(const UnicodeString & unicodeString)
 {
+
   UnicodeString::const_iterator it(unicodeString.begin());
   int currPosition(0);
   for (; it != unicodeString.end(); )
@@ -259,12 +270,20 @@ void TextArea::printuImpl(const UnicodeString & unicodeString)
     if (m_cursory > Canvas::instance().height()) {
       break;
     }
-    if (m_isLink)
+    switch (m_currentControl)
     {
-      assert(not m_links.empty());
-      Link * link = m_links.front();
-      link->appendClickZone(m_cursorx, m_cursory, 
-          size, m_font->height());
+      case LINK:
+        {
+          assert(not m_links.empty());
+          Link * link = m_links.front();
+          link->appendClickZone(m_cursorx, m_cursory, 
+              size, m_font->height());
+        }
+        break;
+      case TEXT:
+        break;
+      case FORM:
+        break;
     }
     printuWord(word);
     advanceWord(unicodeString, word.length(), currPosition, it);
@@ -285,10 +304,61 @@ Link * TextArea::clickLink(int x, int y) const
   return 0;
 }
 
+FormControl * TextArea::clickForm(int x, int y) const
+{
+  FormList::const_iterator it = m_formControls.begin();
+  for (; it != m_formControls.end(); ++it)
+  {
+    FormControl * form = *it;
+    if ( form->hitTest(x, y))
+    {
+      return form;
+    }
+  }
+  return 0;
+}
+
 void TextArea::addLink(const HtmlElement * anchor)
 {
   m_links.push_front(new Link(anchor));
   setLink(true);
+}
+void TextArea::addFormControl(FormControl * formCtrl)
+{
+  m_formControls.push_front(formCtrl);
+  setForm(true);
+  formCtrl->setHeight(m_font->height());
+  // the form controls its own width.
+
+  if (not m_foundPosition) {
+    int finalLine(m_font->height()*m_startLine);
+    if (finalLine < 0)
+    {
+      m_cursory = -finalLine;
+      m_initialCursory = m_cursory;
+      finalLine = 0;
+    }
+    if (m_cursorx + formCtrl->width() > Canvas::instance().width())
+    {
+      incrLine();
+    }
+    if (m_cursory < finalLine) {
+      return;
+    }
+    m_foundPosition = true;
+    m_cursorx = m_initialCursorx+m_indentLevel;
+    m_cursory = m_initialCursory;
+  }
+  if (m_foundPosition) {
+    // get the real position?
+    assert(not m_formControls.empty());
+    int cursorx = m_cursorx;
+    int cursory = m_cursory;
+    formCtrl->setPosition(m_cursorx, m_cursory);
+    formCtrl->draw(this);
+    m_cursorx = cursorx + formCtrl->width();
+    m_cursory = cursory;
+  }
 }
 
 bool TextArea::doSingleChar(unsigned int value)

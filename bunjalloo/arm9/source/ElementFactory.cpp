@@ -6,6 +6,9 @@
 #include "HtmlBodyElement.h"
 #include "HtmlBlockElement.h"
 #include "HtmlPreElement.h"
+#include "HtmlOptionElement.h"
+#include "HtmlFormElement.h"
+#include "HtmlInputElement.h"
 #include "HtmlElement.h"
 
 
@@ -34,6 +37,18 @@ HtmlElement * ElementFactory::create(const std::string & elementType)
   else if (elementType == "pre")
   {
     return new HtmlPreElement(elementType);
+  }
+  else if (elementType == "option")
+  {
+    return new HtmlOptionElement(elementType);
+  }
+  else if (elementType == "form")
+  {
+    return new HtmlFormElement(elementType);
+  }
+  else if (elementType == "input")
+  {
+    return new HtmlInputElement(elementType);
   }
   /*
   else if (elementType == "ul" or elementType == "ol" or elementType == "li")

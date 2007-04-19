@@ -9,15 +9,6 @@ class Sprite;
 #include <string>
 #include <vector>
 
-struct Rectangle
-{
-  int x;
-  int y;
-  int w;
-  int h;
-  bool hit(int x, int y) const;
-};
-
 /** Show a virtual keyboard. Accepts touch input and keypad input. */
 class Keyboard
 {

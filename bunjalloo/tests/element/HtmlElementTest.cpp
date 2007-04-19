@@ -1,6 +1,7 @@
 #include "HtmlElementTest.h"
 #include "HtmlElement.h"
 #include "HtmlMetaElement.h"
+#include "HtmlOptionElement.h"
 #include "HtmlAnchorElement.h"
 #include "ElementFactory.h"
 
@@ -205,4 +206,21 @@ void HtmlElementTest::testNextSibling()
   const HtmlElement * ps = m_element->nextSibling(text);
   CPPUNIT_ASSERT(0 != ps);
   CPPUNIT_ASSERT(li == ps);
+}
+
+void HtmlElementTest::testOptionElement()
+{
+  m_element = ElementFactory::create("option");
+  m_element->setAttribute("value",string2unicode("a"));
+  m_element->setAttribute("label",string2unicode("b"));
+  HtmlOptionElement * opt = dynamic_cast<HtmlOptionElement*>(m_element);
+  CPPUNIT_ASSERT(opt != 0);
+  CPPUNIT_ASSERT(not opt->selected());
+  m_element->setAttribute("selected",string2unicode("yes"));
+  CPPUNIT_ASSERT(opt->selected());
+  
+  string expected("a"); 
+  CPPUNIT_ASSERT_EQUAL( expected , unicode2string(m_element->attribute("value")));
+  expected = "b"; 
+  CPPUNIT_ASSERT_EQUAL( expected , unicode2string(m_element->attribute("label")));
 }
