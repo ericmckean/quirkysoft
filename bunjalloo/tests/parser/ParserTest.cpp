@@ -122,3 +122,11 @@ void ParserTest::testSlashdot()
   int size = m_htmlParser->m_tags.size();
   CPPUNIT_ASSERT_EQUAL( 2 , size);
 }
+
+void ParserTest::testNumbers()
+{
+  readFile("numbers.txt");
+  m_headerParser->feed(m_data, m_length);
+  int size = m_htmlParser->m_tags.size();
+  CPPUNIT_ASSERT_EQUAL( 1 , size);
+}

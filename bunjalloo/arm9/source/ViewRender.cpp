@@ -11,6 +11,9 @@
 #include "HtmlImageElement.h"
 #include "HtmlBodyElement.h"
 #include "File.h"
+#include "Select.h"
+#include "Button.h"
+#include "InputText.h"
 
 using namespace std;
 
@@ -149,7 +152,8 @@ bool ViewRender::applyFormat(const HtmlElement * element)
   }
   else if (element->isa("input"))
   {
-    
+    renderInput(element);
+    return false; 
   }
   return true;
 }
@@ -221,6 +225,36 @@ void ViewRender::render()
   }
 }
 
-void ViewRender::renderSelect(const HtmlElement * select)
+void ViewRender::renderSelect(const HtmlElement * selectElement)
 {
+  // render the select
+  Select * formSelect = new Select( const_cast<HtmlElement*>(selectElement));
+  if (selectElement->hasChildren())
+  {
+    const ElementList & theChildren = selectElement->children();
+    ElementList::const_iterator it(theChildren.begin());
+    for (; it != theChildren.end(); ++it)
+    {
+      if ( (*it)->isa("option") ) {
+        formSelect->addOption((*it), m_self->m_textArea);
+      }
+    }
+  }
+  m_self->m_textArea->addFormControl(formSelect);
+}
+
+void ViewRender::renderInput(const HtmlElement * inputElement)
+{
+  //Input * formInput = new Input;
+  string type = unicode2string(inputElement->attribute("type"));
+  if (type == "submit")
+  {
+    Button * submitButton = new Button(const_cast<HtmlElement*>(inputElement), m_self->m_textArea);
+    m_self->m_textArea->addFormControl(submitButton);
+  }
+  else if (type.empty() or type == "text")
+  {
+    InputText * text = new InputText(const_cast<HtmlElement*>(inputElement), m_self->m_textArea);
+    m_self->m_textArea->addFormControl(text);
+  } 
 }

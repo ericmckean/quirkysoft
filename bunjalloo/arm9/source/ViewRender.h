@@ -23,6 +23,7 @@ class ViewRender
     void setBgColor(const HtmlElement * body);
     void renderSelect(const HtmlElement * body);
     void doImage(const UnicodeString & unicode);
+    void renderInput(const HtmlElement * body);
 
 };
 #endif

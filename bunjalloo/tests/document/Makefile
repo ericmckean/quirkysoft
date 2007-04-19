@@ -15,6 +15,9 @@ LINKFILES:=Document.o \
 	   ElementFactory.o \
 	   HtmlElement.o \
 	   HtmlBodyElement.o \
+	   HtmlOptionElement.o \
+	   HtmlFormElement.o \
+	   HtmlInputElement.o \
 	   HtmlPreElement.o \
 	   HtmlMetaElement.o \
 	   HtmlImageElement.o \

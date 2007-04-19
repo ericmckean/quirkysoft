@@ -1,6 +1,6 @@
 #include "Link.h"
 #include "HtmlElement.h"
-#include "Keyboard.h"
+#include "Rectangle.h"
 
 Link::Link(const HtmlElement * a)
   : m_anchor(a)
@@ -27,7 +27,7 @@ void Link::appendClickZone(int x, int y, int w, int h)
   m_clickZones.push_front(rect);
 }
 
-bool Link::hitTest(int x, int y)
+bool Link::hitTest(int x, int y) const
 {
   RectangleList::const_iterator it(m_clickZones.begin());
   for (; it != m_clickZones.end() ; ++it)

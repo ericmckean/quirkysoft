@@ -13,7 +13,7 @@ class Link
 
     void appendClickZone(int x, int y, int w, int h);
 
-    bool hitTest(int x, int y);
+    bool hitTest(int x, int y) const;
     std::string href() const;
 
   private:

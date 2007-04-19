@@ -7,6 +7,7 @@
 
 class HtmlElement;
 class Link;
+class FormControl;
 /** A widget for displaying text.*/
 class TextArea
 {
@@ -74,7 +75,7 @@ class TextArea
      * reached is skipped. This can be used to "scroll" text up and down.
      * @param line the line of text at which to start the printing.
      */
-    void setStartLine(int line);
+    void setStartLine(int line, bool removeClickables=true);
 
     /** Get the current start line value.
      * @return the line to start the text printing at.
@@ -85,12 +86,17 @@ class TextArea
     inline void setParseNewline(bool parse=true);
     void insertNewline(int count=1);
     inline void setLink(bool isLink=true);
+    inline void setForm(bool isForm=true);
 
     void addLink(const HtmlElement * anchor);
+    void addFormControl(FormControl * formCtrl);
     Link * clickLink(int x, int y) const;
+    FormControl * clickForm(int x, int y) const;
+
     void increaseIndent();
     void decreaseIndent();
 
+    int textSize(const UnicodeString & unicodeString) const;
   private:
     Font * m_font;
     unsigned short * m_palette;
@@ -100,14 +106,21 @@ class TextArea
     int m_startLine;
     bool m_foundPosition;
     bool m_parseNewline;
-    bool m_isLink;
+    enum ControlState {
+      TEXT,
+      LINK,
+      FORM
+    };
+    ControlState m_currentControl;
 
     int m_cursorx;
     int m_cursory;
     int m_initialCursorx;
     int m_initialCursory;
     typedef std::list<Link*> LinkList;
+    typedef std::list<FormControl*> FormList;
     LinkList m_links;
+    FormList m_formControls;
     unsigned short m_bgCol;
     unsigned short m_fgCol;
     int m_indentLevel;
@@ -117,9 +130,9 @@ class TextArea
     void checkLetter(Font::Glyph & g);
     void printuImpl(const UnicodeString & unicodeString);
     bool doSingleChar(unsigned int value);
-    int textSize(const UnicodeString & unicodeString) const;
     void printuWord(const UnicodeString & word);
-    void removeLinks();
+    
+    void removeClickables();
 
     const UnicodeString nextWord(const UnicodeString & unicodeString, 
         int currPosition) const;
@@ -142,6 +155,10 @@ void TextArea::setParseNewline(bool parse)
 }
 void TextArea::setLink(bool isLink)
 {
-  m_isLink = isLink;
+  m_currentControl = isLink?LINK:TEXT;
+}
+void TextArea::setForm(bool isForm)
+{
+  m_currentControl = isForm?FORM:TEXT;
 }
 #endif

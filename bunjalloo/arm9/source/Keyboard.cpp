@@ -2,6 +2,7 @@
 #include <string>
 #include "Palette.h"
 #include "Keyboard.h"
+#include "Rectangle.h"
 #include "TextArea.h"
 #include "Canvas.h"
 #include "Sprite.h"
@@ -23,11 +24,6 @@ static const char * s_characterMap[2]={
   "1234567890qwertyuiopasdfghjkl/zxcvbnm.",
   "!-#$%&*_?=QWERTYUIOPASDFGHJKL\\ZXCVBNM:",
 };
-bool Rectangle::hit(int testx, int testy) const
-{
-  return ( (testx >= x and testx < (x + w))
-      and  (testy >= y and testy < (y + h)));
-}
 
 class Key {
   public:
@@ -63,7 +59,7 @@ class Key {
       nds::Canvas::instance().drawRectangle(rect.x, rect.y, 
           rect.w, rect.h, nds::Color(0,0,6));
       textArea->setBackgroundColor(col);
-      textArea->setStartLine(0);
+      textArea->setStartLine(0,false);
       textArea->setCursor(m_x, m_y);
       textArea->print(m_value.c_str(),m_value.length());//,m_x,m_y);
       textArea->setDefaultColor();
@@ -184,7 +180,7 @@ void Keyboard::undrawResult()
 }
 void Keyboard::drawResult()
 {
-  m_textArea.setStartLine(0);
+  m_textArea.setStartLine(0, false);
   m_textArea.setCursor(KEYBOARD_RESULT_POSITION_X, KEYBOARD_RESULT_POSITION_Y);
   m_textArea.print(m_result.c_str(),m_result.length());
 //      KEYBOARD_RESULT_POSITION_X, KEYBOARD_RESULT_POSITION_Y

@@ -10,6 +10,9 @@ LINKFILES:=HtmlElement.o\
 	   HtmlMetaElement.o \
 	   HtmlBodyElement.o \
 	   HtmlPreElement.o \
+	   HtmlOptionElement.o \
+	   HtmlFormElement.o \
+	   HtmlInputElement.o \
 	   HtmlImageElement.o \
 	   UnicodeString.o \
 	   HtmlAnchorElement.o
