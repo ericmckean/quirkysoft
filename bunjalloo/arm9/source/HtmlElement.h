@@ -85,6 +85,12 @@ class HtmlElement /* : public Element */
      */
     inline const ElementList & children() const;
 
+    /** Get the list of child elements with the given tag name.
+     * @param name the tag name to search for.
+     * @return the list of child elements. May be empty.
+     */
+    ElementList elementsByTagName(const std::string & name) const;
+
     /** Get the parent element.
      * @return the parent element. May be null for top level element.
      */

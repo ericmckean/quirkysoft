@@ -1,4 +1,5 @@
 #include "Canvas.h"
+#include "URI.h"
 #include "HtmlElement.h"
 #include "ControllerI.h"
 #include "Palette.h"
@@ -59,7 +60,29 @@ void FormControl::input(const UnicodeString & str)
 {
 }
 
-void FormControl::input(int x, int y, ControllerI & controller)
+#if 0
+void FormControl::walkForm(const HtmlElement * formElement)
+{
+  UnicodeString name = formElement->attribute("name");
+  if (not name.empty() )
+  {
+    UnicodeString value = formElement->attribute("value");
+    m_processedData += 
+  }
+  if (formElement->hasChildren())
+  {
+    ElementList::const_iterator it(formElement->children());
+    for (; it != formElement->children().end(); ++it)
+    {
+      const HtmlElement * element(*it);
+      if (element)
+        walkForm(element);
+    }
+  }
+}
+#endif
+
+void FormControl::input(int x, int y, ControllerI & controller, URI & uri)
 {
   // need to walk up m_element until we find the form father or the html element.
   HtmlElement * currentNode = m_element->parent();
@@ -73,6 +96,32 @@ void FormControl::input(int x, int y, ControllerI & controller)
   {
     return;
   }
-  // else select the "successful controls" and post them
-  //controller.doUri();
+  // select the "successful controls" and post them
+  m_processedData = unicode2string(currentNode->attribute("action"));
+  m_processedData += '?';
+  ElementList inputs(currentNode->elementsByTagName("input"));
+  ElementList::const_iterator inputIt(inputs.begin());
+  bool needAmp(false);
+  for (; inputIt != inputs.end(); ++inputIt)
+  {
+    const HtmlElement * element(*inputIt);
+    UnicodeString name = element->attribute("name");
+    std::string type = unicode2string(element->attribute("type"));
+    if (not name.empty() and (type.empty() or type == "text" ))
+    {
+      UnicodeString value = element->attribute("value");
+      if (not value.empty())
+      {
+        if (needAmp) {
+          m_processedData += '&';
+        }
+        m_processedData += unicode2string(name);
+        m_processedData += "=";
+        m_processedData += unicode2string(value);
+        needAmp = true;
+      }
+    }
+  }
+  uri.navigateTo(m_processedData);
+  controller.doUri(uri.asString());
 }

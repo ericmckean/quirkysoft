@@ -6,6 +6,7 @@ class Rectangle;
 class TextArea;
 class ControllerI;
 class HtmlElement;
+class URI;
 
 class FormControl
 {
@@ -36,7 +37,7 @@ class FormControl
     /** Input a touch value after clicking.
      * @param str the input touch.
      */
-    virtual void input(int x, int y, ControllerI & controller);
+    virtual void input(int x, int y, ControllerI & controller, URI & uri);
 
     void setHeight(int h);
     void setPosition(int x, int y);
@@ -46,6 +47,7 @@ class FormControl
   protected:
     Rectangle * m_size;
     HtmlElement * m_element;
+    std::string m_processedData;
 };
 
 #endif

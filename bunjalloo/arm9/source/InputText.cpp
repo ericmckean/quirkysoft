@@ -30,7 +30,23 @@ void InputText::draw(TextArea * textArea)
 {
   FormControl::draw(textArea);
   // print the button
-  textArea->printu(m_element->attribute("value"));
+  //
+  UnicodeString text;
+  UnicodeString value(m_element->attribute("value"));
+  UnicodeString::const_iterator it(value.begin());
+  int size(0);
+  for (; it != value.end() and size < m_size->w; ++it)
+  {
+    Font::Glyph g;
+    textArea->font().glyph(*it, g);
+    if (size + g.width < m_size->w) {
+      size += g.width;
+      text += *it;
+    } else {
+      break;
+    }
+  }
+  textArea->printu(text);
 }
 
 FormControl::InputType InputText::inputType() const
