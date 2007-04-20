@@ -22,7 +22,7 @@ SDLhandler::SDLhandler():
     m_scale(1),
     m_frames(0),
     m_isFullScreen(false),
-    m_hasSound(false),
+    m_hasSound(true),
     m_vramMain(0),
     m_vramSub(0),
     m_mainOnTop(true),
@@ -371,33 +371,25 @@ void SDLhandler::drawPixel(int x, int y, unsigned int layer, unsigned int palett
   
   bool usePalette(true);
   if (layer == 0 or layer == 1) {
-    //if (nds::Video::instance(layer).mode() == 5) {
-    colour = decodeColor(palette);
-    usePalette = false;
-    //}
+    if (nds::Video::instance(layer).mode() == 5) {
+      colour = decodeColor(palette);
+      usePalette = false;
+    }
   }
   if (usePalette) {
     switch (layer) {
       case 1:
         colour = m_subBackgroundPaletteSDL[palette];
-        if (not colour)
-          colour = 0;
         break;
       case 2:
         colour = m_spritePaletteSDL[palette];
-        if (not colour)
-          colour = 0;
         break;
       case 3:
         colour = m_subSpritePaletteSDL[palette];
-        if (not colour)
-          colour = 0;
         break;
 
       default:
         colour = m_backgroundPaletteSDL[palette];
-        if (not colour)
-          colour = 0;
         break;
     }
   }
