@@ -589,10 +589,6 @@ void HtmlParserImpl::handleBeforeAttributeValue()
       emitTagToken();
       m_state = DATA;
       break;
-    case '/':
-      // parse error if this is not a permitted slash
-      m_state = BEFORE_ATTRIBUTE_NAME;
-      break;
     default:
       {
         if (m_attribute) {

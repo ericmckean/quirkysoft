@@ -352,6 +352,10 @@ void TextArea::addFormControl(FormControl * formCtrl)
   if (m_foundPosition) {
     // get the real position?
     assert(not m_formControls.empty());
+    if (m_cursorx + formCtrl->width() > Canvas::instance().width())
+    {
+      incrLine();
+    }
     int cursorx = m_cursorx;
     int cursory = m_cursory;
     formCtrl->setPosition(m_cursorx, m_cursory);

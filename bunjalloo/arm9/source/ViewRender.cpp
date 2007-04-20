@@ -98,10 +98,12 @@ void ViewRender::postFormat(const HtmlElement * element)
   }
 
 
+  /*
   if (element->isBlock())
   {
     m_self->m_textArea->insertNewline();
   }
+  */
 }
 
 bool ViewRender::applyFormat(const HtmlElement * element)

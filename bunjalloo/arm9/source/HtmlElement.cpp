@@ -144,3 +144,20 @@ const HtmlElement * HtmlElement::nextSibling(const HtmlElement * child)
   }
   return 0;
 }
+
+ElementList HtmlElement::elementsByTagName(const std::string & name) const
+{
+  string lowerName = name;
+  transform(name.begin(), name.end(), lowerName.begin(), ::tolower);
+  ElementList returnList;
+  ElementList::const_iterator it(m_children.begin());
+  for (; it != m_children.end(); ++it)
+  {
+    HtmlElement * element(*it);
+    if (element->isa(name))
+    {
+      returnList.push_back(element);
+    }
+  }
+  return returnList;
+}

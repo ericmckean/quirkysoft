@@ -106,7 +106,8 @@ void View::browse()
           case FormControl::ONE_CLICK:
             {
               // m_form->input
-              m_form->input(tp.px, tp.py, m_controller);
+              URI uri(m_document.uri());
+              m_form->input(tp.px, tp.py, m_controller, uri);
               m_state = BROWSE;
             }
             break;

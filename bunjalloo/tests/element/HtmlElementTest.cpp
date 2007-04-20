@@ -224,3 +224,24 @@ void HtmlElementTest::testOptionElement()
   expected = "b"; 
   CPPUNIT_ASSERT_EQUAL( expected , unicode2string(m_element->attribute("label")));
 }
+
+
+void HtmlElementTest::testElementsByTagName()
+{
+  m_element = ElementFactory::create("form");
+  HtmlElement * select = ElementFactory::create("select");
+  HtmlElement * option = ElementFactory::create("option");
+  HtmlElement * option2 = ElementFactory::create("option");
+  HtmlElement * p = ElementFactory::create("p");
+  m_element->append(select);
+  select->append(option);
+  select->append(p);
+  select->append(option2);
+
+  size_t expected(1);
+  CPPUNIT_ASSERT_EQUAL( expected , m_element->elementsByTagName("select").size());
+  expected = 2;
+  CPPUNIT_ASSERT_EQUAL( expected , select->elementsByTagName("option").size());
+
+
+}

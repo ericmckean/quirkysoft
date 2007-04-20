@@ -1,5 +1,6 @@
 #include "libnds.h"
 #include "Wifi9.h"
+#include <iostream>
 #include <vector>
 #include "Controller.h"
 #include "Document.h"
@@ -18,6 +19,8 @@ static const char s_licenceText[] = {
 static const char s_errorText[] = {
 #include "error.txt"
 };
+
+static const int MAX_CONNECT_ATTEMPTS(40);
 
 Controller::Controller()
   : m_document(new Document())
@@ -42,6 +45,7 @@ void Controller::showLicence()
 
 void Controller::doUri(const std::string & uriString)
 {
+  cout << uriString << endl;
   if (uriString.size()) {
     m_document->setUri(uriString);
     // split the URI into sections
@@ -67,7 +71,12 @@ void Controller::loadError()
 {
   m_document->reset();
   m_document->appendLocalData(s_errorText, strlen(s_errorText));
-  m_document->appendLocalData(m_document->uri().c_str(), m_document->uri().length());
+  string href("<a href='");
+  href += m_document->uri();
+  href += "'>";
+  href += m_document->uri();
+  href += "</a>";
+  m_document->appendLocalData(href.c_str(), href.length());
   m_document->setStatus(Document::LOADED);
 }
 
@@ -121,8 +130,9 @@ class HttpClient: public nds::Client
     
     bool connectCallback() {
       printf("Connect?...\n");
+      swiWaitForVBlank();
       m_connectAttempts++;
-      return m_connectAttempts < 10;
+      return m_connectAttempts < MAX_CONNECT_ATTEMPTS;
     }
 
     void writeCallback() {

@@ -21,6 +21,7 @@ class HtmlElementTest : public CPPUNIT_NS::TestFixture
   CPPUNIT_TEST( testPreviousSibling );
   CPPUNIT_TEST( testNextSibling );
   CPPUNIT_TEST( testOptionElement );
+  CPPUNIT_TEST( testElementsByTagName );
   CPPUNIT_TEST_SUITE_END();
 
 public:
@@ -41,6 +42,7 @@ public:
   void testPreviousSibling();
   void testNextSibling();
   void testOptionElement();
+  void testElementsByTagName();
 
 private:
   HtmlElement * m_element;
