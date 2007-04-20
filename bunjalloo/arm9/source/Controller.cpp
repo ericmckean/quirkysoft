@@ -1,6 +1,5 @@
 #include "libnds.h"
 #include "Wifi9.h"
-#include <iostream>
 #include <vector>
 #include "Controller.h"
 #include "Document.h"
@@ -45,7 +44,7 @@ void Controller::showLicence()
 
 void Controller::doUri(const std::string & uriString)
 {
-  cout << uriString << endl;
+  //cout << uriString << endl;
   if (uriString.size()) {
     m_document->setUri(uriString);
     // split the URI into sections
@@ -129,7 +128,7 @@ class HttpClient: public nds::Client
     }
     
     bool connectCallback() {
-      printf("Connect?...\n");
+      //printf("Connect?...\n");
       swiWaitForVBlank();
       m_connectAttempts++;
       return m_connectAttempts < MAX_CONNECT_ATTEMPTS;

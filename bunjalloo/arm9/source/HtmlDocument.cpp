@@ -29,7 +29,7 @@ const static char INPUT_TAG[] = "input";
 const static char OPTION_TAG[] = "option";
 const static char OPTGROUP_TAG[] = "optgroup";
 
-#if 1
+#if 0
 #include <iostream>
 void HtmlDocument::walkNode(const HtmlElement * node)
 {

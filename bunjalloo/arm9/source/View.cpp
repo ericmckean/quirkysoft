@@ -1,5 +1,5 @@
 #include <libgen.h>
-#include <iostream>
+//#include <iostream>
 #include "ndspp.h"
 #include "libnds.h"
 #include "View.h"
@@ -14,7 +14,7 @@
 #include "FormControl.h"
 
 using namespace std;
-const static int STEP(1);
+const static int STEP(10);
 
 View::View(Document & doc, ControllerI & c):
   m_document(doc), 
@@ -89,7 +89,7 @@ void View::browse()
       URI tmpURI(original);
       tmpURI.navigateTo(s);
       m_textArea->setStartLine(0);
-      cout << "Navigated to " << tmpURI.asString() << endl;
+      //cout << "Navigated to " << tmpURI.asString() << endl;
       // TODO - "navigate or download"..
       m_controller.doUri( tmpURI.asString() );
     }

@@ -1,4 +1,4 @@
-#include <iostream>
+//#include <iostream>
 #include <assert.h>
 #include "ndspp.h"
 #include "libnds.h"
