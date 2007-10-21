@@ -1,0 +1,239 @@
+/*
+  Copyright (C) 2007 Richard Quirk
+
+  This program is free software: you can redistribute it and/or modify
+  it under the terms of the GNU General Public License as published by
+  the Free Software Foundation, either version 3 of the License, or
+  (at your option) any later version.
+
+  This program is distributed in the hope that it will be useful,
+  but WITHOUT ANY WARRANTY; without even the implied warranty of
+  MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+  GNU General Public License for more details.
+
+  You should have received a copy of the GNU General Public License
+  along with this program.  If not, see <http://www.gnu.org/licenses/>.
+*/
+#include "File.h"
+#include <string>
+#include <stdio.h>
+#include <unistd.h>
+#include <dirent.h>
+
+using namespace nds;
+
+class nds::FileImplementation
+{
+  public:
+    FileImplementation();
+    void open(const char * name, const char * mode);
+    ~FileImplementation();
+
+    int read(char * buffer, int amount=-1);
+    int write(const char * buffer, int amount=-1);
+    int size();
+    bool is_open() const;
+    void close();
+    bool eof() const;
+
+  private:
+    FILE * m_stream;
+  
+};
+
+// delegate class:
+FileImplementation::FileImplementation(): m_stream(0)
+{}
+
+void FileImplementation::open(const char * name, const char * mode)
+{
+  if (m_stream) {
+    close();
+  }
+  m_stream = fopen(name, mode);
+}
+
+
+FileImplementation::~FileImplementation()
+{
+  if (m_stream)
+    fclose(m_stream);
+}
+
+int FileImplementation::read(char * buffer, int amount)
+{
+  if (not m_stream)
+  {
+    return 0;
+  }
+
+  int bytesExpected = amount;
+  if (amount < 0) {
+    // read all bytes
+    rewind(m_stream);
+    bytesExpected = this->size();
+  }
+  return fread(buffer, 1, bytesExpected, m_stream);
+}
+
+int FileImplementation::write(const char * buffer, int amount)
+{
+  if (not m_stream)
+  {
+    return 0;
+  }
+
+  int bytesExpected = amount;
+  if (amount < 0) {
+    bytesExpected = strlen(buffer);
+  }
+  return fwrite(buffer, 1, bytesExpected, m_stream);
+}
+
+int FileImplementation::size()
+{
+  if (not m_stream)
+    return 0;
+
+  int current = ftell(m_stream);
+  fseek(m_stream, 0, SEEK_END);
+  int fileSize = ftell(m_stream);
+  fseek(m_stream, current, SEEK_SET);
+  return fileSize;
+}
+
+bool FileImplementation::is_open() const
+{
+  return m_stream != 0;
+}
+void FileImplementation::close()
+{
+  if (m_stream) 
+    fclose(m_stream);
+  m_stream = 0;
+}
+
+bool FileImplementation::eof() const
+{
+  return feof(m_stream) != 0;
+}
+// File proxy as follows:
+File::File():m_details(new FileImplementation())
+{}
+
+static std::string toFat(const char * path)
+{
+  char * dirname = get_current_dir_name();
+  std::string fullpath(dirname);
+  free(dirname);
+  if (path[0] != '/') {
+    fullpath += "/";
+  }
+  fullpath += path;
+  return fullpath;
+}
+
+void File::open(const char * name, const char * mode)
+{
+  // append name to cwd to emulate FAT behaviour.
+  std::string fullpath(toFat(name));
+  m_details->open(fullpath.c_str(), mode);
+}
+
+File::~File()
+{
+  delete m_details;
+}
+
+int File::read(char * buffer, int amount)
+{
+  return m_details->read(buffer, amount);
+}
+
+int File::write(const char * buffer, int amount)
+{
+  return m_details->write(buffer, amount);
+}
+
+bool File::eof() const
+{
+  return m_details->eof();
+}
+
+int File::size()
+{
+  return m_details->size();
+}
+
+bool File::is_open() const
+{
+  return m_details->is_open();
+}
+
+void File::close()
+{
+  m_details->close();
+}
+
+#include <fcntl.h>
+#include <sys/types.h>
+/*
+bool nds::File::direxists(const char * path)
+{
+  // see if the file exists
+  std::string fullpath(toFat(path));
+  int fp = ::open(fullpath.c_str(), O_RDONLY|O_DIRECTORY);
+  printf("fp %d  for %s from %s\n", fp, fullpath.c_str(), path);
+  bool ex = false;
+  if (fp != -1)
+  {
+    ex = true;
+    ::close(fp);
+  }
+  return ex;
+}
+*/
+
+nds::File::FileType nds::File::exists(const char * path)
+{
+  return existsCommon(toFat(path).c_str());
+}
+
+bool nds::File::mkdir(const char * path)
+{
+  return mkdirCommon(path);
+}
+
+int File::mkdir(const char * path, unsigned int mode)
+{
+  std::string fullpath(toFat(path));
+  return ::mkdir(fullpath.c_str(), mode);
+}
+
+bool File::unlink(const char * path)
+{
+  return ::unlink(toFat(path).c_str()) == 0;
+  //return false;
+}
+
+void nds::File::ls(const char * path, std::vector<std::string> & entries)
+{
+  if (exists(path) == F_DIR)
+  {
+    DIR * dir = ::opendir(toFat(path).c_str());
+    if (dir == NULL)
+    {
+      return;
+    }
+    struct dirent * ent;
+
+    while ( (ent = ::readdir(dir)) != 0)
+    {
+      if (strcmp( ent->d_name, ".") != 0 and strcmp(ent->d_name, "..") != 0 )
+      {
+        entries.push_back(ent->d_name);
+      }
+    }
+    ::closedir(dir);
+  }
+}
