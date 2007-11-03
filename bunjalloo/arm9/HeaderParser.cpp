@@ -141,14 +141,14 @@ void HeaderParser::handleHeader(const std::string & field, const std::string & v
 {
   if (field == "transfer-encoding" and value == "chunked") {
     m_chunked = true;
-  } 
+  }
   else if (field == "location" and m_httpStatusCode >= 300 and m_httpStatusCode < 400)
   {
     m_redirect = value;
   }
   else if (field == "content-length") {
     m_expected = strtol(value.c_str(), 0 , 0);
-  } 
+  }
   else if (field == "content-type") {
     m_htmlParser->parseContentType(value);
   }
@@ -358,7 +358,7 @@ void HeaderParser::httpResponse()
     m_state = PARSE_ERROR;
   }
 }
-  
+
 void HeaderParser::fireData()
 {
   rewind();
@@ -370,7 +370,7 @@ void HeaderParser::fireData()
       m_chunkLengthString = "";
       m_chunkLength = 0;
     }
-    else 
+    else
     {
       m_chunkLength -= length;
     }

@@ -120,7 +120,19 @@ void Controller::reload()
   doUri(m_document->uri());
 }
 
-void Controller::previous() 
+void Controller::saveAs(const char * fileName)
+{
+  // save the current document as fileName
+  // simply copy from the cache.
+  string cachedFile = m_cache->fileName(m_document->uri());
+  if (nds::File::exists(cachedFile.c_str()) == nds::File::F_REG
+      and nds::File::exists(fileName) == nds::File::F_NONE)
+  {
+    bool ok = nds::File::cp(cachedFile.c_str(), fileName);
+  }
+}
+
+void Controller::previous()
 {
   string ph = m_document->gotoPreviousHistory();
   if (not ph.empty())
@@ -130,7 +142,7 @@ void Controller::previous()
   }
 }
 
-void Controller::next() 
+void Controller::next()
 {
   string ph = m_document->gotoNextHistory();
   if (not ph.empty())
