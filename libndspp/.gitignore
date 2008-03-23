@@ -1,0 +1,5 @@
+.sconsign.dblite
+build
+lib
+ndspp-scons/*.pyc
+docs
