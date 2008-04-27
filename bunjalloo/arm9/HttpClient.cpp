@@ -41,6 +41,7 @@
 */
 #include <string>
 #include <algorithm>
+#include <cstring>
 #include "libnds.h"
 #include "System.h"
 #include "Config.h"
@@ -48,6 +49,7 @@
 #include "CookieJar.h"
 #include "Document.h"
 #include "HttpClient.h"
+#include "Language.h"
 #include "URI.h"
 #include "File.h"
 #include "Wifi9.h"
@@ -776,6 +778,9 @@ void HttpClient::get(const URI & uri)
       // ends.
       s += "Connection: close\r\n";
     }
+    s += "Accept-Language: ";
+    s += Language::instance().currentLanguage();
+    s += "\r\n";
     // Only send referrer to the same server.
     if (not m_referer.server().empty()
         and m_referer.server() == uri.server())
@@ -1095,7 +1100,9 @@ void HttpClient::reset()
 
 void HttpClient::setReferer(const URI & referer)
 {
-  if (referer.server().empty())
+  bool fullReferer(false);
+  m_controller->config().resource(Config::FULL_REF, fullReferer);
+  if (referer.server().empty() or fullReferer)
   {
     m_referer = referer;
   }

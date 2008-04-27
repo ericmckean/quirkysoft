@@ -22,10 +22,13 @@
 #include "Canvas.h"
 #include "Config.h"
 #include "Controller.h"
+#include "CookieHandler.h"
 #include "Document.h"
+#include "EditPopup.h"
 #include "HtmlDocument.h"
 #include "File.h"
 #include "FormControl.h"
+#include "HrefFinder.h"
 #include "Language.h"
 #include "InternalVisitor.h"
 #include "HtmlElement.h"
@@ -46,10 +49,10 @@
 
 using namespace std;
 const static char * ENTER_URL_TITLE("enter_url");
+const static char * EDIT_BOOKMARK_TITLE("edit_bm");
 const static char * SAVE_AS_TITLE("save_as");
 const static char * ENTER_TEXT_TITLE("enter_text");
 const static int STEP(1);
-const static char * BOOKMARK_FILE  = "/"DATADIR"/user/bookmarks.html";
 const static char * SEARCH_TEMPLATE = "/"DATADIR"/docs/search-example.txt";
 
 struct KeyState
@@ -102,8 +105,10 @@ View::View(Document & doc, Controller & c):
   m_state(BROWSE),
   m_form(0),
   m_linkHandler(new LinkHandler(this)),
+  m_editPopup(new EditPopup(this)),
   m_search(0),
   m_keyState(new KeyState),
+  m_cookieHandler(new CookieHandler(this)),
   m_dirty(true),
   m_refreshing(0),
   m_saveAsEnabled(true)
@@ -161,6 +166,10 @@ void View::extractTitle()
     URI tmpUri(m_document.uri());
     m_bookmarkTitleUtf8 = tmpUri.fileName();
     m_bookmarkTitleUtf8 = nds::File::base(m_bookmarkTitleUtf8.c_str());
+    if (m_bookmarkTitleUtf8.empty())
+    {
+      m_bookmarkTitleUtf8 = tmpUri.asString();
+    }
   }
 }
 
@@ -174,11 +183,10 @@ void View::notify()
         break;
     case Document::LOADED:
       {
+        // this is to clear the progress's dirty flag.
+        m_progress->paint(m_progress->bounds());
+        m_progress->setVisible(false);
         m_filenameForProgress.clear();
-        /** Broken by BWT.
-         m_textArea->setStartLine( (-SCREEN_HEIGHT / m_textArea->font().height()) - 1);
-        swiWaitForVBlank();
-         */
         m_renderer->render();
         int pos = m_document.position();
         if (pos == -1)
@@ -218,6 +226,8 @@ void View::notify()
       break;
     case Document::INPROGRESS:
       {
+        m_progress->setMax(100);
+        m_progress->setMin(0);
         // add a progress bar or something here...
         unsigned int pc = m_document.percentLoaded();
         m_progress->setValue(pc);
@@ -235,6 +245,7 @@ void View::notify()
         sprintf_platform(buffer, " %d%%", pc);
         s += buffer;
         m_progress->setText(string2unicode(s));
+        m_progress->setVisible();
       }
       break;
     case Document::HAS_HEADERS:
@@ -269,6 +280,16 @@ void View::enterUrl()
   m_dirty = true;
 }
 
+void View::editBookmark()
+{
+  m_addressBar->setText(m_editPopup->details());
+  m_keyboard->setTitle(T(EDIT_BOOKMARK_TITLE));
+  m_keyboard->editText(m_addressBar);
+  m_toolbar->setVisible(false);
+  m_state = EDIT_BOOKMARK;
+  m_dirty = true;
+}
+
 void View::setToolbar(Toolbar * toolbar)
 {
   m_toolbar->setVisible(false);
@@ -287,6 +308,7 @@ void View::endBookmark()
   m_document.setHistoryEnabled(true);
 
   setToolbar(m_browseToolbar);
+  m_renderer->setUpdater(0);
 }
 
 void View::bookmarkUrl()
@@ -302,12 +324,12 @@ void View::bookmarkUrl()
 void View::showBookmarkPage()
 {
   m_document.setHistoryEnabled(false);
-  if (nds::File::exists(BOOKMARK_FILE) == nds::File::F_NONE)
+  if (nds::File::exists(Config::BOOKMARK_FILE) == nds::File::F_NONE)
   {
     // create it
     nds::File bookmarks;
     // doesn't exist, so write out the header...
-    bookmarks.open(BOOKMARK_FILE, "w");
+    bookmarks.open(Config::BOOKMARK_FILE, "w");
     if (not bookmarks.is_open()) {
       // that's unpossible!
       return;
@@ -316,7 +338,7 @@ void View::showBookmarkPage()
     bookmarks.write(header.c_str(), header.length());
   }
   string bookmarkUrl("file://");
-  bookmarkUrl += BOOKMARK_FILE;
+  bookmarkUrl += Config::BOOKMARK_FILE;
   m_controller.doUri(bookmarkUrl);
   m_document.setHistoryEnabled(true);
 }
@@ -333,7 +355,7 @@ void View::bookmarkCurrentPage()
   {
     nds::File bookmarks;
     // OK - add to the bm file
-    bookmarks.open(BOOKMARK_FILE, "a");
+    bookmarks.open(Config::BOOKMARK_FILE, "a");
     if (bookmarks.is_open())
     {
       // write out "<a href=%1>%2</a>" 1=href 2=title
@@ -350,6 +372,27 @@ void View::bookmarkCurrentPage()
     }
   }
   showBookmarkPage();
+}
+
+void View::addCookie()
+{
+  // add cookie for the current page.
+  URI uri(m_document.uri());
+  if (uri.protocol() == URI::HTTPS_PROTOCOL or
+      uri.protocol() == URI::HTTP_PROTOCOL)
+  {
+    m_renderer->clear();
+    m_cookieHandler->setMode(CookieHandler::ADD_MODE);
+    m_cookieHandler->show();
+  }
+}
+
+void View::editCookie()
+{
+  // edit the list of cookies
+  m_renderer->clear();
+  m_cookieHandler->setMode(CookieHandler::EDIT_MODE);
+  m_cookieHandler->show();
 }
 
 void View::preferences()
@@ -542,6 +585,28 @@ void View::linkClicked(Link * link)
   }
 }
 
+void View::linkPopup(Link * link)
+{
+  // if bookmark page, delete bookmark?
+  URI uri(m_document.uri());
+  if (m_state == BOOKMARK)
+  {
+    // delete the link from the bookmark... ulp
+
+    HrefFinder visitor(link->href());
+    HtmlElement * root((HtmlElement*)m_document.rootNode());
+    root->accept(visitor);
+    if (visitor.found())
+    {
+      HtmlElement * el(visitor.element());
+      Stylus * stylus(Stylus::instance());
+      m_editPopup->setElement(el);
+      m_editPopup->setLocation(stylus->lastX(), stylus->lastY());
+      m_editPopup->setVisible();
+    }
+  }
+}
+
 void View::keyboard()
 {
   updateInput();
@@ -559,6 +624,7 @@ void View::tick()
       browse();
       break;
     case ENTER_URL:
+    case EDIT_BOOKMARK:
     case SAVE_CURRENT_FILE:
     case SAVE_DOWNLOADING:
       keyboard();
@@ -575,7 +641,8 @@ void View::tick()
       break;
   }
   m_dirty |= m_keyboard->tick();
-  m_dirty |= (m_document.status() == Document::INPROGRESS) and m_progress->dirty();
+  m_dirty |= m_cookieHandler->tick();
+  m_dirty |= m_progress->dirty();
   m_toolbar->tick();
 
 
@@ -584,7 +651,8 @@ void View::tick()
     m_scrollPane->paint(clip);
     m_keyboard->paint(clip);
     m_linkHandler->paint(clip);
-    if (m_progress->dirty() and m_document.status() == Document::INPROGRESS)
+    m_editPopup->paint(clip);
+    if (m_progress->dirty())
     {
       m_progress->paint(m_progress->bounds());
     }
@@ -600,6 +668,11 @@ void View::tick()
   if (m_state == ENTER_URL and not m_keyboard->visible()) {
     m_toolbar->setVisible(true);
     doEnterUrl();
+  }
+
+  if (m_state == EDIT_BOOKMARK and not m_keyboard->visible()) {
+    m_toolbar->setVisible(true);
+    doEditBookmark();
   }
 
   if (( m_state == SAVE_CURRENT_FILE or m_state == SAVE_DOWNLOADING )
@@ -652,6 +725,16 @@ void View::doEnterUrl()
   }
 }
 
+void View::doEditBookmark()
+{
+  const UnicodeString & value = m_keyboard->result();
+  if (not value.empty() and m_keyboard->selected() == Keyboard::OK)
+  {
+    m_editPopup->postEdit(value);
+  }
+  bookmarkUrl();
+}
+
 void View::doSaveAs()
 {
   string fileName = unicode2string(m_keyboard->result());
@@ -668,4 +751,22 @@ void View::doSaveAs()
     m_controller.stop();
   }
   m_state = BROWSE;
+}
+
+void View::setUpdater(Updater * updater)
+{
+  m_renderer->setUpdater(updater);
+}
+
+void View::resetScroller()
+{
+  m_scrollPane->setLocation(0,0);
+  m_scrollPane->setSize(nds::Canvas::instance().width(), nds::Canvas::instance().height());
+  m_scrollPane->setSize(nds::Canvas::instance().width(), nds::Canvas::instance().height());
+  m_scrollPane->scrollToPercent(0);
+}
+
+ViewRender * View::renderer()
+{
+  return m_renderer;
 }

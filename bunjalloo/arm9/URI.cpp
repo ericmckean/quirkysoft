@@ -86,7 +86,7 @@ void URI::setUri(const std::string & uriString)
   }
   if (sep != string::npos) {
     m_protocol = tmpUri.substr(0,sep);
-    transform(m_protocol.begin(), m_protocol.end(), m_protocol.begin(), tolower);
+    transform(m_protocol.begin(), m_protocol.end(), m_protocol.begin(), ::tolower);
     m_address = tmpUri.substr(sep+3, tmpUri.length());
   }
 }
@@ -171,7 +171,7 @@ static void stripInternal(const std::string & address, std::string &file, std::s
   const std::string f(address);
   // f.split('#')[1]
   vector<string> elements;
-  tokenize(f, elements, "#");
+  tokenize(f, elements, string("#"));
   file = elements[0];
   if (elements.size() > 1)
   {
@@ -292,7 +292,7 @@ URI URI::navigateTo(const std::string & newFile ) const
   // if contains dots -> strip them out
   vector<string> pathElements;
   vector<string> newPath;
-  tokenize(newURI, pathElements, "/");
+  tokenize(newURI, pathElements, string("/"));
 
   vector<string>::const_iterator it(pathElements.begin());
   for (; it != pathElements.end();++it)
@@ -379,6 +379,51 @@ UnicodeString URI::escape(const UnicodeString & input)
     }
   }
   return output;
+}
+
+UnicodeString URI::unescape(const UnicodeString & input)
+{
+  // convert %XX to char
+  UnicodeString output;
+  UnicodeString::const_iterator it(input.begin());
+  for ( ; it != input.end(); ++it)
+  {
+    unsigned int value = *it;
+    if ( value == '%')
+    {
+      string hex;
+      ++it;
+      if (isxdigit(*it))
+        hex += (char)(*it);
+      else
+      {
+        output += value;
+        --it;
+        continue;
+      }
+      ++it;
+      if (isxdigit(*it))
+        hex += (char)(*it);
+      else
+      {
+        output += value;
+        --it;
+        --it;
+        continue;
+      }
+      int converted = strtol(hex.c_str(), 0, 16);
+      if (converted)
+      {
+        output += converted;
+      }
+    }
+    else
+    {
+      output += value;
+    }
+  }
+  return output;
+
 }
 
 const std::string URI::method() const

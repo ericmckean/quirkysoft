@@ -4,7 +4,7 @@ Import('env')
 # Build the bwt library.
 
 # New Environment from parent.
-bwtEnv = env.Copy()
+bwtEnv = env.Clone()
 
 Export('bwtEnv')
 # build common source into "common" build dir

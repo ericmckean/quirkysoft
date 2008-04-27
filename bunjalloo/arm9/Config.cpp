@@ -14,6 +14,7 @@
   You should have received a copy of the GNU General Public License
   along with this program.  If not, see <http://www.gnu.org/licenses/>.
 */
+#include <cstdlib>
 #include "Config.h"
 #include "CookieJar.h"
 #include "File.h"
@@ -36,6 +37,8 @@ const char Config::USECACHE[] = "usecache";
 const char Config::CLEARCACHE[] = "clearcache";
 const char Config::DOWNLOAD[] = "download";
 const char Config::UPDATE[] = "update";
+const char Config::FULL_REF[] = "fullref";
+const char Config::BOOKMARK_FILE[] = "/"DATADIR"/user/bookmarks.html";
 const char LANG_STR[] = "language";
 using namespace std;
 
@@ -218,7 +221,8 @@ void Config::updateConfig(const std::string & first, const std::string & second,
     std::vector<std::string> & lines)
 {
   bool replaced(false);
-  callback(first, second);
+  string valUnescaped(unicode2string(URI::unescape(string2unicode(second)), true));
+  callback(first, valUnescaped);
   for (std::vector<std::string>::iterator it(lines.begin());
       it != lines.end(); ++it)
   {
@@ -232,7 +236,7 @@ void Config::updateConfig(const std::string & first, const std::string & second,
       {
         win = true;
       }
-      line = first + "=" + second;
+      line = first + "=" + valUnescaped;
       if (win)
         line += "\r";
       break;
@@ -243,7 +247,7 @@ void Config::updateConfig(const std::string & first, const std::string & second,
   {
     string line(first);
     line += "=";
-    line += second;
+    line += valUnescaped;
     string & firstLine(lines.front());
     if (firstLine[firstLine.length()-1] == '\r')
     {

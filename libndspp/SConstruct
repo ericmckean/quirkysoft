@@ -1,7 +1,8 @@
-import os, os.path, glob, sys
+#!/usr/bin/env python
+
+import os, os.path, glob
 
 libName = 'ndspp'
-#os.path.basename( os.getcwd())
 
 headers=['#/include']
 commonFlags = ' -g -Wall '
@@ -11,19 +12,49 @@ defaultEnv = Environment( CCFLAGS=commonFlags, CPPPATH=headers,
 buildTargets = ['pc', 'arm9', 'arm7']
 # function definitions
 
+def die(msg):
+  import color
+  print '*** ',
+  color.pprint(msg, color.red)
+  Exit(1)
+
+def configure(target, env):
+  conf = env.Configure()
+  where = ' in $DEVKITPRO'
+  if target == 'arm7':
+    conf.CheckHeader('nds.h') or die('Install libnds'+where)
+    where += '/libnds'
+    conf.CheckHeader(['nds/jtypes.h', 'dswifi7.h']) or die('Install the dswifi library'+where)
+  elif target == 'arm9':
+    conf.CheckHeader('nds.h') or die('Install libnds'+where)
+    where += '/libnds'
+    conf.CheckHeader(['nds/jtypes.h', 'dswifi9.h']) or die('Install the dswifi library'+where)
+    conf.CheckHeader('fat.h') or die('Install the fat library'+where)
+  else:
+    where = '-dev for your system'
+    conf.CheckHeader('SDL/SDL.h') or die('Install SDL'+where)
+
+  # common libs
+  if target != 'arm7':
+    for i in 'zlib png gif_lib'.split():
+      conf.CheckHeader(i+'.h') or die('Install '+i+where)
+    conf.CheckHeader(['stdio.h', 'jpeglib.h']) or die('Install jpeglib'+where)
+
+  return conf.Finish()
+
 def createEnv(buildTarget):
   global defaultEnv
   env = None
   if buildTarget.startswith('arm'):
-    env = defaultEnv.Copy( tools = [ ('arm', { 'type':buildTarget })] )
+    env = defaultEnv.Clone( tools = [ ('arm', { 'type':buildTarget })] )
     env.Append(CCFLAGS=' -O2 ')
   else:
-    env = defaultEnv.Copy()
+    env = defaultEnv.Clone()
     env.Append(CCFLAGS=' -O0 ')
     for i in ['CC', 'CXX']:
       if os.environ.has_key(i) and os.environ[i]:
         env[i] = os.environ[i]
-  return env
+  return configure(buildTarget, env)
 
 def build(buildTarget):
   """ build a particular build target """
@@ -57,4 +88,3 @@ def build(buildTarget):
 # build steps
 [ build(buildTarget) for buildTarget in buildTargets ]
 
-# vim: set filetype=python :

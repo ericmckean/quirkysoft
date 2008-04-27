@@ -14,15 +14,17 @@
   You should have received a copy of the GNU General Public License
   along with this program.  If not, see <http://www.gnu.org/licenses/>.
 */
+#include <cstring>
 #include "libnds.h"
-#include "Keyboard.h"
-#include "TextAreaFactory.h"
-#include "EditableTextArea.h"
-#include "RichTextArea.h"
-#include "ScrollPane.h"
 #include "Button.h"
 #include "Canvas.h"
+#include "EditableTextArea.h"
+#include "Keyboard.h"
+#include "Language.h"
+#include "RichTextArea.h"
+#include "ScrollPane.h"
 #include "Stylus.h"
+#include "TextAreaFactory.h"
 #include "TextEntryI.h"
 
 // TODO: use config for this?
@@ -46,8 +48,6 @@ static const UnicodeString ENTER_STR(string2unicode(" Enter"));
 static const UnicodeString SHIFT_STR(string2unicode("Shift"));
 static const UnicodeString SPACE_STR(string2unicode(" "));
 static const UnicodeString EXTRA_STR(string2unicode(" Alt"));
-static const UnicodeString OK_STR(string2unicode("    OK"));
-static const UnicodeString CANCEL_STR(string2unicode(" Cancel"));
 static const UnicodeString CLEAR_STR(string2unicode(" Clr"));
 
 const static int KEY_HEIGHT = 18;
@@ -148,13 +148,13 @@ Keyboard::Keyboard():
   // ok key - floating after the keyboard
   createSpecialKey(INITIAL_X+KEY_WIDTH, INITIAL_Y+(KEY_HEIGHT*5)+KEY_HEIGHT/3,
       (KEY_WIDTH)*3, KEY_HEIGHT,
-      OK_STR,
+      T("ok"),
       m_ok);
 
   // cancel key - floating after the keyboard
   createSpecialKey(INITIAL_X+KEY_WIDTH*8, INITIAL_Y+(KEY_HEIGHT*5)+KEY_HEIGHT/3,
       (KEY_WIDTH)*3, KEY_HEIGHT,
-      CANCEL_STR,
+      T("cancel"),
       m_cancel);
 
   // caps - at the start of the a-l row. 1.5 keys wide
@@ -305,11 +305,9 @@ void Keyboard::pressed(ButtonI * button)
   {
     case SPKY_SHIFT:
       m_shift = not m_shift;
-      updateModifierKeys();
       break;
     case SPKY_CAPS:
       m_capsLock = not m_capsLock;
-      updateModifierKeys();
       break;
     case SPKY_ENTER:
       appendText(string2unicode("\n"));
@@ -323,7 +321,6 @@ void Keyboard::pressed(ButtonI * button)
       break;
     case SPKY_EXTRA:
       m_extra = not m_extra;
-      updateModifierKeys();
       break;
     case SPKY_CANCEL:
       m_selectedStatus = CANCEL;
@@ -352,6 +349,7 @@ void Keyboard::pressed(ButtonI * button)
       m_extra = false;
       break;
   }
+  updateModifierKeys();
 }
 
 void Keyboard::appendText(const UnicodeString & text)

@@ -29,5 +29,10 @@ class LinkListener
      */
     virtual void linkClicked(Link * link) = 0;
 
+    /** Called when a Link is hovered over for some seconds.
+     * @param link the link that has been hovered over.
+     */
+    virtual void linkPopup(Link * link) = 0;
+
 };
 #endif

@@ -14,6 +14,7 @@
   You should have received a copy of the GNU General Public License
   along with this program.  If not, see <http://www.gnu.org/licenses/>.
 */
+#include <algorithm>
 #include "Cookie.h"
 #include "CookieJar.h"
 #include "File.h"
@@ -209,12 +210,12 @@ bool CookieJar::acceptCookies(const std::string & domain) const
 
   // first get the top level domain of "domain".
   string top(topLevel(domain));
-  AcceptedDomainMap::const_iterator topIt(m_acceptedDomains.find(top));
+  AcceptedDomainSet::const_iterator topIt(m_acceptedDomains.find(top));
   if (topIt != m_acceptedDomains.end())
   {
     return true;
   }
-  AcceptedDomainMap::const_iterator it(m_acceptedDomains.find(domain));
+  AcceptedDomainSet::const_iterator it(m_acceptedDomains.find(domain));
   return (it != m_acceptedDomains.end());
 }
 
@@ -224,10 +225,16 @@ void CookieJar::setAcceptCookies(const std::string & domain, bool accept)
   {
     // no longer accept them
     m_acceptedDomains.erase(domain);
+    // TODO: remove the actual cookie vals too?
   }
 
   if (accept)
   {
-    m_acceptedDomains[domain] = accept;
+    m_acceptedDomains.insert(domain);
   }
+}
+
+void CookieJar::acceptedDomains(AcceptedDomainSet & set) const
+{
+  set = m_acceptedDomains;
 }

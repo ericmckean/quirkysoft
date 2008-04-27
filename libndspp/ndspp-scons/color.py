@@ -17,8 +17,19 @@
 import os.path, sys
 
 black = '\x1b[0m'
-green = '\x1b[30;32m'
-blue = '\x1b[30;34m'
+green = '\x1b[92m'
+blue = '\x1b[94m'
+red = '\x1b[91m'
+
+def reset_colors():
+  global black, green, blue, red
+  black = ''
+  green = ''
+  blue = ''
+  red = ''
+
+def pprint(msg, col):
+  print col + msg + black
 
 def generate(env, **kw):
   """ Generate a coloured output environment """
@@ -27,13 +38,17 @@ def generate(env, **kw):
     sourceTxt = ','.join( [ os.path.basename(str(f)) for f in sources] )
     if len(sourceTxt) > 80:
       sourceTxt = sourceTxt[0:75]+'%s...'%black
+    prog = os.path.basename(s.replace('(', ' ').split()[0])
     sourceTxt = sourceTxt.replace(',', '%s,%s'%(black, blue))
-    sys.stdout.write('\t%s%s%s -> %s%s%s...\n'%
-        (blue, sourceTxt, black,
+    sys.stdout.write('%s:\t%s%s%s -> %s%s%s...\n'%
+        (prog,blue, sourceTxt, black,
          green,('%s,%s'%(black, green)).join( [ os.path.basename(str(f)) for f in targets] ), black ))
 
   if not os.environ.has_key('NO_SCONS_COLOR'):
     env.Append(PRINT_CMD_LINE_FUNC=print_cmd_line)
+
+  if not sys.stdout.isatty():
+    reset_colors()
 
 def exists(env):
   return 1
