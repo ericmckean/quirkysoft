@@ -14,32 +14,53 @@
   You should have received a copy of the GNU General Public License
   along with this program.  If not, see <http://www.gnu.org/licenses/>.
 */
+#include <algorithm>
 #include "Button.h"
+#include "CheckBox.h"
+#include "Document.h"
+#include "File.h"
 #include "Language.h"
-#include "RichTextArea.h"
-#include "ZipFile.h"
-#include "ZipViewer.h"
 #include "PatchDLDI.h"
+#include "ProgressBar.h"
+#include "RichTextArea.h"
+#include "View.h"
+#include "ViewRender.h"
+#include "ZipViewer.h"
 
 using std::vector;
 using std::string;
 
 static const string ndsExt(".nds");
 
-ZipViewer::ZipViewer( const std::string & filename):
-  m_filename(filename),
+ZipViewer::ZipViewer(View & view):
+  m_view(view),
   m_unzip(0),
-  m_unzipAndPatch(0)
+  m_unzipAndPatch(0),
+  m_fileCount(0),
+  m_index(0)
 {
 }
 
-void ZipViewer::show(RichTextArea & textArea)
+void ZipViewer::setFilename(const std::string & filename)
 {
-  ZipFile file;
+  m_filename = filename;
+  m_unzip = 0;
+  m_unzipAndPatch = 0;
+  m_fileCount = 0;
+  // don't delete here - the textArea already handles that
+  m_checkboxes.clear();
+}
+
+void ZipViewer::show()
+{
+  m_view.renderer()->doTitle(string2unicode(nds::File::base(m_view.document().uri().c_str())));
+  RichTextArea & textArea(*m_view.renderer()->textArea());
+  ZipFile file(this);
   file.open(m_filename.c_str());
 
   vector<string> contents;
   file.list(contents);
+  m_fileCount = contents.size();
   if (not contents.empty())
   {
     // add an "unzip" button!
@@ -58,6 +79,10 @@ void ZipViewer::show(RichTextArea & textArea)
   for (vector<string>::const_iterator it(contents.begin()); it != contents.end(); ++it)
   {
     const UnicodeString & u(string2unicode(*it));
+    CheckBox * cb = new CheckBox;
+    cb->setSelected();
+    textArea.add(cb);
+    m_checkboxes.push_back(cb);
     textArea.appendText(u);
     textArea.insertNewline();
   }
@@ -65,7 +90,13 @@ void ZipViewer::show(RichTextArea & textArea)
 
 void ZipViewer::unzip()
 {
-  ZipFile file;
+  ProgressBar & progressBar(m_view.progressBar());
+  progressBar.setMax(m_fileCount);
+  progressBar.setMin(0);
+  progressBar.setVisible();
+  m_index = 0;
+  progressBar.setValue(m_index);
+  ZipFile file(this);
   // unzip the file
   file.open(m_filename.c_str());
   if (file.is_open())
@@ -77,7 +108,7 @@ void ZipViewer::unzip()
 void ZipViewer::unzipAndPatch()
 {
   unzip();
-  ZipFile file;
+  ZipFile file(this);
   file.open(m_filename.c_str());
   if (file.is_open())
   {
@@ -108,4 +139,29 @@ void ZipViewer::pressed(ButtonI * button)
   {
     unzipAndPatch();
   }
+  ProgressBar & progressBar(m_view.progressBar());
+  progressBar.setVisible(false);
+  m_view.tick();
+}
+
+void ZipViewer::before(const char * name)
+{
+  UnicodeString u(string2unicode(name));
+  ProgressBar & progressBar(m_view.progressBar());
+  progressBar.setText(u);
+  m_view.tick();
+}
+
+void ZipViewer::after(const char * name)
+{
+  m_index++;
+  ProgressBar & progressBar(m_view.progressBar());
+  progressBar.setValue(m_index);
+  m_view.tick();
+}
+
+
+bool ZipViewer::extract(const char * name)
+{
+  return m_checkboxes[m_index]->selected();
 }

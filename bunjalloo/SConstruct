@@ -1,3 +1,4 @@
+#!/usr/bin/env python
 """
   Copyright (C) 2007,2008 Richard Quirk
 
@@ -27,22 +28,67 @@ libraryFiles = {
 
 # create the default environment with coloured output
 defaultEnv = Environment(CCFLAGS=commonFlags, CPPPATH=headers,
-    tools=['default', 'color'], toolpath = ['%s/ndspp-scons'%libndsppDir],
+    tools=['default', 'color', 'grit', 'unit_test'], toolpath = ['%s/ndspp-scons'%libndsppDir],
     TARFLAGS='-c -z', TARSUFFIX='tar.gz')
-devkitArmBin = ( os.path.sep.join( [ os.environ['DEVKITARM'], 'bin'] ) )
-defaultEnv.PrependENVPath('PATH', devkitArmBin)
 buildTargets = ['pc', 'arm9', 'arm7']
 
+sys.path.append(os.path.join(libndsppDir, 'ndspp-scons'))
+from find import find
 # function definitions
 
 # create the dist files
 def dist():
   project = 'bunjalloo'
-  version = ARGUMENTS.get('version','0.5.2')
+  version = ARGUMENTS.get('version','')
   distfile = '%s-%s.zip'%(project, version)
   srcfile = '%s-src-%s'%(project, version)
+  defaultEnv['VERSION'] = version
   defaultEnv['DIST_NAME'] = distfile
   defaultEnv['DIST_SRC_NAME'] = srcfile
+
+
+def die(msg):
+  import color
+  print '*** ',
+  color.pprint(msg, color.red)
+  Exit(1)
+
+def configure(target, env):
+  if env.GetOption('clean'):
+    return env
+  conf = env.Configure()
+  where = ' in $DEVKITPRO'
+  if target == 'arm7':
+    conf.CheckLibWithHeader('nds7', 'nds.h', 'c') or die('Install libnds'+where)
+    where += '/libnds'
+    conf.CheckLibWithHeader('ndspp-%s'%target, 'ndspp.h', 'c++', None, True) \
+            or die('libndspp must be compiled in "../libndspp"')
+
+    conf.CheckLibWithHeader('dswifi7', ['nds/jtypes.h', 'dswifi7.h'], 'c', None, True) or die('Install the dswifi library'+where)
+  elif target == 'arm9':
+    conf.CheckLibWithHeader('nds9', 'nds.h', 'c', None, True) or die('Install libnds'+where)
+    where += '/libnds'
+    conf.CheckLibWithHeader('ndspp-%s'%target, 'ndspp.h', 'c++', None, True) \
+            or die('libndspp must be compiled in "../libndspp"')
+    conf.CheckLibWithHeader('fat', 'fat.h', 'c', None, True) or die('Install the fat library'+where)
+    conf.CheckLibWithHeader('dswifi9', ['nds/jtypes.h', 'dswifi9.h'], 'c', None, True) or die('Install the dswifi library'+where)
+    conf.CheckLibWithHeader('nds9', 'nds.h', 'c', None, True) or die('Install libnds'+where)
+  else:
+    where = '-dev for your system'
+    conf.CheckLibWithHeader('ndspp-%s'%target, 'ndspp.h', 'c++', None, True) \
+            or die('libndspp must be compiled in "../libndspp"')
+    conf.CheckLibWithHeader('SDL', 'SDL/SDL.h', 'c', None, True) or die('Install SDL'+where)
+    conf.CheckLibWithHeader('GL', 'GL/gl.h', 'c', None, True) or die('Install gl'+where)
+    conf.CheckLibWithHeader('cppunit', 'cppunit/CompilerOutputter.h', 'c++', None, False) or die('Install cppunit'+where)
+
+  # common libs
+  if target != 'arm7':
+    for lib,header in ( ('png','png'), ('z','zlib'), ('gif','gif_lib'), ('jpeg','jpeglib'),
+        ('matrixsslstatic','matrixSsl'), ('unzip', 'unzip') ):
+      conf.CheckLibWithHeader(lib, ['stdio.h',header+'.h'], 'c', None, True) \
+              or die('Install '+header+where)
+
+  return conf.Finish()
 
 ## create the environment for the chosen target
 # @param buildTarget the target build (pc, arm9, arm7)
@@ -52,27 +98,25 @@ def createEnv(buildTarget):
   dist()
   env = None
   if buildTarget.startswith('arm'):
-    env = defaultEnv.Copy( tools = [ ('arm', { 'type':buildTarget })],
+    env = defaultEnv.Clone( tools = [ ('arm', { 'type':buildTarget })],
         OBJCOPYFLAGS = ' -I binary -O elf32-littlearm -B arm \
             --rename-section .data=.rodata,readonly,contents ')
     env.Append(CPPDEFINES=['sprintf_platform=siprintf'])
     env.Append(CCFLAGS=' -O2 ')
   else:
-    env = defaultEnv.Copy()
+    env = defaultEnv.Clone()
     #env.Append(CCFLAGS="-fprofile-arcs -ftest-coverage")
     env.Append(OBJCOPY = 'objcopy')
     env.Append(OBJCOPYFLAGS = ' -I binary -O elf32-i386 -B i386 ')
     env.Append(CPPDEFINES=['sprintf_platform=sprintf'])
     env.Append(CCFLAGS=' -O0 ')
     #env.Prepend( LIBS=['gcov'])
-    env.Prepend( LIBS=['SDL', 'GL'])
     for i in ['CC', 'CXX', 'OBJCOPY']:
       if os.environ.has_key(i) and os.environ[i]:
         env[i] = os.environ[i]
 
   env.Append( LIBPATH=['#/%s/lib'%libndsppDir])
-  env.Prepend( LIBS=['png','z','gif','jpeg','matrixsslstatic','unzip'])
-  env.Prepend( LIBS=['ndspp-%s'%buildTarget])
+  env = configure(buildTarget, env)
   addObjCopyImageBuilders(env)
   env.Alias('dist', env['DIST_NAME'])
   return env
@@ -91,31 +135,6 @@ def addProjectDirs(env, buildTarget):
 ## Add the project specific builders.
 # @param env the Environment to alter.
 def addObjCopyImageBuilders(env):
-
-  ## Create bin files from png.
-  # This adds an "emitter" that tells the Builder what things are made,
-  # allowing 1 to many rules (png -> map, pal, img)
-  # @param target the target artifacts
-  # @param source the source input
-  # @param env the environment
-  # @return target, source list tuple
-  def img_emitter(target, source, env):
-    # add img.bin, pal.bin and map.bin to the output as side effects
-    fileName = os.path.basename(str(source[0])).split(os.path.extsep)[0]
-    t = []
-    t.append('%s.c'%(fileName))
-    t.append('%s.h'%(fileName))
-    # t.append('%s.map.bin'%(fileName))
-    return (t, source)
-
-  env.Append(GRITFLAGS='-pw 16 -gB 8 -m! -ftc -fh -q -pe64')
-  # chdir=1 changes to the target dir before executing.
-  gritBld = Builder(action='grit ${SOURCE.abspath} -o ${SOURCE.file} $GRITFLAGS',
-      chdir=1,
-      suffix='.c',
-      src_suffix='.png',
-      emitter=img_emitter)
-  env.Append( BUILDERS = { 'Gfx2Bin': gritBld } )
 
   # create o file from bin
   # cd to the directory otherwise puts build path in name.
@@ -157,48 +176,6 @@ extern "C" {
   bldHeader = Builder( action = build_h, suffix='.h', src_suffix='.png')
   env.Append(BUILDERS = {'Png2h': bldHeader})
 
-  ## Execute unit tests, creating a test.passed cache file.
-  # taken from www.scons.org/wiki/UnitTest
-  def build_unit_test(target, source, env):
-    app = str(source[0].abspath)
-    cwd = os.getcwd()
-    os.chdir(os.path.dirname(app))
-    result = os.spawnl(os.P_WAIT, app, app)
-    os.chdir(cwd)
-    if result == 0:
-      open(str(target[0]),'w').write("PASSED\n")
-    else:
-      return 1
-  # Create a builder for tests
-  bld = Builder(action = build_unit_test)
-  env.Append(BUILDERS = {'Test' :  bld})
-
-  def build_cscope_file(target, source, env):
-    try:
-      f = open(str(target[0]), 'w')
-      [f.write('%s\n'%str(s)) for s in source]
-      return 0
-    except Exception,e:
-      return 1
-  # create cscope.out from all source files.
-  cscopeFileBld = Builder(action=build_cscope_file, suffix='.files')
-  env.Append(BUILDERS = {'CscopeFile' :  cscopeFileBld})
-  def cscope_emitter(target, source, env):
-    return ( ['cscope.out', 'cscope.po.out', 'cscope.in.out'], source)
-  cscopeBld = Builder(action='-cscope -b -k -q', suffix='.out', src_suffix='.files', emitter=cscope_emitter)
-  env.Append(BUILDERS = {'Cscope' :  cscopeBld})
-
-def find(top='.', includes=[], excludes=[]):
-  result = []
-  for (root, dirs, files) in os.walk(top):
-    exclude = [ e for e in excludes if root.find(e) != -1]
-    if not exclude:
-      for child in files:
-        exclude = [ e for e in excludes if child.find(e) != -1]
-        if not exclude and ((not includes) or (includes and os.path.splitext(child)[1] in includes)):
-          result.append( os.path.join(root, child))
-  return result
-
 ## Build everything for a particular target.
 def build(buildTarget):
   """ build a particular build target """
@@ -229,16 +206,12 @@ def build(buildTarget):
   objs = []
   libbwt = None
   if buildTarget != 'arm7':
-    libbwt = SConscript('bwt/SConscript', build_dir='/'.join([buildDir, 'bwt']), duplicate=0)
+    libbwt = SConscript('bwt/SConscript', build_dir=os.path.join(buildDir, 'bwt'), duplicate=0)
   objs.append(SConscript('%s/SConscript'%sourceDirectory, build_dir=buildDir, duplicate=0))
 
   # create <builddir>/<target> file
   program = '%s/%s'%(buildDir, executableName)
   prog = env.Program(program, objs)
-  libObjs = [ o for o in Flatten(objs) if (str(o).lower().rfind('main')==-1)]
-  if (libObjs):
-    # library used for unit tests
-    lib = env.Library(program, libObjs)
 
   if (buildTarget != 'pc'):
     env.SideEffect(program+'.map', program)
@@ -251,7 +224,8 @@ def build(buildTarget):
     env['ICON'] = 'common/data/icon.bmp'
     env['BANNER'] = '%s;Web Browser;By Richard Quirk'%executableName
     env['DLDIFILE'] = '%s/data/ez5s.dldi'%(os.environ['HOME'])
-    nds = env.NdsTool(executableName, [ '#build/arm7/%s.arm'%executableName, '%s.arm'%program ])
+    version = env['VERSION'].replace('.','')
+    nds = env.NdsTool(executableName+version, [ '#build/arm7/%s.arm'%executableName, '%s.arm'%program ])
     Default(nds)
     env.Zip(env['DIST_NAME'], nds)
     env.Zip(env['DIST_NAME'], '#/data')
@@ -262,21 +236,17 @@ def build(buildTarget):
   # build the tests
   if (buildTarget == 'pc'):
     # build tests
-    SConscript('tests/SConscript', build_dir='/'.join([buildDir, 'tests']), duplicate=0)
+    SConscript('tests/SConscript', build_dir=os.path.join(buildDir, 'tests'), duplicate=0)
     Default(env.Command('#/%s'%os.path.basename(str(prog[0])), prog, [Copy('$TARGET', '$SOURCE')]))
     Default('tests')
-    filetypes = ['.cpp', '.c', '.h', '.inl', '.py']
-    exclude = ['/build/']
-    allFiles = [find('.', filetypes, exclude) , find('../libndspp', filetypes, exclude)]
-    cs1 = env.CscopeFile('cscope', allFiles )
-    cs2 = env.Cscope('cscope')
-    env.Alias('cscope', [cs1,cs2])
+
   if (buildTarget != 'arm7'):
-    SConscript('tests/gui-test/SConscript', build_dir='/'.join([buildDir, 'gui-test']), duplicate=0)
-    SConscript('tests/lang-test/SConscript', build_dir='/'.join([buildDir, 'lang-test']), duplicate=0)
-    SConscript('tests/patch-test/SConscript', build_dir='/'.join([buildDir, 'patch-test']), duplicate=0)
-    SConscript('tests/images/SConscript', build_dir='/'.join([buildDir, 'images']), duplicate=0)
-    SConscript('tests/sprite/SConscript', build_dir='/'.join([buildDir, 'sprite']), duplicate=0)
+    opj=os.path.join
+    SConscript('tests/gui-test/SConscript', build_dir=opj(buildDir, 'gui-test'), duplicate=0)
+    SConscript('tests/lang-test/SConscript', build_dir=opj(buildDir, 'lang-test'), duplicate=0)
+    SConscript('tests/patch-test/SConscript', build_dir=opj(buildDir, 'patch-test'), duplicate=0)
+    SConscript('tests/images/SConscript', build_dir=opj(buildDir, 'images'), duplicate=0)
+    SConscript('tests/sprite/SConscript', build_dir=opj(buildDir, 'sprite'), duplicate=0)
     Default('images')
     Default('sprite')
     Default('gui-test')
@@ -288,5 +258,3 @@ def build(buildTarget):
 
 cmd = defaultEnv.Command('tags', '%s.nds'%executableName, 'ctags -R --c++-kinds=+p --fields=+iaS --extra=+q . ../libndspp')
 Default(cmd)
-
-# vim: set filetype=python :

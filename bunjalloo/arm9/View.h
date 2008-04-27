@@ -23,19 +23,22 @@
 #include "LinkListener.h"
 
 class Document;
+class CookieHandler;
 class Controller;
 
 class FormControl;
 class Keyboard;
 class KeyState;
 class LinkHandler;
+class EditPopup;
+class ProgressBar;
 class ScrollPane;
 class SearchEntry;
 class Stylus;
 class TextField;
 class Toolbar;
+class Updater;
 class ViewRender;
-class ProgressBar;
 
 /** Handle the displaying of HTML data.*/
 class View : public ViewI, public ButtonListener, public LinkListener
@@ -66,9 +69,16 @@ class View : public ViewI, public ButtonListener, public LinkListener
      */
     virtual void linkClicked(Link * link);
 
+    /** Implement the LinkListener interface.
+     * @param link the link that has been clicked.
+     */
+    virtual void linkPopup(Link * link);
+
     /** The user wants to enter a URL. Set up URL entering mode.
      */
     void enterUrl();
+
+    void editBookmark();
 
     /** User wants to bookmark a URL or show the bookmark page.
      */
@@ -86,6 +96,12 @@ class View : public ViewI, public ButtonListener, public LinkListener
     /** Exit bookmark mode. */
     void endBookmark();
 
+    /** Add cookie for the current site */
+    void addCookie();
+
+    /** Add cookie for the current site */
+    void editCookie();
+
     /** Exit bookmark mode. */
     void preferences();
 
@@ -99,15 +115,22 @@ class View : public ViewI, public ButtonListener, public LinkListener
      */
     inline Document & document() const;
 
+    inline ProgressBar & progressBar() const;
+
     /** Edit the configuration.
      */
     void editConfig();
+
+    void setUpdater(Updater * updater);
+    void resetScroller();
+    ViewRender * renderer();
   private:
 
     enum InputState
     {
       BROWSE,
       ENTER_URL,
+      EDIT_BOOKMARK,
       BOOKMARK,
       SAVE_CURRENT_FILE,
       SAVE_DOWNLOADING
@@ -127,8 +150,10 @@ class View : public ViewI, public ButtonListener, public LinkListener
     InputState m_state;
     FormControl * m_form;
     LinkHandler * m_linkHandler;
+    EditPopup * m_editPopup;
     SearchEntry * m_search;
     KeyState * m_keyState;
+    CookieHandler * m_cookieHandler;
     int m_preInputStartLine;
     bool m_dirty;
     std::string m_linkHref;
@@ -143,6 +168,7 @@ class View : public ViewI, public ButtonListener, public LinkListener
     void keyboard();
 
     void doEnterUrl();
+    void doEditBookmark();
     void doSaveAs();
 
     void showBookmarkPage();
@@ -162,5 +188,10 @@ Controller & View::controller() const
 Document & View::document() const
 {
   return m_document;
+}
+
+ProgressBar & View::progressBar() const
+{
+  return *m_progress;
 }
 #endif

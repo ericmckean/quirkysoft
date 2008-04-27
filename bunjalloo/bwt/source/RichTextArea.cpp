@@ -14,6 +14,7 @@
   You should have received a copy of the GNU General Public License
   along with this program.  If not, see <http://www.gnu.org/licenses/>.
 */
+#include <algorithm>
 #include "Canvas.h"
 #include "Delete.h"
 #include "LinkListener.h"
@@ -27,6 +28,7 @@ using namespace std;
 using namespace nds;
 
 static const int NO_INDEX(-1);
+static const int POPUP_MENU_COUNT(20);
 
 RichTextArea::RichTextArea(Font * font) :
   TextArea(font),
@@ -35,7 +37,8 @@ RichTextArea::RichTextArea(Font * font) :
   m_linkListener(0),
   m_centred(false),
   m_outlined(false),
-  m_linkTouched(0)
+  m_linkTouched(0),
+  m_downCount(0)
 {
 }
 
@@ -66,7 +69,8 @@ static bool isEmpty(const UnicodeString & line)
 
 void RichTextArea::appendText(const UnicodeString & unicodeString)
 {
-  if (m_document.size() > 1 and isEmpty(unicodeString) and isEmpty(currentLine()) and isEmpty(m_document[m_document.size()-2]))
+  if (m_document.size() > 1 and isEmpty(unicodeString) and isEmpty(currentLine()) and isEmpty(m_document[m_document.size()-2])
+      and not lineHasComponent(m_document.size()-1))
   {
     // avoid duplicate empty lines
     return;
@@ -659,6 +663,7 @@ Link * RichTextArea::linkAt(int index)
 bool RichTextArea::stylusUp(const Stylus * stylus)
 {
   bool consumed(false);
+  m_downCount = 0;
   if (m_linkTouched and m_bounds.hit(stylus->lastX(), stylus->lastY()))
   {
     // was it the same link?
@@ -686,6 +691,7 @@ bool RichTextArea::stylusDownFirst(const Stylus * stylus)
   // see if it hit a link
   if (m_bounds.hit(stylus->startX(), stylus->startY()))
   {
+    m_downCount = 0;
     m_linkTouched = 0;
     int charClicked = pointToCharIndex(stylus->startX(), stylus->startY());
     if (charClicked != NO_INDEX)
@@ -725,9 +731,27 @@ bool RichTextArea::stylusDown(const Stylus * stylus)
       m_linkTouched->setClicked(false);
       m_dirty = true;
       m_linkTouched = 0;
+      m_downCount = 0;
+    }
+    else if (l and l == m_linkTouched)
+    {
+      m_downCount++;
+      if (m_downCount == POPUP_MENU_COUNT)
+      {
+        // show a menu!
+        m_downCount = 0;
+        m_linkTouched->setClicked(false);
+        if (m_linkListener)
+        {
+          m_linkListener->linkPopup(m_linkTouched);
+        }
+        m_linkTouched = 0;
+        m_dirty = true;
+      }
     }
     else
     {
+      m_downCount = 0;
       FOR_EACH_CHILD(stylusDown);
     }
   }

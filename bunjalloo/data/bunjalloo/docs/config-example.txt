@@ -39,8 +39,11 @@ logger=0
 # Language setting. "Builtin" means use the DS setting.
 language=builtin
 
+# Send the full referrer with each request
+fullref=0
+
 # Default download directory
 download=/
 
 # Place to look for updates
-update=http://10.0.0.2/~rich/version.txt
+update=http://quirkysoft.googlecode.com/svn/wiki/BunjallooVersion.wiki

@@ -15,6 +15,7 @@
   along with this program.  If not, see <http://www.gnu.org/licenses/>.
 */
 #include <memory>
+#include <cstdlib>
 #include "libnds.h"
 #include "Image.h"
 #include "File.h"
@@ -142,6 +143,7 @@ Image::Image(const char * filename, ImageType type, bool keepPalette):
   m_keepPalette(keepPalette),
   m_width(0),
   m_height(0),
+  m_currentLine(0),
   m_paletteSize(0),
   m_channels(3),
   m_data(0),
@@ -165,6 +167,7 @@ Image::Image(const char * filename, bool keepPalette):
   m_keepPalette(keepPalette),
   m_width(0),
   m_height(0),
+  m_currentLine(0),
   m_paletteSize(0),
   m_channels(3),
   m_data(0),
@@ -338,12 +341,14 @@ void Image::readPng(const char * filename)
    png_bytep rowBuffer = (png_bytep)malloc(sizeof(png_bytep) * info_ptr->rowbytes);
    for (int pass = 0; pass < number_passes; pass++)
    {
+     m_currentLine = 0;
      for (unsigned int line = 0; line < m_realHeight; line++)
      {
        png_read_row(png_ptr, rowBuffer, png_bytep_NULL);
        renderLine((const unsigned char*)rowBuffer, line);
      }
    }
+   m_height = m_currentLine;
    free(rowBuffer);
 
    /* clean up after the read, and free any memory allocated - REQUIRED */
@@ -500,6 +505,7 @@ void Image::readGif(const char * filename)
               renderLine(rowBuffer, i);
             }
           }
+          m_height = m_currentLine;
         }
         break;
       case EXTENSION_RECORD_TYPE:
@@ -675,6 +681,7 @@ void Image::readJpeg(const char * filename)
     m_bpp = inputStream->bytes_per_pixel();
     renderLine((const unsigned char*)scanline, line);
   }
+  m_height = m_currentLine;
 
   m_valid = true;
 }

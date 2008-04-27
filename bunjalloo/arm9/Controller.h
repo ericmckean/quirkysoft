@@ -70,6 +70,8 @@ class Controller
     /** Stop loading the page. */
     void stop();
 
+    bool stopped() const;
+
     /** Get the Config object.
      * @return a reference to the Config object.
      */
@@ -90,6 +92,10 @@ class Controller
      * @return the Cache object.
      */
     Cache * cache() const;
+
+    /** Save the list of accepted domains to file.  */
+    void saveCookieSettings();
+
   private:
     Document * m_document;
     View * m_view;

@@ -19,6 +19,7 @@ from SCons.Builder import Builder
 from SCons.Defaults import Copy
 
 import os, os.path, sys
+import color
 
 DEVKITARM = 'DEVKITARM'
 DEVKITPRO = 'DEVKITPRO'
@@ -42,11 +43,11 @@ def getLibnds():
     print 'No DEVKITPRO variable set. libnds will probably not be found...'
     return ''
   else:
-    return os.path.sep.join( [ os.environ[DEVKITPRO], 'libnds'] )
+    return os.path.join(os.environ[DEVKITPRO], 'libnds')
 
 def devkitArmSet():
   if not os.environ.has_key(DEVKITARM):
-    print 'Please set DEVKITARM in your environment. export DEVKITARM=<path to>devkitARM'
+    color.pprint('Please set DEVKITARM in your environment. export DEVKITARM=<path to>devkitARM', color.red)
     sys.exit(1)
     return 0
   return 1
@@ -76,7 +77,7 @@ def addBinBuilder(env):
 
   env.Append(DLDITOOL='dlditool')
   env.Append(DLDIFILE='none.dldi')
-  dldiPatch = Builder( action=[Copy('$TARGET', '$SOURCE'), '-$DLDITOOL $DLDIFILE $TARGET'],
+  dldiPatch = Builder( action=[Copy('$TARGET', '$SOURCE'), '-$DLDITOOL $DLDIFILE $TARGET >/dev/null'],
       suffix='.nds', src_suffix='.nds')
   env.Append( BUILDERS = { 'DldiPatch': dldiPatch } )
 
@@ -85,13 +86,13 @@ def generate(env, **kw):
   # fetch the processor type, or arm9 by default
   armType = kw.get('type', 'arm9').lower()
   if (devkitArmSet()):
-    devkitArmBin = ( os.path.sep.join( [ os.environ[DEVKITARM], 'bin'] ) )
+    devkitArmBin = os.path.join( os.environ[DEVKITARM], 'bin')
     env.PrependENVPath('PATH', devkitArmBin)
   ccflags = ' '.join( [ extraflags, thumbFlags, processorCCFlags[armType] ] )
   env.Append(CCFLAGS=ccflags)
   env.Append(CXXFLAGS=cxxFlags)
   env.Append(CPPDEFINES='%s'%armType.upper())
-  env.Append(CPPPATH=os.path.sep.join( [getLibnds(), 'include'] ))
+  env.Append(CPPPATH=os.path.join( getLibnds(), 'include' ))
   env['CC'] = devkitPrefix+'gcc'
   env['CXX'] = devkitPrefix+'g++'
   env['AS'] = devkitPrefix+'as'
@@ -99,12 +100,7 @@ def generate(env, **kw):
   env['OBJCOPY'] = devkitPrefix+'objcopy'
   # add 9 or 7
   c = armType[ len(armType) - 1 ]
-  if (c == '9'):
-    env.Append(LIBS=['fat'])
-  env.Append(LIBS=['nds%c'%c])
-  env.Append(LIBS=['dswifi%c'%c])
-
-  env.Append(LIBPATH=[os.path.sep.join( [getLibnds(), 'lib'] )])
+  env.Append(LIBPATH=[os.path.join( getLibnds(), 'lib' )])
   env.Append(LINKFLAGS=processorLDFlags%c)
   env.Append(LINKFLAGS=thumbFlags)
   addBinBuilder(env)
