@@ -31,7 +31,7 @@ const unsigned char * CheckBox::getGfxData()
     offset |= 1;
   if (touched())
     offset |= 2;
-  return (const u8*)&checkboxTiles[16*8*offset];
+  return (const u8*)&checkboxTiles[8*8*offset];
 }
 
 const unsigned short * CheckBox::getPaletteData()
