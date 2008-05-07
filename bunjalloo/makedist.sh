@@ -60,6 +60,7 @@ distdir=$project-$VERSION
 zipname=$distdir.zip
 waf --install-to=$distdir install > /dev/null || die "Error in build"
 pushd $distdir > /dev/null || die "Unable to cd to $distdir"
+mv $project.nds $project-${VERSION//./}.nds
 zip -r ../$zipname * > /dev/null || die "Unable to create $zipname"
 popd > /dev/null
 rm -rf $distdir
