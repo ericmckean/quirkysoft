@@ -6,13 +6,13 @@ import os, os.path
 import sys
 
 Params.g_autoconfig = 1
-APPNAME=os.path.basename(os.getcwd())
+APPNAME = os.path.basename(os.getcwd())
 
-srcdir='.'
-blddir='build'
-libndspp=os.path.abspath("../libndspp")
+srcdir = '.'
+blddir = 'build'
+libndspp = os.path.abspath("../libndspp")
 libndspp_inc = os.path.join(libndspp, 'include')
-waf_tools=os.path.join(libndspp, "waf_tools")
+waf_tools = os.path.join(libndspp, "waf_tools")
 sys.path.append(waf_tools)
 # local waf_tools
 sys.path.append('waf_tools')
@@ -52,6 +52,12 @@ def arm_header_check(conf):
     e.name = header
     e.run()
 
+def lib_check_common(configurator):
+  for l in 'png z gif jpeg matrixsslstatic unzip'.split():
+    configurator.name = l
+    configurator.run()
+
+
 def lib_check_sdl(conf):
   pkgconfig = conf.create_pkgconfig_configurator()
   pkgconfig.uselib = 'HOST'
@@ -66,9 +72,10 @@ def lib_check_sdl(conf):
   e = conf.create_library_configurator()
   e.mandatory = 1
   e.uselib = 'HOST'
-  for l in 'ndspp-pc GL z gif jpeg matrixsslstatic unzip'.split():
+  for l in 'ndspp-pc GL'.split():
     e.name = l
     e.run()
+  lib_check_common(e)
 
 
 def lib_check_arm7(conf):
@@ -84,9 +91,10 @@ def lib_check_arm9(conf):
   e.nosystem = 1
   e.mandatory = 1
   e.uselib = 'ARM9'
-  for l in 'ndspp-arm9 dswifi9 png z gif jpeg matrixsslstatic unzip'.split():
+  for l in 'ndspp-arm9 dswifi9'.split():
     e.name = l
     e.run()
+  lib_check_common(e)
 
 def configure(conf):
   # check native compiler
