@@ -180,20 +180,39 @@ void ScrollPane::setSize(unsigned int w, unsigned int h)
 
 }
 
+void ScrollPane::screenUp()
+{
+  if (m_topLevel)
+  {
+    int initialScrollIncrement = m_scrollIncrement;
+    m_scrollIncrement = m_bounds.h/2;
+    up(SCROLL_NO_ADJUST);
+    m_scrollIncrement = initialScrollIncrement;
+  }
+}
+
 void ScrollPane::pageUp()
 {
   int initialScrollIncrement = m_scrollIncrement;
   m_scrollIncrement = m_bounds.h - m_bounds.h/16;
-  up();
+  up(SCROLL_WITH_ADJUST);
   m_scrollIncrement = initialScrollIncrement;
 }
 
 void ScrollPane::up()
 {
-  if (not m_canScrollUp)
+  up(SCROLL_WITH_ADJUST);
+}
+
+void ScrollPane::up(ScrollType type)
+{
+  if (type == SCROLL_WITH_ADJUST and not m_canScrollUp)
     return;
   int scrollIncrement = m_scrollIncrement;
-  adjustScrollUp(scrollIncrement);
+  if (type == SCROLL_WITH_ADJUST)
+  {
+    adjustScrollUp(scrollIncrement);
+  }
   // move all up one unit...
   std::vector<Component*>::iterator it(m_children.begin());
   for (; it != m_children.end(); ++it)
@@ -205,23 +224,39 @@ void ScrollPane::up()
   calculateScrollBar();
 }
 
+void ScrollPane::screenDown()
+{
+  if (m_topLevel)
+  {
+    int initialScrollIncrement = m_scrollIncrement;
+    m_scrollIncrement = m_bounds.h/2;
+    down(SCROLL_NO_ADJUST);
+    m_scrollIncrement = initialScrollIncrement;
+  }
+}
 
 void ScrollPane::pageDown()
 {
   int initialScrollIncrement = m_scrollIncrement;
   m_scrollIncrement = m_bounds.h - m_bounds.h/16;
-  down();
+  down(SCROLL_WITH_ADJUST);
   m_scrollIncrement = initialScrollIncrement;
 }
 
 void ScrollPane::down()
 {
-  if (not m_canScrollDown) {
+  down(SCROLL_WITH_ADJUST);
+}
+
+void ScrollPane::down(ScrollType type)
+{
+  if (type == SCROLL_WITH_ADJUST and not m_canScrollDown) {
     return;
   }
 
   int scrollIncrement = m_scrollIncrement;
-  adjustScroll(scrollIncrement);
+  if (type == SCROLL_WITH_ADJUST)
+    adjustScroll(scrollIncrement);
 
   // move all up one unit...
   std::vector<Component*>::iterator it(m_children.begin());

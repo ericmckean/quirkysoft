@@ -55,6 +55,11 @@ class ScrollPane: public Component
      */
     int scrollIncrement() const;
 
+    /** Move the contents a screen up */
+    void screenUp();
+    /** Move the contents a screen down */
+    void screenDown();
+
     void pageUp();
     void pageDown();
     /** Scroll the view up one amount.  */
@@ -129,6 +134,13 @@ class ScrollPane: public Component
     void showScrollBar(const nds::Rectangle & clip);
     void adjustScroll(int & scrollIncrement);
     void adjustScrollUp(int & scrollIncrement);
+    enum ScrollType
+    {
+      SCROLL_NO_ADJUST,
+      SCROLL_WITH_ADJUST,
+    };
+    void up(ScrollType type);
+    void down(ScrollType type);
 };
 
 #endif

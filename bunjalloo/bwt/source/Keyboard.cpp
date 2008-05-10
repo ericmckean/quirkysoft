@@ -246,6 +246,10 @@ UnicodeString Keyboard::result() const
 
 void Keyboard::applyResult()
 {
+  tick();
+  m_topLevel->setVisible();
+  m_topLevel->screenUp();
+  this->setVisible(false);
   UnicodeString tmp;
   m_textArea->text(tmp);
   if (m_entry) {
@@ -260,7 +264,8 @@ void Keyboard::paint(const nds::Rectangle & clip)
   m_dirty = false;
   if (visible())
   {
-    nds::Canvas::instance().fillRectangle(m_richTextArea->bounds().left(), m_richTextArea->bounds().top(), clip.w, clip.bottom(),
+    nds::Canvas::instance().setClip(clip);
+    nds::Canvas::instance().fillRectangle(m_richTextArea->bounds().left(), m_richTextArea->bounds().top(), clip.right(), clip.bottom(),
         nds::Color(31,31,31));
     std::vector<Component*>::iterator it(m_children.begin());
     for (; it != m_children.end(); ++it)
@@ -275,6 +280,7 @@ void Keyboard::paint(const nds::Rectangle & clip)
 void Keyboard::editText(TextEntryI * entry)
 {
   m_topLevel->setVisible(false);
+  m_topLevel->screenDown();
   this->setVisible();
   m_initialText.clear();
   entry->text(m_initialText);
@@ -332,16 +338,10 @@ void Keyboard::pressed(ButtonI * button)
       m_selectedStatus = CANCEL;
       m_textArea->clearText();
       m_textArea->appendText(m_initialText);
-      tick();
-      m_topLevel->setVisible();
-      this->setVisible(false);
       applyResult();
       break;
     case SPKY_OK:
       m_selectedStatus = OK;
-      tick();
-      m_topLevel->setVisible();
-      this->setVisible(false);
       applyResult();
       break;
     case SPKY_CLEAR:
@@ -463,7 +463,7 @@ bool Keyboard::stylusDown(const Stylus * stylus)
   return false;
 }
 
-void Keyboard::setTopLevel(Component * topLevel)
+void Keyboard::setTopLevel(ScrollPane * topLevel)
 {
   m_topLevel = topLevel;
 }
@@ -482,6 +482,7 @@ bool Keyboard::tick()
   {
     pressed = 30;
     appendText(UnicodeString(sdlKeyPress));
+    m_dirty = true;
     return true;
   }
   if (pressed)
