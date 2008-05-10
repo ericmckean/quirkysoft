@@ -49,7 +49,7 @@ class Keyboard : public Component, public TextListener, public ButtonListener
      * @param topLevel the top level component that will be hidden when the
      * keyboards is shown.
      */
-    void setTopLevel(Component * topLevel);
+    void setTopLevel(ScrollPane * topLevel);
 
     /** Update timer to deactivate current key selection.
      * @return true if the activation means a repaint is required.
@@ -115,7 +115,7 @@ class Keyboard : public Component, public TextListener, public ButtonListener
     SpecialKey buttonToSpecialKey(const ButtonI * button);
 
     UnicodeString m_initialText;
-    Component * m_topLevel;
+    ScrollPane * m_topLevel;
     TextEntryI * m_entry;
 
     void initUI();
