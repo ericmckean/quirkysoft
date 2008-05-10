@@ -51,6 +51,6 @@ class ZipViewer: public ButtonListener, public ExtractListener
     ButtonI * m_unzipAndPatch;
     std::vector<CheckBox*> m_checkboxes;
     int m_fileCount;
-    int m_index;
+    size_t m_index;
 };
 #endif

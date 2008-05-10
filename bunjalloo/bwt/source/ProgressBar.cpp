@@ -84,7 +84,11 @@ void ProgressBar::paint(const nds::Rectangle & clip)
   // max = x+w
   // val = x + ( (w*val) / (max-min))
   nds::Canvas::instance().drawRectangle(clip.x, clip.y, clip.w-1, clip.h, 0);
-  unsigned int range = (clip.w * m_value) / (m_max-m_min);
+  unsigned int range = clip.w;
+  if (m_max > m_min)
+  {
+     range = (clip.w * m_value) / (m_max-m_min);
+  }
   nds::Rectangle progress = {clip.x+1,clip.y+1, range, clip.h};
   if (m_showString)
   {

@@ -163,5 +163,9 @@ void ZipViewer::after(const char * name)
 
 bool ZipViewer::extract(const char * name)
 {
-  return m_checkboxes[m_index]->selected();
+  if (m_checkboxes.size() > m_index)
+  {
+    return m_checkboxes[m_index]->selected();
+  }
+  return true;
 }
