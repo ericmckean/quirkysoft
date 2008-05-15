@@ -1,0 +1,13 @@
+#!/usr/bin/env python
+
+def build(bld):
+
+  sox = bld.create_obj('sox')
+  sox.find_sources_in_dirs('.', exts=['.wav'])
+  sox.clone('sdl')
+
+  lib = bld.create_obj('bin2o')
+  lib.source = [source.replace('.wav', '.snd') for source in sox.source]
+  lib.export_incdirs = '.'
+  lib.target = 'sounds'
+  lib.clone('sdl')

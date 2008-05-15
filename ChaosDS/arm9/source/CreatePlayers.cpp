@@ -92,9 +92,6 @@ void CreatePlayers::show()
   text16.setColour(10, Color(31,30,30));
   text16.print("How many players?", 4, 1, 10);
 
-  text16.setColour(12, Color(31,30,0));
-  text16.print("Press Start", START_POS_X, START_POS_Y, 12);
-
   if (m_start) {
     // create the default start wizards
     Wizard::createDefaultWizards();
@@ -312,6 +309,8 @@ void CreatePlayers::updatePlayers(void)
   Text16::instance().print(str, HOW_MANY_NUM_POS_X,HOW_MANY_NUM_POS_Y, 10);
   str[0] = Text16::RIGHT_ARROW_INDEX;
   Text16::instance().print(str, HOW_MANY_NUM_POS_X+4,HOW_MANY_NUM_POS_Y, 10);
+  Text16::instance().setColour(12, Color(31,30,0));
+  Text16::instance().print("Press Start", START_POS_X, START_POS_Y, 12);
 }
 
 void CreatePlayers::up(void) {
