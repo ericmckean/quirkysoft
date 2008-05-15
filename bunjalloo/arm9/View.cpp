@@ -39,6 +39,7 @@
 #include "ProgressBar.h"
 #include "ScrollPane.h"
 #include "SearchEntry.h"
+#include "System.h"
 #include "Stylus.h"
 #include "TextField.h"
 #include "RichTextArea.h"
@@ -618,6 +619,7 @@ void View::keyboard()
 void View::tick()
 {
   scanKeys();
+  nds::System::checkSleep();
   switch (m_state)
   {
     case BROWSE:

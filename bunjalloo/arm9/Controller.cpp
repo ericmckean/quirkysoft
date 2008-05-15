@@ -28,6 +28,8 @@
 #include "Font.h"
 #include "HttpClient.h"
 #include "TextAreaFactory.h"
+#include "System.h"
+#include "Wifi9.h"
 #include "Updater.h"
 #include "URI.h"
 #include "View.h"
@@ -44,6 +46,11 @@ static const char s_errorText[] = {
 const static char * LICENCE_URL = "file:///licence";
 const static char * UNABLE_TO_LOAD = "cannot_load";
 const static int MAX_REDIRECTS(7);
+
+static void sleepCallback()
+{
+  nds::Wifi9::instance().disconnect();
+}
 
 Controller::Controller()
   : m_document(new Document()),
@@ -68,6 +75,7 @@ Controller::Controller()
   m_cache = new Cache(*m_document, useCache, clearCache);
   m_config->resource("redirects", m_maxRedirects);
   m_httpClient->setController(this);
+  nds::System::registerSleepFunction(sleepCallback);
 }
 
 Controller::~Controller()
