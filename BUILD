@@ -1,7 +1,19 @@
+Overview
+=========
+
+If you have downloaded this in a source tar.gz, then run
+
+    ./configure
+    make
+
+If you are using a version from git, then you will need to install waf from
+http://waf.googlecode.com/ - at least version 1.4.1, perhaps even the svn trunk
+version. Read on for more details...
+
 Prerequisites
 =============
 
-First I'll assume you are using Ubuntu 7.10, or some similar modern-ish Linux
+First I'll assume you are using Ubuntu 7.10+, or some similar modern-ish Linux
 distro. Otherwise you may have to modify these steps a little.
 
 Download and install DevkitARM, libnds, libdswifi and libfat. These can be
@@ -17,7 +29,9 @@ point to $DEVKITPRO/devkitARM, something like this:
     export DEVKITPRO=$HOME/devkitpro
     export DEVKITARM=$DEVKITPRO/devkitARM
 
-TIP: place these lines in your ~/.bashrc file. Now install the latest devkitArm:
+[ TIP: place these lines in your ~/.bashrc file ]
+
+Now install the latest devkitArm:
 
     mkdir -p $DEVKITPRO
     cd $DEVKITPRO
@@ -40,8 +54,9 @@ Additionally and optionally, download the DLDI patch tool and appropriate
 driver for your card. See chishm's DLDI website http://chishm.drunkencoders.com/DLDI/
 
 In order to automatically have the build system generate a patched ".nds" file
-you must have "your.dldi" driver in $HOME/data/ and the dlditool in the $PATH.
-This is not required if your card automatically patches homebrew.
+you must specifiy the path to "your.dldi" driver and have the dlditool in
+$DEVKITARM/bin.  This is not required if your card automatically patches
+homebrew.
 
 Building dependencies
 =====================
@@ -51,16 +66,22 @@ The following tools are needed:
     sudo apt-get install patch
     sudo apt-get install subversion
 
-To build the dependencies for the DS version. Assuming you are in the "bunjalloo" directory now:
+And also python 2.5. To build the dependencies for the DS version. Assuming you
+are in the ame directory as this file now:
 
     here=$PWD
     cd /tmp/
-    $here/../tools/download-libs.sh
+    $here/tools/download-libs.sh
 
 This should install libpng, libgif, libjpeg, zlib, unzip and matrixSSL into
-the $DEVKITPRO/libnds directory. Follow its final instructions to install
-unzip and matrixSSL for Linux. The following development libraries are also
-needed:
+the $DEVKITPRO/libnds directory. 
+
+Alternatively, use the pre-compiled libraries that are available from
+http://code.google.com/p/quirkysoft/downloads/list and copy them to
+$DEVKITPRO/libnds/ using the install.sh script.
+
+Follow its final instructions to install unzip and matrixSSL for Linux. The
+following development libraries are also needed:
 
     sudo apt-get install libcppunit-dev
     sudo apt-get install libpng-dev
@@ -69,34 +90,27 @@ needed:
     sudo apt-get install libgl1-mesa-dev
     sudo apt-get install zlib1g-dev
     sudo apt-get install libsdl1.2-dev
+    sudo apt-get install sox
 
 And maybe some more ^_^, patches to the build instructions are welcome.
 
 Almost there!
 =============
 
-That's the tough bit out the way, hopefully. Now to compile libndspp. You can
+That's the tough bit out the way, hopefully. Now to compile. You can
 use the usual configure style build:
-
-    cd ../libndspp
-    ./configure
-    make install
-    cd -
-
-Or if you are familiar wit the waf build system, the equivalent commands are
-valid.  This will install the libraries in ../libndspp/lib/libndspp-*.a, one
-for ARM9, one for ARM7 and one for the pc (SDL).
-
-Finally, compile Bunjalloo itself. Again, either use waf directly or the
-standard configure approach:
 
     ./configure
     make
 
+Or if you are familiar wit the waf build system, the equivalent commands are
+valid.
+
 If this works, you should now have bunjalloo.nds and bunjalloo executable in
 the build directory. First see if the Linux version works:
 
-    ./build/sdl/bunjalloo
+    cd bunjalloo
+    ../_build_/sdl/bunjalloo
 
 If that worked, try out the DS build...
 
@@ -114,7 +128,7 @@ with the real location:
 Once you have done that, and assuming you don't alter things in the data
 directory, future builds can be updated by simply running:
 
-    cp -v build/default/bunjalloo-patched.nds /media/$disk/bunjalloo.nds
+    cp -v _build_/default/bunjalloo-patched.nds /media/$disk/bunjalloo.nds
 
 See this page too for more details.
 http://code.google.com/p/quirkysoft/wiki/Compiling

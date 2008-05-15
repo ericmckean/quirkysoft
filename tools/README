@@ -1,13 +1,47 @@
+Description of the stuff in this directory...
 
+PatchDLDI
+===========
+
+Nautilus plug in for patching nds files.
 
 Installation:
 
-Copy PatchDLDI to $HOME/.gnome2/nautilus-scripts
-Place your dldi files in $HOME/data
-Script expects dlditool to be in the path
+1 Copy PatchDLDI to $HOME/.gnome2/nautilus-scripts
+2 Place your dldi files in $HOME/data
+3 Script expects dlditool to be in the path
+
 Requires zenity (try: sudo apt-get install zenity).
 
 Usage:
 Right click an NDS file and select scripts > PatchDLDI
 Choose the patch type.
 
+download-libs.sh
+================
+
+Download NDS dependencies, compile and install them to $DEVKITPRO.
+It's probably easier to use the pre-compiled dependencies.
+
+create_deps.sh
+==============
+
+Create a tar of dependencies, for uploading to the web. You probably don't
+need to use this.
+
+git-*
+=====
+
+Scripts for working with git and subversion. This was from when I used SVN.
+
+issues.py
+=========
+
+Parse the issues page on google code to get a comma separated list of open
+issues.
+
+test-time.sh
+============
+
+See how long a program takes to run, runs multiple times. 
+Usage test-time.sh prog times
