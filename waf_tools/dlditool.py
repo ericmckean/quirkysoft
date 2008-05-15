@@ -6,7 +6,8 @@ def dldi_func(tsk):
   Copy function callback so the patched nds is not recompiled every time
   """
   misc.copy_func(tsk)
-  Action.g_actions['dlditool'].run(tsk)
+  result = Action.g_actions['dlditool'].run(tsk)
+  return result
 
 class dlditool_taskgen(Object.task_gen):
   """ Task for dlditool """

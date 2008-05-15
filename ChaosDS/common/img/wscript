@@ -1,0 +1,46 @@
+#!/usr/bin/env python
+
+paletteFlags = {
+"palettea": "-mR! -m! -gB4",  # this is 256 colour depth, without the T8 option
+"paletteb": "-mRt -gB8",  # this is 256 colour depth, without the T8 option
+"palettec": "-mR! -m! -gB4"
+}
+
+def build(bld):
+  import Params, os
+  here = Params.g_build.m_curdirnode.abspath()
+  # compile each palette directory
+  pal_dirs = []
+  for d in os.listdir(here):
+    if not d.startswith('palette'):
+      continue
+    # else build it
+    flags = "-mRt -gB4"
+    # -T8  8x8 meta tiles
+    # -t8  8x8 tiles
+    # -m   generate optimised palette
+    # -F   turn off flip tile check
+    # -c16 16 colours deep
+    # -q   quiet mode
+    # in grit this would be:
+    # -ftc  output in .c file mode
+    # -mRt  generate optimized tiles
+    # -gB4  4 bit per pixel colour depth
+    if d in paletteFlags.keys():
+      flags = paletteFlags[d]
+    flags += " -ftc -q -gu16 -pS -O"+d
+    obj = bld.create_obj('grit_shared')
+    obj.palette = d
+    obj.find_sources_in_dirs(d)
+    obj.flags = flags
+    obj.export_incdirs = d
+    obj.clone('sdl')
+    pal_dirs.append(d)
+  lib = bld.create_obj('cc', 'staticlib')
+  lib.target = 'pal'
+  lib.find_sources_in_dirs(' '.join(pal_dirs))
+  # include paletteN.c in the library
+  lib.source.extend([os.path.join(d,d+'.c') for d in pal_dirs])
+  lib.export_incdirs = ' '.join(pal_dirs)
+
+  lib.clone('sdl')

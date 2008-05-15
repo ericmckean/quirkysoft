@@ -51,8 +51,11 @@ def setup_tool(conf, proc):
 
   env['LINK_CC'] = env['CC']
   env['LINK_CXX'] = env['CXX']
-
-  env['CCFLAGS_ARM%d' % (proc)] = (arch + ' -ffast-math -O2 -Wall').split()
+  import ccroot
+  version = ccroot.get_cc_version(conf, env['CC'], 'CC_VERSION')
+  env['CCFLAGS_ARM%d' % (proc)] = (arch + ' -ffast-math -O2 -Wall ').split()
+  if version == '4.3.0':
+    env['CCFLAGS_ARM%d' % (proc)].append('-Wno-array-bounds')
   env['CCFLAGS_ARM%d' % (proc)].extend(
       {9:' -march=armv5te -mtune=arm946e-s -DARM9',
        7:' -mcpu=arm7tdmi -mtune=arm7tdmi -DARM7 '}[proc].split())

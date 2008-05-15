@@ -11,6 +11,6 @@ def build(bld):
   obj.target = '''cppunitmain'''
 
   # build subdirs
-  here = os.path.join(Params.g_build.m_srcnode.abspath(), 'tests')
+  here = obj.path.abspath()
   [bld.add_subdirs(d) for d in os.listdir(here)
       if os.path.exists(os.path.join(here,d,Constants.WSCRIPT_FILE))]

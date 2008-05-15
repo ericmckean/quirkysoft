@@ -23,19 +23,19 @@ def build(bld, buildlib=True, buildsdl=True):
   arm9.inst_var = 0
   arm9.find_sources_in_dirs('arm9')
   arm9.includes += ' .'
-  libs = 'bwt'
+  libs = 'bwt bunjalloo'
   if buildlib:
     libs += ' vera'
   arm9.uselib_local = libs.split()
 
   arm9.uselib = 'ARM9'
-  arm9.target = app_name+'-arm9'
+  arm9.target = app_name
 
-  if buildsdl:
-    sdl = arm9.clone('sdl')
-    sdl.uselib = 'HOST'
-    sdl.target = app_name
-    check_target(sdl)
+  #if buildsdl:
+    #sdl = arm9.clone('sdl')
+    #sdl.uselib = 'HOST'
+    #sdl.target = app_name
+    #check_target(sdl)
 
   arm9bin = bld.create_obj('objcopy')
   arm9bin.inst_var = 0

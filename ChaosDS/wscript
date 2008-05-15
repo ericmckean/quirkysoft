@@ -5,14 +5,16 @@ def build(bld):
   import Params, os
   from builder import check_target
 
-  APPNAME = 'bunjalloo'
-  os.unsetenv('NDS_DLDI')
+  bld.add_subdirs('common/img')
+  bld.add_subdirs('common/snd')
+
+  APPNAME = 'ChaosDS'
   arm9obj = bld.create_obj('cpp', 'staticlib')
   arm9obj.inst_var = 0
-  arm9obj.includes = 'arm9'
+  arm9obj.includes = 'arm9/source'
   arm9obj.export_incdirs = arm9obj.includes
-  arm9obj.find_sources_in_dirs('arm9', ['Main.cpp'])
-  arm9obj.uselib_local = 'ndspp bwt'
+  arm9obj.find_sources_in_dirs('arm9/source', ['main.cpp'])
+  arm9obj.uselib_local = 'ndspp pal sounds '
   arm9obj.target = APPNAME
 
   sdl = arm9obj.clone('sdl')
@@ -21,7 +23,7 @@ def build(bld):
 
   arm7obj = bld.create_obj('cpp', 'program')
   arm7obj.inst_var = 0
-  arm7obj.includes = 'arm7'
+  arm7obj.includes = 'arm7/source'
   arm7obj.find_sources_in_dirs(arm7obj.includes)
   arm7obj.uselib = 'ARM7'
   arm7obj.uselib_local = 'ndspp-arm7'
@@ -29,8 +31,8 @@ def build(bld):
 
   arm9p = bld.create_obj('cpp', 'program')
   arm9p.inst_var = 0
-  arm9p.source = 'arm9/Main.cpp'
-  arm9p.uselib_local = APPNAME+' ndspp bwt '
+  arm9p.source = 'arm9/source/main.cpp'
+  arm9p.uselib_local = APPNAME+' ndspp'
   arm9p.uselib = 'ARM9'
   arm9p.target = APPNAME+'-arm9'
 
@@ -53,19 +55,6 @@ def build(bld):
   nds = bld.create_obj('ndstool')
   nds.source = (arm7bin.target, arm9bin.target)
   nds.banner = '%s;;By Richard'%APPNAME
-  nds.icon = 'common/data/icon.bmp'
+  nds.icon = 'common/data/icon_palette.bmp'
   nds.target = APPNAME+'.nds'
   check_target(nds)
-
-  if bld.env()['DLDIFLAGS']:
-    patched = bld.create_obj('dlditool')
-    patched.source = nds.target
-    patched.target = APPNAME+'-patched.nds'
-
-  bld.add_subdirs('bwt tests')
-
-  if Params.g_options.install_to:
-    bld.env()['BUNJALLOO_PREFIX'] = Params.g_options.install_to
-    install_files('BUNJALLOO_PREFIX', '', nds.target)
-    [install_files('BUNJALLOO_PREFIX', 'data/bunjalloo/%s'%d, 'data/bunjalloo/%s/*'%d) for d in ('config', 'docs', 'fonts')]
-

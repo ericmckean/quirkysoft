@@ -8,6 +8,8 @@ tags=$repo/tags
 project=bunjalloo
 upload="no"
 tag="no"
+makedistdir=$(dirname $0)
+pushd $makedistdir > /dev/null
 WAF_SCRIPT=$(which waf)
 VERSION=$( grep -i version arm9/version.c  | sed 's/.*"\(.*\)".*/\1/g')
 
@@ -50,8 +52,6 @@ while true ; do
   esac
 done
 
-makedistdir=$(dirname $0)
-pushd $makedistdir > /dev/null
 makedistdir=$(pwd)
 revision=$(git-svn find-rev HEAD)
 
@@ -59,24 +59,25 @@ revision=$(git-svn find-rev HEAD)
 distdir=$project-$VERSION
 zipname=$distdir.zip
 waf --install-to=$distdir install > /dev/null || die "Error in build"
+pushd ..
 pushd $distdir > /dev/null || die "Unable to cd to $distdir"
 mv $project.nds $project-${VERSION//./}.nds
 zip -r ../$zipname * > /dev/null || die "Unable to create $zipname"
 popd > /dev/null
+mv $zipname $makedistdir
 rm -rf $distdir
+popd > /dev/null
 echo "Created $zipname"
 
 # Create the tar.gz source code file
-src=$project-src-$VERSION
-src_tarname=$src.tar
-src_tgzname=$src.tar.gz
+src=$project-$VERSION
+src_tarname=$project-src-$VERSION.tar
+src_tgzname=$project-src-$VERSION.tar.gz
 pushd .. >/dev/null
-git-archive --prefix=$src/ HEAD bunjalloo libndspp > $src_tarname || die "Unable to create $src_tarname"
+git-archive --prefix=$src/ HEAD > $src_tarname || die "Unable to create $src_tarname"
 mkdir $src -p
 tar xf $src_tarname && rm $src_tarname
-for i in $src/* ; do
-  cp $WAF_SCRIPT $i
-done
+cp $WAF_SCRIPT $src
 tar czf $src_tgzname $src && rm -rf $src
 mv $src_tgzname $makedistdir/ || die "Unable to mv $src_tgzname to $makedistdir"
 echo "Created $src_tgzname"
