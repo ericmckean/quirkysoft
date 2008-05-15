@@ -70,7 +70,6 @@ SDLhandler::SDLhandler():
   ::memset(m_vramSub, 0, 0x16000*2);
   ::memset(m_spriteGfx, 0, sizeof(m_spriteGfx));
   ::memset(m_subSpriteGfx, 0, sizeof(m_subSpriteGfx));
-  drawGap();
 }
 
 SDLhandler::~SDLhandler()
@@ -170,11 +169,22 @@ int SDLhandler::init()
     return 2;
   }
 
-  for (int i = 0; i < 4; ++i)
+  for (int i = 0; i < 2; ++i)
   {
-    m_layer[i] = SDL_CreateRGBSurface(SDL_SWSURFACE, m_scale*WIDTH, m_scale*totalHeight(),
-        16, 0x0000F000, 0x00000F00, 0x000000F0, 0x0000000F);
-    //SDL_SetAlpha(m_layer[i], SDL_SRCALPHA|SDL_RLEACCEL, 0);
+    m_layer[i] = SDL_CreateRGBSurface(SDL_SWSURFACE, m_scale*WIDTH, m_scale*HEIGHT/2,
+        32,
+#if SDL_BYTEORDER == SDL_LIL_ENDIAN
+      0x000000FF,
+      0x0000FF00,
+      0x00FF0000,
+      0xFF000000
+#else
+      0xFF000000,
+      0x00FF0000,
+      0x0000FF00,
+      0x000000FF
+#endif
+      );
     if (m_layer[i] == NULL)
     {
       sprintf (msg, "Couldn't create 16 bit video surface: %s\n",
@@ -343,49 +353,7 @@ Uint32 SDLhandler::decodeColor(unsigned short rgb16)
     green = (int)(m_whiteLevel * (256/16));
     blue = (int)(m_whiteLevel * (256/16));
   }
-  return SDL_MapRGBA(m_layer[0]->format, red, blue, green, m_alpha);
-}
-
-/*
-void SDLhandler::setPaletteData(const unsigned short * palette, int size)
-{
-  if (size >= 256)
-    size = 256;
-  for (int i = 0; i < size; ++i)
-  {
-    m_palette[i] = decodeColor(*palette++);
-  }
-
-  SDL_Rect rect;
-  rect.w = WIDTH*m_scale;
-  rect.h = totalHeight()*m_scale;
-  rect.x = 0;
-  rect.y = 0;
-  if ( SDL_MUSTLOCK(m_screen) ) 
-    SDL_LockSurface(m_screen);
-  SDL_FillRect (m_screen, &rect,m_palette[0]);
-  if ( SDL_MUSTLOCK(m_screen) ) 
-    SDL_UnlockSurface(m_screen);
-  drawGap();
-}
-*/
-
-void SDLhandler::drawGap() {
-  /*
-  glColor3b(200, 200, 200);
-  glBegin(GL_QUADS);
-    glVertex3f(-1.0f,0.2f,0.0f);
-    glVertex3f(1.0f,0.2f,0.0f);
-    glVertex3f(1.0f,-0.2f,0.0f);
-    glVertex3f(-1.0f,-0.2f,0.0f);
-  glEnd();
-  */
-  /*
-  int fadeLevel = m_fadeLevel;
-  m_fadeLevel = 0;
-  SDL_FillRect (m_screen, &GAP, decodeColor( (20|(20<<5)|(20<<10)) ) );
-  m_fadeLevel = fadeLevel;
-  */
+  return SDL_MapRGB(m_layer[0]->format, red, blue, green);
 }
 
 void SDLhandler::clear()
@@ -397,9 +365,6 @@ void SDLhandler::clear()
   rect.w = WIDTH;
   rect.h = HEIGHT/2;
   int colour(m_backgroundPaletteSDL[0]);
-  if (not m_mainOnTop) {
-    colour = m_subBackgroundPaletteSDL[0];
-  }
   if (Video::instance(0).mode() != 5) {
     SDL_FillRect (m_layer[0], &rect, colour);
   }
@@ -413,16 +378,7 @@ void SDLhandler::clear()
       }
     }
   }
-  SDL_BlitSurface(m_layer[0], 0, m_layer[2], 0);
-  if (m_mainOnTop) {
-    colour = m_subBackgroundPaletteSDL[0];
-  } else {
-    colour = m_backgroundPaletteSDL[0];
-  }
-  rect.x = 0;
-  rect.y = GAP.y+GAP.h;
-  rect.w = WIDTH;
-  rect.h = HEIGHT/2;
+  colour = m_subBackgroundPaletteSDL[0];
   if (Video::instance(1).mode() != 5) {
     SDL_FillRect (m_layer[1], &rect, colour);
   }
@@ -437,9 +393,7 @@ void SDLhandler::clear()
       }
     }
   }
-  SDL_BlitSurface(m_layer[1], 0, m_layer[3], 0);
 
-  drawGap();
 }
 
 void SDLhandler::setAlpha(int alpha)
@@ -447,26 +401,53 @@ void SDLhandler::setAlpha(int alpha)
   m_alpha = alpha;
 }
 
+static Uint32 getpixel(SDL_Surface *surface, int x, int y)
+{
+  int bpp = surface->format->BytesPerPixel;
+  /* Here p is the address to the pixel we want to retrieve */
+  Uint8 *p = (Uint8 *)surface->pixels + y * surface->pitch + x * bpp;
+  switch(bpp) {
+    case 1:
+      return *p;
+    case 2:
+      return *(Uint16 *)p;
+    case 3:
+      if(SDL_BYTEORDER == SDL_BIG_ENDIAN)
+        return p[0] << 16 | p[1] << 8 | p[2];
+      else
+        return p[0] | p[1] << 8 | p[2] << 16;
+    case 4:
+      return *(Uint32 *)p;
+    default:
+      return 0;
+      /* shouldn't happen, but avoids warnings */
+  }
+}
+
+static inline Uint8 alpha(Uint8 val1, Uint8 val2, float a)
+{
+  return (Uint8)((1-a)*val1 + a*val2);
+}
+
+Uint32 SDLhandler::alphaBlend(int layer, Uint32 col, int x, int y)
+{
+  if (m_alpha > 0)
+  {
+    float a = ((float) m_alpha) / 256.f;
+    Uint8 r1, g1, b1, r2, g2, b2, r, g, b;
+    Uint32 pixel = getpixel(m_layer[layer], x, y);
+    SDL_GetRGB(pixel, m_layer[layer]->format, &r1, &g1, &b1);
+    SDL_GetRGB(col, m_layer[layer]->format, &r2, &g2, &b2);
+    r = alpha(r1, r2, a);
+    g = alpha(g1, g2, a);
+    b = alpha(b1, b2, a);
+    return SDL_MapRGB(m_layer[layer]->format, r, g, b);
+  }
+  return col;
+}
+
 void SDLhandler::drawPixel(int x, int y, unsigned int layer, unsigned int palette)
 {
-  if (layer == 0 or layer == 2) {
-    if (not m_mainOnTop)
-    {
-      y += 192;
-    }
-  } 
-  else if (layer == 1 or layer == 3)
-  {
-    if (m_mainOnTop)
-    {
-      y += 192;
-    }
-  }
-  //int origY = y;
-  if (y >= GAP.y)
-  {
-    y += GAP.h;
-  }
 
   SDL_Rect rect;
   rect.w = 1*m_scale;
@@ -474,7 +455,7 @@ void SDLhandler::drawPixel(int x, int y, unsigned int layer, unsigned int palett
   rect.x = x*m_scale;
   rect.y = y*m_scale;
   Uint32 colour = 0;
-  
+
   bool usePalette(true);
   if (layer == 0 or layer == 1) {
     if (nds::Video::instance(layer).mode() == 5) {
@@ -484,43 +465,37 @@ void SDLhandler::drawPixel(int x, int y, unsigned int layer, unsigned int palett
   }
   if (usePalette) {
     switch (layer) {
+      case 0:
+        colour = m_backgroundPaletteSDL[palette];
+        break;
       case 1:
         colour = m_subBackgroundPaletteSDL[palette];
         break;
       case 2:
+        m_fadeLevel = m_fadeLevelMain;
+        m_whiteLevel = m_whiteLevelMain;
         colour = decodeColor(m_spritePalette[palette]);
         break;
       case 3:
+        m_fadeLevel = m_fadeLevelSub;
+        m_whiteLevel = m_whiteLevelSub;
         colour = decodeColor(m_subSpritePalette[palette]);
         break;
 
       default:
-        colour = m_backgroundPaletteSDL[palette];
-        break;
+        return;
+    }
+    if (layer > 1 and palette == 0)
+      return;
+    if (layer > 1)
+    {
+      // read color at x, y and blend if m_alpha != 0
+      colour = alphaBlend(layer&1, colour, x, y);
     }
   }
-  SDL_FillRect (m_layer[layer], &rect, colour);
+  SDL_FillRect(m_layer[layer&1], &rect, colour);
 }
 
-#if 0
-void SDLhandler::loadPalette(const std::string & fileName)
-{
-  ifstream palFile;
-  palFile.open(fileName.c_str(), ios::in);
-  // read the lot
-  if (palFile.is_open())
-  {
-    palFile.seekg(0, ios::end);
-    int size = palFile.tellg();
-    char * data = new char[size+2];
-    palFile.seekg(0, ios::beg);
-    palFile.read(data, size);
-    data[size] = 0;
-    setPaletteData((unsigned short*)data, size/2);
-    delete [] data;
-  }
-}
-#endif
 unsigned short * SDLhandler::vramMain(int offset)
 {
   setDirty();
@@ -598,24 +573,10 @@ void SDLhandler::waitVsync()
       m_fadeLevel = m_fadeLevelMain;
       m_whiteLevel = m_whiteLevelMain;
       m_backgroundPaletteSDL[i] = decodeColor(m_backgroundPalette[i]);
-      //m_spritePaletteSDL[i] = decodeColor(m_spritePalette[i]);
 
       m_fadeLevel = m_fadeLevelSub;
       m_whiteLevel = m_whiteLevelSub;
       m_subBackgroundPaletteSDL[i] = decodeColor(m_subBackgroundPalette[i]);
-      //m_subSpritePaletteSDL[i] = decodeColor(m_subSpritePalette[i]);
-#if 0
-      if (m_backgroundPaletteSDL[i] or
-          m_subBackgroundPaletteSDL[i] or
-          m_spritePaletteSDL[i] or
-          m_subSpritePaletteSDL[i])
-      {
-        printf("%3d: %08x %08x %08x %08x\n", i, m_backgroundPaletteSDL[i],
-            m_subBackgroundPaletteSDL[i],
-            m_spritePaletteSDL[i],
-            m_subSpritePaletteSDL[i]);
-      }
-#endif
     }
 
     clear();
@@ -623,9 +584,8 @@ void SDLhandler::waitVsync()
     SpriteHandler::render();
 
     // blit doesn't work with open gl - have to upload as a texture
-    //SDL_Flip(m_screen);
-    SDL_Surface * alphaImage = SDL_CreateRGBSurface( SDL_SWSURFACE, m_layer[0]->w,
-        512, 32,
+    SDL_Surface * alphaImage = SDL_CreateRGBSurface( SDL_SWSURFACE, 256, 512,
+        32,
 #if SDL_BYTEORDER == SDL_LIL_ENDIAN // OpenGL RGBA masks
       0x000000FF,
       0x0000FF00,
@@ -638,9 +598,16 @@ void SDLhandler::waitVsync()
       0x000000FF
 #endif
       );
-    for (int i = 0; i < 4; ++i)
+
+    SDL_Rect areas[2] = {
+      {0, 0, WIDTH, HEIGHT/2 },
+      {0, GAP.h + GAP.y, WIDTH, HEIGHT/2}
+    };
+    for (int i = 0; i < 2; ++i)
     {
-      SDL_BlitSurface(m_layer[i], 0, alphaImage, 0);
+      // blit main screens to the top (unless m_mainOnTop is false)
+      SDL_Rect * r = &areas[(i&1)^(!m_mainOnTop)];
+      SDL_BlitSurface(m_layer[i], 0, alphaImage, r);
     }
 
     // get the user viewport and project
@@ -665,7 +632,7 @@ void SDLhandler::waitVsync()
     // glLoadIdentity( );
 
     float y = 0.;
-    float h = (float)m_layer[0]->h;
+    float h = (float)(areas[1].y + areas[1].h);
     if (m_threeD)
     {
       if (!m_mainOnTop)
@@ -688,7 +655,6 @@ void SDLhandler::waitVsync()
     glEnd();
     glDeleteTextures(1, &texture);
     glDisable( GL_TEXTURE_2D );
-    //printf("Write to %f %f\n", y, h);
 
     glFlush();
     if (m_threeD)

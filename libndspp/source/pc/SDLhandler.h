@@ -129,7 +129,6 @@ class SDLhandler
 
     int init();
     void initGL();
-    void drawGap();
     void clear();
     bool inGap(int y) const;
     int uploadTextureFromSurface(
@@ -137,5 +136,6 @@ class SDLhandler
         int colorKeyRed, int colorKeyGreen, int colorKeyBlue );
 
     static void clear3D();
+    Uint32 alphaBlend(int layer, Uint32 col, int x, int y);
 };
 #endif
