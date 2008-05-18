@@ -3,6 +3,7 @@ Waf tool for generating a .nds file from 1 or 2 arm cores, optionally using a
 banner.
 """
 import Params, Action, Object
+import sys, os
 
 class ndstool_taskgen(Object.task_gen):
   def __init__(self, *k, **kw):
@@ -31,7 +32,7 @@ class ndstool_taskgen(Object.task_gen):
     task.set_outputs(find_build(self.target))
 
 def detect(conf):
-  dka_bin = '%s/bin' % (Params.g_options.devkitarm)
+  dka_bin = os.path.join(Params.g_options.devkitarm, 'bin')
   ndstool = 'ndstool'
   ndstool = conf.find_program(ndstool, path_list=[dka_bin], var='NDSTOOL')
   if not ndstool:
@@ -39,10 +40,13 @@ def detect(conf):
   conf.env['NDSTOOL'] = ndstool
 
 def setup(bld):
-  ndstool_str = '${NDSTOOL} -c ${TGT} -7 ${SRC[0].bldpath(env)} -9 ${SRC[1].bldpath(env)} %s > /dev/null'
+  outfile = ''
+  if sys.platform.startswith('linux'):
+    outfile = ' > /dev/null'
+  ndstool_str = '${NDSTOOL} -c ${TGT} -7 ${SRC[0].bldpath(env)} -9 ${SRC[1].bldpath(env)} %s '+outfile
   Action.simple_action('ndstool_7_9', ndstool_str%'', color='BLUE', prio=150)
   Action.simple_action('ndstool_7_9_b', ndstool_str%'-b ${SRC[2].srcpath(env)} \'${NDSTOOL_BANNER}\'', color='BLUE', prio=150)
-  ndstool_str = '${NDSTOOL} -c ${TGT} -9 ${SRC[0].bldpath(env)} %s > /dev/null'
+  ndstool_str = '${NDSTOOL} -c ${TGT} -9 ${SRC[0].bldpath(env)} %s '+outfile
   Action.simple_action('ndstool_9', ndstool_str%'', color='BLUE', prio=150)
-  Action.simple_action('ndstool_9_b', ndstool_str%'-b ${SRC[1].srcpath(env)} ${NDSTOOL_ICON} \'${NDSTOOL_BANNER}\'', color='BLUE', prio=150)
+  Action.simple_action('ndstool_9_b', ndstool_str%' -b ${SRC[1].srcpath(env)} ${NDSTOOL_ICON} \'${NDSTOOL_BANNER}\'', color='BLUE', prio=150)
 

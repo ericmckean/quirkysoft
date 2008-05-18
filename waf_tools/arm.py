@@ -80,4 +80,5 @@ def setup_tool(conf, proc):
   env['LIB_ARM%d' % (proc)].reverse()
   env['CPPFLAGS_ARM%d' % (proc)].extend(env['CCFLAGS_ARM%d' % (proc)])
   env['CXXDEFINES'] = env['CCDEFINES']
+  env['ARFLAGS'] = 'rcs'
 

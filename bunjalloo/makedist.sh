@@ -11,7 +11,7 @@ tag="no"
 makedistdir=$(dirname $0)
 pushd $makedistdir > /dev/null
 WAF_SCRIPT=$(which waf)
-VERSION=$( grep -i version arm9/version.c  | sed 's/.*"\(.*\)".*/\1/g')
+VERSION=$( grep -i version arm9/version_number.c  | sed 's/.*"\(.*\)".*/\1/g')
 
 die() {
   echo >&2 "$@"
