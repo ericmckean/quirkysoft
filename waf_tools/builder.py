@@ -1,5 +1,6 @@
 """ Build test programs """
 import os
+import Params
 
 def build(bld, buildlib=True, buildsdl=True):
   """
@@ -16,7 +17,7 @@ def build(bld, buildlib=True, buildsdl=True):
                        """
     arm9font.target = 'vera'
     arm9font.inst_var = 0
-    if buildsdl:
+    if buildsdl and bld.env()['WITH_SDL']:
       arm9font.clone('sdl')
 
   arm9 = bld.create_obj('cpp', 'program')
@@ -60,6 +61,10 @@ def check_target(obj):
 
 def build_test(bld):
   """ Build a unit test program """
+  if not bld.env()['WITH_SDL']:
+    return
+  if not bld.env('sdl')['HAVE_CPPUNIT']:
+    return
   tst = bld.create_obj('cpp', 'program')
   tst.inst_var = 0
   tst.env = bld.env('sdl').copy()

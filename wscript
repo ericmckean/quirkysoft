@@ -42,6 +42,14 @@ def set_options(opt):
           help='Do not build bunjalloo (use with "configure")',
           default=False, dest='without_bunjalloo')
 
+  opt.add_option('--without-sdl', action='store_true',
+          help='Do not build the SDL port',
+          default=False, dest='without_sdl')
+
+  opt.add_option('--without-cppunit', action='store_true',
+          help='Do not build the unit tests',
+          default=False, dest='without_cppunit')
+
   opt.add_option('--tags', action='store_true',
           help='Force creation of tags file using ctags (use with "build")',
           default=False, dest='tags')
@@ -87,7 +95,8 @@ def sdl_tool_check(conf):
   conf.check_tool('grit', waf_tools)
   if not Params.g_options.without_chaos:
     conf.check_tool('sox', waf_tools)
-  conf.check_tool('unit_test', waf_tools)
+  if not Params.g_options.without_cppunit:
+    conf.check_tool('unit_test', waf_tools)
   conf.check_tool('objcopy', waf_tools)
 
 # Header checking
@@ -144,14 +153,22 @@ def lib_check_common(configurator):
 
 def lib_check_sdl(conf):
   pkgconfig = conf.create_pkgconfig_configurator()
+  pkgconfig.mandatory = 1
   pkgconfig.uselib = 'HOST'
   for i in 'libpng sdl'.split():
     pkgconfig.name = i
     pkgconfig.run()
 
-  pkgconfig.uselib = 'TEST'
-  pkgconfig.name = 'cppunit'
-  pkgconfig.run()
+  conf.env['HAVE_CPPUNIT'] = 0
+  if not (Params.g_options.without_bunjalloo or Params.g_options.without_cppunit):
+    pkgconfig.uselib = 'TEST'
+    pkgconfig.name = 'cppunit'
+    pkgconfig.run()
+    if not conf.env['LIB_TEST']:
+      Params.g_options.without_cppunit = True
+      Params.pprint('RED', 'Unit tests will not be built')
+    else:
+      conf.env['HAVE_CPPUNIT'] = 1
 
   e = conf.create_library_configurator()
   e.mandatory = 1
@@ -197,6 +214,12 @@ def configure(conf):
   if Params.g_options.with_dldi:
     conf.env['DLDIFLAGS'] = Params.g_options.with_dldi
 
+  conf.env['WITH_SDL'] = True
+  if Params.g_options.without_sdl:
+    Params.pprint('BLUE','SDL version not configured')
+    conf.env['WITH_SDL'] = False
+    return True
+
   sdl = Environment.Environment()
 
   conf.set_env_name('sdl', sdl)
@@ -220,7 +243,6 @@ def configure(conf):
   sdl['CXXFLAGS'] = ['-Wall', '-g']
   sdl['OBJCOPY'] = 'objcopy'
   sdl_header_check(conf)
-
 
 def shutdown():
   # force running unit tests
