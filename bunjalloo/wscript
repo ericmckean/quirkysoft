@@ -45,7 +45,7 @@ def build(bld):
   arm9bin.source = arm9p.target
   arm9bin.target = arm9p.target+'.bin'
 
-  arm7bin = arm9bin.clone('default')
+  arm7bin = bld.create_obj('objcopy')
   arm7bin.inst_var = 0
   arm7bin.source = arm7obj.target
   arm7bin.target = arm7obj.target+'.bin'
