@@ -3,7 +3,7 @@
 
 def build(bld):
   import Params, os
-  from builder import check_target
+  from builder import check_target, generate_banner
 
   APPNAME = 'bunjalloo'
   os.unsetenv('NDS_DLDI')
@@ -54,7 +54,7 @@ def build(bld):
 
   nds = bld.create_obj('ndstool')
   nds.source = (arm7bin.target, arm9bin.target)
-  nds.banner = '%s;;By Richard'%APPNAME
+  nds.banner = generate_banner(APPNAME)
   nds.icon = 'common/data/icon.bmp'
   nds.target = APPNAME+'.nds'
   check_target(nds)

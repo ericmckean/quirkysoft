@@ -3,7 +3,7 @@
 
 def build(bld):
   import Params, os
-  from builder import check_target
+  from builder import check_target, generate_banner
 
   bld.add_subdirs('common/img')
   bld.add_subdirs('common/snd')
@@ -57,7 +57,7 @@ def build(bld):
 
   nds = bld.create_obj('ndstool')
   nds.source = (arm7bin.target, arm9bin.target)
-  nds.banner = '%s;;By Richard'%APPNAME
+  nds.banner = generate_banner(APPNAME)
   nds.icon = 'common/data/icon_palette.bmp'
   nds.target = APPNAME+'.nds'
   check_target(nds)

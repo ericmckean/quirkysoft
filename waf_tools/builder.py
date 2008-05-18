@@ -1,5 +1,5 @@
 """ Build test programs """
-import os
+import os, sys
 import Params
 
 def build(bld, buildlib=True, buildsdl=True):
@@ -81,3 +81,15 @@ def build_test(bld):
   unit_test.env = bld.env('sdl').copy()
   unit_test.source = tst.target
 
+def generate_banner(app, author=None):
+  if author == None:
+    author = '?'
+    try:
+      import pwd
+      author = pwd.getpwnam(os.getlogin()).pw_gecos.split(',')[0]
+    except:
+      pass
+  banner = '%s;;By %s'%(app.title(), author)
+  if sys.platform.startswith('win'):
+    banner = banner.replace(' ', '_')
+  return banner

@@ -58,8 +58,8 @@ def set_options(opt):
 
 def arm_tool_check(conf):
   conf.check_tool('misc')
-  conf.check_tool('g++', funs='cxx_load_tools gxx_common_flags find_ar')
-  conf.check_tool('gcc', funs='cc_load_tools gcc_common_flags find_ar')
+  conf.check_tool('g++', funs='cxx_load_tools gxx_common_flags')
+  conf.check_tool('gcc', funs='cc_load_tools gcc_common_flags')
 
   # cannot check compiler_cc for devkitArm as it needs LINKFLAGS, which waf
   # stips off in the check.
@@ -218,6 +218,7 @@ def configure(conf):
   if Params.g_options.without_sdl:
     Params.pprint('BLUE','SDL version not configured')
     conf.env['WITH_SDL'] = False
+    conf.env['CXXDEFINES'].extend(['sprintf_platform=siprintf'])
     return True
 
   sdl = Environment.Environment()

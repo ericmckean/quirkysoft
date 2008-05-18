@@ -1,5 +1,5 @@
 """ Waf tool for generating image data using grit """
-import os, re
+import os, re, sys
 import Params, Action, Object, Utils
 
 def grit_shared_wrapper(task):
@@ -133,7 +133,7 @@ def img_file(self, node):
   self.allnodes.append(out_source_C)
 
 def detect(conf):
-  dka_bin = '%s/bin' % (Params.g_options.devkitarm)
+  dka_bin = os.path.join(Params.g_options.devkitarm,'bin')
   grit = 'grit'
   grit = conf.find_program(grit, path_list=[dka_bin], var='GRIT')
   if not grit:
@@ -157,7 +157,10 @@ def detect(conf):
     conf.env['GRITFLAGS'] = '-pw 16 -gB 8 -m! -ft b -fh! -q'.split()
 
 def setup(bld):
-  grit_str = '${GRIT} ${SRC[0].abspath(env)} -o ${SRC[0].bldbase(env)} ${GRITFLAGS} > /dev/null 2>&1 '
+  outfile = ''
+  if sys.platform.startswith('linux'):
+    outfile = ' > /dev/null 2>&1'
+  grit_str = '${GRIT} ${SRC[0].abspath(env)} -o ${SRC[0].bldbase(env)} ${GRITFLAGS} %s '%(outfile)
   Action.simple_action('grit', grit_str, color='CYAN', prio=10)
   Action.Action('c_C', vars=[], func=add_include , color='CYAN', prio=11)
   grit_str = '${GRIT} ${SRC} ${GRITFLAGS}'
