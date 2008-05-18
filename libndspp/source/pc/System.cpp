@@ -18,21 +18,10 @@
 #include "System.h"
 #include "libnds.h"
 
+VoidFunctionPointer nds::System::s_callback(0);
+
 void nds::System::checkSleep()
 {
-  if (keysDown() & KEY_LID)
-  {
-    // remove current interrupts, set the lid open interrupt handler
-#if 0
-    powerOFF(POWER_LCD);
-    swiIntrWait(1, IRQ_VBLANK);
-    // wait for vblank before powering on the LCD
-    while (REG_VCOUNT!=0);
-    while (REG_VCOUNT==0);
-    while (REG_VCOUNT!=0);
-    powerON(POWER_LCD);
-#endif
-  }
 }
 
 const char * nds::System::uname()
@@ -48,4 +37,13 @@ int nds::System::language()
     return strtol(l, 0, 0);
   }
   return 0;
+}
+
+void nds::System::setupSleepWatchdog()
+{
+}
+
+void nds::System::registerSleepFunction(VoidFunctionPointer fn)
+{
+  s_callback = fn;
 }

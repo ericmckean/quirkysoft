@@ -17,6 +17,7 @@
 #include <nds.h>
 #include <dswifi9.h>
 #include "Wifi9.h"
+#include "System.h"
 #define         VCOUNT          (*((u16 volatile *) 0x04000006))
 
 // wifi timer function, to update internals of sgIP
@@ -33,8 +34,15 @@ static void arm9_synctoarm7() {
 // interrupt handler to receive fifo messages from arm7
 static void arm9_fifo() {
   // check incoming fifo messages
-  u32 value = REG_IPC_FIFO_RX;
-  if(value == 0x87654321) Wifi_Sync();
+  while (!(REG_IPC_FIFO_CR & IPC_FIFO_RECV_EMPTY))
+  {
+    u32 value = REG_IPC_FIFO_RX;
+    if(value == 0x87654321) Wifi_Sync();
+    if (value == nds::System::SLEEP_MESSAGE)
+    {
+      nds::System::recvSleepMessage();
+    }
+  }
 }
 
 using namespace nds;

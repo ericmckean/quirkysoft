@@ -24,6 +24,23 @@ namespace nds
   {
 
     public:
+      typedef void (* VoidFunctionPointer)(void);
+
+      static const unsigned int SLEEP_MESSAGE = 0x99775533;
+      /** Register a function to be called just before the processor goes to sleep
+       * This can be used to shut down optional systems (e.g. Wifi, Mic)
+       */
+      static void registerSleepFunction(VoidFunctionPointer fn);
+
+      /** Set up the fifo handler for checking when the other processor needs to sleep/wake up
+       * Shouldn't be used if using Wifi. FIXME: rename for ARM9 use
+       */
+      static void setupSleepWatchdog();
+
+      /** A FIFO message has been received from the other CPU to update sleep
+       * mode. On arm9 this will wake up, on arm7 it will set the sleep flag. */
+      static void recvSleepMessage();
+
       /**
        * When the lid is closed, this function sets up a lid open interrupt,
        * powers down and sleeps. When the lid is opened again, the power is
@@ -40,6 +57,8 @@ namespace nds
       static const char * uname();
 
       static int language();
+    private:
+      static VoidFunctionPointer s_callback;
   };
 }
 // tolua_end

@@ -19,6 +19,7 @@
 #include <nds/bios.h>
 #include <nds/interrupts.h>
 #include <dswifi7.h>
+#include "System.h"
 #include "Wifi7.h"
 
 using namespace nds;
@@ -35,9 +36,16 @@ static void arm7_synctoarm9() { // send fifo message
 }
 // interrupt handler to allow incoming notifications from arm9
 static void arm7_fifo() { // check incoming fifo messages
-  u32 msg = REG_IPC_FIFO_RX;
-  if(msg==0x87654321)
-    Wifi_Sync();
+  while (!(REG_IPC_FIFO_CR & IPC_FIFO_RECV_EMPTY))
+  {
+    u32 msg = REG_IPC_FIFO_RX;
+    if(msg==0x87654321)
+      Wifi_Sync();
+    if (msg == nds::System::SLEEP_MESSAGE)
+    {
+      System::recvSleepMessage();
+    }
+  }
 }
 
 Wifi7::Wifi7():m_enabled(false)
@@ -52,6 +60,7 @@ void Wifi7::mainLoop()
       swiWaitForVBlank();
     else
       initialise();
+    nds::System::checkSleep();
   }
 }
 

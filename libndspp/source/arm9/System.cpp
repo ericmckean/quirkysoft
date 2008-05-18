@@ -18,18 +18,58 @@
 #include <nds.h>
 #include <nds/system.h>
 
+VoidFunctionPointer nds::System::s_callback(0);
+bool s_awoke = false;
+
+void nds::System::recvSleepMessage()
+{
+  s_awoke = true;
+}
+
+static void sleep_fifo()
+{
+  while (!(REG_IPC_FIFO_CR & IPC_FIFO_RECV_EMPTY))
+  {
+    u32 value = REG_IPC_FIFO_RX;
+    if (value == nds::System::SLEEP_MESSAGE)
+      nds::System::recvSleepMessage();
+  }
+}
+
+void nds::System::setupSleepWatchdog()
+{
+    irqSet(IRQ_FIFO_NOT_EMPTY, sleep_fifo);
+    irqEnable(IRQ_FIFO_NOT_EMPTY);
+    REG_IPC_FIFO_CR = IPC_FIFO_SEND_CLEAR | IPC_FIFO_ENABLE | IPC_FIFO_RECV_IRQ;
+}
+
 void nds::System::checkSleep()
 {
-  if (keysDown() & KEY_LID)
+  if (keysHeld() & KEY_LID)
   {
-    // remove current interrupts, set the lid open interrupt handler
     powerOFF(POWER_LCD);
-    swiIntrWait(1, IRQ_VBLANK);
+    unsigned long oldIE = REG_IE;
+    // remove current interrupts
+    irqDisable((IRQ_MASK)oldIE);
+    REG_IME = 0;
+    if (s_callback)
+    {
+      // switch off Wifi, etc.
+      s_callback();
+    }
+    s_awoke = false;
+    // tell the arm7 to snooze. it'll send a new interrupt to wake us up
+    REG_IPC_FIFO_CR = IPC_FIFO_SEND_CLEAR | IPC_FIFO_ENABLE | IPC_FIFO_RECV_IRQ;
+    REG_IPC_FIFO_TX = SLEEP_MESSAGE;
+    irqEnable(IRQ_FIFO_NOT_EMPTY);
+    while (!s_awoke)
+      swiWaitForIRQ();
     // wait for vblank before powering on the LCD
     while (REG_VCOUNT!=0);
     while (REG_VCOUNT==0);
     while (REG_VCOUNT!=0);
     powerON(POWER_LCD);
+    irqEnable((IRQ_MASK)(oldIE));
   }
 }
 
@@ -41,4 +81,9 @@ const char * nds::System::uname()
 int nds::System::language()
 {
   return PersonalData->_user_data.language;
+}
+
+void nds::System::registerSleepFunction(VoidFunctionPointer fn)
+{
+  s_callback = fn;
 }
