@@ -34,7 +34,8 @@ def build(bld):
     obj.find_sources_in_dirs(d)
     obj.flags = flags
     obj.export_incdirs = d
-    obj.clone('sdl')
+    if bld.env()['WITH_SDL']:
+      obj.clone('sdl')
     pal_dirs.append(d)
   lib = bld.create_obj('cc', 'staticlib')
   lib.target = 'pal'
@@ -43,4 +44,5 @@ def build(bld):
   lib.source.extend([os.path.join(d,d+'.c') for d in pal_dirs])
   lib.export_incdirs = ' '.join(pal_dirs)
 
-  lib.clone('sdl')
+  if bld.env()['WITH_SDL']:
+    lib.clone('sdl')

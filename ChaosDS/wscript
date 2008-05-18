@@ -17,9 +17,11 @@ def build(bld):
   arm9obj.uselib_local = 'ndspp pal sounds '
   arm9obj.target = APPNAME
 
-  sdl = arm9obj.clone('sdl')
+  if bld.env()['WITH_SDL']:
+    sdl = arm9obj.clone('sdl')
+    sdl.uselib = 'HOST'
+
   arm9obj.uselib = 'ARM9'
-  sdl.uselib = 'HOST'
 
   arm7obj = bld.create_obj('cpp', 'program')
   arm7obj.inst_var = 0
@@ -36,10 +38,11 @@ def build(bld):
   arm9p.uselib = 'ARM9'
   arm9p.target = APPNAME+'-arm9'
 
-  sdlp = arm9p.clone('sdl')
-  sdlp.uselib = 'HOST'
-  sdlp.target = APPNAME
-  check_target(sdlp)
+  if bld.env()['WITH_SDL']:
+    sdlp = arm9p.clone('sdl')
+    sdlp.uselib = 'HOST'
+    sdlp.target = APPNAME
+    check_target(sdlp)
 
   # generate nds
   arm9bin = bld.create_obj('objcopy')
