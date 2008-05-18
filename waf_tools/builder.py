@@ -32,11 +32,11 @@ def build(bld, buildlib=True, buildsdl=True):
   arm9.uselib = 'ARM9'
   arm9.target = app_name
 
-  #if buildsdl:
-    #sdl = arm9.clone('sdl')
-    #sdl.uselib = 'HOST'
-    #sdl.target = app_name
-    #check_target(sdl)
+  if buildsdl:
+    sdl = arm9.clone('sdl')
+    sdl.uselib = 'HOST'
+    sdl.target = app_name
+    check_target(sdl)
 
   arm9bin = bld.create_obj('objcopy')
   arm9bin.inst_var = 0
