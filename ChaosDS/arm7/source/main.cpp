@@ -128,6 +128,7 @@ int main(int argc, char ** argv) {
   vcount = 80;
   irqSet(IRQ_VCOUNT, VcountHandler);
   irqEnable((IRQ_MASK)(IRQ_VBLANK | IRQ_VCOUNT));
+  nds::System::setupSleepWatchdog();
   while (true) {
     swiWaitForVBlank();
     nds::System::checkSleep();
