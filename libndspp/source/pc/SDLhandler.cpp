@@ -669,6 +669,7 @@ void SDLhandler::waitVsync()
       SDL_GL_SwapBuffers();
     }
   }
+  m_dirty = false;
   SDL_Event event;
   while( SDL_PollEvent( &event ) ) {
     switch( event.type ) {
@@ -703,6 +704,10 @@ void SDLhandler::waitVsync()
         }
         break;
 
+      case SDL_VIDEOEXPOSE:
+        m_dirty = true;
+        break;
+
       case SDL_KEYUP:
       case SDL_KEYDOWN:
         if (event.key.keysym.sym == SDLK_ESCAPE)
@@ -718,7 +723,6 @@ void SDLhandler::waitVsync()
   }
   if (m_fn)
     m_fn();
-  m_dirty = false;
 }
 
 void SDLhandler::setFade(int screen, int level)
