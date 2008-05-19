@@ -437,6 +437,7 @@ void HeaderParser::fireData()
 }
 void HeaderParser::setCacheFile(const std::string & cacheFile)
 {
+  reset();
   m_cacheFile = cacheFile;
   if (not m_cacheFile.empty())
   {
