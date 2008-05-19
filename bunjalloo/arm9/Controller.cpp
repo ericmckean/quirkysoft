@@ -145,6 +145,7 @@ void Controller::doUri(const URI & uri)
       }
     }
     while (m_document->status() == Document::REDIRECTED);
+    checkDownloadQueue();
 
   }
 }
@@ -477,5 +478,24 @@ void Controller::saveCookieSettings()
         allowed.write("\n");
       }
     }
+  }
+}
+
+void Controller::queueUri(const URI & uri)
+{
+  if (uri.protocol() == URI::HTTPS_PROTOCOL or
+      uri.protocol() == URI::HTTP_PROTOCOL)
+  {
+    m_downloadQ.push(uri);
+  }
+}
+
+void Controller::checkDownloadQueue()
+{
+  while (m_downloadQ.size())
+  {
+    URI uri(m_downloadQ.front());
+    m_downloadQ.pop();
+    fetchHttp(uri);
   }
 }

@@ -17,10 +17,12 @@
 #ifndef Controller_h_seen
 #define Controller_h_seen
 
+#include "URI.h"
+#include <queue>
+
 class Document;
 class View;
 class Config;
-class URI;
 class Cache;
 
 class HttpClient;
@@ -39,6 +41,8 @@ class Controller
      * @param uri the URI to use.
      */
     void doUri(const URI & uri);
+
+    void queueUri(const URI & uri);
 
     /** Set the HTTP Referer URI.
      * @param referer the referring site.
@@ -108,6 +112,7 @@ class Controller
     int m_maxRedirects;
     SaveAs_t m_saveAs;
     std::string m_saveFileName;
+    std::queue<URI> m_downloadQ;
 
 
     void localFile(const std::string &);
@@ -124,5 +129,6 @@ class Controller
     void checkSave();
     void checkUpdates();
 
+    void checkDownloadQueue();
 };
 #endif
