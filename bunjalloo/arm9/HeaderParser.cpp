@@ -446,6 +446,11 @@ void HeaderParser::setCacheFile(const std::string & cacheFile)
   }
 }
 
+const std::string & HeaderParser::cacheFile() const
+{
+  return m_cacheFile;
+}
+
 void HeaderParser::addToCacheFile(const std::string & text)
 {
   if (not m_cacheFile.empty())

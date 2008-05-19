@@ -83,6 +83,7 @@ class HeaderParser
     void setUri(const std::string & uri);
 
     void setCacheFile(const std::string & cacheFile);
+    const std::string & cacheFile() const;
 
     bool shouldCache() const;
 

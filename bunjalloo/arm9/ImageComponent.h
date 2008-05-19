@@ -18,16 +18,20 @@
 #define ImageComponent_h_seen
 
 #include "Component.h"
+#include "ViewI.h"
 #include <string>
 namespace nds {
 class Image;
 }
-class ImageComponent: public Component
+class Document;
+class ImageComponent: public Component, public ViewI
 {
   public:
-    ImageComponent(nds::Image * image);
+    ImageComponent(nds::Image * image, Document * doc=0);
+    void reload();
     virtual void paint(const nds::Rectangle & clip);
     virtual ~ImageComponent();
+    void notify();
 
     virtual bool stylusUp(const Stylus * stylus) { return false; }
     virtual bool stylusDownFirst(const Stylus * stylus) { return false; }
@@ -35,6 +39,7 @@ class ImageComponent: public Component
     virtual bool stylusDown(const Stylus * stylus) { return false; }
   private:
     nds::Image * m_image;
+    Document * m_document;
 
 };
 #endif
