@@ -806,8 +806,6 @@ void HttpClient::get(const URI & uri)
     }
     m_finished = false;
   }
-  // reset the document for downloading
-  m_controller->m_document->reset();
 }
 
 void HttpClient::wifiConnection()

@@ -100,6 +100,7 @@ const Config & Controller::config() const
 
 void Controller::handleUri(const URI & uri)
 {
+  m_document->reset();
   m_document->setCacheFile("");
   switch (uri.protocol())
   {
