@@ -133,8 +133,19 @@ void Controller::doUri(const URI & uri)
   // cout << uri.asString() << endl;
   if (uri.isValid()) {
     m_document->setUri(uri.asString());
-    handleUri(uri);
-    m_document->setPosition(-1);
+    do {
+      if (m_document->status() == Document::REDIRECTED)
+      {
+        handleUri(uri.navigateTo(m_document->uri()));
+      }
+      else
+      {
+        handleUri(uri);
+        m_document->setPosition(-1);
+      }
+    }
+    while (m_document->status() == Document::REDIRECTED);
+
   }
 }
 
@@ -390,23 +401,21 @@ void Controller::finishFetchHttp(const URI & uri)
     // oops, remove it
     m_cache->remove(uri);
   }
-  URI docUri(m_document->uri());
-  if (docUri != uri and m_document->historyEnabled() and m_redirected < m_maxRedirects)
+  if (m_document->status() == Document::REDIRECTED and m_document->historyEnabled() and m_redirected < m_maxRedirects)
   {
     // redirected.
     m_redirected++;
     swiWaitForVBlank();
     swiWaitForVBlank();
-    m_document->setStatus(Document::REDIRECTED);
     m_document->reset();
-    doUri(uri.navigateTo(m_document->uri()));
+    m_document->setStatus(Document::REDIRECTED);
   }
   else
   {
     m_redirected = 0;
     m_document->setStatus(Document::LOADED);
+    checkSave();
   }
-  checkSave();
 }
 
 void Controller::checkSave()
