@@ -15,21 +15,28 @@
   along with this program.  If not, see <http://www.gnu.org/licenses/>.
 */
 #include "libnds.h"
+#include "Canvas.h"
+#include "Document.h"
+#include "HeaderParser.h"
+#include "HtmlDocument.h"
 #include "ImageComponent.h"
 #include "Image.h"
-#include "URI.h"
-#include "Canvas.h"
 #include "Palette.h"
+#include "URI.h"
 
 using nds::Canvas;
 using nds::Image;
 
 
-ImageComponent::ImageComponent(nds::Image * image):m_image(image)
+ImageComponent::ImageComponent(nds::Image * image, Document * doc):m_image(image), m_document(doc)
 {
   if (m_image)
   {
     setSize(m_image->width(), m_image->height());
+  }
+  if (m_document)
+  {
+    m_document->registerView(this);
   }
 }
 
@@ -63,4 +70,30 @@ void ImageComponent::paint(const nds::Rectangle & clip)
     Canvas::instance().drawRectangle(0,0,128,128, nds::Color(31,0,0));
   }
   m_dirty = false;
+}
+
+void ImageComponent::reload()
+{
+  if (m_image->type() == nds::Image::ImageUNKNOWN)
+  {
+    m_image->setType((nds::Image::ImageType)m_document->htmlDocument()->mimeType());
+  }
+  m_image->reload();
+  setSize(m_image->width(), m_image->height());
+  m_dirty = true;
+}
+void ImageComponent::notify()
+{
+  if ( m_document->headerParser().cacheFile() == (m_image->filename()+".hdr"))
+  {
+    if (m_document->status() == Document::INPROGRESS)
+    {
+      reload();
+    }
+    if (m_document->status() == Document::LOADED)
+    {
+      reload();
+      m_document->unregisterView(this);
+    }
+  }
 }
