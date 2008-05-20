@@ -33,10 +33,6 @@
 class Language: public FileParser
 {
   public:
-    /** Name of the directory where language settings are kept.
-     * Settings are kept in lang.txt, e.g. en.txt */
-    const static char LANGUAGE_DIR[];
-
     const static char * BUILTIN_LANGS[6];
     /** Singleton pattern used. Again. */
     static Language & instance();
@@ -56,11 +52,17 @@ class Language: public FileParser
      */
     std::string currentLanguage() const;
 
+    /** Set the language directory where the translation files live.
+     * @param dir  the directory name
+     */
+    void setDirectory(const std::string & dir);
+
     void callback(const std::string & first, const std::string & second);
   private:
     typedef std::map<std::string, std::string> TranslateMap;
     TranslateMap m_strings;
     std::string m_lang;
+    std::string m_directory;
 
     /** Read language settings.
      */

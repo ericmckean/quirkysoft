@@ -43,6 +43,7 @@ int main(int argc, char * argv[])
   TextAreaFactory::setFont(&font);
   TextAreaFactory::usePaletteData((const char*)_binary_vera_pal_bin_start, 32);
   ScrollPane scrollPane;
+  Language::instance().setDirectory("data/docs");
   TextField * tf = new TextField(T("text"));
   TextField * passwd = new TextField(UnicodeString());
   RichTextArea * rich = (RichTextArea*)TextAreaFactory::create(TextAreaFactory::TXT_RICH);

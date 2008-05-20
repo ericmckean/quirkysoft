@@ -25,6 +25,7 @@ static const char * s_datadir = DATADIR;
 static const char s_configFile[] = "config.ini";
 static const char s_templateName[] = "config-example.txt";
 static const char USER_DIR[] = "/"DATADIR"/user";
+static const char DOCS_DIR[] = "/"DATADIR"/docs/";
 
 const char Config::PROXY_STR[] = "proxy";
 const char Config::FONT_STR[] = "font";
@@ -89,8 +90,7 @@ void Config::reload()
   cfgFilename += "/";
   cfgFilename += s_configFile;
 
-  string cfgTemplate(s_datadir);
-  cfgTemplate += "/docs/";
+  string cfgTemplate(DOCS_DIR);
   cfgTemplate += s_templateName;
   if (nds::File::exists(cfgFilename.c_str()) == nds::File::F_NONE)
   {
@@ -135,6 +135,7 @@ void Config::callback(const std::string & first, const std::string & second)
 
 Config::Config()
 {
+  Language::instance().setDirectory(DOCS_DIR);
 }
 
 Config::~Config()
