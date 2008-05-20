@@ -59,7 +59,7 @@ def check_target(obj):
             'Deleting %s/%s' % (obj.path.srcpath(obj.env), target))
         os.unlink(abs_target)
 
-def build_test(bld):
+def build_test(bld, uselibs='bunjalloo bwt'):
   """ Build a unit test program """
   if not bld.env()['WITH_SDL']:
     return
@@ -73,7 +73,7 @@ def build_test(bld):
   tst.find_sources_in_dirs('.')
   tst.unit_test = 1
   tst.includes += ' .'
-  tst.uselib_local = 'bunjalloo bwt cppunitmain'
+  tst.uselib_local = '%s cppunitmain'%(uselibs)
   tst.uselib = 'TEST HOST'
 
   # Cached unit tests.
