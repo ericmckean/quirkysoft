@@ -1,0 +1,33 @@
+#!/usr/bin/env python
+# encoding: utf-8
+
+
+def build(bld):
+
+  # clone does not seem to work correctly with uselib_local when the target
+  # name is changed
+  def createobj():
+    obj = bld.create_obj('cpp', 'staticlib')
+    obj.gritflags = '-pw 16 -gB 4 -m! -ftc -fh -q -pe2 -pT 1'
+    obj.inst_var = 0
+    obj.export_incdirs = 'include'
+    obj.includes = 'include source/common'
+    obj.target = 'ndspp'
+    return obj
+
+  arm9obj = createobj()
+  if bld.env()['WITH_SDL']:
+    sdl = arm9obj.clone('sdl')
+    sdl.includes += ' source/pc'
+    sdl.find_sources_in_dirs('source/pc source/common')
+
+  arm9obj.includes += ' source/arm9'
+  arm9obj.find_sources_in_dirs('source/arm9 source/common')
+  arm9obj.uselib = 'ARM9'
+
+  arm7obj = createobj()
+  arm7obj.includes += ' source/arm7'
+  arm7obj.find_sources_in_dirs('source/arm7')
+  arm7obj.uselib = 'ARM7'
+  arm7obj.target = 'ndspp-arm7'
+
