@@ -138,7 +138,7 @@ void CookieJar::cookiesForRequest(const URI & request,
   // find a cookie in the jar that corresponds to the requested domain...
   string tmp("Cookie: ");
   bool needSep(false);
-  const static string sep(";");
+  const static string sep("\r\nCookie: ");
   std::vector<Cookie *>::const_iterator it(m_cookies.begin());
   for (; it != m_cookies.end(); ++it)
   {

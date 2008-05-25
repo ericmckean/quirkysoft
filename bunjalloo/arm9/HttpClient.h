@@ -41,7 +41,6 @@ class HttpClient: public nds::Client
 
 
     HttpClient();
-    HttpClient(const URI & uri);
     ~HttpClient();
     void setController(Controller * c);
 

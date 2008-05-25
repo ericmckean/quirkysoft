@@ -69,7 +69,11 @@ class SslClient
 {
   public:
     SslClient(HttpClient & httpClient)
-      : m_httpClient(httpClient), m_conn(0), m_sessionId(NULL), m_cipherSuite(0)
+      : m_httpClient(httpClient),
+      m_conn(0),
+      m_sessionId(NULL),
+      m_buffer(new char[SSL_BUFFER_SIZE]),
+      m_cipherSuite(0)
     {}
     ~SslClient();
 
@@ -100,6 +104,7 @@ class SslClient
     };
     sslConn_t * m_conn;
     sslSessionId_t *m_sessionId;
+    char * m_buffer;
     short m_cipherSuite;
     int m_lastRead;
 
@@ -120,6 +125,7 @@ const int SslClient::SOCKET_ERROR(-1);
 SslClient::~SslClient()
 {
   freeConnection();
+  delete [] m_buffer;
 }
 
 void SslClient::freeConnection()
@@ -234,14 +240,13 @@ int SslClient::sslHandshake()
 
   m_httpClient.print("Read back hello respose\n");
   // read back the data.
-  char buf[SSL_BUFFER_SIZE];
 
   int result(-1);
   m_lastRead = 0;
   do
   {
     m_httpClient.print("Read hello respose");
-    result = sslRead(buf, SSL_BUFFER_SIZE);
+    result = sslRead(m_buffer, SSL_BUFFER_SIZE);
     //printf("hello response read - result %d\n", result);
   } while (result == 0 and not matrixSslHandshakeIsComplete(m_conn->ssl));
 
@@ -277,9 +282,8 @@ int SslClient::writeBuffer(sslBuf_t * out)
 
 int SslClient::read()
 {
-  char buf[SSL_BUFFER_SIZE];
   m_lastRead = 0;
-  int result = sslRead(buf, SSL_BUFFER_SIZE);
+  int result = sslRead(m_buffer, SSL_BUFFER_SIZE);
   if (result < 0)
   {
     return HttpClient::CONNECTION_CLOSED;
@@ -294,7 +298,7 @@ int SslClient::read()
     else
       return HttpClient::READ_ERROR;
   }
-  m_httpClient.handleRaw(buf, result);
+  m_httpClient.handleRaw(m_buffer, result);
   return result;
 }
 
@@ -593,34 +597,10 @@ HttpClient::HttpClient():
   m_connectAttempts(0),
   m_state(WIFI_OFF),
   m_maxConnectAttempts(MAX_CONNECT_ATTEMPTS),
+  m_hasSsl(true),
   m_sslClient(new SslClient(*this)),
   m_log(false)
 {
-}
-
-HttpClient::HttpClient(const URI & uri) :
-  nds::Client(uri.server().c_str(),uri.port()),
-  m_total(0),
-  m_finished(false),
-  m_connectAttempts(0),
-  m_uri(uri),
-  m_state(WIFI_OFF),
-  m_maxConnectAttempts(MAX_CONNECT_ATTEMPTS),
-  m_sslClient(new SslClient(*this)),
-  m_log(false)
-{
-  debug("In HttpClient, uri.server.c_str:");
-  debug(uri.server().c_str());
-  debug(uri.asString().c_str());
-  if (s_sslKeys == 0 and matrixSslOpen() < 0)
-  {
-    // no HTTPS
-    debug("No HTTPS");
-  }
-  else
-  {
-    m_hasSsl = true;
-  }
 }
 
 HttpClient::~HttpClient()

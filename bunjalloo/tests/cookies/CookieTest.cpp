@@ -148,7 +148,7 @@ void CookieTest::testSubDomain()
 
   // now test that for sub.domain.com it returns the domain.com cookie AND the
   // sub.domain.com specific cookie.
-  expectedHeader = "Cookie: subcount=1;topcount=2\r\n";
+  expectedHeader = "Cookie: subcount=1\r\nCookie: topcount=2\r\n";
   uri.setUri("http://sub.domain.com");
   resultHeader = "";
   m_cookieJar->cookiesForRequest(uri, resultHeader);
@@ -196,6 +196,18 @@ void CookieTest::testPath()
 
   expectedHeader = "Cookie: SD=richard\r\n";
   resultHeader = "";
+  m_cookieJar->cookiesForRequest(uri, resultHeader);
+  CPPUNIT_ASSERT_EQUAL(expectedHeader, resultHeader);
+
+
+  m_cookieJar->setAcceptCookies("mail.gmail.com");
+  requestHeader = "EMAIL_AT=BIG_Scary_H4sh; Path=/mail; Secure\r\n";
+  uri.setUri("https://mail.gmail.com/mail/?whatever");
+  m_cookieJar->addCookieHeader(uri, requestHeader);
+
+  expectedHeader = "Cookie: EMAIL_AT=BIG_Scary_H4sh\r\n";
+  resultHeader = "";
+  uri.setUri("https://mail.gmail.com/mail/?zx=fizzbuzz&sva=1");
   m_cookieJar->cookiesForRequest(uri, resultHeader);
   CPPUNIT_ASSERT_EQUAL(expectedHeader, resultHeader);
 
