@@ -289,6 +289,8 @@ void Document::setCacheFile(const std::string & cacheFile)
 #include <gif_lib.h>
 void Document::magicMimeType(const char * data, int length)
 {
+  if (length > 128)
+    length = 128;
   // this is only for local data - data from http should already have
   // content-type in the headers or in meta or whatever.
   if (length < 3)
@@ -322,16 +324,29 @@ void Document::magicMimeType(const char * data, int length)
     {
       string htmlTest(data);
       transform(htmlTest.begin(), htmlTest.end(), htmlTest.begin(), ::tolower);
-      if (htmlTest.find('<') != string::npos
-          or htmlTest.find("html") != string::npos
-          or htmlTest.find("body") != string::npos
+      size_t gt = htmlTest.find('<');
+      size_t doctype = htmlTest.find("<!doctype");
+      size_t html = htmlTest.find("<html");
+      size_t body = htmlTest.find("<body");
+      if ((html != string::npos and html >= gt and (html < 5 or (doctype < html and doctype < 5)))
+          or
+          (body != string::npos and body < 5)
+          or (gt == 0)
          )
       {
         m_htmlDocument->parseContentType("text/html");
       }
       else
       {
-        m_htmlDocument->parseContentType("application/octet-stream");
+        for (const char * src=data; src != data+length; ++src)
+        {
+          if (not isascii(*src))
+          {
+            m_htmlDocument->parseContentType("application/octet-stream");
+            return;
+          }
+        }
+        m_htmlDocument->parseContentType("text/plain");
       }
     }
   }
