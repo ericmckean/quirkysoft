@@ -44,6 +44,8 @@ SDLhandler::SDLhandler():
     m_hasSound(true),
     m_vramMain(0),
     m_vramSub(0),
+    m_vramMainBack(0),
+    m_vramMainIsShown(true),
     m_mainOnTop(true),
     m_fn(0),
     m_fadeLevel(0),
@@ -57,6 +59,7 @@ SDLhandler::SDLhandler():
   init();
   m_vramMain = new unsigned short[0x16000];
   m_vramSub = new unsigned short[0x16000];
+  m_vramMainBack = new unsigned short[0x16000];
   m_spriteGfx = new unsigned short[0x2000];
   m_subSpriteGfx = new unsigned short[0x2000];
   for (int i = 0; i < 256; ++i)
@@ -68,6 +71,7 @@ SDLhandler::SDLhandler():
   }
   ::memset(m_vramMain, 0, 0x16000*2);
   ::memset(m_vramSub, 0, 0x16000*2);
+  ::memset(m_vramMainBack, 0, 0x16000*2);
   ::memset(m_spriteGfx, 0, sizeof(m_spriteGfx));
   ::memset(m_subSpriteGfx, 0, sizeof(m_subSpriteGfx));
 }
@@ -370,7 +374,9 @@ void SDLhandler::clear()
   }
   else
   {
+    m_vramMainIsShown = !m_vramMainIsShown;
     u16 * vram = vramMain(0);
+    m_vramMainIsShown = !m_vramMainIsShown;
     for (int x = 0; x < SCREEN_WIDTH; ++x) {
       for (int y = 0; y < SCREEN_HEIGHT; ++y)
       {
@@ -499,7 +505,24 @@ void SDLhandler::drawPixel(int x, int y, unsigned int layer, unsigned int palett
 unsigned short * SDLhandler::vramMain(int offset)
 {
   setDirty();
+  if (Video::instance(0).mode() == 5)
+  {
+    // we are showing the main vram on screen, return
+    // the back buffer
+    if (m_vramMainIsShown) {
+      return &m_vramMain[offset];
+    } else {
+      return &m_vramMainBack[offset];
+    }
+  }
   return &m_vramMain[offset];
+}
+
+void SDLhandler::swapMainBuffer()
+{
+  if (Video::instance(0).mode() == 5) {
+    m_vramMainIsShown = not m_vramMainIsShown;
+  }
 }
 
 bool SDLhandler::inGap(int y) const
