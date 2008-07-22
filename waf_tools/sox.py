@@ -1,4 +1,8 @@
-import Action, Object, Params
+
+import TaskGen
+import Options
+import Logs
+import subprocess
 
 def detect(conf):
   sox = conf.find_program('sox', var='SOX')
@@ -25,7 +29,7 @@ def detect(conf):
     Logs.warn("""sox does not have wav. run `sudo apt-get install libsox-fmt-all'?""")
     conf.env['SOX'] = None
 
-  dka_bin = '%s/bin' % (Params.g_options.devkitarm)
+  dka_bin = '%s/bin' % (Options.options.devkitarm)
   padbin = conf.find_program('padbin', path_list=[dka_bin], var='PADBIN')
   conf.env['PADBIN'] = padbin
   if padbin:
@@ -33,45 +37,26 @@ def detect(conf):
     if not conf.env['PADBINFLAGS']:
       conf.env['PADBINFLAGS'] = flags.split()
 
-def pad_things(task):
-  # TODO: pad the node to 4 bytes instead of just cping
-  import misc
-  misc.copy_func(task)
-  result = Action.g_actions['padbin'].run(task)
-  return result
-
 def setup(bld):
   sox_str = "${SOX} ${SRC} ${SOXFLAGS} ${TGT}"
-  Action.simple_action('sox', sox_str, color='GREEN', prio=70)
-  Action.Action('pad', vars=[], func=pad_things , color='YELLOW', prio=71)
+  TaskGen.declare_chain(
+      name = 'sox',
+      action = sox_str,
+      ext_in = '.wav',
+      ext_out = '.raw',
+      color='GREEN',
+      reentrant=1
+  )
 
-  padbin_str = "${PADBIN} ${PADBINFLAGS} ${TGT}"
-  Action.simple_action('padbin', padbin_str, color='YELLOW', prio=72)
+  # need a declare_chain that accepts a fn
+  padbin_str = "${COPY} ${SRC} ${TGT} && ${PADBIN} ${PADBINFLAGS} ${TGT}"
+  TaskGen.declare_chain(
+      name = 'padbin',
+      action = padbin_str,
+      ext_in = '.raw',
+      ext_out = '.snd',
+      color='YELLOW',
+      before='objcopy name2h',
+      reentrant=0
+  )
 
-from Object import extension, taskgen, after
-
-class sox_taskgen(Object.task_gen):
-  def clone(self, variant):
-    import Utils
-    obj = Params.g_build.create_obj('sox')
-    obj.source = [a for a in Utils.to_list(self.source)]
-    if variant != 'default':
-      obj.env = Params.g_build.env(variant).copy()
-    return obj
-
-  def apply(self):
-    """ Convert a wav file to a raw file """
-    find_source = self.path.find_source
-    for filename in self.to_list(self.source):
-      node = find_source(filename)
-      out_raw = node.change_ext('.raw')
-      out_padded = node.change_ext('.snd')
-
-      tsk = self.create_task('sox')
-      tsk.set_inputs(node)
-      tsk.set_outputs(out_raw)
-
-      tsk = self.create_task('pad')
-      tsk.chmod = ''
-      tsk.set_inputs(out_raw)
-      tsk.set_outputs(out_padded)

@@ -1,13 +1,13 @@
 #!/usr/bin/env python
 # encoding: utf-8
 import os
-import Constants, Params
+import Constants
 
 def build(bld):
-  obj = bld.create_obj('cpp', 'staticlib')
-  if bld.env()['WITH_SDL']:
+  obj = bld.new_task_gen('cxx', 'staticlib')
+  if bld.env['WITH_SDL']:
     obj.inst_var = 0
-    obj.env = bld.env('sdl').copy()
+    obj.env = bld.env_of_name('sdl').copy()
     obj.source = '''Main.cpp'''
     obj.target = '''cppunitmain'''
 

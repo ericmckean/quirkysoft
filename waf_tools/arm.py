@@ -1,6 +1,7 @@
 """ Set up Devkit ARM toolkit """
 import os
-import Params
+import Options
+import Logs
 
 DEVKITPRO = "DEVKITPRO"
 DEVKITARM = "DEVKITARM"
@@ -27,18 +28,16 @@ def set_options(opt):
 
 def setup_tool(conf, proc):
   """ Set up the C and C++ flags for ARM compilation """
-  if not Params.g_options.devkitpro:
+  if not Options.options.devkitpro:
     conf.fatal('''No DEVKITPRO variable set. Set the path to devkit pro or use the --with-devkitpro option''')
-  if not Params.g_options.devkitarm:
-    Params.g_options.devkitarm = os.path.join(Params.g_options.devkitpro, 'devkitARM')
-    Params.niceprint(
-    '''No DEVKITARM variable set. Using %s''' % (Params.g_options.devkitarm),
-    'WARNING', 'Configuration')
+  if not Options.options.devkitarm:
+    Options.options.devkitarm = os.path.join(Options.options.devkitpro, 'devkitARM')
+    Logs.warn('''No DEVKITARM variable set. Using %s''' % (Options.options.devkitarm))
 
   env = conf.env
   arch = '-mthumb -mthumb-interwork'
 
-  dka_bin = '%s/bin' % (Params.g_options.devkitarm)
+  dka_bin = '%s/bin' % (Options.options.devkitarm)
   arm_eabi = 'arm-eabi-'
 
   # reset the tools
@@ -49,18 +48,24 @@ def setup_tool(conf, proc):
       conf.fatal(i[0]+' was not found')
     env[i[1]] = prog
 
+  env['CC_NAME'] = 'gcc'
+  env['CXX_NAME'] = 'gcc'
   env['LINK_CC'] = env['CC']
   env['LINK_CXX'] = env['CXX']
   import ccroot
+  cxx_flags = 'CXXFLAGS_ARM%d' % (proc)
+  cc_flags = 'CCFLAGS_ARM%d' % (proc)
   version = ccroot.get_cc_version(conf, env['CC'], 'CC_VERSION')
-  env['CCFLAGS_ARM%d' % (proc)] = (arch + ' -ffast-math -O2 -Wall ').split()
+  env[cc_flags] = (arch + ' -ffast-math -O2 -Wall ').split()
   if version == '4.3.0':
-    env['CCFLAGS_ARM%d' % (proc)].append('-Wno-array-bounds')
-  env['CCFLAGS_ARM%d' % (proc)].extend(
+    env[cc_flags].append('-Wno-array-bounds')
+  env[cc_flags].extend(
       {9:' -march=armv5te -mtune=arm946e-s -DARM9',
        7:' -mcpu=arm7tdmi -mtune=arm7tdmi -DARM7 '}[proc].split())
-  env['CPPFLAGS_ARM%d' % (proc)] = ' -g -fno-rtti -fno-exceptions '.split()
-  path = ['%s/libnds/include' % (Params.g_options.devkitpro)]
+  env[cxx_flags] = ' -g -fno-rtti -fno-exceptions '.split()
+  env[cxx_flags].extend(env[cc_flags])
+
+  path = ['%s/libnds/include' % (Options.options.devkitpro)]
   env['CPPPATH_ARM%d' % (proc)] = path
   env['LINKFLAGS_ARM%d' % (proc)] = ['-specs=ds_arm%d.specs' % (proc),
       '-g','-mno-fpu','-Wl,-Map,map%d.map' % (proc), '-Wl,-gc-sections'] \
@@ -69,8 +74,8 @@ def setup_tool(conf, proc):
   lib_conf = conf.create_library_configurator()
   lib_conf.nosystem = 1
   lib_conf.mandatory = 1
-  lib_conf.uselib = 'ARM%d' % (proc)
-  lib_conf.path = ['%s/libnds/lib' % (Params.g_options.devkitpro)]
+  lib_conf.uselib_store = 'ARM%d' % (proc)
+  lib_conf.path = ['%s/libnds/lib' % (Options.options.devkitpro)]
   lib_conf.name = 'nds%d' % (proc)
   lib_conf.run()
   if proc == 9:

@@ -7,8 +7,8 @@ paletteFlags = {
 }
 
 def build(bld):
-  import Params, os
-  here = Params.g_build.m_curdirnode.abspath()
+  import Build, os
+  here = Build.bld.path.abspath()
   # compile each palette directory
   pal_dirs = []
   for d in os.listdir(here):
@@ -29,20 +29,20 @@ def build(bld):
     if d in paletteFlags.keys():
       flags = paletteFlags[d]
     flags += " -ftc -q -gu16 -pS -O"+d
-    obj = bld.create_obj('grit_shared')
+    obj = bld.new_task_gen('grit_shared')
     obj.palette = d
     obj.find_sources_in_dirs(d)
-    obj.flags = flags
+    obj.gritflags = flags
     obj.export_incdirs = d
-    if bld.env()['WITH_SDL']:
+    if bld.env['WITH_SDL']:
       obj.clone('sdl')
     pal_dirs.append(d)
-  lib = bld.create_obj('cc', 'staticlib')
+  lib = bld.new_task_gen('cc', 'staticlib')
   lib.target = 'pal'
   lib.find_sources_in_dirs(' '.join(pal_dirs))
   # include paletteN.c in the library
   lib.source.extend([os.path.join(d,d+'.c') for d in pal_dirs])
   lib.export_incdirs = ' '.join(pal_dirs)
 
-  if bld.env()['WITH_SDL']:
+  if bld.env['WITH_SDL']:
     lib.clone('sdl')
