@@ -1,28 +1,38 @@
 #!/usr/bin/env python
 
-import Params, Environment, UnitTest, Utils, Runner, Object
+import Build
+import Configure
+import Environment
+import Logs
+import Options
 import os
+import Runner
 import sys
+import Task
+import TaskGen
+import UnitTest
+import Utils
 
-Params.g_autoconfig = 1
+Configure.autoconfig = True
 srcdir = '.'
 blddir = '_build_'
 waf_tools = 'waf_tools'
 sys.path.append(waf_tools)
 
 def build(bld):
+  Task.g_shuffle = False
   # overcome chdir problems for jump-to-error
-  if not Params.g_commands['clean']:
+  if not Options.commands['clean']:
     print "waf: Entering directory `%s'" % \
-        (os.path.join(Params.g_build.m_srcnode.abspath(), blddir))
+        (os.path.join(Build.bld.srcnode.abspath(), blddir))
   bld.add_subdirs('libndspp')
-  if bld.env()['WITH_BUNJALLOO']:
+  if bld.env['WITH_BUNJALLOO']:
     bld.add_subdirs('bunjalloo')
-  if bld.env()['WITH_CHAOS']:
+  if bld.env['WITH_CHAOS']:
     bld.add_subdirs('ChaosDS')
 
 def set_options(opt):
-  opt.tool_options('g++')
+  #opt.tool_options('g++')
   opt.tool_options('compiler_cxx')
   opt.tool_options('compiler_cc')
   opt.tool_options('arm', waf_tools)
@@ -67,11 +77,11 @@ def arm_tool_check(conf):
   conf.check_tool('arm9', waf_tools)
   conf.check_tool('grit', waf_tools)
   without_chaos = False
-  if not Params.g_options.without_chaos and not conf.env['HAVE_GRIT_SHARED']:
-    Params.warning("""Required version of 'grit' is v0.8 (devkitpro r22) at least.""")
+  if not Options.options.without_chaos and not conf.env['HAVE_GRIT_SHARED']:
+    Logs.warn("""Required version of 'grit' is v0.8 (devkitpro r22) at least.""")
     without_chaos = True
 
-  if not Params.g_options.without_chaos:
+  if not Options.options.without_chaos:
     conf.check_tool('sox', waf_tools)
     if not conf.env['SOX'] or not conf.env['PADBIN']:
       without_chaos = True
@@ -79,11 +89,11 @@ def arm_tool_check(conf):
   conf.check_tool('ndstool', waf_tools)
   conf.check_tool('dlditool', waf_tools)
   conf.check_tool('objcopy', waf_tools)
-  if not Params.g_options.without_chaos and without_chaos:
-    Params.warning("Chaos will not be compiled due to missing requirements")
-    Params.g_options.without_chaos = without_chaos
-  conf.env['WITH_CHAOS'] = not Params.g_options.without_chaos
-  conf.env['WITH_BUNJALLOO'] = not Params.g_options.without_bunjalloo
+  if not Options.options.without_chaos and without_chaos:
+    Logs.warn("Chaos will not be compiled due to missing requirements")
+    Options.options.without_chaos = without_chaos
+  conf.env['WITH_CHAOS'] = not Options.options.without_chaos
+  conf.env['WITH_BUNJALLOO'] = not Options.options.without_bunjalloo
 
   # see if we have ctags
   ctags = conf.find_program('ctags', var='CTAGS')
@@ -93,9 +103,9 @@ def sdl_tool_check(conf):
   conf.check_tool('compiler_cxx')
   conf.check_tool('compiler_cc')
   conf.check_tool('grit', waf_tools)
-  if not Params.g_options.without_chaos:
+  if not Options.options.without_chaos:
     conf.check_tool('sox', waf_tools)
-  if not Params.g_options.without_cppunit:
+  if not Options.options.without_cppunit:
     conf.check_tool('unit_test', waf_tools)
   conf.check_tool('objcopy', waf_tools)
 
@@ -111,7 +121,7 @@ def arm_header_check(conf):
   e = conf.create_header_configurator()
   e.mandatory = 1
   e.nosystem = 1
-  e.uselib = 'ARM9'
+  e.uselib_store = 'ARM9'
   e.name = 'fat.h'
   e.run()
 
@@ -126,7 +136,7 @@ def arm_header_check(conf):
   e.run()
 
   e.name = 'dswifi7.h'
-  e.uselib = 'ARM7'
+  e.uselib_store = 'ARM7'
   e.header_code = '#include <nds/jtypes.h>'
   e.run()
 
@@ -154,25 +164,25 @@ def lib_check_common(configurator):
 def lib_check_sdl(conf):
   pkgconfig = conf.create_pkgconfig_configurator()
   pkgconfig.mandatory = 1
-  pkgconfig.uselib = 'HOST'
+  pkgconfig.uselib_store = 'HOST'
   for i in 'libpng sdl'.split():
     pkgconfig.name = i
     pkgconfig.run()
 
   conf.env['HAVE_CPPUNIT'] = 0
-  if not (Params.g_options.without_bunjalloo or Params.g_options.without_cppunit):
-    pkgconfig.uselib = 'TEST'
+  if not (Options.options.without_bunjalloo or Options.options.without_cppunit):
+    pkgconfig.uselib_store = 'TEST'
     pkgconfig.name = 'cppunit'
     pkgconfig.run()
     if not conf.env['LIB_TEST']:
-      Params.g_options.without_cppunit = True
-      Params.pprint('RED', 'Unit tests will not be built')
+      Options.options.without_cppunit = True
+      Utils.pprint('RED', 'Unit tests will not be built')
     else:
       conf.env['HAVE_CPPUNIT'] = 1
 
   e = conf.create_library_configurator()
   e.mandatory = 1
-  e.uselib = 'HOST'
+  e.uselib_store = 'HOST'
   e.name = 'GL'
   e.run()
   lib_check_common(e)
@@ -182,7 +192,7 @@ def lib_check_arm7(conf):
   e = conf.create_library_configurator()
   e.nosystem = 1
   e.mandatory = 1
-  e.uselib = 'ARM7'
+  e.uselib_store = 'ARM7'
   e.name = 'dswifi7'
   e.run()
 
@@ -190,7 +200,7 @@ def lib_check_arm9(conf):
   e = conf.create_library_configurator()
   e.nosystem = 1
   e.mandatory = 1
-  e.uselib = 'ARM9'
+  e.uselib_store = 'ARM9'
   e.name = 'dswifi9'
   e.run()
   lib_check_common(e)
@@ -211,12 +221,12 @@ def configure(conf):
   conf.env['CXXDEFINES'] = ['DATADIR=\\"%s\\"'%DATADIR]
 
   conf.env['GRITFLAGS'] = GRITFLAGS
-  if Params.g_options.with_dldi:
-    conf.env['DLDIFLAGS'] = Params.g_options.with_dldi
+  if Options.options.with_dldi:
+    conf.env['DLDIFLAGS'] = Options.options.with_dldi
 
   conf.env['WITH_SDL'] = True
-  if Params.g_options.without_sdl:
-    Params.pprint('BLUE','SDL version not configured')
+  if Options.options.without_sdl:
+    Utils.pprint('BLUE','SDL version not configured')
     conf.env['WITH_SDL'] = False
     conf.env['CXXDEFINES'].extend(['sprintf_platform=siprintf'])
     return True
@@ -247,26 +257,25 @@ def configure(conf):
 
 def shutdown():
   # force running unit tests
-  import UnitTest
   ut = UnitTest.unit_test()
   ut.change_to_testfile_dir = 1
   ut.run_if_waf_does = 'check'
-  if Params.g_verbose:
+  if Logs.verbose:
     ut.want_to_see_test_output = True
     ut.want_to_see_test_error = True
   ut.run()
   ut.print_results()
 
-  ctags = Params.g_build.env()['CTAGS']
-  if Params.g_commands['build'] and ctags:
+  ctags = Build.bld.env['CTAGS']
+  if Options.commands['build'] and ctags:
     # create ctags if we recompiled any program, or force with --tags option
-    for obj in Object.g_allobjs:
-      if (getattr(obj,'m_type','') == 'program'
+    for obj in Build.bld.all_task_gen:
+      if (getattr(obj,'type','') == 'program'
           and obj.link_task
-          and getattr(obj.link_task,"m_executed",0) != 0):
-        Params.g_options.tags = True
+          and getattr(obj.link_task,"executed",0) != 0):
+        Options.options.tags = True
         break
-    if Params.g_options.tags:
+    if Options.options.tags:
       import commands
       commands.getoutput('%s -R --c++-kinds=+p --fields=+iaS --extra=+q .'%ctags)
-      Params.pprint('BLUE','Created tags')
+      Utils.pprint('BLUE','Created tags')

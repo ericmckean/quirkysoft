@@ -1,67 +1,28 @@
-""" Use objcopy to generate a library from binary input files. """
+#! /usr/bin/env python
+# encoding: utf-8
+
 import os
-import Params, Action, Utils, ccroot, misc
-import Object
+import Task
+import Utils
+import TaskGen
+import Options
 
-class objcopy_taskgen(Object.task_gen):
-  def apply(self):
-    find_source_lst = self.path.find_source_lst
-    for filename in self.to_list(self.source):
-      node = find_source_lst(Utils.split_path(filename))
-      task = self.create_task('objcopy', self.env)
-      task.set_inputs(node)
-      task.set_outputs(node.change_ext('.bin'))
+def detect(conf):
+  env = conf.env
+  dka_bin = '%s/bin' % (Options.options.devkitarm)
+  arm_eabi = 'arm-eabi-objcopy'
+  objcopy = conf.find_program(arm_eabi, path_list=[dka_bin], var='OBJCOPY')
+  if not objcopy:
+    conf.fatal('objcopy was not found')
+  env['OBJCOPY'] = objcopy
+  copy = conf.find_program('cp', var='COPY')
+  env['COPY'] = copy
 
-class bin2o_taskgen(ccroot.ccroot_abstract):
-  def __init__(self, *k, **kw):
-    self.m_type = 'staticlib'
-    self.name = ''
-    self.link_task = None
-    Object.task_gen.__init__(self, *k, **kw)
-    self.compiled_tasks = []
-    self.uselib = ''
-    self.uselib_local = ''
-    self.features.append('cstaticlib')
-
-  def apply(self):
-    find_source_lst = self.path.find_source_lst
-    find_build_lst = self.path.find_build_lst
-    input_nodes = []
-    for filename in self.to_list(self.source):
-      node = find_source_lst(Utils.split_path(filename))
-      if not node:
-        node = find_build_lst(Utils.split_path(filename))
-      # file -> file.bin
-      ext = os.path.splitext(filename)[1]+'.bin'
-      cpytask = self.create_task('copy', self.env, 79)
-      cpytask.chmod = 0
-      cpytask.fun = misc.copy_func
-      cpytask.set_inputs(node)
-      copybin = node.change_ext(ext)
-      cpytask.set_outputs(copybin)
-
-      otsk = self.create_task('bin2o', self.env)
-      otsk.set_inputs(copybin)
-      outnode = copybin.change_ext('.o')
-      otsk.set_outputs(outnode)
-
-      self.compiled_tasks.append(otsk)
-      input_nodes.append(node)
-
-    if self.target:
-      self.link_task = self.create_task('ar_link_static', self.env)
-      outputs = [t.m_outputs[0] for t in self.compiled_tasks]
-      self.link_task.set_inputs(outputs)
-      self.link_task.set_outputs(self.path.find_build(ccroot.get_target_name(self)))
-      # create header too
-      headertask = self.create_task('name2h', self.env)
-      headertask.set_inputs(input_nodes)
-      headertask.set_outputs(self.path.find_build(self.target+'.h'))
-
+# name2h
 def build_h(task):
   """ build h file from input file names """
-  env = task.env()
-  filename = task.m_outputs[0].abspath(env)
+  env = task.env
+  filename = task.outputs[0].abspath(env)
   hfile  = open(filename, 'w')
   target = os.path.basename(filename).replace('.', '_')
   hfile.write("""#ifndef %s_seen
@@ -69,13 +30,13 @@ def build_h(task):
 #ifdef __cplusplus
 extern "C" {
 #endif\n"""%(target, target))
-  for i in task.m_inputs:
+  for i in task.inputs:
     symbol = os.path.basename(i.srcpath(env)).replace('.', '_')
     hfile.write("""
-            extern const u16 _binary_%s_bin_end[];
-            extern const u16 _binary_%s_bin_start[];
-            extern const u32 _binary_%s_bin_size[];
-            """%(symbol, symbol, symbol))
+	extern const u16 _binary_%s_bin_end[];
+	extern const u16 _binary_%s_bin_start[];
+	extern const u32 _binary_%s_bin_size[];
+"""%(symbol, symbol, symbol))
   hfile.write("""
 #ifdef __cplusplus
 };
@@ -84,18 +45,63 @@ extern "C" {
 """)
   return 0
 
-def detect(conf):
-  env = conf.env
-  dka_bin = '%s/bin' % (Params.g_options.devkitarm)
-  arm_eabi = 'arm-eabi-objcopy'
-  objcopy = conf.find_program(arm_eabi, path_list=[dka_bin], var='OBJCOPY')
-  if not objcopy:
-    conf.fatal('objcopy was not found')
-  env['OBJCOPY'] = objcopy
+class name2h_taskgen(TaskGen.task_gen):
+  def __init__(self, *k, **kw):
+    TaskGen.task_gen.__init__(self, *k, **kw)
+
+  def apply(self):
+    find_source_lst = self.path.find_resource
+    input_nodes = []
+    for filename in self.to_list(self.source):
+      node = find_source_lst(Utils.split_path(filename))
+      input_nodes.append(node)
+    task = self.create_task('name2h', self.env)
+    task.set_inputs(input_nodes)
+
+    task.set_outputs(self.path.find_or_declare(Utils.split_path(self.target)))
 
 def setup(bld):
+  # declare the Task Generators
+  # objcopy
+  # copies file.ext to file.ext.bin, then file.ext.bin to file.ext.o
+  bin2o_str = 'cd ${SRC[0].bld_dir(env)} && ${OBJCOPY} ${OBJCOPYFLAGS} ${SRC[0].name} ${TGT[0].name}'
+  copy_str = '${COPY} ${SRC} ${TGT}'
+
+  # pal -> pal.bin
+  for i in """
+        .img
+        .pal
+        .map
+        .snd
+      """.split():
+    TaskGen.declare_chain(
+        name = 'in2bin',
+        action = copy_str,
+        ext_in=i,
+        ext_out=i+'.bin')
+  # pal.bin -> pal.bin.o
+  TaskGen.declare_chain(
+      name = 'bin2o',
+      action = bin2o_str,
+      ext_in = '.bin',
+      ext_out = '.o',
+      after="in2bin",
+      reentrant = 0)
+
+  # bin2o
+  # copies file.elf to file.arm
   objcopy_str = '${OBJCOPY} -O binary ${SRC} ${TGT}'
-  Action.simple_action('objcopy', objcopy_str, color='YELLOW', prio=130)
-  objcopy_str = 'cd ${SRC[0].bld_dir(env)} && ${OBJCOPY} ${OBJCOPYFLAGS} ${SRC[0].m_name} ${TGT[0].m_name}'
-  Action.simple_action('bin2o', objcopy_str, color='YELLOW', prio=80)
-  Action.Action('name2h', vars=[], func=build_h, prio=81)
+  TaskGen.declare_chain(
+      name = 'objcopy',
+      action = objcopy_str,
+      ext_in = '.elf',
+      ext_out = '.arm',
+      before = 'ndstool_9 ndstool_7_9 ndstool_7_9_b ndstool_9_b',
+      after = 'cc_link cxx_link',
+      reentrant = 0
+  )
+
+  # name2h
+  Task.task_type_from_func('name2h', vars=[], func=build_h, before="cxx cc")
+  TaskGen.task_gen.classes['name2h'] = name2h_taskgen
+

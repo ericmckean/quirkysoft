@@ -1,15 +1,31 @@
 #!/usr/bin/env python
+import TaskGen
 
 def build(bld):
 
-  sox = bld.create_obj('sox')
-  sox.find_sources_in_dirs('.', exts=['.wav'])
-  if bld.env()['WITH_SDL']:
-    sox.clone('sdl')
+  taskgens = []
 
-  lib = bld.create_obj('bin2o')
-  lib.source = [source.replace('.wav', '.snd') for source in sox.source]
-  lib.export_incdirs = '.'
+  sox = TaskGen.task_gen()
+  sox.find_sources_in_dirs('.', exts=['.wav'])
+  taskgens.append(sox)
+
+  # .snd -> .snd.o
+
+  sources = [source.replace('.wav', '.snd') for source in sox.source]
+
+  taskgens.append(TaskGen.task_gen(source=sources))
+
+  lib = bld.new_task_gen('cxx', 'staticlib')
   lib.target = 'sounds'
-  if bld.env()['WITH_SDL']:
-    lib.clone('sdl')
+  lib.export_incdirs = '.'
+  lib.source = 'dummy.c'
+  [lib.add_obj_file(s+'.o') for s in sources]
+  taskgens.append(lib)
+
+  hdr = bld.new_task_gen('name2h')
+  hdr.target = 'sounds.h'
+  hdr.source = sources
+  taskgens.append(hdr)
+
+  if bld.env['WITH_SDL']:
+    for t in taskgens: t.clone('sdl')

@@ -1,16 +1,21 @@
 """ Waf tool for generating image data using grit """
 import os, re, sys
-import Params, Action, Object, Utils
+import Build, Task, Utils
+from TaskGen import extension, taskgen, after, task_gen
+import Options
 
 def grit_shared_wrapper(task):
   import shutil
   # wrapper for grit shared
-  result = Action.g_actions['grit_shared_cmd'].run(task)
+  shrd_cmd = Task.TaskBase.classes['grit_shared_cmd'](task.env)
+  shrd_cmd.set_inputs(task.inputs)
+  shrd_cmd.set_outputs(task.outputs)
+  result = shrd_cmd.run()
   if result: return result
   if getattr(task, 'outdir', None):
     try:
-      for i in task.m_outputs:
-        src = os.path.basename(i.bldpath(task.env()))
+      for i in task.outputs:
+        src = os.path.basename(i.bldpath(task.env))
         dst = task.outdir
         if src.endswith('.h'):
           fp = open(src, 'r')
@@ -22,33 +27,33 @@ def grit_shared_wrapper(task):
               i = i.replace('__','').strip()
               i += '_h_seen\n'
             op.write(i)
-          op.close
+          op.close()
           os.unlink(src)
         else:
           shutil.move(src, dst)
         #print "moved %s to %s"%(src, dst)
-    except OSError, IOError:
+    except IOError:
       return 1
   return 0
 
-class grit_shared_taskgen(Object.task_gen):
+class grit_shared_taskgen(task_gen):
   def __init__(self, *k, **kw):
-    Object.task_gen.__init__(self, *k, **kw)
-    self.flags = ''
+    task_gen.__init__(self, *k, **kw)
+    self.gritflags = ''
     self.palette = ''
 
   def clone(self, variant):
-    obj = Params.g_build.create_obj('grit_shared')
+    obj = Build.bld.new_task_gen('grit_shared')
     obj.palette = self.palette
     obj.source = [a for a in Utils.to_list(self.source)]
-    obj.flags = self.flags
+    obj.gritflags = self.gritflags
     obj.export_incdirs = self.export_incdirs
     if variant != 'default':
-      obj.env = Params.g_build.env(variant).copy()
+      obj.env = Build.bld.env_of_name(variant).copy()
     return obj
 
   def apply(self):
-    find_source_lst = self.path.find_source_lst
+    find_source_lst = self.path.find_resource
     input_nodes = []
     c_nodes = []
     out_nodes = []
@@ -58,12 +63,12 @@ class grit_shared_taskgen(Object.task_gen):
       out_nodes.append(node.change_ext('.h'))
       c_nodes.append(node.change_ext('.c'))
 
-    if self.flags:
-      self.env['GRITFLAGS'] = self.flags
+    if self.gritflags:
+      self.env['GRITFLAGS'] = self.gritflags
     task = self.create_task('grit_shared', self.env)
     task.set_inputs(input_nodes)
     # palette hacks
-    fb = self.path.find_build
+    fb = self.path.find_or_declare
     fname = os.path.join(self.palette,self.palette)
     cfile = fb(fname+'.c')
     hfile = fb(fname+'.h')
@@ -90,12 +95,11 @@ def output_for_source(source, env):
     out.append('%s.pal.bin' % (fileName))
   return out
 
-from Object import extension, taskgen, after
 
 def add_include(task):
   """ Add an #include line to the output file for the given input file  """
-  outfile = task.m_outputs[0].abspath(task.env())
-  infile = task.m_inputs[0].abspath(task.env())
+  outfile = task.outputs[0].abspath(task.env)
+  infile = task.inputs[0].abspath(task.env)
   fp = open(outfile, 'w')
   fp.write('#include "%s"\n' % (os.path.basename(infile).replace('.c','.h')))
   i = open(infile)
@@ -106,20 +110,20 @@ def add_include(task):
 @taskgen
 @extension('.pcx')
 @after('apply_core')
-def img_file(self, node):
+def pcx_file(self, node):
   out_source_c = node.change_ext('.c')
   self.allnodes.append(out_source_c)
 
 @taskgen
 @extension('.png')
-def img_file(self, node):
+def png_file(self, node):
   """ Convert a png file to a cpp and header file """
   out_source_s = node.change_ext('.c')
   out_source_C = node.change_ext('.cpp')
   out_source_h = node.change_ext('.h')
 
   if getattr(self, 'gritflags', None):
-    self.env['GRITFLAGS'] = getattr(self, 'gritflags')
+    self.env['GRITFLAGS'] = self.gritflags
 
   tsk = self.create_task('grit')
   tsk.set_inputs(node)
@@ -133,7 +137,7 @@ def img_file(self, node):
   self.allnodes.append(out_source_C)
 
 def detect(conf):
-  dka_bin = os.path.join(Params.g_options.devkitarm,'bin')
+  dka_bin = os.path.join(Options.options.devkitarm,'bin')
   grit = 'grit'
   grit = conf.find_program(grit, path_list=[dka_bin], var='GRIT')
   if not grit:
@@ -161,9 +165,9 @@ def setup(bld):
   if sys.platform.startswith('linux'):
     outfile = ' > /dev/null 2>&1'
   grit_str = '${GRIT} ${SRC[0].abspath(env)} -o ${SRC[0].bldbase(env)} ${GRITFLAGS} %s '%(outfile)
-  Action.simple_action('grit', grit_str, color='CYAN', prio=10)
-  Action.Action('c_C', vars=[], func=add_include , color='CYAN', prio=11)
+  Task.simple_task_type('grit', grit_str, color='CYAN', before="cc cxx")
+  Task.task_type_from_func('c_C', vars=[], func=add_include , color='CYAN', before="cc cxx", after="grit")
   grit_str = '${GRIT} ${SRC} ${GRITFLAGS}'
-  Action.simple_action('grit_shared_cmd', grit_str, color='CYAN', prio=10)
-  Action.Action('grit_shared', vars=[], func=grit_shared_wrapper , color='CYAN', prio=11)
+  Task.simple_task_type('grit_shared_cmd', grit_str, color='CYAN', before="cc cxx")
+  Task.task_type_from_func('grit_shared', vars=[], func=grit_shared_wrapper , color='CYAN', before="cc cxx")
 
