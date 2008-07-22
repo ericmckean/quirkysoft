@@ -247,6 +247,8 @@ void View::notify()
         s += buffer;
         m_progress->setText(string2unicode(s));
         m_progress->setVisible();
+        m_keyboard->forceRedraw();
+        m_scrollPane->forceRedraw();
       }
       break;
     case Document::HAS_HEADERS:
@@ -520,7 +522,6 @@ void View::browse()
   Stylus * stylus(Stylus::instance());
   if (stylus->touchType() != Stylus::NOTHING)
   {
-    m_dirty = true;
     m_dirty = m_keyboard->dirty();
     if (not m_dirty) {
       m_dirty = m_scrollPane->dirty();
@@ -644,9 +645,8 @@ void View::tick()
   }
   m_dirty |= m_keyboard->tick();
   m_dirty |= m_cookieHandler->tick();
-  m_dirty |= m_progress->dirty();
+  m_dirty |= m_scrollPane->dirty();
   m_toolbar->tick();
-
 
   if (m_dirty) {
     const static nds::Rectangle clip = {0, 0, nds::Canvas::instance().width(), nds::Canvas::instance().height()};
@@ -654,10 +654,7 @@ void View::tick()
     m_keyboard->paint(clip);
     m_linkHandler->paint(clip);
     m_editPopup->paint(clip);
-    if (m_progress->dirty())
-    {
-      m_progress->paint(m_progress->bounds());
-    }
+    m_progress->paint(m_progress->bounds());
     nds::Canvas::instance().endPaint();
     m_dirty = false;
     m_toolbar->updateIcons();
@@ -680,6 +677,7 @@ void View::tick()
   if (( m_state == SAVE_CURRENT_FILE or m_state == SAVE_DOWNLOADING )
     and not m_keyboard->visible()) {
     m_toolbar->setVisible(true);
+    m_scrollPane->forceRedraw();
     doSaveAs();
   }
 

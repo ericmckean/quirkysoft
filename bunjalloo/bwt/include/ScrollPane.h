@@ -117,6 +117,8 @@ class ScrollPane: public Component
     virtual bool stylusDownRepeat(const Stylus * stylus);
     virtual bool stylusDown(const Stylus * stylus);
 
+    void forceRedraw();
+
   private:
     static Component * s_popup;
     int m_scrollIncrement;
