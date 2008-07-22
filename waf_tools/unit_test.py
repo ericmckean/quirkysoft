@@ -32,11 +32,11 @@ def setup(bld):
     app = test_exe.abspath(task.env)
     blddir = os.path.dirname(app)
     srcdir = os.path.dirname(test_exe.abspath())
-    cwd = os.getcwd()
+    cwd = None
     if task.run_from_srcdir:
-      os.chdir(srcdir)
+      cwd = srcdir
     target = os.path.join(blddir, task.outputs[0].name)
-    process_pipe = subprocess.Popen(app, stdout=subprocess.PIPE)
+    process_pipe = subprocess.Popen(app, stdout=subprocess.PIPE, cwd=cwd)
     process_pipe.wait()
     returncode = process_pipe.returncode
     if Options.options.verbose or returncode:
@@ -44,11 +44,9 @@ def setup(bld):
         # this sorts out jump-to-errors in e.g. vim
         print "waf: Entering directory `%s'" % (srcdir)
       print process_pipe.stdout.read()
-    if task.run_from_srcdir:
-      os.chdir(cwd)
     out = 'FAILED'
     if returncode == 0:
       out = 'PASSED'
     open(str(target),'w').write(out+"\n")
     return returncode
-  Task.task_type_from_func('unit_test', vars=[], func=run_unit_test, color='PINK', after="cxx_link cc_link objcopy")
+  Task.task_type_from_func('unit_test', vars=[], func=run_unit_test, color='PINK', after="cxx_link")
