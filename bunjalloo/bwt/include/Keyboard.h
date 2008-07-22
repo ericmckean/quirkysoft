@@ -80,6 +80,8 @@ class Keyboard : public Component, public TextListener, public ButtonListener
 
     void setTitle(const UnicodeString & title);
 
+    void forceRedraw();
+
   private:
     bool m_extra;
     bool m_shift;
