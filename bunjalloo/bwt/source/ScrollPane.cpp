@@ -152,6 +152,7 @@ void ScrollPane::calculateScrollBar()
   {
     m_canScrollDown = true;
   }
+  m_dirty = true;
 }
 
 int ScrollPane::currentPosition() const
@@ -284,10 +285,14 @@ void ScrollPane::showScrollBar(const nds::Rectangle & clip)
 void ScrollPane::paint(const nds::Rectangle & clip)
 {
   nds::Canvas::instance().setClip(clip);
-  if (not (dirty() or visible())) {
+  if (not dirty())
+  {
     return;
   }
   m_dirty = false;
+  if (not visible()) {
+    return;
+  }
   if (m_topLevel) {
     nds::Canvas::instance().fillRectangle(clip.x, clip.y, clip.w, clip.h, m_backgroundColour);
   }
@@ -562,3 +567,7 @@ void ScrollPane::removePopup(Component * popup)
   }
 }
 
+void ScrollPane::forceRedraw()
+{
+  m_dirty = true;
+}

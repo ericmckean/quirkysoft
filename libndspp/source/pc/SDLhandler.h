@@ -83,6 +83,8 @@ class SDLhandler
     {
       return m_mainOnTop;
     }
+
+    void swapMainBuffer();
   private:
     static SDL_Rect GAP;
 
@@ -108,6 +110,9 @@ class SDLhandler
     Uint32 m_subSpritePaletteSDL[256];
     unsigned short * m_vramMain;
     unsigned short * m_vramSub;
+    // back buffer for main
+    unsigned short * m_vramMainBack;
+    bool m_vramMainIsShown;
     unsigned short * m_spriteGfx;
     unsigned short * m_subSpriteGfx;
 

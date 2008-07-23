@@ -488,7 +488,7 @@ bool Keyboard::tick()
   if (pressed)
     pressed--;
 #endif
-  return false;
+  return m_dirty;
 }
 
 bool Keyboard::multiLine() const
@@ -502,4 +502,11 @@ void Keyboard::setTitle(const UnicodeString & title)
   m_richTextArea->appendText(title);
   m_richTextArea->setLocation(0, SCREEN_HEIGHT -  m_richTextArea->preferredSize().h-GAP);
   m_richTextArea->setSize(nds::Canvas::instance().width()-1,m_richTextArea->preferredSize().h);
+  m_dirty = true;
+}
+
+void Keyboard::forceRedraw()
+{
+  m_dirty = true;
+  m_scrollPane->forceRedraw();
 }
