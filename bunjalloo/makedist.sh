@@ -53,7 +53,7 @@ while true ; do
 done
 
 makedistdir=$(pwd)
-revision=$(git-svn find-rev HEAD)
+revision=$(git svn find-rev HEAD)
 
 # Create the zip file
 distdir=$project-$VERSION
@@ -74,7 +74,7 @@ src=$project-$VERSION
 src_tarname=$project-src-$VERSION.tar
 src_tgzname=$project-src-$VERSION.tar.gz
 pushd .. >/dev/null
-git-archive --prefix=$src/ HEAD > $src_tarname || die "Unable to create $src_tarname"
+git archive --prefix=$src/ HEAD > $src_tarname || die "Unable to create $src_tarname"
 mkdir $src -p
 tar xf $src_tarname && rm $src_tarname
 cp $WAF_SCRIPT $src
