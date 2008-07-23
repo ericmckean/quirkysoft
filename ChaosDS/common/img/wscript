@@ -38,6 +38,7 @@ def build(bld):
       obj.clone('sdl')
     pal_dirs.append(d)
   lib = bld.create_obj('cc', 'staticlib')
+  lib.inst_var = 0
   lib.target = 'pal'
   lib.find_sources_in_dirs(' '.join(pal_dirs))
   # include paletteN.c in the library
