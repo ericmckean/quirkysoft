@@ -32,7 +32,7 @@ def build(bld, buildlib=True, buildsdl=True):
 
 
   arm9 = bld.new_task_gen('cxx', 'program')
-  arm9.inst_var = 0
+  arm9.install_path = 0
   arm9.find_sources_in_dirs('arm9')
   arm9.includes += ' .'
   libs = 'bwt bunjalloo'
@@ -51,7 +51,7 @@ def build(bld, buildlib=True, buildsdl=True):
     sdl.target = app_name
 
   arm9bin = TaskGen.task_gen()
-  arm9bin.inst_var = 0
+  arm9bin.install_path = 0
   arm9bin.source = arm9.target
   arm9bin.target = app_name+'.arm'
 
@@ -66,7 +66,7 @@ def build_test(bld, uselibs='bunjalloo bwt'):
   if not bld.env_of_name('sdl')['HAVE_CPPUNIT']:
     return
   tst = bld.new_task_gen('cxx', 'program')
-  tst.inst_var = 0
+  tst.install_path = 0
   tst.env = bld.env_of_name('sdl').copy()
   tst.target = 'tester'
   tst.find_sources_in_dirs('.')

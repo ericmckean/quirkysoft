@@ -2,7 +2,7 @@
 # encoding: utf-8
 
 arm9obj = bld.new_task_gen('cxx', 'staticlib')
-arm9obj.inst_var = 0
+arm9obj.install_path = 0
 arm9obj.includes = ' include img'
 arm9obj.find_sources_in_dirs('source img')
 arm9obj.target = 'bwt'

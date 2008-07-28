@@ -11,7 +11,7 @@ def build(bld):
   APPNAME = 'bunjalloo'
   os.unsetenv('NDS_DLDI')
   arm9obj = bld.new_task_gen('cxx', 'staticlib')
-  arm9obj.inst_var = 0
+  arm9obj.install_path = 0
   arm9obj.includes = 'arm9'
   arm9obj.export_incdirs = arm9obj.includes
   arm9obj.find_sources_in_dirs('arm9', ['Main.cpp'])
@@ -24,7 +24,7 @@ def build(bld):
   arm9obj.uselib = 'ARM9'
 
   arm7obj = bld.new_task_gen('cxx', 'program')
-  arm7obj.inst_var = 0
+  arm7obj.install_path = 0
   arm7obj.includes = 'arm7'
   arm7obj.find_sources_in_dirs(arm7obj.includes)
   arm7obj.uselib = 'ARM7'
@@ -33,7 +33,7 @@ def build(bld):
   arm7obj.target = arm7elfname
 
   arm9p = bld.new_task_gen('cxx', 'program')
-  arm9p.inst_var = 0
+  arm9p.install_path = 0
   arm9p.source = 'arm9/Main.cpp'
   arm9p.uselib_local = APPNAME+' ndspp bwt '
   arm9p.uselib = 'ARM9'
@@ -46,8 +46,8 @@ def build(bld):
     sdlp.target = APPNAME
 
   # generate nds
-  TaskGen.task_gen(source=arm7elfname, inst_var=0)
-  TaskGen.task_gen(source=arm9elfname, inst_var=0)
+  TaskGen.task_gen(source=arm7elfname, install_path=0)
+  TaskGen.task_gen(source=arm9elfname, install_path=0)
   nds = bld.new_task_gen('ndstool')
   nds.source = (arm7elfname.replace('.elf', '.arm'),
                 arm9elfname.replace('.elf', '.arm'))
