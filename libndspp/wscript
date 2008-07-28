@@ -9,7 +9,7 @@ def build(bld):
   def createobj():
     obj = bld.new_task_gen('cxx', 'staticlib')
     obj.gritflags = '-pw 16 -gB 4 -m! -ftc -fh -q -pe2 -pT 1'
-    obj.inst_var = 0
+    obj.install_path = 0
     obj.export_incdirs = 'include'
     obj.includes = 'include source/common'
     obj.target = 'ndspp'

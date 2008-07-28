@@ -76,7 +76,7 @@ class grit_shared_taskgen(task_gen):
     out_nodes.append(hfile)
     out_nodes.extend(c_nodes)
     task.set_outputs(out_nodes)
-    setattr(task, 'outdir', os.path.dirname(input_nodes[0].bldbase(self.env)))
+    setattr(task, 'outdir', os.path.dirname(input_nodes[0].bld_base(self.env)))
     self.allnodes.append(c_nodes)
 
 
@@ -164,7 +164,7 @@ def setup(bld):
   outfile = ''
   if sys.platform.startswith('linux'):
     outfile = ' > /dev/null 2>&1'
-  grit_str = '${GRIT} ${SRC[0].abspath(env)} -o ${SRC[0].bldbase(env)} ${GRITFLAGS} %s '%(outfile)
+  grit_str = '${GRIT} ${SRC[0].abspath(env)} -o ${SRC[0].bld_base(env)} ${GRITFLAGS} %s '%(outfile)
   Task.simple_task_type('grit', grit_str, color='CYAN', before="cc cxx")
   Task.task_type_from_func('c_C', vars=[], func=add_include , color='CYAN', before="cc cxx", after="grit")
   grit_str = '${GRIT} ${SRC} ${GRITFLAGS}'

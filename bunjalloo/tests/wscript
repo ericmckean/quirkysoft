@@ -6,7 +6,7 @@ import Constants
 def build(bld):
   obj = bld.new_task_gen('cxx', 'staticlib')
   if bld.env['WITH_SDL']:
-    obj.inst_var = 0
+    obj.install_path = 0
     obj.env = bld.env_of_name('sdl').copy()
     obj.source = '''Main.cpp'''
     obj.target = '''cppunitmain'''
