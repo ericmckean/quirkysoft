@@ -65,6 +65,7 @@ def build_test(bld, uselibs='bunjalloo bwt'):
     return
   if not bld.env_of_name('sdl')['HAVE_CPPUNIT']:
     return
+  uselibs = ' '.join([ '%s_default'%l for l in uselibs.split()])
   tst = bld.new_task_gen('cxx', 'program')
   tst.install_path = 0
   tst.env = bld.env_of_name('sdl').copy()
