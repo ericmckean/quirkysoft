@@ -277,5 +277,9 @@ def shutdown():
         break
     if Options.options.tags:
       import commands
-      commands.getoutput('%s -R --c++-kinds=+p --fields=+iaS --extra=+q .'%ctags)
+      # create the tags file in the build directory, but include all the source files
+      top_dir = Build.bld.srcnode.abspath()
+      launch_dir = Options.launch_dir
+      os.chdir(launch_dir)
+      commands.getoutput('%s -R --c++-kinds=+p --fields=+iaS --extra=+q %s'%(ctags, top_dir))
       Utils.pprint('BLUE','Created tags')
