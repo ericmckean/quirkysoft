@@ -42,6 +42,7 @@ ImageComponent::ImageComponent(nds::Image * image, Document * doc):m_image(image
 
 ImageComponent::~ImageComponent()
 {
+  m_document->unregisterView(this);
   delete m_image;
 }
 
@@ -93,7 +94,6 @@ void ImageComponent::notify()
     if (m_document->status() == Document::LOADED)
     {
       reload();
-      m_document->unregisterView(this);
     }
   }
 }

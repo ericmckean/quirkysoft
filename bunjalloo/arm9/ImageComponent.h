@@ -31,7 +31,7 @@ class ImageComponent: public Component, public ViewI
     void reload();
     virtual void paint(const nds::Rectangle & clip);
     virtual ~ImageComponent();
-    void notify();
+    virtual void notify();
 
     virtual bool stylusUp(const Stylus * stylus) { return false; }
     virtual bool stylusDownFirst(const Stylus * stylus) { return false; }
