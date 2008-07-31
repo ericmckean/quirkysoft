@@ -1054,7 +1054,11 @@ void HttpClient::setUri(const URI & uri)
   m_uri = uri;
   m_state = GET_URL;
   m_finished = false;
-  setConnection(uri.server().c_str(), uri.port());
+  string proxy;
+  if (!m_controller->config().resource(Config::PROXY_STR, proxy))
+  {
+    setConnection(uri.server().c_str(), uri.port());
+  }
 }
 
 const URI & HttpClient::uri() const
