@@ -6,14 +6,19 @@ If you have downloaded this in a source tar.gz, then run
     ./configure
     make
 
+If the configuration step fails, and you know you have python installed, then
+try running:
+
+   python waf
+
 If you are using a version from git, then you will need to install waf from
-http://waf.googlecode.com/ - at least version 1.4.1, perhaps even the svn trunk
-version. Read on for more details...
+http://waf.googlecode.com/ - version 1.5 which is currently only available in
+the svn trunk. Read on for more details...
 
 Prerequisites
 =============
 
-First I'll assume you are using Ubuntu 7.10+, or some similar modern-ish Linux
+First I'll assume you are using Ubuntu 8.04+, or some similar modern-ish Linux
 distro. Otherwise you may have to modify these steps a little.
 
 Download and install DevkitARM, libnds, libdswifi and libfat. These can be
@@ -74,7 +79,7 @@ are in the ame directory as this file now:
     $here/tools/download-libs.sh
 
 This should install libpng, libgif, libjpeg, zlib, unzip and matrixSSL into
-the $DEVKITPRO/libnds directory. 
+the $DEVKITPRO/libnds directory.
 
 Alternatively, use the pre-compiled libraries that are available from
 http://code.google.com/p/quirkysoft/downloads/list and copy them to
@@ -104,7 +109,10 @@ use the usual configure style build:
     make
 
 Or if you are familiar wit the waf build system, the equivalent commands are
-valid.
+valid:
+
+    /path/to/waf configure
+    /path/to/waf build
 
 If this works, you should now have bunjalloo.nds and bunjalloo executable in
 the build directory. First see if the Linux version works:
@@ -118,7 +126,7 @@ Installing
 ==========
 
 There build system has a flag '--install-to' that makes the installation of the
-required files onto your DLDI supported device easy. In these steps
+required files onto your DLDI supported device easier. In these steps
 /media/$disk is the mount point of your media card, you will have to replace it
 with the real location:
 
