@@ -203,7 +203,17 @@ void Document::appendData(const char * data, int size)
 
 void Document::notifyAll() const
 {
-  for_each(m_views.rbegin(), m_views.rend(), mem_fun(&ViewI::notify));
+  for (std::vector<ViewI*>::const_reverse_iterator it(m_views.rbegin()); it != m_views.rend(); ++it)
+  {
+    size_t size = m_views.size();
+    ViewI * v(*it);
+    v->notify();
+    // someone has been naughty and registered in an update
+    if (m_views.size() != size)
+    {
+      break;
+    }
+  }
 }
 
 void Document::setStatus(Document::Status status)
