@@ -82,11 +82,7 @@ void RichTextArea::appendText(const UnicodeString & unicodeString)
 void RichTextArea::add(Component * child)
 {
   Component::add(child);
-  addComponentAt(child, m_document.size() - 1);
-}
 
-void RichTextArea::addComponentAt(Component * child, unsigned int lastLine)
-{
   Rectangle bounds(child->preferredSize());
   child->setSize(bounds.w, bounds.h);
   int w = bounds.w;
@@ -96,6 +92,7 @@ void RichTextArea::addComponentAt(Component * child, unsigned int lastLine)
   child->setSize(w, bounds.h);
 
   int x = m_appendPosition;
+  size_t lastLine = m_document.size() -1;
   if ((x + child->width()) > width())
   {
     // out of bounds
@@ -110,12 +107,6 @@ void RichTextArea::addComponentAt(Component * child, unsigned int lastLine)
     m_appendPosition += child->width();
   }
 
-  int extraLine = 0;
-  if (not m_document[lastLine].empty())
-  {
-    extraLine = font().height();
-  }
-
   int y = 0;
   for (unsigned int i = 0; i < lastLine; ++i)
   {
@@ -127,57 +118,14 @@ void RichTextArea::addComponentAt(Component * child, unsigned int lastLine)
 
   child->setLocation(x, y);
 
-  int compareTo(font().height());
-  LineHeightMap::iterator lit(m_lineHeight.find(lastLine));
-  if (lit != m_lineHeight.end())
-  {
-    compareTo = lit->second;
-  }
-
-  m_lineHeight[lastLine] = std::max(child->height()+extraLine, compareTo);
+  m_lineHeight[lastLine] = std::max(child->height(), font().height());
   m_childPositions.push_back(m_documentSize);
-  m_preferredHeight += m_lineHeight[lastLine]; // - font().height();
+  m_preferredHeight += m_lineHeight[lastLine] - font().height();
   // problems here -
   // setSize should update the child sizes and text positions
   // setLocation should update the child locations
   // on paint, should constantly look for next child component while printing text
   // upon finding the child component, increment the cursorx, cursory to account for it.
-}
-
-void RichTextArea::setSize(unsigned int w, unsigned int h)
-{
-  TextArea::setSize(w, h);
-  layout();
-}
-
-void RichTextArea::layout()
-{
-  // redo the layout :-O
-  // go through the document looking for children
-  // when we reach one, remove+re-add it
-  // this is needed for some strange reason
-  using std::vector;
-  vector<Component*> children;
-  swap(m_children, children);
-  unsigned int initialPos = m_documentSize;
-  vector<unsigned int> childPositions;
-  swap(m_childPositions, childPositions);
-  reverse(childPositions.begin(), childPositions.end());
-  m_lineHeight.clear();
-  // reverse order
-  m_preferredHeight = m_document.size()*font().height();
-  for (vector<Component*>::iterator it(children.begin());
-      it != children.end(); ++it)
-  {
-    m_documentSize = childPositions.back();
-    childPositions.pop_back();
-    Component::add(*it);
-    int leftover(0);
-    int line = charIndexToLine(m_documentSize, &leftover);
-    m_appendPosition = textSize(m_document[line].substr(0, leftover));
-    addComponentAt(*it, line);
-  }
-  m_documentSize = initialPos;
 }
 
 void RichTextArea::setLocation(unsigned int x, unsigned int y)
@@ -348,15 +296,6 @@ void RichTextArea::printu(const UnicodeString & unicodeString)
       if (m_cursory == c->y())
       {
         m_cursorx += c->width();
-        if (m_cursorx >= width())
-        {
-          m_cursorx = 0;
-          m_cursory += c->height();
-        }
-      }
-      else {
-        m_cursorx = c->width();
-        m_cursory += c->height();
       }
       ++m_currentChildIndex;
     }
@@ -439,22 +378,19 @@ void RichTextArea::handleNextEvent()
   }
 }
 
-unsigned int RichTextArea::charIndexToLine(unsigned int charIndex, int * pos) const
+unsigned int RichTextArea::charIndexToLine(unsigned int charIndex) const
 {
-  // given a cursor position, find the equivalent line
+  // given a cursor position, find the equivalent line/ypos
   unsigned int line = 0;
   unsigned int total = 0;
+  int fontHeight = font().height();
   std::vector<UnicodeString>::const_iterator it(m_document.begin());
   for (; it != m_document.end() and total < charIndex; ++it)
   {
     total += it->length();
     line++;
   }
-  if (pos)
-  {
-    *pos = total - charIndex;
-  }
-  return line;
+  return line*fontHeight;
 }
 
 unsigned int RichTextArea::documentSize(int endLine, unsigned int * childIndex) const
@@ -564,26 +500,6 @@ void RichTextArea::paint(const nds::Rectangle & clip)
     nds::Canvas::instance().setClip(clip);
   }
 
-  dumpLineHeights();
-
-}
-
-void RichTextArea::dumpLineHeights() const
-{
-  for (uint32_t i = 0; i < m_document.size(); ++i)
-  {
-    printf("%d:", i);
-    LineHeightMap::const_iterator it(m_lineHeight.find(i));
-    if (it == m_lineHeight.end())
-    {
-      printf("%d (default)", font().height());
-    }
-    else
-    {
-      printf("%d (component on this line)", it->second);
-    }
-    printf(" ##%s##\n", unicode2string(m_document[i]).c_str());
-  }
 }
 
 void RichTextArea::checkSkippedLines(int skipLines)
@@ -723,8 +639,7 @@ int RichTextArea::linkPosition(int linkIndex) const
   {
     // now know where it starts
     Link * l(*it);
-    // FIXME: this doesn't take components into account!
-    return charIndexToLine(l->textStart()) * font().height();
+    return charIndexToLine(l->textStart());
   }
   return -1;
 }
@@ -853,15 +768,10 @@ void RichTextArea::addLinkListener(LinkListener * linkListener)
 
 void RichTextArea::insertNewline()
 {
-  if (m_document.size() > 1 and isEmpty(currentLine()) and isEmpty(m_document[m_document.size()-2])
-      and not lineHasComponent(m_document.size()-1))
-  {
-    // avoid duplicate empty lines
-    return;
-  }
-  m_appendPosition = 0;
-  m_document.push_back(UnicodeString());
-  m_preferredHeight += font().height();
+  bool pnl = parseNewline();
+  setParseNewline();
+  RichTextArea::appendText(string2unicode("\n"));
+  setParseNewline(pnl);
 }
 
 bool RichTextArea::centred() const
