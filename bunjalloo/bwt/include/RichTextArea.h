@@ -63,7 +63,6 @@ class RichTextArea: public TextArea
 
     virtual int linesToSkip() const;
 
-    virtual void setSize(unsigned int w, unsigned int h);
     virtual void paint(const nds::Rectangle & clip);
     virtual void setLocation(unsigned int x, unsigned int y);
 
@@ -129,10 +128,6 @@ class RichTextArea: public TextArea
     // bool childTouch(Stylus & stylus);
     Link * linkAt(int index);
 
-    unsigned int charIndexToLine(unsigned int charIndex, int * pos=0) const;
-
-    void layout();
-    void addComponentAt(Component * child, unsigned int lastLine);
-    void dumpLineHeights() const;
+    unsigned int charIndexToLine(unsigned int charIndex) const;
 };
 #endif
