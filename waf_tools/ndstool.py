@@ -48,11 +48,11 @@ def setup(bld):
   if sys.platform.startswith('linux'):
     outfile = ' > /dev/null'
   ndstool_str = '${NDSTOOL} -c ${TGT} -7 ${SRC[0].bldpath(env)} -9 ${SRC[1].bldpath(env)} %s '+outfile
-  Task.simple_task_type('ndstool_7_9', ndstool_str%'', color='BLUE', after="objcopy")
+  Task.simple_task_type('ndstool_7_9', ndstool_str%'', color='BLUE', after="objcopy", before="unit_test")
   Task.simple_task_type('ndstool_7_9_b', ndstool_str%'-b ${SRC[2].srcpath(env)} \'${NDSTOOL_BANNER}\'',
-      color='BLUE', after="objcopy")
+      color='BLUE', after="objcopy", before="unit_test")
   ndstool_str = '${NDSTOOL} -c ${TGT} -9 ${SRC[0].bldpath(env)} %s '+outfile
-  Task.simple_task_type('ndstool_9', ndstool_str%'', color='BLUE', after="objcopy")
+  Task.simple_task_type('ndstool_9', ndstool_str%'', color='BLUE', after="objcopy", before="unit_test")
   Task.simple_task_type('ndstool_9_b', ndstool_str%' -b ${SRC[1].srcpath(env)} ${NDSTOOL_ICON} \'${NDSTOOL_BANNER}\'',
-      color='BLUE', after="objcopy")
+      color='BLUE', after="objcopy", before="unit_test")
 
