@@ -128,7 +128,7 @@ void RichTextArea::add(Component * child)
   // upon finding the child component, increment the cursorx, cursory to account for it.
 }
 
-void RichTextArea::setLocation(unsigned int x, unsigned int y)
+void RichTextArea::setLocation(int x, int y)
 {
   // work out dx, dy
   int dx = this->x() - x;

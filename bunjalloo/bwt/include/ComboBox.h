@@ -53,7 +53,7 @@ class ComboBox: public Component,
 
     // implemented from Component.
     virtual void paint(const nds::Rectangle & clip);
-    virtual void setLocation(unsigned int x, unsigned int y);
+    virtual void setLocation(int x, int y);
     virtual void setSize(unsigned int w, unsigned int h);
 
     virtual bool stylusUp(const Stylus * stylus);

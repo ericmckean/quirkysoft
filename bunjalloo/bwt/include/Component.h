@@ -65,7 +65,7 @@ class Component: public StylusListener
      * @param x the horizontal x position.
      * @param y the vertical y position.
      */
-    virtual void setLocation(unsigned int x, unsigned int y);
+    virtual void setLocation(int x, int y);
 
     /** Set the size in pixels.
      * @param w the width.

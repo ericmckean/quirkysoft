@@ -55,7 +55,7 @@ ScrollPane::~ScrollPane()
   Stylus::instance()->unregisterListener(this);
 }
 
-void ScrollPane::setLocation(unsigned int x, unsigned int y)
+void ScrollPane::setLocation(int x, int y)
 {
   int dx = x-m_bounds.x;
   int dy = y-m_bounds.y;

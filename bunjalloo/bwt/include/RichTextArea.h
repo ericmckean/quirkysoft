@@ -64,7 +64,7 @@ class RichTextArea: public TextArea
     virtual int linesToSkip() const;
 
     virtual void paint(const nds::Rectangle & clip);
-    virtual void setLocation(unsigned int x, unsigned int y);
+    virtual void setLocation(int x, int y);
 
     virtual bool stylusUp(const Stylus * stylus);
     virtual bool stylusDownFirst(const Stylus * stylus);
