@@ -111,7 +111,7 @@ bool ComboBox::stylusDownFirst(const Stylus * stylus)
 bool ComboBox::stylusDownRepeat(const Stylus * stylus) { return false; }
 bool ComboBox::stylusDown(const Stylus * stylus) { return false; }
 
-void ComboBox::setLocation(unsigned int x, unsigned int y)
+void ComboBox::setLocation(int x, int y)
 {
   Component::setLocation(x, y);
   button()->setLocation(x, y);

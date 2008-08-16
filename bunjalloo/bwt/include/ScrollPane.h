@@ -110,7 +110,7 @@ class ScrollPane: public Component
     // From Component
     virtual void paint(const nds::Rectangle & clip);
     virtual void setSize(unsigned int w, unsigned int h);
-    virtual void setLocation(unsigned int x, unsigned int y);
+    virtual void setLocation(int x, int y);
 
     virtual bool stylusUp(const Stylus * stylus);
     virtual bool stylusDownFirst(const Stylus * stylus);

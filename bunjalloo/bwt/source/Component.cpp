@@ -81,7 +81,7 @@ nds::Rectangle Component::preferredSize() const
   return r;
 }
 
-void Component::setLocation(unsigned int x, unsigned int y)
+void Component::setLocation(int x, int y)
 {
   m_bounds.x = x;
   m_bounds.y = y;
