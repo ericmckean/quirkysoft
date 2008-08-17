@@ -449,6 +449,7 @@ void ViewRender::begin(HtmlAnchorElement & element)
     URI newUri = URI(m_self->m_document.uri()).navigateTo(unicode2string(href));
     viewed = m_self->m_controller.cache()->contains(newUri, false);
   }
+  /* Oh no - this breaks if link is an image :(*/
   textArea()->addLink( unicode2string(href), viewed);
 }
 
@@ -458,6 +459,7 @@ bool ViewRender::visit(HtmlAnchorElement & element)
 }
 void ViewRender::end(HtmlAnchorElement & element)
 {
+  /* Oh no - this breaks if link was only for an image :(*/
   textArea()->endLink();
 }
 
