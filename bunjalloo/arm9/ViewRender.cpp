@@ -14,50 +14,7 @@
   You should have received a copy of the GNU General Public License
   along with this program.  If not, see <http://www.gnu.org/licenses/>.
 */
-#include <assert.h>
-#include <cstdlib>
-#include "ndspp.h"
-#include "libnds.h"
-#include "Cache.h"
-#include "Canvas.h"
-#include "Config.h"
-#include "Controller.h"
-#include "Document.h"
-#include "ElementFactory.h"
-#include "File.h"
-#include "FormCheckBox.h"
-#include "FormControl.h"
-#include "FormRadio.h"
-#include "FormTextArea.h"
-#include "HtmlAnchorElement.h"
-#include "HtmlBlockElement.h"
-#include "HtmlBodyElement.h"
-#include "HtmlConstants.h"
-#include "HtmlDocument.h"
-#include "HtmlElement.h"
-#include "HtmlFormElement.h"
-#include "HtmlImageElement.h"
-#include "HtmlInputElement.h"
-#include "HtmlMetaElement.h"
-#include "HtmlOptionElement.h"
-#include "HtmlPreElement.h"
-#include "HtmlTextAreaElement.h"
-#include "ImageComponent.h"
-#include "Image.h"
-#include "InputText.h"
-#include "Keyboard.h"
-#include "Language.h"
-#include "PasswordField.h"
-#include "RadioButton.h"
-#include "RichTextArea.h"
-#include "ScrollPane.h"
-#include "Select.h"
-#include "TextAreaFactory.h"
-#include "Updater.h"
-#include "URI.h"
-#include "View.h"
-#include "ViewRender.h"
-#include "ZipViewer.h"
+#include "ViewRenderHeaders.h"
 
 using namespace std;
 const static char * NOT_VIEWABLE("not_view");
@@ -81,7 +38,6 @@ RichTextArea * ViewRender::textArea()
     m_textArea->addLinkListener(m_self);
     bool parseNewline(m_self->m_document.htmlDocument()->mimeType() == HtmlDocument::TEXT_PLAIN);
     m_textArea->setParseNewline(parseNewline);
-    m_self->m_scrollPane->add(m_textArea);
   }
   return m_textArea;
 }
@@ -149,8 +105,8 @@ void ViewRender::doImage(const UnicodeString & imgStr,
           return;
       }
       nds::Image *image = new nds::Image(filename.c_str());
-      ImageComponent *imageComponent = new ImageComponent(image, &m_self->document());
-      textArea()->add(imageComponent);
+      ImageComponent *imageComponent = new ImageComponent(image, m_box, &m_self->document());
+      add(imageComponent);
       m_self->controller().queueUri(imgUri);
     }
   }
@@ -178,8 +134,12 @@ void ViewRender::clear()
   m_self->m_scrollPane->removeChildren();
   clearRadioGroups();
   m_textArea = 0;
+  m_box = new BoxLayout;
+  m_box->setSize(m_self->m_scrollPane->width(),
+      m_self->m_scrollPane->height());
 }
 
+/*
 void ViewRender::renderImage()
 {
   URI uri(m_self->m_document.uri());
@@ -199,8 +159,9 @@ void ViewRender::renderImage()
         (nds::Image::ImageType)m_self->m_document.htmlDocument()->mimeType());
   }
   ImageComponent * imageComponent = new ImageComponent(image, &m_self->document());
-  textArea()->add(imageComponent);
+  add(imageComponent);
 }
+*/
 
 bool ViewRender::hasImage()
 {
@@ -268,7 +229,9 @@ void ViewRender::render()
       useScrollPane = true;
     }
   }
+  pushTextArea();
 
+  m_self->m_scrollPane->add(m_box);
   if (useScrollPane)
   {
     m_self->resetScroller();
@@ -299,12 +262,12 @@ void ViewRender::doTitle(const HtmlElement * title)
     m_textArea->setCentred();
     m_textArea->setOutlined();
     m_textArea->setSize(nds::Canvas::instance().width()-7, m_textArea->font().height());
-    m_self->m_scrollPane->add(m_textArea);
     HtmlElement * titleText = title->firstChild();
     if (titleText)
     {
       visit(*titleText);
     }
+    m_box->add(m_textArea);
     m_textArea = 0;
   }
 }
@@ -312,9 +275,22 @@ void ViewRender::doTitle(const HtmlElement * title)
 void ViewRender::renderSelect(const HtmlElement * selectElement)
 {
   Select * select = new Select(const_cast<HtmlElement*>(selectElement));
-  textArea()->add(select);
+  add(select);
 }
 
+void ViewRender::pushTextArea()
+{
+  if (m_textArea) {
+    m_box->add(m_textArea);
+    m_textArea = 0;
+  }
+}
+
+void ViewRender::add(Component *component)
+{
+  pushTextArea();
+  m_box->add(component);
+}
 
 // FIXME - where should this go?
 static const int MAX_SIZE(SCREEN_WIDTH-7);
@@ -353,7 +329,7 @@ void ViewRender::renderInput(const HtmlElement * inputElement)
           submitButton->setSize(size, submitButton->preferredSize().h);
         }
         /* m_self->m_scrollPane->add(submitButton); */
-        textArea()->add(submitButton);
+        add(submitButton);
       }
       break;
     case HtmlInputElement::TEXT:
@@ -365,7 +341,7 @@ void ViewRender::renderInput(const HtmlElement * inputElement)
         text->setListener(m_self->m_keyboard);
         text->setSize(size, text->preferredSize().h);
         /*m_self->m_scrollPane->add(text);*/
-        textArea()->add(text);
+        add(text);
       }
       break;
     case HtmlInputElement::PASSWORD:
@@ -378,14 +354,14 @@ void ViewRender::renderInput(const HtmlElement * inputElement)
         text->setListener(m_self->m_keyboard);
         text->setSize(size, text->preferredSize().h);
         // m_self->m_scrollPane->add(text);
-        textArea()->add(text);
+        add(text);
       }
       break;
     case HtmlInputElement::CHECKBOX:
       {
         // m_textArea = 0;
         FormCheckBox * checkbox = new FormCheckBox(const_cast<HtmlElement*>(inputElement));
-        textArea()->add(checkbox);
+        add(checkbox);
       }
       break;
     case HtmlInputElement::RADIO:
@@ -395,7 +371,7 @@ void ViewRender::renderInput(const HtmlElement * inputElement)
         // FIXME - get the group.
         // m_textArea = 0;
         RadioButton * radio = new RadioButton;
-        textArea()->add(radio);
+        add(radio);
         if (not name.empty())
         {
           FormGroupMap::iterator it(m_radioGroup.find(name));
@@ -422,7 +398,7 @@ void ViewRender::renderTextArea(const HtmlElement * textAreaElement)
   FormTextArea * text = new FormTextArea(const_cast<HtmlElement*>(textAreaElement));
   text->setListener(m_self->m_keyboard);
   m_textArea = 0;
-  m_self->m_scrollPane->add(text);
+  add(text);
 }
 
 void ViewRender::notify()

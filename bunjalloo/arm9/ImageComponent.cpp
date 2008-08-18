@@ -15,6 +15,7 @@
   along with this program.  If not, see <http://www.gnu.org/licenses/>.
 */
 #include "libnds.h"
+#include "BoxLayout.h"
 #include "Canvas.h"
 #include "Document.h"
 #include "HeaderParser.h"
@@ -28,7 +29,11 @@ using nds::Canvas;
 using nds::Image;
 
 
-ImageComponent::ImageComponent(nds::Image * image, Document * doc):m_image(image), m_document(doc)
+ImageComponent::ImageComponent(
+    nds::Image *image,
+    BoxLayout *boxLayout,
+    Document *doc):
+  m_image(image), m_boxLayout(boxLayout), m_document(doc)
 {
   if (m_image)
   {
@@ -79,8 +84,16 @@ void ImageComponent::reload()
   {
     m_image->setType((nds::Image::ImageType)m_document->htmlDocument()->mimeType());
   }
+  unsigned int w = m_image->width();
+  unsigned int h = m_image->height();
   m_image->reload();
-  setSize(m_image->width(), m_image->height());
+  if (w != m_image->width() or h != m_image->height())
+  {
+    setSize(m_image->width(), m_image->height());
+    if (m_boxLayout) {
+      m_boxLayout->doLayout();
+    }
+  }
   m_dirty = true;
 }
 void ImageComponent::notify()

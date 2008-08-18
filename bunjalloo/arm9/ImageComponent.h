@@ -23,11 +23,12 @@
 namespace nds {
 class Image;
 }
+class BoxLayout;
 class Document;
 class ImageComponent: public Component, public ViewI
 {
   public:
-    ImageComponent(nds::Image * image, Document * doc=0);
+    ImageComponent(nds::Image * image, BoxLayout * m_boxLayout=0, Document * doc=0);
     void reload();
     virtual void paint(const nds::Rectangle & clip);
     virtual ~ImageComponent();
@@ -39,6 +40,7 @@ class ImageComponent: public Component, public ViewI
     virtual bool stylusDown(const Stylus * stylus) { return false; }
   private:
     nds::Image * m_image;
+    BoxLayout * m_boxLayout;
     Document * m_document;
 
 };
