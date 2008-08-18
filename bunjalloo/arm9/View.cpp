@@ -188,6 +188,8 @@ void View::notify()
         m_progress->paint(m_progress->bounds());
         m_progress->setVisible(false);
         m_filenameForProgress.clear();
+        if (m_controller.downloadingFile() != m_document.uri())
+          break;
         m_renderer->render();
         int pos = m_document.position();
         if (pos == -1)
@@ -234,7 +236,7 @@ void View::notify()
         m_progress->setValue(pc);
         if (m_filenameForProgress.empty())
         {
-          URI u(m_document.uri());
+          const URI &u(m_controller.downloadingFile());
           m_filenameForProgress = nds::File::base(u.fileName().c_str());
           if (m_filenameForProgress.empty())
           {
