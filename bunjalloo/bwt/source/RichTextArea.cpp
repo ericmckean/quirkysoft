@@ -258,7 +258,7 @@ void RichTextArea::printu(const UnicodeString & unicodeString)
   {
     // find size of line, change m_cursorx accordingly
     int w = textSize(unicodeString.substr(0, lastPosition));
-    m_cursorx = (m_bounds.w - w)/2;
+    m_cursorx = m_bounds.x + ((m_bounds.w - w)/2);
   }
 
   /*
