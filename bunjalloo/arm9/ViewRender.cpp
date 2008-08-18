@@ -29,6 +29,17 @@ ViewRender::ViewRender(View * self):
   m_self->document().registerView(this);
 }
 
+// Add a link to a "something" - see ImageComponent::addLink and
+// RichTextArea::addLink for details
+template<typename T, typename A>
+void ViewRender::addLink(T *component, A &a)
+{
+  if (not m_hrefForLink.empty())
+  {
+    component->addLink(m_hrefForLink, a);
+  }
+}
+
 RichTextArea * ViewRender::textArea()
 {
   if (m_textArea == 0)
@@ -39,6 +50,7 @@ RichTextArea * ViewRender::textArea()
     bool parseNewline(m_self->m_document.htmlDocument()->mimeType() == HtmlDocument::TEXT_PLAIN);
     m_textArea->setParseNewline(parseNewline);
   }
+  addLink(m_textArea, m_hrefViewed);
   return m_textArea;
 }
 
@@ -107,6 +119,7 @@ void ViewRender::doImage(const UnicodeString & imgStr,
       nds::Image *image = new nds::Image(filename.c_str());
       ImageComponent *imageComponent = new ImageComponent(image, m_box, &m_self->document());
       add(imageComponent);
+      addLink(imageComponent, m_self);
       m_self->controller().queueUri(imgUri);
     }
   }
@@ -412,7 +425,6 @@ void ViewRender::notify()
       {
         progressId = 0;
         pc = 0;
-        m_self->resetScroller();
       }
       break;
     case Document::INPROGRESS:
@@ -428,7 +440,6 @@ void ViewRender::notify()
           }
         }
         */
-        m_self->resetScroller();
         progressId++;
       }
       break;
@@ -443,14 +454,14 @@ void ViewRender::notify()
 void ViewRender::begin(HtmlAnchorElement & element)
 {
   const UnicodeString & href(element.attribute("href"));
-  bool viewed = false;
+  m_hrefViewed = false;
+  m_hrefForLink.clear();
   if (not href.empty())
   {
     URI newUri = URI(m_self->m_document.uri()).navigateTo(unicode2string(href));
-    viewed = m_self->m_controller.cache()->contains(newUri, false);
+    m_hrefViewed = m_self->m_controller.cache()->contains(newUri, false);
+    m_hrefForLink = unicode2string(href);
   }
-  /* Oh no - this breaks if link is an image :(*/
-  textArea()->addLink( unicode2string(href), viewed);
 }
 
 bool ViewRender::visit(HtmlAnchorElement & element)
@@ -459,8 +470,14 @@ bool ViewRender::visit(HtmlAnchorElement & element)
 }
 void ViewRender::end(HtmlAnchorElement & element)
 {
-  /* Oh no - this breaks if link was only for an image :(*/
-  textArea()->endLink();
+  if (not m_hrefForLink.empty())
+  {
+    if (m_textArea)
+    {
+      m_textArea->endLink();
+    }
+    m_hrefForLink.clear();
+  }
 }
 
 void ViewRender::begin(HtmlBlockElement & element)

@@ -22,7 +22,10 @@
 #include "HtmlDocument.h"
 #include "ImageComponent.h"
 #include "Image.h"
+#include "Link.h"
+#include "LinkListener.h"
 #include "Palette.h"
+#include "Stylus.h"
 #include "URI.h"
 
 using nds::Canvas;
@@ -33,7 +36,7 @@ ImageComponent::ImageComponent(
     nds::Image *image,
     BoxLayout *boxLayout,
     Document *doc):
-  m_image(image), m_boxLayout(boxLayout), m_document(doc)
+  m_image(image), m_boxLayout(boxLayout), m_document(doc), m_link(0), m_linkListener(0)
 {
   if (m_image)
   {
@@ -48,6 +51,7 @@ ImageComponent::ImageComponent(
 ImageComponent::~ImageComponent()
 {
   m_document->unregisterView(this);
+  delete m_link;
   delete m_image;
 }
 
@@ -70,6 +74,10 @@ void ImageComponent::paint(const nds::Rectangle & clip)
   {
     //nds::Canvas::instance().drawRectangle(x(),y(),width(),height(), nds::Color(31,0,0));
     drawImage(Canvas::instance(), *m_image, x(), y());
+    if (m_link and m_link->clicked())
+    {
+      nds::Canvas::instance().drawRectangle(x(),y(),width(),height(), nds::Color(31,0,0));
+    }
   }
   else
   {
@@ -96,6 +104,7 @@ void ImageComponent::reload()
   }
   m_dirty = true;
 }
+
 void ImageComponent::notify()
 {
   if ( m_document->headerParser().cacheFile() == (m_image->filename()+".hdr"))
@@ -110,3 +119,51 @@ void ImageComponent::notify()
     }
   }
 }
+
+void ImageComponent::addLink(const std::string & href, LinkListener * listener)
+{
+  m_linkListener = listener;
+  delete m_link;
+  m_link = 0;
+  if (m_linkListener)
+  {
+    m_link = new Link(href);
+  }
+}
+
+bool ImageComponent::stylusUp(const Stylus * stylus)
+{
+  if (m_link and m_link->clicked())
+  {
+    if (m_bounds.hit(stylus->lastX(), stylus->lastY()))
+    {
+      m_linkListener->linkClicked(m_link);
+    }
+    m_link->setClicked(false);
+    return true;
+  }
+  return false;
+}
+bool ImageComponent::stylusDownFirst(const Stylus * stylus)
+{
+  if (m_bounds.hit(stylus->startX(), stylus->startY()))
+  {
+    if (m_link)
+      m_link->setClicked();
+    return true;
+  }
+  return false;
+}
+
+bool ImageComponent::stylusDownRepeat(const Stylus * stylus)
+{ return false; }
+
+bool ImageComponent::stylusDown(const Stylus * stylus)
+{
+  if (m_link and m_link->clicked() and not m_bounds.hit(stylus->lastX(), stylus->lastY()))
+  {
+    m_link->setClicked(false);
+  }
+  return false;
+}
+
