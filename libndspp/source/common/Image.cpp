@@ -571,7 +571,6 @@ class JpegFileStream
     ~JpegFileStream()
     {
       free(m_scanLine);
-      jpeg_finish_decompress(&cinfo);
       jpeg_destroy_decompress(&cinfo);
 
     }
@@ -584,11 +583,15 @@ class JpegFileStream
     bool begin()
     {
       jpeg_stdio_src(&cinfo, (FILE*)m_file.file());
-      jpeg_read_header(&cinfo, TRUE);
+      int retcode = jpeg_read_header(&cinfo, FALSE);
+      if (retcode != JPEG_HEADER_OK)
+      {
+        return false;
+      }
+
       jpeg_calc_output_dimensions(&cinfo);
       m_scanLine = (unsigned char*)calloc(bytes_per_pixel()*width(), 1);
-      jpeg_start_decompress(&cinfo);
-      return true;
+      return jpeg_start_decompress(&cinfo);
     }
 
     int width() const
@@ -613,9 +616,17 @@ class JpegFileStream
 
     bool decode(void * &scanline)
     {
-      jpeg_read_scanlines(&cinfo, &m_scanLine, 1);
-      scanline = m_scanLine;
-      return true;
+      if (jpeg_read_scanlines(&cinfo, &m_scanLine, 1))
+      {
+        scanline = m_scanLine;
+        return true;
+      }
+      return false;
+    }
+
+    void done()
+    {
+      jpeg_finish_decompress(&cinfo);
     }
 
   private:
@@ -707,6 +718,7 @@ void Image::readJpeg()
     m_bpp = inputStream->bytes_per_pixel();
     renderLine((const unsigned char*)scanline, line);
   }
+  inputStream->done();
   m_height = m_currentLine;
 
   m_valid = true;
