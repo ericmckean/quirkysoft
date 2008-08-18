@@ -1,0 +1,51 @@
+/*
+  Copyright (C) 2008 Richard Quirk
+
+  This program is free software: you can redistribute it and/or modify
+  it under the terms of the GNU General Public License as published by
+  the Free Software Foundation, either version 3 of the License, or
+  (at your option) any later version.
+
+  This program is distributed in the hope that it will be useful,
+  but WITHOUT ANY WARRANTY; without even the implied warranty of
+  MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+  GNU General Public License for more details.
+
+  You should have received a copy of the GNU General Public License
+  along with this program.  If not, see <http://www.gnu.org/licenses/>.
+*/
+#ifndef BoxLayout_h_seen
+#define BoxLayout_h_seen
+
+#include "Component.h"
+#include <list>
+
+/** Class to provide flow-like positional layout. */
+class BoxLayout: public Component
+{
+  public:
+    BoxLayout();
+    ~BoxLayout();
+
+    unsigned int boxCount() const;
+
+    /** layout the child components again. */
+    void doLayout();
+
+    // Reimplement Component methods.
+    virtual void setLocation(int x, int y);
+    virtual void add(Component *child);
+    virtual void paint(const nds::Rectangle & clip);
+
+    // Stylus handling. TODO
+    virtual bool stylusUp(const Stylus * stylus) { return false; }
+    virtual bool stylusDownFirst(const Stylus * stylus) { return false; }
+    virtual bool stylusDownRepeat(const Stylus * stylus) { return false; }
+    virtual bool stylusDown(const Stylus * stylus) { return false; }
+  private:
+    class Box;
+    std::list<Box*> m_boxes;
+    void addToLayout(Component *child);
+    void initBoxes();
+};
+#endif
