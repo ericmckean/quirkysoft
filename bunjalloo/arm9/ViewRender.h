@@ -93,6 +93,8 @@ class ViewRender: public Visitor, public ViewI
     ZipViewer * m_zipViewer;
     Updater * m_updater;
     BoxLayout *m_box;
+    bool m_hrefViewed;
+    std::string m_hrefForLink;
 
     const HtmlElement * m_lastElement;
     typedef std::map<UnicodeString, FormRadio*> FormGroupMap;
@@ -112,5 +114,7 @@ class ViewRender: public Visitor, public ViewI
     void add(Component *component);
     void pushTextArea();
 
+    template<typename T, typename A>
+      void addLink(T *component, A &a);
 };
 #endif
