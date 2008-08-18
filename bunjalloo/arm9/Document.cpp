@@ -194,7 +194,10 @@ void Document::appendData(const char * data, int size)
     }
     if (not m_headerParser->redirect().empty())
     {
-      currentHistoryUri() = m_headerParser->redirect();
+      if (m_historyEnabled)
+      {
+        currentHistoryUri() = m_headerParser->redirect();
+      }
       setStatus(REDIRECTED);
     }
   }

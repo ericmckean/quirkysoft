@@ -27,6 +27,7 @@
 #include "Palette.h"
 #include "Stylus.h"
 #include "URI.h"
+#include "WidgetColors.h"
 
 using nds::Canvas;
 using nds::Image;
@@ -74,20 +75,28 @@ void ImageComponent::paint(const nds::Rectangle & clip)
   {
     //nds::Canvas::instance().drawRectangle(x(),y(),width(),height(), nds::Color(31,0,0));
     drawImage(Canvas::instance(), *m_image, x(), y());
-    if (m_link and m_link->clicked())
+    if (m_link)
     {
-      nds::Canvas::instance().drawRectangle(x(),y(),width(),height(), nds::Color(31,0,0));
+      // TODO: need to css or whatever this part of the code...
+      nds::Color linkColor(WidgetColors::LINK_REGULAR);
+      if (m_link->clicked()) {
+        linkColor = WidgetColors::LINK_CLICKED;
+        nds::Canvas::instance().drawRectangle(x(), y(), width(), height(), linkColor);
+      }
     }
   }
   else
   {
-    Canvas::instance().drawRectangle(0,0,128,128, nds::Color(31,0,0));
+    Canvas::instance().fillRectangle(x(),y(),width(),height(), nds::Color(31,0,0));
   }
   m_dirty = false;
 }
 
 void ImageComponent::reload()
 {
+  if (not m_image)
+    return;
+
   if (m_image->type() == nds::Image::ImageUNKNOWN)
   {
     m_image->setType((nds::Image::ImageType)m_document->htmlDocument()->mimeType());
@@ -107,8 +116,22 @@ void ImageComponent::reload()
 
 void ImageComponent::notify()
 {
-  if ( m_document->headerParser().cacheFile() == (m_image->filename()+".hdr"))
+  if ( m_image and  m_document->headerParser().cacheFile() == (m_image->filename()+".hdr"))
   {
+    if (m_document->status() == Document::HAS_HEADERS)
+    {
+      // checks for probs
+      HtmlDocument::MimeType mimeType = m_document->htmlDocument()->mimeType();
+      bool isImg = (mimeType == HtmlDocument::IMAGE_PNG
+          or mimeType == HtmlDocument::IMAGE_GIF
+          or mimeType == HtmlDocument::IMAGE_JPEG);
+      if (not isImg or m_document->headerParser().httpStatusCode() != 200)
+      {
+        setSize(12,12);
+        if (m_boxLayout) m_boxLayout->doLayout();
+        m_image = 0;
+      }
+    }
     if (m_document->status() == Document::INPROGRESS)
     {
       reload();

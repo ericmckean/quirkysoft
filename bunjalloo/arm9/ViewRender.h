@@ -110,7 +110,7 @@ class ViewRender: public Visitor, public ViewI
     void clearRadioGroups();
 
     bool hasImage();
-    // void renderImage();
+    void renderImage();
     void add(Component *component);
     void pushTextArea();
 
