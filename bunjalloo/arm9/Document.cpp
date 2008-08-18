@@ -203,7 +203,7 @@ void Document::appendData(const char * data, int size)
 
 void Document::notifyAll() const
 {
-  for_each(m_views.begin(), m_views.end(), mem_fun(&ViewI::notify));
+  for_each(m_views.rbegin(), m_views.rend(), mem_fun(&ViewI::notify));
 }
 
 void Document::setStatus(Document::Status status)

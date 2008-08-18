@@ -28,7 +28,7 @@ class ZipViewer;
 #include "Visitor.h"
 #include "HtmlElementFwd.h"
 
-class ViewRender: public Visitor
+class ViewRender: public Visitor, public ViewI
 {
   public:
     ViewRender(View * self);
@@ -37,6 +37,9 @@ class ViewRender: public Visitor
     void setUpdater(Updater * updater);
     RichTextArea * textArea();
     void doTitle(const UnicodeString & str);
+
+    // implement the ViewI interface.
+    virtual void notify();
 
     // implement the Visitor interface.
     virtual bool visit(HtmlAnchorElement & element);
@@ -101,6 +104,9 @@ class ViewRender: public Visitor
     void renderInput(const HtmlElement * inputElement);
     void renderTextArea(const HtmlElement * inputElement);
     void clearRadioGroups();
+
+    bool hasImage();
+    void renderImage();
 
 };
 #endif
