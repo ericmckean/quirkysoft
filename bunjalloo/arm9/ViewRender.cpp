@@ -20,6 +20,7 @@
 #include "libnds.h"
 #include "Cache.h"
 #include "Canvas.h"
+#include "Config.h"
 #include "Controller.h"
 #include "Document.h"
 #include "ElementFactory.h"
@@ -68,6 +69,7 @@ ViewRender::ViewRender(View * self):
   m_updater(0),
   m_lastElement(0)
 {
+  m_self->document().registerView(this);
 }
 
 RichTextArea * ViewRender::textArea()
@@ -121,9 +123,44 @@ void ViewRender::setBgColor(const HtmlElement * body)
 void ViewRender::doImage(const UnicodeString & imgStr,
     const UnicodeString & src)
 {
-  textArea()->addImage(unicode2string(src));
-  textArea()->appendText(imgStr);
-  textArea()->endImage();
+  bool show(false);
+  m_self->controller().config().resource(Config::SHOW_IMAGES,show);
+  if (show)
+  {
+    // configured to show images inline
+    if (not src.empty())
+    {
+      URI uri(m_self->document().uri());
+      const URI &imgUri(uri.navigateTo(unicode2string(src)));
+      std::string filename;
+      switch (imgUri.protocol())
+      {
+        case URI::FILE_PROTOCOL:
+        case URI::CONFIG_PROTOCOL:
+          filename = imgUri.fileName();
+          break;
+        case URI::HTTPS_PROTOCOL:
+        case URI::HTTP_PROTOCOL:
+          filename = Cache::CACHE_DIR;
+          filename += "/";
+          filename += imgUri.crc32();
+          break;
+        default:
+          return;
+      }
+      nds::Image *image = new nds::Image(filename.c_str());
+      ImageComponent *imageComponent = new ImageComponent(image, &m_self->document());
+      textArea()->add(imageComponent);
+      m_self->controller().queueUri(imgUri);
+    }
+  }
+  else
+  {
+    // the old image display - shows a text value only + clickage
+    textArea()->addImage(unicode2string(src));
+    textArea()->appendText(imgStr);
+    textArea()->endImage();
+  }
 }
 
 void ViewRender::clearRadioGroups()
@@ -143,47 +180,57 @@ void ViewRender::clear()
   m_textArea = 0;
 }
 
+void ViewRender::renderImage()
+{
+  URI uri(m_self->m_document.uri());
+  string filename;
+  if (uri.protocol() == URI::FILE_PROTOCOL)
+  {
+    filename = uri.fileName();
+  }
+  else
+  {
+    filename = m_self->m_controller.cache()->fileName(m_self->m_document.uri());
+  }
+  nds::Image * image(0);
+  if (not filename.empty())
+  {
+    image = new nds::Image(filename.c_str(),
+        (nds::Image::ImageType)m_self->m_document.htmlDocument()->mimeType());
+  }
+  ImageComponent * imageComponent = new ImageComponent(image, &m_self->document());
+  textArea()->add(imageComponent);
+}
+
+bool ViewRender::hasImage()
+{
+  HtmlDocument::MimeType mimeType = m_self->m_document.htmlDocument()->mimeType();
+  return (mimeType == HtmlDocument::IMAGE_PNG
+      or mimeType == HtmlDocument::IMAGE_GIF
+      or mimeType == HtmlDocument::IMAGE_JPEG);
+}
+
 void ViewRender::render()
 {
-  clear();
-
   const HtmlElement * root = m_self->m_document.rootNode();
-  HtmlDocument::MimeType mimeType = m_self->m_document.htmlDocument()->mimeType();
   bool useScrollPane(false);
 
   if (m_updater)
   {
+    clear();
     m_updater->show();
     useScrollPane = true;
   }
   else
   {
-    if (mimeType == HtmlDocument::IMAGE_PNG
-        or mimeType == HtmlDocument::IMAGE_GIF
-        or mimeType == HtmlDocument::IMAGE_JPEG)
+    HtmlDocument::MimeType mimeType = m_self->m_document.htmlDocument()->mimeType();
+    if (hasImage())
     {
-      URI uri(m_self->m_document.uri());
-      string filename;
-      if (uri.protocol() == URI::FILE_PROTOCOL)
-      {
-        filename = uri.fileName();
-      }
-      else
-      {
-        filename = m_self->m_controller.cache()->fileName(m_self->m_document.uri());
-      }
-      nds::Image * image(0);
-      if (not filename.empty())
-      {
-        image = new nds::Image(filename.c_str(), (nds::Image::ImageType)mimeType);
-      }
-      ImageComponent * imageComponent = new ImageComponent(image);
-      textArea()->add(imageComponent);
       useScrollPane = true;
-
     }
     else if (mimeType == HtmlParser::ZIP)
     {
+      clear();
       URI uri(m_self->m_document.uri());
       string filename;
       if (uri.protocol() == URI::FILE_PROTOCOL)
@@ -200,11 +247,13 @@ void ViewRender::render()
     }
     else if (mimeType == HtmlParser::OTHER)
     {
+      clear();
       textArea()->appendText(T(NOT_VIEWABLE));
       useScrollPane = true;
     }
     else
     {
+      clear();
       if (not root->isa(HtmlConstants::HTML_TAG))
         return;
       if (not root->hasChildren())
@@ -374,6 +423,44 @@ void ViewRender::renderTextArea(const HtmlElement * textAreaElement)
   text->setListener(m_self->m_keyboard);
   m_textArea = 0;
   m_self->m_scrollPane->add(text);
+}
+
+void ViewRender::notify()
+{
+  Document::Status status(m_self->document().status());
+  static int progressId(0);
+  static int pc(0);
+  switch (status)
+  {
+    case Document::LOADED:
+      {
+        progressId = 0;
+        pc = 0;
+        m_self->resetScroller();
+      }
+      break;
+    case Document::INPROGRESS:
+      {
+        /*
+        if (hasImage())
+        {
+          if (progressId == 0)
+          {
+            clear();
+            renderImage();
+            m_self->resetScroller();
+          }
+        }
+        */
+        m_self->resetScroller();
+        progressId++;
+      }
+      break;
+    default:
+      progressId = 0;
+      pc = 0;
+      break;
+  }
 }
 
 // Visitor implementation
