@@ -267,7 +267,7 @@ void ViewRender::doTitle(const HtmlElement * title)
     {
       visit(*titleText);
     }
-    m_box->add(m_textArea);
+    m_self->m_scrollPane->add(m_textArea);
     m_textArea = 0;
   }
 }
