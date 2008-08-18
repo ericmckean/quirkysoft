@@ -269,7 +269,8 @@ static void user_read_fn(png_structp png_ptr, unsigned char *data, png_size_t si
   nds::File * f = (nds::File*)png_get_io_ptr(png_ptr);
   size_t n = f->read((char*)data, size);
   if(size && (n == 0)) {
-    // meh
+    // ups - go to the error handler
+    longjmp(png_jmpbuf(png_ptr), 1);
   }
 }
 
@@ -557,15 +558,34 @@ void Image::readGif()
   m_valid = true;
 }
 
+struct safer_err_mgr
+{
+  struct jpeg_error_mgr pub;
+  jmp_buf jumpbuf;
+};
+
+void user_error_exit (j_common_ptr cinfo)
+{
+  safer_err_mgr* err = (safer_err_mgr*) cinfo->err;
+  (*cinfo->err->output_message) (cinfo);
+  longjmp(err->jumpbuf, 1);
+}
+
 // create a new jpeg_decoder_file_stream
 class JpegFileStream
 {
   public:
     JpegFileStream(const char * filename):m_scanLine(0)
     {
-      cinfo.err = jpeg_std_error(&jerr);
+      cinfo.err = jpeg_std_error(&jerr.pub);
+      jerr.pub.error_exit = user_error_exit;
       jpeg_create_decompress(&cinfo);
       m_file.open(filename);
+    }
+
+    jmp_buf * get_jmpbuf()
+    {
+      return &jerr.jumpbuf;
     }
 
     ~JpegFileStream()
@@ -631,7 +651,7 @@ class JpegFileStream
 
   private:
     struct jpeg_decompress_struct cinfo;
-    struct jpeg_error_mgr jerr;
+    struct safer_err_mgr jerr;
     nds::File m_file;
     unsigned char * m_scanLine;
 };
@@ -685,6 +705,12 @@ void Image::readJpeg()
 {
   m_valid = false;
   auto_ptr<JpegFileStream> inputStream(new JpegFileStream(m_filename.c_str()));
+  if (setjmp(*inputStream->get_jmpbuf()))
+  {
+    /* If we get here, we had a problem reading the file */
+    return;
+  }
+
   if (not inputStream->is_open())
   {
     return;
