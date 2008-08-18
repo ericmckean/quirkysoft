@@ -340,11 +340,11 @@ const std::string URI::asString() const
   return m_protocol+"://"+m_address;
 }
 
-bool URI::operator==(const URI & other)
+bool URI::operator==(const URI & other) const
 {
   return m_protocol == other.m_protocol and m_address==other.m_address;
 }
-bool URI::operator!=(const URI & other)
+bool URI::operator!=(const URI & other) const
 {
   return not operator==(other);
 }

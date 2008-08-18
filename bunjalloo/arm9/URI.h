@@ -120,11 +120,11 @@ class URI
      * the same protocol and address.
      * @param other the other URI to compare.
      */
-    bool operator==(const URI & other);
+    bool operator==(const URI & other) const;
     /** Inverse compare. @see operator==().
      * @param other the other URI to compare.
      */
-    bool operator!=(const URI & other);
+    bool operator!=(const URI & other) const;
 
     /** Get the CRC for the address.
      * @return the 32 bit CRC value for the address.

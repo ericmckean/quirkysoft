@@ -425,6 +425,7 @@ void ViewRender::notify()
       {
         progressId = 0;
         pc = 0;
+        m_self->m_scrollPane->setSize(nds::Canvas::instance().width(), nds::Canvas::instance().height());
       }
       break;
     case Document::INPROGRESS:

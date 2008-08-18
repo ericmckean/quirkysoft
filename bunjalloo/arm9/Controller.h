@@ -100,6 +100,8 @@ class Controller
     /** Save the list of accepted domains to file.  */
     void saveCookieSettings();
 
+    const URI & downloadingFile() const;
+
   private:
     Document * m_document;
     View * m_view;

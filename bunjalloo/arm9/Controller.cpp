@@ -395,6 +395,11 @@ void Controller::fetchHttp(const URI & uri)
   }
 }
 
+const URI & Controller::downloadingFile() const
+{
+  return m_httpClient->uri();
+}
+
 void Controller::finishFetchHttp(const URI & uri)
 {
   // check the caching status

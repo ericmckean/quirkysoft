@@ -82,9 +82,9 @@ void ScrollPane::layoutChildren()
     childWidth -= SCROLLER_WIDTH;
   }
   std::vector<Component*>::iterator it(m_children.begin());
-  int yPos = m_bounds.top();
-  int lastXPos = m_bounds.x;
-  int lastYPos = m_bounds.y;
+  int yPos = m_children.front()->y();
+  int lastXPos = m_children.front()->x();
+  int lastYPos = yPos;
   int rowHeight = 0;
   // printf(" ******** layoutChildren ******* \n");
   for (; it != m_children.end(); ++it)
