@@ -395,9 +395,18 @@ void Controller::fetchHttp(const URI & uri)
   }
 }
 
-const URI & Controller::downloadingFile() const
+URI Controller::downloadingFile() const
 {
-  return m_httpClient->uri();
+  URI uri(m_document->uri());
+  switch (uri.protocol())
+  {
+    case URI::HTTPS_PROTOCOL:
+    case URI::HTTP_PROTOCOL:
+      return m_httpClient->uri();
+
+    default:
+      return uri;
+  }
 }
 
 void Controller::finishFetchHttp(const URI & uri)
@@ -414,8 +423,16 @@ void Controller::finishFetchHttp(const URI & uri)
     m_redirected++;
     swiWaitForVBlank();
     swiWaitForVBlank();
-    m_document->reset();
-    m_document->setStatus(Document::REDIRECTED);
+    if (downloadingFile() != m_document->uri())
+    {
+      // handleUri(uri.navigateTo(m_document->uri()));
+      // queueUri();
+    }
+    else
+    {
+      m_document->reset();
+      m_document->setStatus(Document::REDIRECTED);
+    }
   }
   else
   {
@@ -498,10 +515,12 @@ void Controller::queueUri(const URI & uri)
 
 void Controller::checkDownloadQueue()
 {
+  m_document->setHistoryEnabled(false);
   while (m_downloadQ.size())
   {
     URI uri(m_downloadQ.front());
     m_downloadQ.pop();
     fetchHttp(uri);
   }
+  m_document->setHistoryEnabled(true);
 }

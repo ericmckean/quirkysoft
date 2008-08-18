@@ -152,7 +152,6 @@ void ViewRender::clear()
       m_self->m_scrollPane->height());
 }
 
-/*
 void ViewRender::renderImage()
 {
   URI uri(m_self->m_document.uri());
@@ -171,10 +170,10 @@ void ViewRender::renderImage()
     image = new nds::Image(filename.c_str(),
         (nds::Image::ImageType)m_self->m_document.htmlDocument()->mimeType());
   }
-  ImageComponent * imageComponent = new ImageComponent(image, &m_self->document());
-  add(imageComponent);
+  ImageComponent * imageComponent = new ImageComponent(image, m_box, &m_self->document());
+  m_self->m_scrollPane->add(imageComponent);
+  //add(imageComponent);
 }
-*/
 
 bool ViewRender::hasImage()
 {
@@ -430,8 +429,7 @@ void ViewRender::notify()
       break;
     case Document::INPROGRESS:
       {
-        /*
-        if (hasImage())
+        if (hasImage() and m_self->controller().downloadingFile() == m_self->document().uri())
         {
           if (progressId == 0)
           {
@@ -440,11 +438,15 @@ void ViewRender::notify()
             m_self->resetScroller();
           }
         }
-        */
         progressId++;
       }
       break;
     default:
+      if (hasImage() and m_self->controller().downloadingFile() == m_self->document().uri())
+      {
+        clear();
+        renderImage();
+      }
       progressId = 0;
       pc = 0;
       break;
