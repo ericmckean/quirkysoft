@@ -64,3 +64,30 @@ nds::Rectangle nds::Rectangle::intersect(const nds::Rectangle & r2) const
   return rect;
 }
 
+bool nds::Rectangle::operator==(const nds::Rectangle & r2)
+{
+  const nds::Rectangle &r1(*this);
+  return r1.x == r2.x
+    and r1.y == r2.y
+    and r1.w == r2.w
+    and r1.h == r2.h;
+
+}
+
+bool nds::Rectangle::operator!=(const nds::Rectangle & other)
+{
+  return !(*this == other);
+}
+
+nds::Rectangle& nds::Rectangle::operator=(const nds::Rectangle &rhs)
+{
+  if (this != &rhs)
+  {
+    this->x = rhs.x;
+    this->y = rhs.y;
+    this->w = rhs.w;
+    this->h = rhs.h;
+  }
+  return *this;
+}
+
