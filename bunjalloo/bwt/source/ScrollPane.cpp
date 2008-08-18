@@ -76,7 +76,11 @@ void ScrollPane::setLocation(int x, int y)
 
 void ScrollPane::layoutChildren()
 {
-  int childWidth = m_bounds.w - SCROLLER_WIDTH - 1;
+  int childWidth = m_bounds.w - 1;
+  if (m_scrollBar->visible())
+  {
+    childWidth -= SCROLLER_WIDTH;
+  }
   std::vector<Component*>::iterator it(m_children.begin());
   int yPos = m_bounds.top();
   int lastXPos = m_bounds.x;
@@ -127,8 +131,11 @@ void ScrollPane::layoutChildren()
 
 void ScrollPane::calculateScrollBar()
 {
-  if (m_children.empty())
+  if (m_children.empty()) {
+    m_scrollBar->setVisible(false);
     return;
+  }
+  m_scrollBar->setVisible(true);
   int topY = m_children.front()->bounds().top();
   int botY = m_children.back()->bounds().bottom();
   // Set the total coverage of the scrollBar

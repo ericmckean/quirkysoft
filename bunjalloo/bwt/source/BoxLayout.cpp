@@ -15,20 +15,20 @@
   along with this program.  If not, see <http://www.gnu.org/licenses/>.
 */
 
-#include "BoxLayout.h"
-#include "Delete.h"
 #include <set>
 #include <algorithm>
 #include <functional>
+#include <cstdio>
+#include "Canvas.h"
+#include "BoxLayout.h"
+#include "Delete.h"
 
 using nds::Rectangle;
 
 class BoxLayout::Box
 {
   public:
-    static int MAX_WIDTH;
-
-    Box()
+    Box(BoxLayout * parent): m_parent(parent)
     {
       m_bounds.x = 0;
       m_bounds.y = 0;
@@ -43,7 +43,7 @@ class BoxLayout::Box
 
     bool tryAdd(Component *child)
     {
-      if ((child->width() + m_bounds.w) > MAX_WIDTH)
+      if ((child->width() + m_bounds.w) > m_parent->width())
       {
         return false;
       }
@@ -82,6 +82,7 @@ class BoxLayout::Box
     }
 
   private:
+    BoxLayout *m_parent;
     Rectangle m_bounds;
     class BoundComponent
     {
@@ -145,8 +146,6 @@ class BoxLayout::Box
     }
 };
 
-int BoxLayout::Box::MAX_WIDTH(255);
-
 BoxLayout::BoxLayout()
 {
   initBoxes();
@@ -154,8 +153,8 @@ BoxLayout::BoxLayout()
 
 void BoxLayout::initBoxes()
 {
-  Box *first(new Box);
-  first->setPosition(0,0);
+  Box *first(new Box(this));
+  first->setPosition(m_bounds.x,m_bounds.y);
   m_boxes.push_front(first);
 }
 
@@ -170,27 +169,40 @@ void BoxLayout::addToLayout(Component *child)
   // now see *where* this should go in box terms
   // oh! idea: add a "setSizeFixed()" method to prevent RichTextArea and
   // friends from resizing after being fixed into position?
+  const Rectangle &bounds(child->preferredSize());
+  int w(bounds.w);
+  if (w > m_bounds.w) {
+    w = m_bounds.w;
+  }
+  child->setSize(w, bounds.h);
   Box *lastBox(m_boxes.front());
+  // remove height from last box, in case we resize the box
+  if (m_boxes.size() > 1)
+  {
+    m_bounds.h -= lastBox->bounds().h;
+  }
+  else
+  {
+    m_bounds.h = 0;
+  }
   if (not lastBox->tryAdd(child))
   {
+    // Did not fit, so now we need to add the last height on again
+    m_bounds.h += lastBox->bounds().h;
     Rectangle lbb(lastBox->bounds());
-    lastBox = new Box;
+    lastBox = new Box(this);
     lastBox->setPosition(lbb.x, lbb.bottom());
     lastBox->tryAdd(child);
     m_boxes.push_front(lastBox);
   }
+  // Add height of the last box, whatever it was to the bounds height
+  m_bounds.h += lastBox->bounds().h;
 }
 
 void BoxLayout::add(Component *child)
 {
   Component::add(child);
   // Fudge size vs preferredSize
-  const Rectangle &bounds(child->preferredSize());
-  int w(bounds.w);
-  if (m_bounds.w < w) {
-    w = m_bounds.w;
-  }
-  child->setSize(w, bounds.h);
   addToLayout(child);
 }
 
@@ -208,7 +220,7 @@ void BoxLayout::paint(const nds::Rectangle & clip)
     if (thisClip.w == 0 and thisClip.h == 0)
       continue;
     c->paint(thisClip);
-    // nds::Canvas::instance().setClip(clip);
+    nds::Canvas::instance().setClip(clip);
   }
 }
 
@@ -237,17 +249,29 @@ void BoxLayout::setLocation(int x, int y)
   }
 }
 
+void BoxLayout::setSize(int w, int h)
+{
+  if (w != m_bounds.w)
+  {
+    m_bounds.w = w;
+    doLayout(true);
+  }
+}
+
 unsigned int BoxLayout::boxCount() const
 {
   return m_boxes.size();
 }
 
-void BoxLayout::doLayout()
+void BoxLayout::doLayout(bool force)
 {
   // redo all boxes layout
-  std::list<Box*>::iterator it = find_if(
-      m_boxes.begin(), m_boxes.end(),
-      std::mem_fun(&Box::hasChanged));
+  std::list<Box*>::iterator it = m_boxes.begin();
+  if (not force) {
+    it = find_if(
+        m_boxes.begin(), m_boxes.end(),
+        std::mem_fun(&Box::hasChanged));
+  }
   if (it != m_boxes.end())
   {
     // needs redoing
@@ -256,5 +280,41 @@ void BoxLayout::doLayout()
     initBoxes();
     for_each(m_children.begin(), m_children.end(), std::bind1st(std::mem_fun(&BoxLayout::addToLayout), this));
   }
+}
+
+bool BoxLayout::stylusUp(const Stylus * stylus)
+{
+  if (not visible())
+    return false;
+  m_dirty = true;
+  FOR_EACH_CHILD(stylusUp);
+  return false;
+}
+
+bool BoxLayout::stylusDownFirst(const Stylus * stylus)
+{
+  if (not visible())
+    return false;
+  m_dirty = true;
+  FOR_EACH_CHILD(stylusDownFirst);
+  return false;
+}
+
+bool BoxLayout::stylusDownRepeat(const Stylus * stylus)
+{
+  if (not visible())
+    return false;
+  m_dirty = true;
+  FOR_EACH_CHILD(stylusDownRepeat);
+  return false;
+}
+
+bool BoxLayout::stylusDown(const Stylus * stylus)
+{
+  if (not visible())
+    return false;
+  m_dirty = true;
+  FOR_EACH_CHILD(stylusDown);
+  return false;
 }
 

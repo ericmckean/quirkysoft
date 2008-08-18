@@ -17,11 +17,12 @@
 #ifndef ViewRender_h_seen
 #define ViewRender_h_seen
 
-class View;
-class RichTextArea;
-class HtmlElement;
+class BoxLayout;
 class FormRadio;
+class HtmlElement;
+class RichTextArea;
 class Updater;
+class View;
 class ZipViewer;
 #include <map>
 #include "UnicodeString.h"
@@ -91,6 +92,7 @@ class ViewRender: public Visitor, public ViewI
     RichTextArea * m_textArea;
     ZipViewer * m_zipViewer;
     Updater * m_updater;
+    BoxLayout *m_box;
 
     const HtmlElement * m_lastElement;
     typedef std::map<UnicodeString, FormRadio*> FormGroupMap;
@@ -106,7 +108,9 @@ class ViewRender: public Visitor, public ViewI
     void clearRadioGroups();
 
     bool hasImage();
-    void renderImage();
+    // void renderImage();
+    void add(Component *component);
+    void pushTextArea();
 
 };
 #endif

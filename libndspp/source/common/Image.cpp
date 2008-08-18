@@ -32,7 +32,7 @@ static const u8 JPEG_SIGNATURE[11] = {
   0xFF, 0xD8, 0xFF, 0xE0, 0x00, 0x10, 0x4A, 0x46,
   0x49, 0x46, 0x00
 };
-static const unsigned int MAX_IMAGE_WIDTH(250);
+static const unsigned int MAX_IMAGE_WIDTH(SCREEN_WIDTH-7);
 static const unsigned int MAX_IMAGE_HEIGHT(SCREEN_HEIGHT*2);
 
 static bool isPng(const char *filename)

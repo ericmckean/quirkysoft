@@ -29,19 +29,21 @@ class BoxLayout: public Component
 
     unsigned int boxCount() const;
 
-    /** layout the child components again. */
-    void doLayout();
+    /** layout the child components again.
+     * @param force force the relayout, e.g. if resize this component */
+    void doLayout(bool force=false);
 
     // Reimplement Component methods.
     virtual void setLocation(int x, int y);
+    virtual void setSize(int w, int h);
     virtual void add(Component *child);
     virtual void paint(const nds::Rectangle & clip);
 
     // Stylus handling. TODO
-    virtual bool stylusUp(const Stylus * stylus) { return false; }
-    virtual bool stylusDownFirst(const Stylus * stylus) { return false; }
-    virtual bool stylusDownRepeat(const Stylus * stylus) { return false; }
-    virtual bool stylusDown(const Stylus * stylus) { return false; }
+    virtual bool stylusUp(const Stylus * stylus);
+    virtual bool stylusDownFirst(const Stylus * stylus);
+    virtual bool stylusDownRepeat(const Stylus * stylus);
+    virtual bool stylusDown(const Stylus * stylus);
   private:
     class Box;
     std::list<Box*> m_boxes;

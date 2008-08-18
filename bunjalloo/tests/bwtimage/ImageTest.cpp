@@ -38,7 +38,7 @@ void ImageTest::testWide()
 {
   m_image = new Image("inputs/wide.jpg");
   CPPUNIT_ASSERT(m_image->isValid());
-  int expected = 250;
+  int expected = 249;
   int result = m_image->width();
   CPPUNIT_ASSERT_EQUAL(expected, result);
 }
@@ -56,7 +56,7 @@ void ImageTest::testWidePng()
 {
   m_image = new Image("inputs/wide.png");
   CPPUNIT_ASSERT(m_image->isValid());
-  int expected = 250;
+  int expected = 249;
   int result = m_image->width();
   CPPUNIT_ASSERT_EQUAL(expected, result);
 }
@@ -74,7 +74,7 @@ void ImageTest::testWideGif()
 {
   m_image = new Image("inputs/wide.gif");
   CPPUNIT_ASSERT(m_image->isValid());
-  int expected = 250;
+  int expected = 249;
   int result = m_image->width();
   CPPUNIT_ASSERT_EQUAL(expected, result);
 }

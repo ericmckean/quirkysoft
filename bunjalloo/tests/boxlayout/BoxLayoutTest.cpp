@@ -27,6 +27,8 @@ class BoxLayoutTest : public CPPUNIT_NS::TestFixture
   CPPUNIT_TEST( testPacked3 );
   CPPUNIT_TEST( testResize );
   CPPUNIT_TEST( testSetLocation );
+  CPPUNIT_TEST( testNastySize );
+  CPPUNIT_TEST( testResizeImages );
   CPPUNIT_TEST_SUITE_END();
 
 public:
@@ -40,12 +42,21 @@ public:
   void testPacked3();
   void testResize();
   void testSetLocation();
+  void testNastySize();
+  void testResizeImages();
 
 };
 
 class MockComponent: public Component
 {
   public:
+
+    void setPreferredSize(int w, int h)
+    {
+      m_preferredWidth = w;
+      m_preferredHeight = h;
+    }
+
     virtual void paint(const nds::Rectangle & clip) { }
 
     virtual bool stylusUp(const Stylus * stylus) { return false; }
@@ -100,6 +111,7 @@ void BoxLayoutTest::testSimple()
 
   CPPUNIT_ASSERT_MESSAGE("Component 1 bounds", r1 == comp1->bounds());
   CPPUNIT_ASSERT_MESSAGE("Component 2 bounds", r2 == comp2->bounds());
+  CPPUNIT_ASSERT_EQUAL(r2.bottom(), m_layout->height());
   CPPUNIT_ASSERT_EQUAL(2U, m_layout->boxCount());
 }
 
@@ -330,4 +342,185 @@ void BoxLayoutTest::testSetLocation()
   CPPUNIT_ASSERT_MESSAGE("Component 1 bounds after setLocation", r1 == comp1->bounds());
   CPPUNIT_ASSERT_MESSAGE("Component 2 bounds after setLocation", r2 == comp2->bounds());
   CPPUNIT_ASSERT_EQUAL(2U, m_layout->boxCount());
+}
+
+void BoxLayoutTest::testNastySize()
+{
+  /*
+   * Test that the simple case works:
+   *
+   * comp1 - wide component with lowish height
+   * comp2 - wide component with lowish height
+   *   +----------+
+   *   |  comp1   |
+   *   +----------+
+   *   |  comp2   |
+   *   +----------+
+   * comp1 should be at 0,0
+   * comp2 should be at 0,comp1.bottom
+   */
+  MockComponent *comp1 = new MockComponent;
+  MockComponent *comp2 = new MockComponent;
+
+  using nds::Rectangle;
+  Rectangle r1 = { 0, 0, 230, 14 };
+  comp1->setSize(r1.w, r1.h);
+  comp2->setSize(r1.w, r1.h);
+
+  m_layout->setSize(256, 13);
+  comp1->setPreferredSize(256, 14);
+  comp2->setPreferredSize(256, 14);
+
+  m_layout->add(comp1);
+  m_layout->add(comp2);
+
+  // size should be max size of m_layout
+  r1.w = m_layout->width();
+  Rectangle r2 = r1;
+  r2.y = r1.bottom();
+
+  CPPUNIT_ASSERT_MESSAGE("Component 1 bounds", r1 == comp1->bounds());
+  CPPUNIT_ASSERT_MESSAGE("Component 2 bounds", r2 == comp2->bounds());
+  CPPUNIT_ASSERT_EQUAL(r2.bottom(), m_layout->height());
+  CPPUNIT_ASSERT_EQUAL(2U, m_layout->boxCount());
+}
+
+void BoxLayoutTest::testResizeImages()
+{
+  /*
+   * Test a "real life" resize case.
+   *
+   * c1 -> 0,0,249,13 (preferred height 26)
+   * c2 -> 0,0,0,0
+   * c3 -> 0,0,249,13 (preferred height 52)
+   * c4 -> 0,0,0,0
+   * c5 -> 0,0,249,13 (preferred height 26)
+   *  
+   * +----------++
+   * |    c1    ||<c2
+   * +----------++
+   * |    c3    ||<c4
+   * |          |
+   * +----------+
+   * |    c5    |
+   * +----------+
+   *
+   * Then 
+   * resize 1:
+   *  c2 resize to -> 250 94
+   *  doLayout()
+   *  
+   * resize 2:
+   *  c4 resize to -> 250 232
+   *  doLayout()
+   *  
+   */
+  MockComponent *c1 = new MockComponent;
+  MockComponent *c2 = new MockComponent;
+  MockComponent *c3 = new MockComponent;
+  MockComponent *c4 = new MockComponent;
+  MockComponent *c5 = new MockComponent;
+
+  using nds::Rectangle;
+  Rectangle r1 = { 0, 0, 249, 13 };
+  Rectangle image = { 0, 0, 0, 0 };
+  c1->setSize(r1.w, r1.h);
+  c1->setPreferredSize(300, 26);
+  c2->setSize(image.w, image.h);
+  c3->setSize(r1.w, r1.h);
+  c3->setPreferredSize(300, 52);
+  c4->setSize(image.w, image.h);
+  c5->setSize(r1.w, r1.h);
+  c5->setPreferredSize(300, 26);
+
+  m_layout->add(c1);
+  m_layout->add(c2);
+  m_layout->add(c3);
+  m_layout->add(c4);
+  m_layout->add(c5);
+
+  m_layout->setSize(249, 26);
+  {
+    Rectangle ex1 = {0, 0, m_layout->width(), 26};
+    Rectangle ex2 = {ex1.right(), 0, 0, 0};
+    Rectangle ex3 = {0, 26, m_layout->width(), 52};
+    Rectangle ex4 = {ex3.right(), 26, 0, 0};
+    Rectangle ex5 = ex1; ex5.y = ex3.bottom();
+
+    CPPUNIT_ASSERT(ex1 == c1->bounds());
+    CPPUNIT_ASSERT(ex2 == c2->bounds());
+    CPPUNIT_ASSERT(ex3 == c3->bounds());
+    CPPUNIT_ASSERT(ex4 == c4->bounds());
+    CPPUNIT_ASSERT(ex5 == c5->bounds());
+    CPPUNIT_ASSERT_EQUAL(3U, m_layout->boxCount());
+  }
+
+  c2->setSize(249, 94);
+  /*
+   * +----------+
+   * |    c1    |
+   * +----------+
+   * |          |
+   * |    c2    |
+   * |          |
+   * +----------+
+   * |    c3    ||<c4
+   * |          |
+   * +----------+
+   * |    c5    |
+   * +----------+
+   */
+  // move down...
+  m_layout->setLocation(0, 192);
+  m_layout->doLayout();
+  {
+    Rectangle ex1 = {0, m_layout->y(), m_layout->width(), 26};
+    Rectangle ex2 = {0, ex1.bottom(), 249, 94};
+    Rectangle ex3 = {0, ex2.bottom(), m_layout->width(), 52};
+    Rectangle ex4 = {ex3.right(), ex2.bottom(), 0, 0};
+    Rectangle ex5 = ex1; ex5.y = ex3.bottom();
+
+    CPPUNIT_ASSERT(ex1 == c1->bounds());
+    CPPUNIT_ASSERT(ex2 == c2->bounds());
+    CPPUNIT_ASSERT(ex3 == c3->bounds());
+    CPPUNIT_ASSERT(ex4 == c4->bounds());
+    CPPUNIT_ASSERT(ex5 == c5->bounds());
+    CPPUNIT_ASSERT_EQUAL(4U, m_layout->boxCount());
+  }
+
+  /*
+   * +----------+
+   * |    c1    |
+   * +----------+
+   * |          |
+   * |    c2    |
+   * |          |
+   * +----------+
+   * |    c3    |
+   * |          |
+   * +----------+
+   * |          |
+   * |    c4    |
+   * |          |
+   * +----------+
+   * |    c5    |
+   * +----------+
+   */
+  c4->setSize(249, 232);
+  m_layout->doLayout();
+  {
+    Rectangle ex1 = {0, m_layout->y(), m_layout->width(), 26};
+    Rectangle ex2 = {0, ex1.bottom(), 249, 94};
+    Rectangle ex3 = {0, ex2.bottom(), m_layout->width(), 52};
+    Rectangle ex4 = {0, ex3.bottom(), 249, 232};
+    Rectangle ex5 = ex1; ex5.y = ex4.bottom();
+
+    CPPUNIT_ASSERT(ex1 == c1->bounds());
+    CPPUNIT_ASSERT(ex2 == c2->bounds());
+    CPPUNIT_ASSERT(ex3 == c3->bounds());
+    CPPUNIT_ASSERT(ex4 == c4->bounds());
+    CPPUNIT_ASSERT(ex5 == c5->bounds());
+    CPPUNIT_ASSERT_EQUAL(5U, m_layout->boxCount());
+    CPPUNIT_ASSERT_EQUAL(26+94+52+232+26, m_layout->height());
+  }
 }
