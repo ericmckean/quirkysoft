@@ -17,6 +17,7 @@ def build(bld):
 
   lib = bld.new_task_gen('cxx', 'staticlib')
   lib.target = 'sounds'
+  lib.install_path = 0
   lib.export_incdirs = '.'
   lib.source = 'dummy.c'
   [lib.add_obj_file(s+'.o') for s in sources]
