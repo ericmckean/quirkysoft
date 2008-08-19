@@ -357,12 +357,12 @@ void Controller::fetchHttp(const URI & uri)
    *
    */
   bool hasPage = false;
+  m_httpClient->setUri(uri);
+  m_httpClient->reset();
   if (not m_cache->load(uri))
   {
     // loop one, if get, then head
     // if that is ok, then get again
-    m_httpClient->setUri(uri);
-    m_httpClient->reset();
     m_stop = false;
     m_saveAs = NO_SAVE;
     while (not m_httpClient->finished())
