@@ -36,12 +36,6 @@ def set_options(opt):
   opt.tool_options('compiler_cxx')
   opt.tool_options('compiler_cc')
   opt.tool_options('arm', waf_tools)
-  opt.add_option('--delete-scons', action='store_true',
-          help='Delete the leftovers from SCons builds (use with "build").',
-          default=False, dest='delete_scons')
-  opt.add_option('--install-to', action='store',
-          help='Set the install directory (use with "install").',
-          default='bunjalloo-dist', dest='install_to')
   opt.add_option('--with-dldi', action='store',
           help='Set the DLDI patch to use (use with "build").',
           default='', dest='with_dldi')

@@ -10,13 +10,26 @@ upload="no"
 tag="no"
 makedistdir=$(dirname $0)
 pushd $makedistdir > /dev/null
-WAF_SCRIPT=$(which waf)
-VERSION=$( grep -i version arm9/version_number.c  | sed 's/.*"\(.*\)".*/\1/g')
 
 die() {
   echo >&2 "$@"
   exit 1
 }
+
+if test "x$WAFDIR" = x ; then
+  WAF_SCRIPT=$(which waf)
+  WAF=$WAF_SCRIPT
+else
+  WAF=$WAFDIR/../waf-light
+  WAF_SCRIPT=$WAFDIR/../waf
+  if ! test -e $WAF_SCRIPT ; then
+    cd $WAFDIR/..
+    ./waf-light --make-waf || die "Unable to build suitable waf script"
+    cd -
+  fi
+fi
+VERSION=$( grep -i version arm9/version_number.c  | sed 's/.*"\(.*\)".*/\1/g')
+
 
 TEMP=$(getopt -o hutv:l: --long version:,last:,upload,tag,help -- "$@")
     
@@ -58,7 +71,7 @@ revision=$(git svn find-rev HEAD)
 # Create the zip file
 distdir=$project-$VERSION
 zipname=$distdir.zip
-waf --install-to=$distdir install > /dev/null || die "Error in build"
+$WAF --install-to=$distdir install > /dev/null || die "Error in build"
 pushd ..
 pushd $distdir > /dev/null || die "Unable to cd to $distdir"
 mv $project.nds $project-${VERSION//./}.nds

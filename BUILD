@@ -125,12 +125,13 @@ If that worked, try out the DS build...
 Installing
 ==========
 
-There build system has a flag '--install-to' that makes the installation of the
+There build system uses the '--prefix' flag to make the installation of the
 required files onto your DLDI supported device easier. In these steps
 /media/$disk is the mount point of your media card, you will have to replace it
 with the real location:
 
-    ./waf --install-to=/media/$disk install
+    ./waf --prefix=/media/$disk configure
+    ./waf install
     dlditool /path/to/your.dldi /media/$disk/bunjalloo.nds
 
 Once you have done that, and assuming you don't alter things in the data

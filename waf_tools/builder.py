@@ -20,6 +20,7 @@ def build(bld, buildlib=True, buildsdl=True):
     taskgens.append(TaskGen.task_gen(source=sources))
     arm9font = bld.new_task_gen('cxx', 'staticlib')
     arm9font.target = 'vera'
+    arm9font.install_path = 0
     arm9font.export_incdirs = '.'
     arm9font.source = 'common/fonts/dummy.c'
     [arm9font.add_obj_file(s+'.o') for s in sources.split()]
