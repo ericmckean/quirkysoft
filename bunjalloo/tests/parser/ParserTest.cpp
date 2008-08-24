@@ -114,6 +114,18 @@ void ParserTest::testIso()
   CPPUNIT_ASSERT_EQUAL( expectedDataSize , dataSize);
 }
 
+void ParserTest::testUtf8()
+{
+  readFile("utf8.txt");
+  m_headerParser->feed(m_data, m_length);
+  HtmlParser::Encoding result = m_htmlParser->encoding();
+  HtmlParser::Encoding expected = HtmlParser::UTF8_ENCODING;
+  CPPUNIT_ASSERT_EQUAL( expected , result);
+  int dataSize =  m_htmlParser->m_data.length();
+  int expectedDataSize = 6;
+  CPPUNIT_ASSERT_EQUAL( expectedDataSize , dataSize);
+}
+
 void ParserTest::testRefresh()
 {
   readFile("refresh.txt");
