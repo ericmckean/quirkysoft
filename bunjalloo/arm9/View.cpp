@@ -488,22 +488,18 @@ void View::browse()
     if (m_keyState->isRepeat(KEY_DOWN)) {
       // scroll down ...
       m_scrollPane->down();
-      m_dirty = true;
     }
     if (m_keyState->isRepeat(KEY_UP)) {
       // scroll up ...
       m_scrollPane->up();
-      m_dirty = true;
     }
     if (m_keyState->isRepeat(KEY_RIGHT)) {
       // scroll down ...
       m_scrollPane->pageDown();
-      m_dirty = true;
     }
     if (m_keyState->isRepeat(KEY_LEFT)) {
       // scroll up ...
       m_scrollPane->pageUp();
-      m_dirty = true;
     }
     if (m_keyState->isRepeat(KEY_L)) {
       if (m_toolbar == m_browseToolbar)
