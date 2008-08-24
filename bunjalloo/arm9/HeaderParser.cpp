@@ -17,6 +17,7 @@
 #include <assert.h>
 #include <cstdlib>
 #include <cstring>
+#include <algorithm>
 #include "CookieJar.h"
 #include "File.h"
 #include "HeaderParser.h"
@@ -158,7 +159,9 @@ void HeaderParser::handleHeader(const std::string & field, const std::string & v
     m_expected = strtol(value.c_str(), 0 , 0);
   }
   else if (field == "content-type") {
-    m_htmlParser->parseContentType(value);
+    string content(value);
+    std::transform(content.begin(), content.end(), content.begin(), ::tolower);
+    m_htmlParser->parseContentType(content);
   }
   else if (field == "refresh") {
     m_htmlParser->parseRefresh(value);
