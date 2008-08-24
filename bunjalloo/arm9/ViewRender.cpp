@@ -172,7 +172,6 @@ void ViewRender::renderImage()
   }
   ImageComponent * imageComponent = new ImageComponent(image, m_box, &m_self->document());
   m_self->m_scrollPane->add(imageComponent);
-  //add(imageComponent);
 }
 
 bool ViewRender::hasImage()
@@ -242,9 +241,13 @@ void ViewRender::render()
     }
   }
   pushTextArea();
+  done(useScrollPane);
+}
 
+void ViewRender::done(bool resetScroller)
+{
   m_self->m_scrollPane->add(m_box);
-  if (useScrollPane)
+  if (resetScroller)
   {
     m_self->resetScroller();
   }

@@ -188,8 +188,13 @@ void View::notify()
         m_progress->paint(m_progress->bounds());
         m_progress->setVisible(false);
         m_filenameForProgress.clear();
-        if (m_controller.downloadingFile() != m_document.uri())
+        if (m_state == BROWSE and m_controller.downloadingFile() != m_document.uri())
           break;
+        if (m_state == BROWSE and m_document.htmlDocument()->mimeType() == HtmlParser::TEXT_HTML)
+        {
+          // extract the *current* title
+          extractTitle();
+        }
         m_renderer->render();
         int pos = m_document.position();
         if (pos == -1)
@@ -321,8 +326,6 @@ void View::bookmarkUrl()
   // Add a line to the file DATADIR/userdata/bookmarks.html
   setToolbar(m_bookmarkToolbar);
   m_state = BOOKMARK;
-  // extract the *current* title
-  extractTitle();
   showBookmarkPage();
 }
 
