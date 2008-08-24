@@ -100,7 +100,6 @@ void Cache::remove(const URI & uri)
 {
   if (m_useCache)
   {
-    m_document.setCacheFile("");
     std::string cacheFile(uri2CacheFile(uri));
     if (nds::File::exists(cacheFile.c_str()) == nds::File::F_REG)
     {
