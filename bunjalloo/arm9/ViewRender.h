@@ -36,6 +36,8 @@ class ViewRender: public Visitor, public ViewI
     void render();
     void clear();
     void setUpdater(Updater * updater);
+    void add(Component *component);
+    void done(bool resetScroll);
     RichTextArea * textArea();
     void doTitle(const UnicodeString & str);
 
@@ -111,7 +113,6 @@ class ViewRender: public Visitor, public ViewI
 
     bool hasImage();
     void renderImage();
-    void add(Component *component);
     void pushTextArea();
 
     template<typename T, typename A>
