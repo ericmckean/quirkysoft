@@ -672,3 +672,15 @@ void DocumentTest::testTokenize()
   }
 
 }
+
+void DocumentTest::testNoCacheHtml()
+{
+  readFile("nocache.txt");
+  // tests for no-cache and mime type breakage
+  m_document->appendData(m_data, m_length);
+  m_document->setStatus(Document::LOADED);
+  HtmlParser::MimeType mimeType = m_document->htmlDocument()->mimeType();
+  HtmlParser::MimeType expected = HtmlParser::TEXT_HTML;
+  CPPUNIT_ASSERT_EQUAL(expected, mimeType);
+}
+
