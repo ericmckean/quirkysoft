@@ -250,10 +250,13 @@ void Keyboard::applyResult()
   m_topLevel->setVisible();
   m_topLevel->screenUp();
   this->setVisible(false);
-  UnicodeString tmp;
-  m_textArea->text(tmp);
-  if (m_entry) {
-    m_entry->setText(tmp);
+  if (m_selectedStatus == OK)
+  {
+    UnicodeString tmp;
+    m_textArea->text(tmp);
+    if (m_entry) {
+      m_entry->setText(tmp);
+    }
   }
 }
 
