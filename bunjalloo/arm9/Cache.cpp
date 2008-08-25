@@ -122,7 +122,8 @@ bool Cache::load(const URI & uri)
     if (contains(uri) and nds::File::exists(uri2CacheFile(uri).c_str()) == nds::File::F_REG)
     {
       add(uri);
-      m_document.reset();
+      if (m_document.historyEnabled())
+        m_document.reset();
       feed(cacheFile+".hdr");
       m_document.appendData("\r\n", 2);
       feed(cacheFile);
