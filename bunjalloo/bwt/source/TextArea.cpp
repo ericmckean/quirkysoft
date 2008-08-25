@@ -112,6 +112,10 @@ void TextArea::clearText()
 
 void TextArea::appendText(const UnicodeString & unicodeString)
 {
+  if (m_document.empty())
+  {
+    m_preferredWidth = 0;
+  }
   // append text, adding in new lines as needed to wrap.
   int currPosition = 0;
   // find the next space character
@@ -160,10 +164,6 @@ void TextArea::layoutText()
     appendText(tmp);
   if (m_preferredHeight == 0)
     m_preferredHeight = m_font->height();
-  int wInt = static_cast<int>(m_bounds.w);
-  if ( m_preferredWidth < 0 or (wInt <= m_preferredWidth)) {
-    m_preferredWidth = m_bounds.w;
-  }
   setParseNewline(pnl);
 }
 
