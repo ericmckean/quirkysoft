@@ -119,6 +119,8 @@ class ScrollPane: public Component
 
     void forceRedraw();
 
+    int visibleHeight() const;
+
   private:
     static Component * s_popup;
     int m_scrollIncrement;

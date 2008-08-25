@@ -178,6 +178,8 @@ class View : public ViewI, public ButtonListener, public LinkListener
     void setToolbar(Toolbar * toolbar);
 
     void makeNiceFileName(std::string & fileName);
+
+    int internalLinkPos();
 };
 
 Controller & View::controller() const

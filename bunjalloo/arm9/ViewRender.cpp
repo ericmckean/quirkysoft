@@ -49,6 +49,7 @@ RichTextArea * ViewRender::textArea()
     m_textArea->addLinkListener(m_self);
     bool parseNewline(m_self->m_document.htmlDocument()->mimeType() == HtmlDocument::TEXT_PLAIN);
     m_textArea->setParseNewline(parseNewline);
+    m_richTextAreas.push_back(m_textArea);
   }
   else
   {
@@ -155,6 +156,7 @@ void ViewRender::clear()
   m_self->m_scrollPane->removeChildren();
   clearRadioGroups();
   m_textArea = 0;
+  m_richTextAreas.clear();
   m_pendingNewline = false;
   m_box = new BoxLayout;
   m_box->setSize(m_self->m_scrollPane->width(),
@@ -482,6 +484,10 @@ void ViewRender::begin(HtmlAnchorElement & element)
     m_hrefViewed = m_self->m_controller.cache()->contains(newUri, false);
     m_hrefForLink = unicode2string(href);
   }
+  else
+  {
+    textArea()->addLink(unicode2string(href));
+  }
 }
 
 bool ViewRender::visit(HtmlAnchorElement & element)
@@ -490,14 +496,11 @@ bool ViewRender::visit(HtmlAnchorElement & element)
 }
 void ViewRender::end(HtmlAnchorElement & element)
 {
-  if (not m_hrefForLink.empty())
+  if (m_textArea)
   {
-    if (m_textArea)
-    {
-      m_textArea->endLink();
-    }
-    m_hrefForLink.clear();
+    m_textArea->endLink();
   }
+  m_hrefForLink.clear();
 }
 
 void ViewRender::begin(HtmlBlockElement & element)
@@ -557,11 +560,11 @@ bool ViewRender::visit(HtmlElement & element)
   else if (element.isa(HtmlConstants::BR_TAG))
   {
     m_pendingNewline = true;
-    if (m_textArea == 0)
+    /*if (m_textArea == 0)
     {
       m_box->insertNewline();
       m_pendingNewline = false;
-    }
+    }*/
   }
   else if (element.isa(HtmlConstants::TEXTAREA_TAG))
   {
@@ -698,4 +701,9 @@ bool ViewRender::visit(HtmlTextAreaElement & element)
 }
 void ViewRender::end(HtmlTextAreaElement & element)
 {
+}
+
+void ViewRender::textAreas(std::list<RichTextArea*>& textAreas)
+{
+  textAreas = m_richTextAreas;
 }
