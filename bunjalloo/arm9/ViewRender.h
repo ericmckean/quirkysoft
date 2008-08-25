@@ -97,6 +97,7 @@ class ViewRender: public Visitor, public ViewI
     BoxLayout *m_box;
     bool m_hrefViewed;
     std::string m_hrefForLink;
+    bool m_pendingNewline;
 
     const HtmlElement * m_lastElement;
     typedef std::map<UnicodeString, FormRadio*> FormGroupMap;

@@ -25,10 +25,16 @@
 
 using nds::Rectangle;
 
+/*
+ * BoxLayout has a list of Box
+ * Each Box has a set of BoundComponent
+ *
+ */
+
 class BoxLayout::Box
 {
   public:
-    Box(BoxLayout * parent): m_parent(parent)
+    Box(BoxLayout * parent): m_parent(parent), m_forceEnd(false)
     {
       m_bounds.x = 0;
       m_bounds.y = 0;
@@ -43,6 +49,8 @@ class BoxLayout::Box
 
     bool tryAdd(Component *child)
     {
+      if (m_forceEnd)
+        return false;
       if ((child->width() + m_bounds.w) > m_parent->width())
       {
         return false;
@@ -81,6 +89,25 @@ class BoxLayout::Box
       m_bounds.y -= dy;
     }
 
+    /** Force the end of the area. */
+    void setForceEnd(bool forceEnd)
+    {
+      m_forceEnd = forceEnd;
+    }
+
+    bool forceEnd()
+    {
+      return m_forceEnd;
+    }
+
+    Component *lastComponent()
+    {
+      if (m_children.empty())
+        return 0;
+      BoundComponent *bc(*m_children.rbegin());
+      return bc->component();
+    }
+
   private:
     BoxLayout *m_parent;
     Rectangle m_bounds;
@@ -112,6 +139,7 @@ class BoxLayout::Box
     };
     typedef std::set<BoundComponent*> BoundComponentSet;
     BoundComponentSet m_children;
+    bool m_forceEnd;
 
     bool initialised() const
     {
@@ -206,6 +234,15 @@ void BoxLayout::add(Component *child)
   addToLayout(child);
 }
 
+void BoxLayout::insertNewline()
+{
+  // magically add something that says "this box has a new line"!
+  if (m_boxes.size() > 1 or m_boxes.front()->lastComponent() != 0)
+  {
+    m_boxes.front()->setForceEnd(true);
+  }
+}
+
 void BoxLayout::paint(const nds::Rectangle & clip)
 {
   using nds::Rectangle;
@@ -275,10 +312,33 @@ void BoxLayout::doLayout(bool force)
   if (it != m_boxes.end())
   {
     // needs redoing
-    for_each(m_boxes.begin(), m_boxes.end(), delete_ptr());
+    // find the components that are followed by forced newlines
+    // delete all Boxes to avoid mem leaks
+    std::set<Component*> lastBeforeForce;
+    for (std::list<Box*>::const_iterator it(m_boxes.begin()); it != m_boxes.end(); ++it)
+    {
+      Box *b(*it);
+      if (b->forceEnd())
+      {
+        Component * c(b->lastComponent());
+        if (c)
+        {
+          lastBeforeForce.insert(c);
+        }
+      }
+      delete b;
+    }
     m_boxes.clear();
     initBoxes();
-    for_each(m_children.begin(), m_children.end(), std::bind1st(std::mem_fun(&BoxLayout::addToLayout), this));
+    for (std::vector<Component*>::iterator it(m_children.begin()); it != m_children.end(); ++it)
+    {
+      Component *c(*it);
+      addToLayout(c);
+      if (lastBeforeForce.find(c) != lastBeforeForce.end())
+      {
+        m_boxes.front()->setForceEnd(true);
+      }
+    }
   }
 }
 

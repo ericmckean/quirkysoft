@@ -50,6 +50,14 @@ RichTextArea * ViewRender::textArea()
     bool parseNewline(m_self->m_document.htmlDocument()->mimeType() == HtmlDocument::TEXT_PLAIN);
     m_textArea->setParseNewline(parseNewline);
   }
+  else
+  {
+    if (m_pendingNewline)
+    {
+      m_textArea->insertNewline();
+    }
+  }
+  m_pendingNewline = false;
   addLink(m_textArea, m_hrefViewed);
   return m_textArea;
 }
@@ -147,6 +155,7 @@ void ViewRender::clear()
   m_self->m_scrollPane->removeChildren();
   clearRadioGroups();
   m_textArea = 0;
+  m_pendingNewline = false;
   m_box = new BoxLayout;
   m_box->setSize(m_self->m_scrollPane->width(),
       m_self->m_scrollPane->height());
@@ -304,6 +313,11 @@ void ViewRender::pushTextArea()
 void ViewRender::add(Component *component)
 {
   pushTextArea();
+  if (m_pendingNewline)
+  {
+    m_box->insertNewline();
+    m_pendingNewline = false;
+  }
   m_box->add(component);
 }
 
@@ -542,7 +556,12 @@ bool ViewRender::visit(HtmlElement & element)
   }
   else if (element.isa(HtmlConstants::BR_TAG))
   {
-    textArea()->insertNewline();
+    m_pendingNewline = true;
+    if (m_textArea == 0)
+    {
+      m_box->insertNewline();
+      m_pendingNewline = false;
+    }
   }
   else if (element.isa(HtmlConstants::TEXTAREA_TAG))
   {
@@ -582,7 +601,10 @@ void ViewRender::end(HtmlElement & element)
 
 void ViewRender::begin(HtmlFormElement & element)
 {
-  textArea()->insertNewline();
+  m_pendingNewline = true;
+  pushTextArea();
+  m_box->insertNewline();
+  m_pendingNewline = false;
 }
 bool ViewRender::visit(HtmlFormElement & element)
 {
