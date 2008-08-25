@@ -61,8 +61,6 @@ class RichTextArea: public TextArea
     bool outlined() const;
     void setOutlined(bool outline=true);
 
-    virtual int linesToSkip() const;
-
     virtual void paint(const nds::Rectangle & clip);
     virtual void setLocation(int x, int y);
 
@@ -74,6 +72,8 @@ class RichTextArea: public TextArea
     /** Given a link index, find where abouts in the text area it is.
      */
     int linkPosition(int linkIndex) const;
+
+    unsigned int linkCount() const;
 
   protected:
     /** Overloaded from TextArea. This checks the current char vs the links to

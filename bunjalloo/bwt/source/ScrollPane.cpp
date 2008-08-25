@@ -578,3 +578,10 @@ void ScrollPane::forceRedraw()
 {
   m_dirty = true;
 }
+
+int ScrollPane::visibleHeight() const
+{
+  if (m_children.empty())
+    return 0;
+  return m_scrollBar->total() - m_scrollBar->visibleRange();
+}

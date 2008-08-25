@@ -423,15 +423,6 @@ unsigned int RichTextArea::documentSize(int endLine, unsigned int * childIndex) 
   return total;
 }
 
-int RichTextArea::linesToSkip() const
-{
-  if (m_bounds.y < 0)
-  {
-    return lineAt(0);
-  }
-  return 0;
-}
-
 void RichTextArea::paint(const nds::Rectangle & clip)
 {
   m_dirty = false;
@@ -457,7 +448,7 @@ void RichTextArea::paint(const nds::Rectangle & clip)
   m_lineNumber = 0;
   // work out what happens when we skip lines.
   int dy;
-  int lineNum = lineAt(0, dy);
+  int lineNum = lineAt(m_bounds.y, dy);
   std::vector<UnicodeString>::const_iterator it(m_document.begin());
   int skipLines(lineNum);
   m_currentChildIndex = 0;
@@ -585,7 +576,7 @@ int RichTextArea::pointToCharIndex(int x, int y) const
   const UnicodeString & line(m_document[lineNum]);
   int caretChar = NO_INDEX;
   bool hasComponent(lineHasComponent(lineNum));
-  for (int i = 0, size = 0; i < (int)line.length(); ++i, ++charNumber)
+  for (int i = 0, size = m_bounds.x; i < (int)line.length(); ++i, ++charNumber)
   {
     // check if component here too
     while (hasComponent and currentChildIndex < m_childPositions.size()
@@ -643,7 +634,7 @@ int RichTextArea::linkPosition(int linkIndex) const
   {
     // now know where it starts
     Link * l(*it);
-    return charIndexToLine(l->textStart());
+    return m_bounds.top() + charIndexToLine(l->textStart());
   }
   return -1;
 }
@@ -720,7 +711,7 @@ bool RichTextArea::stylusDownFirst(const Stylus * stylus)
 bool RichTextArea::stylusDownRepeat(const Stylus * stylus)
 {
   // do nothing to avoid accidental clicks
-  FOR_EACH_CHILD(stylusDownRepeat);
+  // FOR_EACH_CHILD(stylusDownRepeat);
   return false;
 }
 
@@ -761,6 +752,11 @@ bool RichTextArea::stylusDown(const Stylus * stylus)
       FOR_EACH_CHILD(stylusDown);
     }
   }
+  else if (m_linkTouched)
+  {
+    m_linkTouched->setClicked(false);
+    return true;
+  }
   return false;
 }
 
@@ -796,5 +792,10 @@ bool RichTextArea::outlined() const
 void RichTextArea::setOutlined(bool outline)
 {
   m_outlined = outline;
+}
+
+unsigned int RichTextArea::linkCount() const
+{
+  return m_links.size();
 }
 

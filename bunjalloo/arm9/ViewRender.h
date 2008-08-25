@@ -41,6 +41,8 @@ class ViewRender: public Visitor, public ViewI
     RichTextArea * textArea();
     void doTitle(const UnicodeString & str);
 
+    void textAreas(std::list<RichTextArea*>& textAreas);
+
     // implement the ViewI interface.
     virtual void notify();
 
@@ -92,6 +94,7 @@ class ViewRender: public Visitor, public ViewI
     View * m_self;
     // keep track of the last RichTextArea component added to the ScrollPane
     RichTextArea * m_textArea;
+    std::list<RichTextArea*> m_richTextAreas;
     ZipViewer * m_zipViewer;
     Updater * m_updater;
     BoxLayout *m_box;

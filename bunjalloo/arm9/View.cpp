@@ -200,24 +200,10 @@ void View::notify()
         if (pos == -1)
         {
           // is it relative?
-          URI uri(m_document.uri());
-          const string & internal(uri.internalLink());
-          if (not internal.empty())
-          {
-            // do some stuff with internal links
-            InternalVisitor visitor(internal);
-            HtmlElement * root((HtmlElement*)m_document.rootNode());
-            root->accept(visitor);
-            if (visitor.found())
-            {
-              RichTextArea * text((RichTextArea*)m_scrollPane->childAt(m_scrollPane->childCount()-1));
-              unsigned int linkPos = text->linkPosition(visitor.index()) + 192;
-              pos = (linkPos * 256) / (text->bounds().h);
-            }
-
-          }
+          pos = internalLinkPos();
         }
         m_scrollPane->scrollToPercent(pos);
+        //m_scrollPane->scrollToAbsolute(pos);
         m_dirty = true;
         string refresh;
         int refreshTime;
@@ -770,4 +756,39 @@ void View::resetScroller()
 ViewRender * View::renderer()
 {
   return m_renderer;
+}
+
+int View::internalLinkPos()
+{
+  URI uri(m_document.uri());
+  const string & internal(uri.internalLink());
+  if (not internal.empty())
+  {
+    // do some stuff with internal links
+    InternalVisitor visitor(internal);
+    HtmlElement * root((HtmlElement*)m_document.rootNode());
+    root->accept(visitor);
+    if (visitor.found())
+    {
+      std::list<RichTextArea*> richTextAreas;
+      m_renderer->textAreas(richTextAreas);
+      int linksFound = 0;
+      // search in each RichTextArea until we find the link position
+      for (std::list<RichTextArea*>::iterator it(richTextAreas.begin());
+          it != richTextAreas.end(); ++it)
+      {
+        RichTextArea * text(*it);
+        int links = text->linkCount();
+        if ((linksFound + links) > visitor.index())
+        {
+          // if (link is in this text area)...
+          int linkInText = visitor.index() - linksFound;
+          unsigned int linkPos = text->linkPosition(linkInText)  - 192;
+          return (linkPos * 256) / (m_scrollPane->visibleHeight());
+        }
+        linksFound += links;
+      }
+    }
+  }
+  return -1;
 }
