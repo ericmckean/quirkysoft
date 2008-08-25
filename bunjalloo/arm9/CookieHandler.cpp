@@ -21,6 +21,8 @@
 #include "CookieHandler.h"
 #include "CookieJar.h"
 #include "Document.h"
+#include "HtmlConstants.h"
+#include "HtmlElement.h"
 #include "Language.h"
 #include "RadioButton.h"
 #include "RichTextArea.h"
@@ -135,6 +137,7 @@ void CookieHandler::showEdit()
   ViewRender * renderer(m_view.renderer());
   CookieJar::AcceptedDomainSet domains;
   m_view.document().cookieJar()->acceptedDomains(domains);
+  HtmlElement brElement(HtmlConstants::BR_TAG);
   for (CookieJar::AcceptedDomainSet::const_iterator it(domains.begin());
       it != domains.end(); ++it)
   {
@@ -142,13 +145,13 @@ void CookieHandler::showEdit()
     m_checkboxes.push_back(check);
     renderer->add(check);
     renderer->textArea()->appendText(string2unicode(*it));
-    renderer->textArea()->insertNewline();
+    renderer->visit(brElement);
   }
   renderer->add(static_cast<Button*>(m_deleteSelected));
   renderer->add(static_cast<Button*>(m_editSelected));
-  renderer->textArea()->insertNewline();
+  renderer->visit(brElement);
   renderer->textArea()->appendText(string2unicode(" --- "));
-  renderer->textArea()->insertNewline();
+  renderer->visit(brElement);
   renderer->add(static_cast<Button*>(m_ok));
   renderer->done(true);
 }

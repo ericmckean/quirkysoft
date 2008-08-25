@@ -29,6 +29,7 @@ class BoxLayoutTest : public CPPUNIT_NS::TestFixture
   CPPUNIT_TEST( testSetLocation );
   CPPUNIT_TEST( testNastySize );
   CPPUNIT_TEST( testResizeImages );
+  CPPUNIT_TEST( testNewline );
   CPPUNIT_TEST_SUITE_END();
 
 public:
@@ -44,6 +45,7 @@ public:
   void testSetLocation();
   void testNastySize();
   void testResizeImages();
+  void testNewline();
 
 };
 
@@ -523,4 +525,66 @@ void BoxLayoutTest::testResizeImages()
     CPPUNIT_ASSERT_EQUAL(5U, m_layout->boxCount());
     CPPUNIT_ASSERT_EQUAL(26+94+52+232+26, m_layout->height());
   }
+}
+
+void BoxLayoutTest::testNewline()
+{
+  /*
+   * Test that adding a new line and resizing works
+   *
+   * c1 - small component
+   * c2 - 0 component, resized later
+   * -> newline
+   * c3 - small component
+   * c4 - small component
+   *   +---+
+   *   |c1|| < c2 is 0 size, but followed by a newline
+   *   +-----+
+   *   |c3|c4|
+   *   +-----+
+   * c1 at 0,0
+   * c2 at 0,c1.right
+   * c3 at 0, c1.bottom
+   * c4 at c3.right, c1.bottom
+   *
+   * Note c1, c2 and c3 would all fit on one line normally
+   */
+  MockComponent *c1 = new MockComponent;
+  MockComponent *c2 = new MockComponent;
+  MockComponent *c3 = new MockComponent;
+  MockComponent *c4 = new MockComponent;
+
+  using nds::Rectangle;
+  Rectangle r1 = { 0, 0, 40, 14 };
+  Rectangle r2 = { 0, 0, 0, 0 };
+  c1->setSize(r1.w, r1.h);
+  c2->setSize(r2.w, r2.h);
+  c3->setSize(r1.w, r1.h);
+  c4->setSize(r1.w, r1.h);
+
+  m_layout->add(c1);
+  m_layout->add(c2);
+  m_layout->insertNewline();
+  m_layout->add(c3);
+  m_layout->add(c4);
+
+  c2->setSize(50, 18);
+  m_layout->doLayout();
+  r2.x = r1.right();
+  r2.y = 0;
+  r2.w = 50;
+  r2.h = 18;
+
+  Rectangle r3 = r1;
+  r3.y = r2.bottom();
+  Rectangle r4 = r3;
+  r4.x = r3.right();
+
+
+  CPPUNIT_ASSERT(r1 == c1->bounds());
+  CPPUNIT_ASSERT(r2 == c2->bounds());
+  CPPUNIT_ASSERT(r3 == c3->bounds());
+  CPPUNIT_ASSERT(r4 == c4->bounds());
+  CPPUNIT_ASSERT_EQUAL(r3.bottom(), m_layout->height());
+  CPPUNIT_ASSERT_EQUAL(2U, m_layout->boxCount());
 }

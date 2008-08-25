@@ -33,6 +33,9 @@ class BoxLayout: public Component
      * @param force force the relayout, e.g. if resize this component */
     void doLayout(bool force=false);
 
+    /** Force there to be an end-of-line after the last component. */
+    void insertNewline();
+
     // Reimplement Component methods.
     virtual void setLocation(int x, int y);
     virtual void setSize(int w, int h);
