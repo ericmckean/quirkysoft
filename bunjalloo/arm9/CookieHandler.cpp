@@ -142,6 +142,7 @@ void CookieHandler::showEdit()
     m_checkboxes.push_back(check);
     renderer->add(check);
     renderer->textArea()->appendText(string2unicode(*it));
+    renderer->textArea()->insertNewline();
   }
   renderer->add(static_cast<Button*>(m_deleteSelected));
   renderer->add(static_cast<Button*>(m_editSelected));

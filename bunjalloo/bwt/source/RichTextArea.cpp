@@ -77,6 +77,10 @@ void RichTextArea::appendText(const UnicodeString & unicodeString)
   }
   TextArea::appendText(unicodeString);
   m_documentSize = documentSize();
+  if (m_centred)
+  {
+    m_preferredWidth = m_bounds.w;
+  }
 }
 
 void RichTextArea::add(Component * child)
