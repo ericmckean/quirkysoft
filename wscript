@@ -45,7 +45,6 @@ def set_options(opt):
   opt.add_option('--without-bunjalloo', action='store_true',
           help='Do not build bunjalloo (use with "configure")',
           default=False, dest='without_bunjalloo')
-
   opt.add_option('--without-sdl', action='store_true',
           help='Do not build the SDL port',
           default=False, dest='without_sdl')
@@ -53,6 +52,12 @@ def set_options(opt):
   opt.add_option('--without-cppunit', action='store_true',
           help='Do not build the unit tests',
           default=False, dest='without_cppunit')
+  opt.add_option('--with-tcmalloc', action='store_true',
+          help='Use Google heap profiler tcmalloc (http://code.google.com/p/google-perftools/)',
+          default=False, dest='with_tcmalloc')
+  opt.add_option('--with-profiler', action='store_true',
+          help='Use Google CPU profiler (http://code.google.com/p/google-perftools/)',
+          default=False, dest='with_profiler')
 
   opt.add_option('--tags', action='store_true',
           help='Force creation of tags file using ctags (use with "build")',
@@ -179,6 +184,22 @@ def lib_check_sdl(conf):
   e.uselib_store = 'HOST'
   e.name = 'GL'
   e.run()
+
+  if Options.options.with_tcmalloc:
+    e = conf.create_library_configurator()
+    e.mandatory = 1
+    e.uselib_store = 'HOST'
+    e.name = 'tcmalloc'
+    e.run()
+  if Options.options.with_profiler:
+    e = conf.create_library_configurator()
+    e.mandatory = 1
+    e.uselib_store = 'HOST'
+    e.name = 'profiler'
+    e.run()
+
+
+
   lib_check_common(e)
 
 
