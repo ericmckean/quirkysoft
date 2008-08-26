@@ -625,3 +625,8 @@ unsigned int RichTextArea::linkCount() const
   return m_links.size();
 }
 
+bool RichTextArea::inLink() const
+{
+  return m_state == Link::STATE_LINK;
+}
+
