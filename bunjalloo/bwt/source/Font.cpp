@@ -158,9 +158,11 @@ int Font::minGlyph() const
 }
 int Font::valueToIndex(unsigned int glyphId) const
 {
-  vector<Range*>::const_iterator it(m_range.begin());
+  vector<Range*>::const_iterator end = m_range.end();
   int total = 0;
-  for (; it != m_range.end(); ++it)
+  for (vector<Range*>::const_iterator it(m_range.begin());
+      it != end;
+      ++it)
   {
     const Range * range(*it);
     if (range->contains(glyphId))

@@ -78,7 +78,8 @@ void RichTextArea::appendText(const UnicodeString & unicodeString)
     return;
   }
   TextArea::appendText(unicodeString);
-  m_documentSize = documentSize(NO_INDEX);
+  // recalculate document size
+  m_documentSize = 0;
   if (m_centred)
   {
     m_preferredWidth = m_bounds.w;
@@ -88,7 +89,7 @@ void RichTextArea::appendText(const UnicodeString & unicodeString)
 void RichTextArea::addLink(const std::string & href, bool visited)
 {
   Link * link = new Link(href);
-  link->setTextStart(m_documentSize);
+  link->setTextStart(totalCharacters());
   m_links.push_back(link);
   m_state = Link::STATE_LINK;
   if (visited)
@@ -103,13 +104,13 @@ void RichTextArea::endLink()
   {
     m_state = Link::STATE_PLAIN;
     Link & link(*m_links.back());
-    link.setTextEnd(m_documentSize);
+    link.setTextEnd(totalCharacters());
     if (link.textEnd() != link.textStart())
     {
       int lastChar = (int) ( currentLine()[currentLine().length()-1] );
       if (isWhitespace(lastChar))
       {
-        link.setTextEnd(m_documentSize-1);
+        link.setTextEnd(totalCharacters()-1);
       }
     }
   }
@@ -129,7 +130,7 @@ void RichTextArea::addImage(const std::string & src)
   else
   {
     Link * link = new Link(WidgetColors::LINK_IMAGE);
-    link->setTextStart(m_documentSize);
+    link->setTextStart(totalCharacters());
     m_links.push_back(link);
     m_state = Link::STATE_COLOR;
   }
@@ -142,7 +143,7 @@ void RichTextArea::endImage()
   {
     m_state = Link::STATE_PLAIN;
     Link & link(*m_links.back());
-    link.setTextEnd(m_documentSize);
+    link.setTextEnd(totalCharacters());
   }
   else if (m_state == Link::STATE_LINK)
   {
@@ -233,7 +234,7 @@ void RichTextArea::handleNextEvent()
           handleNextEvent();
         }
       } else {
-        m_nextEvent = m_documentSize;
+        m_nextEvent = totalCharacters();
         m_nextEventType = Link::STATE_PLAIN;
       }
       break;
@@ -268,6 +269,15 @@ unsigned int RichTextArea::charIndexToLine(unsigned int charIndex) const
   return line*fontHeight;
 }
 
+unsigned int RichTextArea::totalCharacters()
+{
+  if (m_documentSize == 0)
+  {
+    m_documentSize = documentSize(NO_INDEX);
+  }
+  return m_documentSize;
+}
+
 unsigned int RichTextArea::documentSize(int endLine) const
 {
   unsigned int total = 0;
@@ -276,7 +286,8 @@ unsigned int RichTextArea::documentSize(int endLine) const
     endLine = m_document.size();
   }
   std::vector<UnicodeString>::const_iterator it(m_document.begin());
-  for (int i = 0; it != m_document.end() and i != endLine; ++it, ++i)
+  std::vector<UnicodeString>::const_iterator end(m_document.end());
+  for (int i = 0; it != end and i != endLine; ++it, ++i)
   {
     total += it->length();
   }
@@ -300,7 +311,7 @@ void RichTextArea::paint(const nds::Rectangle & clip)
   else
   {
     m_currentLink = m_links.end();
-    m_nextEvent = m_documentSize;
+    m_nextEvent = totalCharacters();
     m_nextEventType = Link::STATE_PLAIN;
   }
   nds::Canvas::instance().setClip(clip);
@@ -378,7 +389,7 @@ void RichTextArea::checkSkippedLines(int skipLines)
   if (not handled)
   {
     m_currentLink = m_links.end();
-    m_nextEvent = m_documentSize;
+    m_nextEvent = totalCharacters();
     m_nextEventType = Link::STATE_PLAIN;
   }
 }

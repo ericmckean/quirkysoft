@@ -107,6 +107,11 @@ class RichTextArea: public TextArea
      * @param endLine the last line to use - pass NO_INDEX to use whole doc.
      */
     unsigned int documentSize(int endLine) const;
+
+    /** Get the total character count. Uses m_documentSize internally,
+     * recalculating only when needed.*/
+    unsigned int totalCharacters();
+
     void handleNextEvent();
     void checkSkippedLines(int skipLines);
     int pointToCharIndex(int x, int y) const;
