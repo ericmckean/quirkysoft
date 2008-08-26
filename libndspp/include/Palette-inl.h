@@ -1,5 +1,5 @@
-#ifndef Palette_inl_seen
-#define Palette_inl_seen
+#ifndef Palette_inl_h_seen
+#define Palette_inl_h_seen
 
 inline unsigned int Color::red() const
 {
