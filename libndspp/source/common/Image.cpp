@@ -451,6 +451,9 @@ void Image::readGif()
 
   // map ScreenBuffer to m_data
   ColorMapObject * colorMap = (gifFile->Image.ColorMap ? gifFile->Image.ColorMap : gifFile->SColorMap);
+  // TODO: handle other gif types
+  if (!colorMap)
+    return;
   m_paletteSize = colorMap->ColorCount;
   m_palette = (unsigned short*)malloc(sizeof(unsigned short) * m_paletteSize);
   if (!m_palette)

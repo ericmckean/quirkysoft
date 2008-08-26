@@ -1,15 +1,28 @@
 #!/bin/bash
 cd $(dirname $0)
-
+startat=""
+if test $# -gt 0 ; then
+  startat=$1
+fi
 BUNJALLOO=../_build_/sdl/bunjalloo/bunjalloo
 while read line
 do
+  if ! test -z $startat ; then
+    echo $line| grep $startat  > /dev/null
+    if test $? -eq 0 ; then
+      startat=""
+    else
+      continue
+    fi
+  fi
   cd ../.. >/dev/null
-  $BUNJALLOO $line &
-  sleep 10
-  printf "5 seconds to kill... "
-  sleep 5
-  pkill bunjalloo
-  printf "killed\n"
+  echo $line...
+  $BUNJALLOO $line 0
+  if test  $? -ne 0; then
+    echo $line caused a crash
+    exit 1
+  fi
   cd - >/dev/null
 done < input.txt
+
+echo "All done!"
