@@ -53,5 +53,6 @@ class TextField: public TextContainer, public TextEntryI
     virtual bool stylusDown(const Stylus * stylus);
   private:
     bool m_touched;
+    DISALLOW_COPY_AND_ASSIGN(TextField);
 };
 #endif

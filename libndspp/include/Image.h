@@ -18,6 +18,7 @@
 #define Image_h_seen
 #include <stdint.h>
 #include <string>
+#include "util/classhelper.h"
 
 // tolua_begin
 namespace nds
@@ -131,6 +132,7 @@ namespace nds
       void calculateScale();
       void allocData();
 
+      DISALLOW_COPY_AND_ASSIGN(Image);
   }; //tolua_export
 }
 #endif

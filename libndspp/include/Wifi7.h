@@ -21,6 +21,7 @@
 #error Wifi7 is only available on the ARM7
 #endif
 
+#include "util/classhelper.h"
 namespace nds {
   /*! @brief Wifi7 is a helper class for the arm7 dswifi code.
    *
@@ -42,6 +43,8 @@ namespace nds {
       bool m_enabled;
       //! initialise the hardware
       void initialise();
+
+      DISALLOW_COPY_AND_ASSIGN(Wifi7);
   };
 };
 

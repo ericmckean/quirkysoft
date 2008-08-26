@@ -70,5 +70,6 @@ class TextContainer: public Component
     UnicodeString m_text;
     void layout();
 
+    DISALLOW_COPY_AND_ASSIGN(TextContainer);
 };
 #endif

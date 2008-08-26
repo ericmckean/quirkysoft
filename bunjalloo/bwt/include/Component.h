@@ -20,6 +20,7 @@
 #include <vector>
 #include "Rectangle.h"
 #include "StylusListener.h"
+#include "util/classhelper.h"
 
 //! Helper define for calling stylus callbacks on children
 #define FOR_EACH_CHILD(fn) \
@@ -143,6 +144,9 @@ class Component: public StylusListener
     std::vector<Component *> m_children;
 
     bool m_dirty;
+
+  private:
+    DISALLOW_COPY_AND_ASSIGN(Component);
 };
 
 int Component::width() const

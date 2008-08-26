@@ -49,5 +49,6 @@ class ProgressBar: public TextContainer
     unsigned int m_value;
     bool m_showString;
 
+    DISALLOW_COPY_AND_ASSIGN(ProgressBar);
 };
 #endif

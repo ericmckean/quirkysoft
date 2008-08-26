@@ -50,5 +50,6 @@ class Button: public TextContainer, public ButtonI
 
   private:
     bool m_decoration;
+    DISALLOW_COPY_AND_ASSIGN(Button);
 };
 #endif

@@ -60,15 +60,17 @@ class ComboBox: public Component,
     virtual bool stylusDownFirst(const Stylus * stylus);
     virtual bool stylusDownRepeat(const Stylus * stylus);
     virtual bool stylusDown(const Stylus * stylus);
-  private:
-    int m_items;
-    int m_selectedIndex;
-    bool m_open;
 
   protected:
     inline ScrollPane * scrollPane();
     inline const ScrollPane * scrollPane() const;
     inline Button * button();
+
+  private:
+    int m_items;
+    int m_selectedIndex;
+    bool m_open;
+    DISALLOW_COPY_AND_ASSIGN(ComboBox);
 
 };
 

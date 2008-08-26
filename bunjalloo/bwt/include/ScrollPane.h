@@ -145,6 +145,8 @@ class ScrollPane: public Component
     };
     void up(ScrollType type);
     void down(ScrollType type);
+
+    DISALLOW_COPY_AND_ASSIGN(ScrollPane);
 };
 
 #endif
