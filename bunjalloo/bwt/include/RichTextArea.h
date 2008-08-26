@@ -38,8 +38,6 @@ class RichTextArea: public TextArea
      */
     void addLink(const std::string & href, bool visited=false);
 
-    void add(Component * child);
-
     /** End the Link. */
     void endLink();
 
@@ -61,19 +59,19 @@ class RichTextArea: public TextArea
     bool outlined() const;
     void setOutlined(bool outline=true);
 
+    /** Given a link index, find where abouts in the text area it is.
+     */
+    int linkPosition(int linkIndex) const;
+
+    /** @return the number of links in total. */
+    unsigned int linkCount() const;
+
     virtual void paint(const nds::Rectangle & clip);
-    virtual void setLocation(int x, int y);
 
     virtual bool stylusUp(const Stylus * stylus);
     virtual bool stylusDownFirst(const Stylus * stylus);
     virtual bool stylusDownRepeat(const Stylus * stylus);
     virtual bool stylusDown(const Stylus * stylus);
-
-    /** Given a link index, find where abouts in the text area it is.
-     */
-    int linkPosition(int linkIndex) const;
-
-    unsigned int linkCount() const;
 
   protected:
     /** Overloaded from TextArea. This checks the current char vs the links to
@@ -94,17 +92,9 @@ class RichTextArea: public TextArea
     // for painting:
     LinkList::const_iterator m_currentLink;
     LinkListener * m_linkListener;
-
-    typedef std::map<int, int> LineHeightMap;
-    // keep track of which lines have components.
-    // line height is the maximum height of a component on that line
-    LineHeightMap m_lineHeight;
+    // current line number being painted
     int m_lineNumber;
 
-    unsigned int m_currentChildIndex;
-
-    // character position of a component.
-    std::vector<unsigned int> m_childPositions;
     bool m_centred;
     bool m_outlined;
 
@@ -113,19 +103,18 @@ class RichTextArea: public TextArea
 
     /** Delete the links */
     void removeClickables();
-    unsigned int documentSize(int endLine=-1, unsigned int * childIndex=0) const;
+    /** get the size in characters.
+     * @param endLine the last line to use - pass NO_INDEX to use whole doc.
+     */
+    unsigned int documentSize(int endLine) const;
     void handleNextEvent();
     void checkSkippedLines(int skipLines);
     int pointToCharIndex(int x, int y) const;
-
-    void appendText_copyPaste(const UnicodeString & unicodeString);
 
     // get the document line at the clicked y position
     int lineAt(int y, int & leftover) const;
     int lineAt(int y) const;
 
-    bool lineHasComponent(int line) const;
-    // bool childTouch(Stylus & stylus);
     Link * linkAt(int index);
 
     unsigned int charIndexToLine(unsigned int charIndex) const;
