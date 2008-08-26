@@ -17,6 +17,7 @@
 #ifndef Video_h_seen
 #define Video_h_seen
 #include <stdint.h>
+#include "util/classhelper.h"
 // tolua_begin
 namespace nds
 {
@@ -163,6 +164,7 @@ namespace nds
       //! Set the default VRAM banks. Uses bank A for the main screen, bank C for the sub screen.
       void setBanks();
 
+      DISALLOW_COPY_AND_ASSIGN(Video);
   }; // tolua_export
 
 } // tolua_export

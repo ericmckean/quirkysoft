@@ -137,5 +137,6 @@ class Keyboard : public Component, public TextListener, public ButtonListener
      */
     inline bool multiLine() const;
 
+    DISALLOW_COPY_AND_ASSIGN(Keyboard);
 };
 #endif

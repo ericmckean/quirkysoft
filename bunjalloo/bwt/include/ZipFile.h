@@ -19,6 +19,7 @@
 
 #include <vector>
 #include <string>
+#include "util/classhelper.h"
 
 class ZipFileImpl;
 class ExtractListener
@@ -66,5 +67,6 @@ class ZipFile
     void setListener(ExtractListener * listener);
   private:
     ZipFileImpl * m_impl;
+    DISALLOW_COPY_AND_ASSIGN(ZipFile);
 };
 #endif

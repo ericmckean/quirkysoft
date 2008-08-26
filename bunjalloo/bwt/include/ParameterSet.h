@@ -19,6 +19,7 @@
 
 #include <map>
 #include <string>
+#include "util/classhelper.h"
 
 typedef std::map<std::string, std::string> KeyValueMap;
 class PSImpl;
@@ -53,6 +54,7 @@ class ParameterSet
   private:
     PSImpl * m_psImpl;
 
+    DISALLOW_COPY_AND_ASSIGN(ParameterSet);
 };
 
 #endif

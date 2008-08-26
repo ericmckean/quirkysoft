@@ -52,5 +52,6 @@ class BoxLayout: public Component
     std::list<Box*> m_boxes;
     void addToLayout(Component *child);
     void initBoxes();
+    DISALLOW_COPY_AND_ASSIGN(BoxLayout);
 };
 #endif

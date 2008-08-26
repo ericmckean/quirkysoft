@@ -157,8 +157,8 @@ class TextArea : public Component
      * @param y the cursor y position in pixels.
      */
     void setCursor(int x, int y);
-  private:
 
+  private:
     Font * m_font;
     unsigned short * m_palette;
     unsigned short * m_basePalette;
@@ -168,12 +168,10 @@ class TextArea : public Component
     unsigned short m_fgCol;
     bool m_underLine;
 
-
     void printAt(Font::Glyph & g, int xPosition, int yPosition);
     inline void checkLetter(Font::Glyph & g);
 
-
-
+    DISALLOW_COPY_AND_ASSIGN(TextArea);
 };
 
 // inline implementations

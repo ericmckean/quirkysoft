@@ -17,6 +17,7 @@
 #ifndef Client_h_seen
 #define Client_h_seen
 
+#include "util/classhelper.h"
 struct sockaddr_in;
 namespace nds {
   class Client
@@ -97,8 +98,7 @@ namespace nds {
       bool connect(sockaddr_in & socketAddress);
       void makeNonBlocking();
 
-      Client(const Client &);
-      const Client operator=(const Client &);
+      DISALLOW_COPY_AND_ASSIGN(Client);
   };
 }
 #endif

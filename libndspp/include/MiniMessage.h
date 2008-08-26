@@ -2,6 +2,7 @@
 #define MiniMessage_h_seen
 
 #include "Background.h"
+#include "util/classhelper.h"
 namespace nds
 {
   class MiniMessage
@@ -19,6 +20,8 @@ namespace nds
 
       void init();
       void print(const char * msg, int x, int y);
+
+      DISALLOW_COPY_AND_ASSIGN(MiniMessage);
   };
 }
 #endif

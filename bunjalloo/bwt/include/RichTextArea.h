@@ -129,5 +129,6 @@ class RichTextArea: public TextArea
     Link * linkAt(int index);
 
     unsigned int charIndexToLine(unsigned int charIndex) const;
+    DISALLOW_COPY_AND_ASSIGN(RichTextArea);
 };
 #endif

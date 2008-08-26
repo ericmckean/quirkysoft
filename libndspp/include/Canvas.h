@@ -18,6 +18,7 @@
 #define Canvas_h_seen
 
 #include "Rectangle.h"
+#include "util/classhelper.h"
 
 namespace nds   // tolua_export
 {               // tolua_export
@@ -97,13 +98,10 @@ namespace nds   // tolua_export
       ~Canvas();
 
       unsigned short * vram();
-
-      Canvas(const Canvas &);
-      const Canvas operator=(const Canvas &);
       unsigned short * vram(int y);
       void init();
 
-
+      DISALLOW_COPY_AND_ASSIGN(Canvas);
   }; //tolua_export
 } //tolua_export
 #endif

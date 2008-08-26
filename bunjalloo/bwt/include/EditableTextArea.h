@@ -87,6 +87,7 @@ class EditableTextArea: public TextArea, public TextEntryI
     void resizeParent();
 
     bool inBounds(int x, int y);
+    DISALLOW_COPY_AND_ASSIGN(EditableTextArea);
 };
 void EditableTextArea::setEchoText(bool echo)
 {

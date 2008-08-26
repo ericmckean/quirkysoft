@@ -19,6 +19,7 @@
 
 #include <string>
 #include <vector>
+#include "util/classhelper.h"
 
 class Range;
 
@@ -93,6 +94,7 @@ class Font
     int valueToIndex(unsigned int glyphId) const;
     int minGlyph() const;
     void init(const unsigned char * imageData, const unsigned char * mapData);
+    DISALLOW_COPY_AND_ASSIGN(Font);
 };
 
 inline int Font::totalWidth() const

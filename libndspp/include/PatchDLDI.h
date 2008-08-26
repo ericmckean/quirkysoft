@@ -17,6 +17,8 @@
 #ifndef PatchDLDI_h_seen
 #define PatchDLDI_h_seen
 
+#include "util/classhelper.h"
+
 namespace nds
 {
   class PatchDLDI
@@ -46,6 +48,8 @@ namespace nds
     private:
       class PatchDLDI_Impl;
       PatchDLDI_Impl * m_impl;
+
+      DISALLOW_COPY_AND_ASSIGN(PatchDLDI);
   };
 }
 #endif

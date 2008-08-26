@@ -19,6 +19,7 @@
 
 #include <map>
 #include "UnicodeString.h"
+#include "util/classhelper.h"
 
 /** Define to make translation a bit easier.
  * @code
@@ -71,6 +72,7 @@ class Language: public FileParser
 
     void loadLanguageFile();
     void setBuiltin();
+    DISALLOW_COPY_AND_ASSIGN(Language);
 };
 
 #endif
