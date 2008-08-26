@@ -39,6 +39,11 @@ int main(int argc, char * argv[])
     else {
       c->doUri(URI(fileName));
     }
+    // pass 2 arguments to exit early!
+    if (argc > 2)
+    {
+      return 0;
+    }
   }
   else
   {
