@@ -84,20 +84,28 @@ void CookieHandler::showAdd()
   renderer->doTitle(T("add_ck_title"));
   m_siteButton->setSelected();
   URI uri(m_view.document().uri());
+  HtmlElement brElement(HtmlConstants::BR_TAG);
+  UnicodeString server(string2unicode(uri.server()));
+  UnicodeString topLevel(string2unicode(CookieJar::topLevel(uri.server())));
+
   switch (uri.protocol())
   {
     case URI::HTTPS_PROTOCOL:
     case URI::HTTP_PROTOCOL:
       renderer->textArea()->appendText(T("add_cookie"));
-      renderer->textArea()->insertNewline();
+      renderer->visit(brElement);
       renderer->add(m_siteButton);
-      renderer->textArea()->appendText(string2unicode(uri.server()));
-      renderer->textArea()->insertNewline();
-      renderer->add(m_allButton);
-      renderer->textArea()->appendText(string2unicode(CookieJar::topLevel(uri.server())));
-      renderer->textArea()->insertNewline();
+      renderer->textArea()->appendText(server);
+      renderer->visit(brElement);
+      if (server != topLevel)
+      {
+        renderer->add(m_allButton);
+        renderer->textArea()->appendText(topLevel);
+        renderer->visit(brElement);
+      }
       renderer->add(static_cast<Button*>(m_ok));
       renderer->add(static_cast<Button*>(m_cancel));
+      renderer->visit(brElement);
       break;
     default:
       break;

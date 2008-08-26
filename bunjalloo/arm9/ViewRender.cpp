@@ -560,11 +560,11 @@ bool ViewRender::visit(HtmlElement & element)
   else if (element.isa(HtmlConstants::BR_TAG))
   {
     m_pendingNewline = true;
-    /*if (m_textArea == 0)
+    if (m_textArea == 0)
     {
       m_box->insertNewline();
       m_pendingNewline = false;
-    }*/
+    }
   }
   else if (element.isa(HtmlConstants::TEXTAREA_TAG))
   {
@@ -604,7 +604,6 @@ void ViewRender::end(HtmlElement & element)
 
 void ViewRender::begin(HtmlFormElement & element)
 {
-  m_pendingNewline = true;
   pushTextArea();
   m_box->insertNewline();
   m_pendingNewline = false;
