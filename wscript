@@ -2,6 +2,7 @@
 
 import Build
 import Configure
+import Constants
 import Environment
 import Logs
 import Options
@@ -13,6 +14,7 @@ import TaskGen
 import UnitTest
 import Utils
 
+Task.algotype = Constants.JOBCONTROL
 Configure.autoconfig = True
 srcdir = '.'
 blddir = '_build_'
