@@ -57,21 +57,9 @@ void TextContainer::setSize(unsigned int w, unsigned int h)
   bool needLayout = ((int)w != m_bounds.w or (int)h != m_bounds.h);
   Component::setSize(w, h);
 
-  if ((int)w < (m_preferredWidth+BORDER_WIDTH))
-  {
-    m_preferredWidth = w+BORDER_WIDTH;
-  }
-  else
-  {
-    m_preferredWidth = w;
-  }
+  m_preferredWidth = w;
   textArea()->setSize(w, h);
   m_preferredHeight = textArea()->font().height()+BORDER_HEIGHT;
-  /*
-  int tmpPW = textArea()->preferredSize().w+BORDER_WIDTH;
-  if (tmpPW > m_preferredWidth)
-    m_preferredWidth = tmpPW;
-  */
   if (needLayout)
   {
     layout();
