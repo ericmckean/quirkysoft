@@ -59,8 +59,7 @@ RichTextArea * ViewRender::textArea()
     }
   }
   m_pendingNewline = false;
-  if (not m_textArea->inLink())
-    addLink(m_textArea, m_hrefViewed);
+  addLink(m_textArea, m_hrefViewed);
   return m_textArea;
 }
 

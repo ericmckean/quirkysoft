@@ -38,8 +38,6 @@ class RichTextArea: public TextArea
      */
     void addLink(const std::string & href, bool visited=false);
 
-    bool inLink() const;
-
     /** End the Link. */
     void endLink();
 

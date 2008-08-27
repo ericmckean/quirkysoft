@@ -88,6 +88,8 @@ void RichTextArea::appendText(const UnicodeString & unicodeString)
 
 void RichTextArea::addLink(const std::string & href, bool visited)
 {
+  if (m_state == Link::STATE_LINK)
+    return;
   Link * link = new Link(href);
   link->setTextStart(totalCharacters());
   m_links.push_back(link);
@@ -624,9 +626,3 @@ unsigned int RichTextArea::linkCount() const
 {
   return m_links.size();
 }
-
-bool RichTextArea::inLink() const
-{
-  return m_state == Link::STATE_LINK;
-}
-
