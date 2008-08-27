@@ -169,5 +169,6 @@ def setup(bld):
   Task.task_type_from_func('c_C', vars=[], func=add_include , color='CYAN', before="cc cxx", after="grit")
   grit_str = '${GRIT} ${SRC} ${GRITFLAGS}'
   Task.simple_task_type('grit_shared_cmd', grit_str, color='CYAN', before="cc cxx")
-  Task.task_type_from_func('grit_shared', vars=[], func=grit_shared_wrapper , color='CYAN', before="cc cxx")
+  cls = Task.task_type_from_func('grit_shared', vars=[], func=grit_shared_wrapper , color='CYAN', before="cc cxx")
+  cls.maxjobs = 1
 
