@@ -461,6 +461,14 @@ void Controller::stop()
   m_stop = true;
   m_saveAs = NO_SAVE;
   m_saveFileName.clear();
+  if (not m_document->historyEnabled())
+  {
+    const URI &uri(m_httpClient->uri());
+    if (uri.protocol() == URI::HTTPS_PROTOCOL or uri.protocol() == URI::HTTP_PROTOCOL)
+    {
+      m_cache->remove(uri);
+    }
+  }
 }
 
 bool Controller::stopped() const

@@ -105,7 +105,7 @@ void Cache::remove(const URI & uri)
     {
       nds::File::unlink(cacheFile.c_str());
     }
-    if (nds::File::exists(cacheFile.c_str()) == nds::File::F_REG)
+    if (nds::File::exists((cacheFile+".hdr").c_str()) == nds::File::F_REG)
     {
       nds::File::unlink((cacheFile+".hdr").c_str());
     }
