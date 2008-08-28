@@ -684,3 +684,17 @@ void DocumentTest::testNoCacheHtml()
   CPPUNIT_ASSERT_EQUAL(expected, mimeType);
 }
 
+void DocumentTest::testEntities()
+{
+  readFile("entities.html");
+  // tests for entities that are nasty
+  m_document->appendLocalData(m_data, m_length);
+  m_document->setStatus(Document::LOADED);
+  const HtmlElement * root = m_document->rootNode();
+  CPPUNIT_ASSERT(root != 0);
+  CPPUNIT_ASSERT(root->isa("html"));
+  const HtmlElement * body = root->lastChild();
+  CPPUNIT_ASSERT(body != 0);
+  CPPUNIT_ASSERT(body->isa("body"));
+}
+
