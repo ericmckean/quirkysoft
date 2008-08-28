@@ -101,6 +101,9 @@ class HtmlParser
       OTHER
     };
 
+    static const char * IMAGE_JPEG_STR;
+    static const char * IMAGE_JPG_STR;
+
     MimeType mimeType() const;
   protected:
     enum ContentModel {
