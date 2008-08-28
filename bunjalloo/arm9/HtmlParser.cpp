@@ -31,6 +31,9 @@
 
 using namespace std;
 
+const char * HtmlParser::IMAGE_JPEG_STR = "image/jpeg";
+const char * HtmlParser::IMAGE_JPG_STR = "image/jpg"; // some people...
+
 //! The private implementation of the parser.
 class HtmlParserImpl
 {
@@ -1468,7 +1471,7 @@ void HtmlParser::setMimeType(ParameterSet & paramSet)
   {
     m_mimeType = IMAGE_GIF;
   }
-  else if (paramSet.hasParameter("image/jpeg"))
+  else if (paramSet.hasParameter(IMAGE_JPEG_STR) or paramSet.hasParameter(IMAGE_JPG_STR))
   {
     m_mimeType = IMAGE_JPEG;
   }
