@@ -53,8 +53,8 @@ void ZipViewer::setFilename(const std::string & filename)
 
 void ZipViewer::show()
 {
-  m_view.renderer()->doTitle(string2unicode(nds::File::base(m_view.document().uri().c_str())));
-  RichTextArea & textArea(*m_view.renderer()->textArea());
+  ViewRender *renderer(m_view.renderer());
+  renderer->doTitle(string2unicode(nds::File::base(m_view.document().uri().c_str())));
   ZipFile file(this);
   file.open(m_filename.c_str());
 
@@ -66,14 +66,15 @@ void ZipViewer::show()
     // add an "unzip" button!
     Button * unzipButton = new Button(T("unzip"));
     unzipButton->setListener(this);
-    textArea.add(unzipButton);
+    renderer->add(unzipButton);
     m_unzip = unzipButton;
+    renderer->textArea()->appendText(T(" "));
 
     Button * patch = new Button(T("unzip_patch"));
     patch->setListener(this);
-    textArea.add(patch);
+    renderer->add(patch);
     m_unzipAndPatch = patch;
-    textArea.insertNewline();
+    renderer->insertNewline();
   }
 
   for (vector<string>::const_iterator it(contents.begin()); it != contents.end(); ++it)
@@ -81,10 +82,10 @@ void ZipViewer::show()
     const UnicodeString & u(string2unicode(*it));
     CheckBox * cb = new CheckBox;
     cb->setSelected();
-    textArea.add(cb);
+    renderer->add(cb);
     m_checkboxes.push_back(cb);
-    textArea.appendText(u);
-    textArea.insertNewline();
+    renderer->textArea()->appendText(u);
+    renderer->insertNewline();
   }
 }
 
