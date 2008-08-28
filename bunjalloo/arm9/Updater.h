@@ -66,8 +66,8 @@ class Updater: public ButtonListener
     void iniFail();
     void askUpdate();
     void doTitle();
-    void addOk(RichTextArea &);
-    void addCancel(RichTextArea &);
+    void addOk();
+    void addCancel();
     void alreadyGotLatest();
 };
 #endif

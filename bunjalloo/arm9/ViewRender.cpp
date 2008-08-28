@@ -254,12 +254,12 @@ void ViewRender::render()
       useScrollPane = true;
     }
   }
-  pushTextArea();
   done(useScrollPane);
 }
 
 void ViewRender::done(bool resetScroller)
 {
+  pushTextArea();
   m_self->m_scrollPane->add(m_box);
   if (resetScroller)
   {
@@ -313,6 +313,16 @@ void ViewRender::pushTextArea()
   if (m_textArea) {
     m_box->add(m_textArea);
     m_textArea = 0;
+  }
+}
+
+void ViewRender::insertNewline()
+{
+  m_pendingNewline = true;
+  if (m_textArea == 0)
+  {
+    m_box->insertNewline();
+    m_pendingNewline = false;
   }
 }
 
@@ -563,12 +573,7 @@ bool ViewRender::visit(HtmlElement & element)
   }
   else if (element.isa(HtmlConstants::BR_TAG))
   {
-    m_pendingNewline = true;
-    if (m_textArea == 0)
-    {
-      m_box->insertNewline();
-      m_pendingNewline = false;
-    }
+    insertNewline();
   }
   else if (element.isa(HtmlConstants::TEXTAREA_TAG))
   {

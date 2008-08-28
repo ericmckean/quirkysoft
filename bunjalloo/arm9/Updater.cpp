@@ -151,25 +151,27 @@ void Updater::iniFail()
   RichTextArea & textArea(*(m_view.renderer()->textArea()));
   textArea.appendText(T("fail_ini"));
   textArea.insertNewline();
-  addCancel(textArea);
+  addCancel();
 }
 
 void Updater::doUpdate()
 {
-  RichTextArea & textArea(*(m_view.renderer()->textArea()));
+  // RichTextArea & textArea(*(m_view.renderer()->textArea()));
   string cachedFile = m_controller.cache()->fileName(m_downloadUrl);
   ZipViewer viewer(m_view);
   viewer.setFilename(cachedFile);
   viewer.unzipAndPatch();
-  textArea.appendText(T("done"));
-  m_view.resetScroller();
+  RichTextArea *textArea(m_view.renderer()->textArea());
+  textArea->appendText(T("done"));
+  m_view.renderer()->done(true);
 }
 
 extern const char * VERSION;
 void Updater::askUpdate()
 {
   doTitle();
-  RichTextArea & textArea(*(m_view.renderer()->textArea()));
+  ViewRender &renderer(*m_view.renderer());
+  RichTextArea & textArea(*(renderer.textArea()));
   // now find out where that was saved...
   string cachedFile = m_controller.cache()->fileName(m_downloadUrl);
   if (not m_controller.stopped()
@@ -183,35 +185,36 @@ void Updater::askUpdate()
     textArea.insertNewline();
     textArea.appendText(T("cur_ver"));
     textArea.appendText(string2unicode(VERSION));
-    textArea.insertNewline();
-    textArea.insertNewline();
-    addOk(textArea);
-    addCancel(textArea);
-    textArea.insertNewline();
-    m_view.resetScroller();
+    renderer.insertNewline();
+    addOk();
+    addCancel();
+    renderer.insertNewline();
+    renderer.done(true);
   }
   else
   {
     textArea.appendText(T("fail_zip"));
     textArea.appendText(string2unicode(m_newVersion));
-    textArea.insertNewline();
-    addCancel(textArea);
+    renderer.insertNewline();
+    addCancel();
+    renderer.insertNewline();
+    renderer.done(true);
     m_state = ZIP_FAIL;
   }
 }
 
-void Updater::addOk(RichTextArea & textArea)
+void Updater::addOk()
 {
   m_ok = new Button(T("ok"));
   m_ok->setListener(this);
-  textArea.add(m_ok);
+  m_view.renderer()->add(m_ok);
 }
 
-void Updater::addCancel(RichTextArea & textArea)
+void Updater::addCancel()
 {
   m_cancel = new Button(T("cancel"));
   m_cancel->setListener(this);
-  textArea.add(m_cancel);
+  m_view.renderer()->add(m_cancel);
 }
 
 void Updater::pressed(ButtonI * button)
@@ -248,5 +251,5 @@ void Updater::alreadyGotLatest()
   textArea.appendText(string2unicode(m_newVersion));
   textArea.insertNewline();
   textArea.insertNewline();
-  addCancel(textArea);
+  addCancel();
 }

@@ -84,7 +84,6 @@ void CookieHandler::showAdd()
   renderer->doTitle(T("add_ck_title"));
   m_siteButton->setSelected();
   URI uri(m_view.document().uri());
-  HtmlElement brElement(HtmlConstants::BR_TAG);
   UnicodeString server(string2unicode(uri.server()));
   UnicodeString topLevel(string2unicode(CookieJar::topLevel(uri.server())));
 
@@ -93,19 +92,19 @@ void CookieHandler::showAdd()
     case URI::HTTPS_PROTOCOL:
     case URI::HTTP_PROTOCOL:
       renderer->textArea()->appendText(T("add_cookie"));
-      renderer->visit(brElement);
+      renderer->insertNewline();
       renderer->add(m_siteButton);
       renderer->textArea()->appendText(server);
-      renderer->visit(brElement);
+      renderer->insertNewline();
       if (server != topLevel)
       {
         renderer->add(m_allButton);
         renderer->textArea()->appendText(topLevel);
-        renderer->visit(brElement);
+        renderer->insertNewline();
       }
       renderer->add(static_cast<Button*>(m_ok));
       renderer->add(static_cast<Button*>(m_cancel));
-      renderer->visit(brElement);
+      renderer->insertNewline();
       break;
     default:
       break;
@@ -145,7 +144,6 @@ void CookieHandler::showEdit()
   ViewRender * renderer(m_view.renderer());
   CookieJar::AcceptedDomainSet domains;
   m_view.document().cookieJar()->acceptedDomains(domains);
-  HtmlElement brElement(HtmlConstants::BR_TAG);
   for (CookieJar::AcceptedDomainSet::const_iterator it(domains.begin());
       it != domains.end(); ++it)
   {
@@ -153,13 +151,13 @@ void CookieHandler::showEdit()
     m_checkboxes.push_back(check);
     renderer->add(check);
     renderer->textArea()->appendText(string2unicode(*it));
-    renderer->visit(brElement);
+    renderer->insertNewline();
   }
   renderer->add(static_cast<Button*>(m_deleteSelected));
   renderer->add(static_cast<Button*>(m_editSelected));
-  renderer->visit(brElement);
+  renderer->insertNewline();
   renderer->textArea()->appendText(string2unicode(" --- "));
-  renderer->visit(brElement);
+  renderer->insertNewline();
   renderer->add(static_cast<Button*>(m_ok));
   renderer->done(true);
 }
