@@ -42,6 +42,7 @@ class ViewRender: public Visitor, public ViewI
     void doTitle(const UnicodeString & str);
 
     void textAreas(std::list<RichTextArea*>& textAreas);
+    void insertNewline();
 
     // implement the ViewI interface.
     virtual void notify();
