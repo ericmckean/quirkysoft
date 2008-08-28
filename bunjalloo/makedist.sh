@@ -71,7 +71,10 @@ revision=$(git svn find-rev HEAD)
 # Create the zip file
 distdir=$project-$VERSION
 zipname=$distdir.zip
-$WAF --install-to=$distdir install > /dev/null || die "Error in build"
+cd ..
+$WAF --prefix=$distdir configure
+cd -
+$WAF install > /dev/null || die "Error in build"
 pushd ..
 pushd $distdir > /dev/null || die "Unable to cd to $distdir"
 mv $project.nds $project-${VERSION//./}.nds

@@ -60,6 +60,9 @@ def set_options(opt):
   opt.add_option('--with-profiler', action='store_true',
           help='Use Google CPU profiler (http://code.google.com/p/google-perftools/)',
           default=False, dest='with_profiler')
+  opt.add_option('--with-gcov', action='store_true',
+          help='Build with gcov flags',
+          default=False, dest='with_gcov')
 
   opt.add_option('--tags', action='store_true',
           help='Force creation of tags file using ctags (use with "build")',
@@ -200,8 +203,6 @@ def lib_check_sdl(conf):
     e.name = 'profiler'
     e.run()
 
-
-
   lib_check_common(e)
 
 
@@ -221,6 +222,18 @@ def lib_check_arm9(conf):
   e.name = 'dswifi9'
   e.run()
   lib_check_common(e)
+
+def check_gcov(conf):
+  if Options.options.with_gcov:
+    e = conf.create_library_configurator()
+    e.mandatory = 1
+    e.uselib_store = 'HOST'
+    e.name = 'gcov'
+    e.run()
+
+    flags = '-fprofile-arcs -ftest-coverage'.split()
+    for i in ('CXXFLAGS', 'CCFLAGS'):
+      conf.env[i].extend(flags)
 
 # Main configuration entry point
 def configure(conf):
@@ -271,6 +284,8 @@ def configure(conf):
   sdl['CXXFLAGS'] = ['-Wall', '-g']
   sdl['OBJCOPY'] = 'objcopy'
   sdl_header_check(conf)
+
+  check_gcov(conf)
 
 def shutdown():
   # force running unit tests
