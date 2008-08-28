@@ -47,3 +47,6 @@ download=/
 
 # Place to look for updates
 update=http://quirkysoft.googlecode.com/svn/wiki/BunjallooVersion.wiki
+
+# Allow inline images
+images=1
