@@ -219,7 +219,7 @@ const UnicodeString TextArea::nextWord(const UnicodeString & unicodeString, int 
     word += ' ';
   }
   int size(textSize(word));
-  if (size > width())
+  if (size > width() and word.size() > 1)
   {
     // This is a very long word, split it up
     UnicodeString::const_iterator it(word.begin());

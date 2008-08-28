@@ -304,6 +304,7 @@ void ViewRender::doTitle(const HtmlElement * title)
 void ViewRender::renderSelect(const HtmlElement * selectElement)
 {
   Select * select = new Select(const_cast<HtmlElement*>(selectElement));
+  select->init();
   add(select);
 }
 
