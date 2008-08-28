@@ -795,8 +795,7 @@ unsigned int HtmlParserImpl::consumeEntity()
     rewind();
 
     // check that it isn't nbsp - that is very common
-    string nbspCheck = asUnconsumedCharString(5);
-    if (nbspCheck == "nbsp;") {
+    if (asUnconsumedCharString(5) == "nbsp;") {
       //cout << "Entity shortcut - nbsp." << endl;
       consume(5);
       return NBSP;
