@@ -57,6 +57,7 @@ class DocumentTest : public CPPUNIT_NS::TestFixture
   CPPUNIT_TEST( testBodyEnd);
   CPPUNIT_TEST( testTokenize);
   CPPUNIT_TEST( testNoCacheHtml);
+  CPPUNIT_TEST( testEntities);
   CPPUNIT_TEST_SUITE_END();
 
   public:
@@ -96,6 +97,7 @@ class DocumentTest : public CPPUNIT_NS::TestFixture
   void testHistoryWithConfig();
   void testTokenize();
   void testNoCacheHtml();
+  void testEntities();
 
   private:
   Document * m_document;
