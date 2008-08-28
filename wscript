@@ -15,7 +15,8 @@ import UnitTest
 import Utils
 
 Task.algotype = Constants.JOBCONTROL
-Configure.autoconfig = True
+# TODO: uncomment when waf issue 195 is fixed
+# Configure.autoconfig = True
 srcdir = '.'
 blddir = '_build_'
 waf_tools = 'waf_tools'
