@@ -251,8 +251,15 @@ void View::notify()
         switch (m_document.htmlDocument()->mimeType())
         {
           case HtmlParser::OTHER:
-            saveAs();
-            m_state = SAVE_DOWNLOADING;
+            {
+              if (m_state == BROWSE and m_controller.downloadingFile() != m_document.uri())
+              {
+                m_controller.stop();
+                break;
+              }
+              saveAs();
+              m_state = SAVE_DOWNLOADING;
+            }
             break;
 
           case HtmlParser::UNINITIALISED:
