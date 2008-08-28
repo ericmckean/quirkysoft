@@ -135,9 +135,12 @@ void ViewRender::doImage(const UnicodeString & imgStr,
   else
   {
     // the old image display - shows a text value only + clickage
-    textArea()->addImage(unicode2string(src));
-    textArea()->appendText(imgStr);
-    textArea()->endImage();
+    if (not imgStr.empty())
+    {
+      textArea()->addImage(unicode2string(src));
+      textArea()->appendText(imgStr);
+      textArea()->endImage();
+    }
   }
 }
 
@@ -625,10 +628,7 @@ bool ViewRender::visit(HtmlImageElement & element)
   // easy way to display it (see w3m google.com - Google [hp1] [hp2] [hp3]... huh?)
   bool hasAltText = element.hasAltText();
   UnicodeString imgText = extractImageText(&element, hasAltText);
-  if (not imgText.empty())
-  {
-    doImage(imgText, element.attribute("src"));
-  }
+  doImage(imgText, element.attribute("src"));
   return true;
 }
 void ViewRender::end(HtmlImageElement & element)
