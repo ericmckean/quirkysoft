@@ -51,7 +51,7 @@ def build(bld):
   nds = bld.new_task_gen('ndstool')
   nds.source = (arm7elfname.replace('.elf', '.arm'),
                 arm9elfname.replace('.elf', '.arm'))
-  nds.banner = generate_banner(APPNAME)
+  nds.banner = generate_banner(APPNAME, 'Web Browser')
   nds.icon = 'common/data/icon.bmp'
   nds.target = APPNAME+'.nds'
 
