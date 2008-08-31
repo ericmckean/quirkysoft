@@ -453,7 +453,8 @@ void ViewRender::notify()
   static int pc(0);
   switch (status)
   {
-    case Document::LOADED:
+    case Document::LOADED_ITEM:
+    case Document::LOADED_HTML:
       {
         progressId = 0;
         pc = 0;

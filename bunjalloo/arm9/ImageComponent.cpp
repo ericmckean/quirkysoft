@@ -132,13 +132,15 @@ void ImageComponent::notify()
         m_image = 0;
       }
     }
-    if (m_document->status() == Document::INPROGRESS)
+    switch (m_document->status())
     {
-      reload();
-    }
-    if (m_document->status() == Document::LOADED)
-    {
-      reload();
+      case Document::INPROGRESS:
+      case Document::LOADED_ITEM:
+      case Document::LOADED_HTML:
+        reload();
+        break;
+      default:
+        break;
     }
   }
 }

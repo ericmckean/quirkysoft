@@ -43,7 +43,7 @@ static const char s_errorText[] = {
 "<html> <meta http-equiv='Content-Type' content='text/html; charset=utf-8' />"
 };
 
-const static char * LICENCE_URL = "file:///licence";
+const char Controller::LICENCE_URL[] = "file:///licence";
 const static char * UNABLE_TO_LOAD = "cannot_load";
 const static int MAX_REDIRECTS(7);
 
@@ -55,7 +55,7 @@ static void sleepCallback()
 Controller::Controller()
   : m_document(new Document()),
   m_httpClient(new HttpClient),
-  m_wifiInit(false),m_redirected(0),m_maxRedirects(MAX_REDIRECTS)
+  m_wifiInit(false),m_redirected(0),m_maxRedirects(MAX_REDIRECTS), m_checkingQueue(false)
 {
   m_config = new Config;
   m_config->checkPre();
@@ -90,7 +90,7 @@ void Controller::showLicence()
   m_document->reset();
   m_document->setUri(LICENCE_URL);
   m_document->appendLocalData(s_licenceText, strlen(s_licenceText));
-  m_document->setStatus(Document::LOADED);
+  m_document->setStatus(Document::LOADED_HTML);
 }
 
 const Config & Controller::config() const
@@ -173,7 +173,7 @@ void Controller::saveAs(const char * fileName, SaveAs_t saveType)
     default:
       // download the file first!
       m_saveFileName = fileName;
-      if (m_document->status() == Document::LOADED)
+      if (m_document->status() == Document::LOADED_ITEM or m_document->status() == Document::LOADED_HTML)
       {
         checkSave();
       }
@@ -203,21 +203,27 @@ void Controller::saveCurrentFileAs(const char * fileName)
 
 void Controller::previous()
 {
+  if (m_document->status() != Document::LOADED_PAGE)
+    stop();
   string ph = m_document->gotoPreviousHistory();
   if (not ph.empty())
   {
     URI uri(ph);
     handleUri(uri);
+    checkDownloadQueue();
   }
 }
 
 void Controller::next()
 {
+  if (m_document->status() != Document::LOADED_PAGE)
+    stop();
   string ph = m_document->gotoNextHistory();
   if (not ph.empty())
   {
     URI uri(ph);
     handleUri(uri);
+    checkDownloadQueue();
   }
 }
 
@@ -241,7 +247,7 @@ void Controller::loadError()
   href += m_document->uri();
   href += "</a>";
   m_document->appendLocalData(href.c_str(), href.length());
-  m_document->setStatus(Document::LOADED);
+  m_document->setStatus(Document::LOADED_PAGE);
 }
 
 void Controller::configureUrl(const std::string & fileName)
@@ -301,7 +307,7 @@ void Controller::localConfigFile(const std::string & fileName)
       configParser.replaceMarkers(line);
       m_document->appendLocalData(line.c_str(), line.length());
     }
-    m_document->setStatus(Document::LOADED);
+    m_document->setStatus(Document::LOADED_HTML);
   }
   else
   {
@@ -324,7 +330,7 @@ void Controller::localFile(const std::string & fileName)
     data[size] = 0;
     m_document->reset();
     m_document->appendLocalData(data, size);
-    m_document->setStatus(Document::LOADED);
+    m_document->setStatus(Document::LOADED_HTML);
     delete [] data;
     uriFile.close();
   }
@@ -423,21 +429,20 @@ void Controller::finishFetchHttp(const URI & uri)
     m_redirected++;
     swiWaitForVBlank();
     swiWaitForVBlank();
-    if (downloadingFile() != m_document->uri())
-    {
-      // handleUri(uri.navigateTo(m_document->uri()));
-      // queueUri();
-    }
-    else
-    {
-      m_document->reset();
-      m_document->setStatus(Document::REDIRECTED);
-    }
+    m_document->reset();
+    m_document->setStatus(Document::REDIRECTED);
   }
   else
   {
     m_redirected = 0;
-    m_document->setStatus(Document::LOADED);
+    if (m_checkingQueue)
+    {
+      m_document->setStatus(Document::LOADED_ITEM);
+    }
+    else
+    {
+      m_document->setStatus(Document::LOADED_HTML);
+    }
     checkSave();
   }
 }
@@ -461,12 +466,15 @@ void Controller::stop()
   m_stop = true;
   m_saveAs = NO_SAVE;
   m_saveFileName.clear();
-  if (not m_document->historyEnabled())
+  if (m_checkingQueue)
   {
     const URI &uri(m_httpClient->uri());
     if (uri.protocol() == URI::HTTPS_PROTOCOL or uri.protocol() == URI::HTTP_PROTOCOL)
     {
       m_cache->remove(uri);
+      while (not m_downloadQ.empty()) {
+        m_downloadQ.pop();
+      }
     }
   }
 }
@@ -524,6 +532,7 @@ void Controller::queueUri(const URI & uri)
 void Controller::checkDownloadQueue()
 {
   m_document->setHistoryEnabled(false);
+  m_checkingQueue = true;
   while (m_downloadQ.size())
   {
     URI uri(m_downloadQ.front());
@@ -531,4 +540,6 @@ void Controller::checkDownloadQueue()
     fetchHttp(uri);
   }
   m_document->setHistoryEnabled(true);
+  m_document->setStatus(Document::LOADED_PAGE);
+  m_checkingQueue = false;
 }

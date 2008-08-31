@@ -222,7 +222,7 @@ void Document::notifyAll() const
 void Document::setStatus(Document::Status status)
 {
   m_status = status;
-  if (m_status == LOADED)
+  if (m_status == LOADED_HTML or m_status == LOADED_ITEM)
   {
     m_htmlDocument->handleEOF();
     //m_htmlDocument->dumpDOM();

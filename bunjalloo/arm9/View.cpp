@@ -182,19 +182,14 @@ void View::notify()
     case Document::REDIRECTED:
         m_filenameForProgress.clear();
         break;
-    case Document::LOADED:
+    case Document::LOADED_HTML:
       {
         // this is to clear the progress's dirty flag.
         m_progress->paint(m_progress->bounds());
         m_progress->setVisible(false);
         m_filenameForProgress.clear();
-        if (m_state == BROWSE and m_controller.downloadingFile() != m_document.uri())
-          break;
-        if (m_state == BROWSE and m_document.htmlDocument()->mimeType() == HtmlParser::TEXT_HTML)
-        {
-          // extract the *current* title
-          extractTitle();
-        }
+        // extract the *current* title
+        extractTitle();
         m_renderer->render();
         int pos = m_document.position();
         if (pos == -1)
@@ -222,7 +217,8 @@ void View::notify()
       {
         m_progress->setMax(100);
         m_progress->setMin(0);
-        // add a progress bar or something here...
+        if (not m_document.historyEnabled()) // FIXME: should be "downloading embedded images"
+          return;
         unsigned int pc = m_document.percentLoaded();
         m_progress->setValue(pc);
         if (m_filenameForProgress.empty())

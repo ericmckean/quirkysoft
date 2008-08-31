@@ -681,7 +681,7 @@ void HttpClient::finish() {
   }
   else
   {
-    m_controller->m_document->setStatus(Document::LOADED);
+    m_controller->m_document->setStatus(Document::LOADED_HTML);
   }
 }
 

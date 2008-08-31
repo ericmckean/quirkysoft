@@ -47,7 +47,7 @@ int main(int argc, char * argv[])
   }
   else
   {
-    c->showLicence();
+    c->doUri(URI(std::string(Controller::LICENCE_URL)));
   }
   c->mainLoop();
 }

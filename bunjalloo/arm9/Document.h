@@ -34,7 +34,9 @@ class Document
     //! Status of the document.
     enum Status {
       NOTHING,   //!< No status set.
-      LOADED,    //!< Has fully loaded.
+      LOADED_HTML,  //!< Has loaded the HTML page
+      LOADED_ITEM,  //!< Has loaded an item on the page
+      LOADED_PAGE,  //!< Has fully loaded the page
       INPROGRESS, //!< Is in the progress of loading.
       HAS_HEADERS,//!< Has got the HTTP headers
       REDIRECTED  //!< Page has been redirected

@@ -80,7 +80,7 @@ void DocumentTest::test1()
 {
   readFile("test1.txt");
   m_document->appendData(m_data, m_length);
-  m_document->setStatus(Document::LOADED);
+  m_document->setStatus(Document::LOADED_HTML);
   const HtmlElement * result = m_document->rootNode();
   CPPUNIT_ASSERT( result != 0);
 }
@@ -157,7 +157,7 @@ void DocumentTest::testTitle()
 {
   readFile("title.html");
   m_document->appendLocalData(m_data, m_length);
-  m_document->setStatus(Document::LOADED);
+  m_document->setStatus(Document::LOADED_HTML);
   const HtmlElement * root = m_document->rootNode();
   CPPUNIT_ASSERT(root->hasChildren());
   const HtmlElement * child = root->firstChild();
@@ -255,7 +255,7 @@ void DocumentTest::testCharacterStart()
 {
   readFile("character-start.html");
   m_document->appendLocalData(m_data, m_length);
-  m_document->setStatus(Document::LOADED);
+  m_document->setStatus(Document::LOADED_HTML);
   const HtmlElement * root = m_document->rootNode();
   CPPUNIT_ASSERT(root != 0);
 }
@@ -263,7 +263,7 @@ void DocumentTest::testEndTagStart()
 {
   readFile("endtag-start.html");
   m_document->appendLocalData(m_data, m_length);
-  m_document->setStatus(Document::LOADED);
+  m_document->setStatus(Document::LOADED_HTML);
   const HtmlElement * root = m_document->rootNode();
   CPPUNIT_ASSERT(root != 0);
   string rootType = root->tagName();
@@ -275,7 +275,7 @@ void DocumentTest::testSimpleBodyA()
 {
   readFile("simple.html");
   m_document->appendLocalData(m_data, m_length);
-  m_document->setStatus(Document::LOADED);
+  m_document->setStatus(Document::LOADED_HTML);
   const HtmlElement * root = m_document->rootNode();
   CPPUNIT_ASSERT(root != 0);
   string expected("html");
@@ -332,7 +332,7 @@ void DocumentTest::testMismatchFormat()
   //        a >
   //            #text ()
   m_document->appendLocalData(m_data, m_length);
-  m_document->setStatus(Document::LOADED);
+  m_document->setStatus(Document::LOADED_HTML);
   const HtmlElement * root = m_document->rootNode();
   CPPUNIT_ASSERT(root != 0);
   string rootType = root->tagName();
@@ -345,7 +345,7 @@ void DocumentTest::testLi()
 {
   readFile("test-li.html");
   m_document->appendLocalData(m_data, m_length);
-  m_document->setStatus(Document::LOADED);
+  m_document->setStatus(Document::LOADED_HTML);
   const HtmlElement * root = m_document->rootNode();
   CPPUNIT_ASSERT(root != 0);
   CPPUNIT_ASSERT(root->isa("html"));
@@ -359,7 +359,7 @@ void DocumentTest::testDD()
 {
   readFile("test-dd.html");
   m_document->appendLocalData(m_data, m_length);
-  m_document->setStatus(Document::LOADED);
+  m_document->setStatus(Document::LOADED_HTML);
   const HtmlElement * root = m_document->rootNode();
   CPPUNIT_ASSERT(root != 0);
   CPPUNIT_ASSERT(root->isa("html"));
@@ -373,7 +373,7 @@ void DocumentTest::testPlaintext()
 {
   readFile("plaintext.html");
   m_document->appendLocalData(m_data, m_length);
-  m_document->setStatus(Document::LOADED);
+  m_document->setStatus(Document::LOADED_HTML);
   const HtmlElement * root = m_document->rootNode();
   CPPUNIT_ASSERT(root != 0);
   CPPUNIT_ASSERT(root->isa("html"));
@@ -384,7 +384,7 @@ void DocumentTest::testFont()
 {
   readFile("font.html");
   m_document->appendLocalData(m_data, m_length);
-  m_document->setStatus(Document::LOADED);
+  m_document->setStatus(Document::LOADED_HTML);
   const HtmlElement * root = m_document->rootNode();
   CPPUNIT_ASSERT(root != 0);
   CPPUNIT_ASSERT(root->isa("html"));
@@ -394,7 +394,7 @@ void DocumentTest::testFont2()
 {
   readFile("font2.html");
   m_document->appendLocalData(m_data, m_length);
-  m_document->setStatus(Document::LOADED);
+  m_document->setStatus(Document::LOADED_HTML);
   const HtmlElement * root = m_document->rootNode();
   CPPUNIT_ASSERT(root != 0);
   CPPUNIT_ASSERT(root->isa("html"));
@@ -405,7 +405,7 @@ void DocumentTest::testPin8()
   readFile("pineight.txt");
   // tests for end script tag after end of chunk
   m_document->appendData(m_data, m_length);
-  m_document->setStatus(Document::LOADED);
+  m_document->setStatus(Document::LOADED_HTML);
   const HtmlElement * root = m_document->rootNode();
   CPPUNIT_ASSERT(root != 0);
   CPPUNIT_ASSERT(root->isa("html"));
@@ -444,7 +444,7 @@ void DocumentTest::testClarin()
   data += length;
   length = 2252;
   m_document->appendData(data, 2252);
-  m_document->setStatus(Document::LOADED);
+  m_document->setStatus(Document::LOADED_HTML);
   const HtmlElement * root = m_document->rootNode();
   CPPUNIT_ASSERT(root != 0);
   CPPUNIT_ASSERT(root->isa("html"));
@@ -457,7 +457,7 @@ void DocumentTest::testAdoption()
   readFile("adoption.html");
   // test the adoption algorithm
   m_document->appendLocalData(m_data, m_length);
-  m_document->setStatus(Document::LOADED);
+  m_document->setStatus(Document::LOADED_HTML);
   const HtmlElement * root = m_document->rootNode();
   CPPUNIT_ASSERT(root != 0);
   CPPUNIT_ASSERT(root->isa("html"));
@@ -472,7 +472,7 @@ void DocumentTest::testAdoption2()
   readFile("adoption2.html");
   // test the adoption algorithm
   m_document->appendLocalData(m_data, m_length);
-  m_document->setStatus(Document::LOADED);
+  m_document->setStatus(Document::LOADED_HTML);
   const HtmlElement * root = m_document->rootNode();
   CPPUNIT_ASSERT(root != 0);
   CPPUNIT_ASSERT(root->isa("html"));
@@ -483,7 +483,7 @@ void DocumentTest::testHeader()
   readFile("header1.html");
   // test the adoption algorithm
   m_document->appendLocalData(m_data, m_length);
-  m_document->setStatus(Document::LOADED);
+  m_document->setStatus(Document::LOADED_HTML);
   const HtmlElement * root = m_document->rootNode();
   CPPUNIT_ASSERT(root != 0);
   CPPUNIT_ASSERT(root->isa("html"));
@@ -510,7 +510,7 @@ void DocumentTest::testHeader2()
   readFile("header2.html");
   // test the adoption algorithm
   m_document->appendLocalData(m_data, m_length);
-  m_document->setStatus(Document::LOADED);
+  m_document->setStatus(Document::LOADED_HTML);
   const HtmlElement * root = m_document->rootNode();
   CPPUNIT_ASSERT(root != 0);
   CPPUNIT_ASSERT(root->isa("html"));
@@ -540,7 +540,7 @@ void DocumentTest::testAttribs()
 {
   readFile("attrib.html");
   m_document->appendLocalData(m_data, m_length);
-  m_document->setStatus(Document::LOADED);
+  m_document->setStatus(Document::LOADED_HTML);
   const HtmlElement * root = m_document->rootNode();
   CPPUNIT_ASSERT(root != 0);
   CPPUNIT_ASSERT(root->isa("html"));
@@ -559,7 +559,7 @@ void DocumentTest::testActiveFormatters()
 {
   readFile("issue29.html");
   m_document->appendLocalData(m_data, m_length);
-  m_document->setStatus(Document::LOADED);
+  m_document->setStatus(Document::LOADED_HTML);
   const HtmlElement * root = m_document->rootNode();
   CPPUNIT_ASSERT(root != 0);
   CPPUNIT_ASSERT(root->isa("html"));
@@ -598,7 +598,7 @@ void DocumentTest::testHistory()
   m_document->setUri("attrib.html");
   m_document->appendLocalData(m_data, m_length);
   m_document->setPosition(10);
-  m_document->setStatus(Document::LOADED);
+  m_document->setStatus(Document::LOADED_HTML);
   const HtmlElement * root = m_document->rootNode();
   CPPUNIT_ASSERT(root != 0);
   CPPUNIT_ASSERT(root->isa("html"));
@@ -607,7 +607,7 @@ void DocumentTest::testHistory()
   readFile("anchor.html");
   m_document->setUri("anchor.html");
   m_document->appendLocalData(m_data, m_length);
-  m_document->setStatus(Document::LOADED);
+  m_document->setStatus(Document::LOADED_HTML);
   root = m_document->rootNode();
   CPPUNIT_ASSERT(root != 0);
   CPPUNIT_ASSERT(root->isa("html"));
@@ -624,7 +624,7 @@ void DocumentTest::testBodyEnd()
 {
   readFile("body.html");
   m_document->appendLocalData(m_data, m_length);
-  m_document->setStatus(Document::LOADED);
+  m_document->setStatus(Document::LOADED_HTML);
   const HtmlElement * root = m_document->rootNode();
   CPPUNIT_ASSERT(root != 0);
   CPPUNIT_ASSERT(root->isa("html"));
@@ -678,7 +678,7 @@ void DocumentTest::testNoCacheHtml()
   readFile("nocache.txt");
   // tests for no-cache and mime type breakage
   m_document->appendData(m_data, m_length);
-  m_document->setStatus(Document::LOADED);
+  m_document->setStatus(Document::LOADED_HTML);
   HtmlParser::MimeType mimeType = m_document->htmlDocument()->mimeType();
   HtmlParser::MimeType expected = HtmlParser::TEXT_HTML;
   CPPUNIT_ASSERT_EQUAL(expected, mimeType);
@@ -689,7 +689,7 @@ void DocumentTest::testEntities()
   readFile("entities.html");
   // tests for entities that are nasty
   m_document->appendLocalData(m_data, m_length);
-  m_document->setStatus(Document::LOADED);
+  m_document->setStatus(Document::LOADED_HTML);
   const HtmlElement * root = m_document->rootNode();
   CPPUNIT_ASSERT(root != 0);
   CPPUNIT_ASSERT(root->isa("html"));
