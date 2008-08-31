@@ -82,7 +82,7 @@ def build_test(bld, uselibs='bunjalloo bwt'):
   unit_test.env = bld.env_of_name('sdl').copy()
   unit_test.source = tst.target
 
-def generate_banner(app, author=None):
+def generate_banner(app, comment="", author=None):
   if author == None:
     author = '?'
     try:
@@ -90,7 +90,7 @@ def generate_banner(app, author=None):
       author = pwd.getpwnam(os.getlogin()).pw_gecos.split(',')[0]
     except:
       pass
-  banner = '%s;;By %s'%(app.title(), author)
+  banner = '%s;%s;By %s'%(app.title(), comment, author)
   if sys.platform.startswith('win'):
     banner = banner.replace(' ', '_')
   return banner
