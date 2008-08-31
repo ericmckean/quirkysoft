@@ -218,7 +218,10 @@ void View::notify()
         m_progress->setMax(100);
         m_progress->setMin(0);
         if (not m_document.historyEnabled()) // FIXME: should be "downloading embedded images"
+        {
+          tick(); // ?
           return;
+        }
         unsigned int pc = m_document.percentLoaded();
         m_progress->setValue(pc);
         if (m_filenameForProgress.empty())
