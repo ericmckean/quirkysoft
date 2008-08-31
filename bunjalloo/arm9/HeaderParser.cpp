@@ -64,6 +64,7 @@ void HeaderParser::reset()
   m_redirect = "";
   m_chunked = false;
   m_gzip = false;
+  m_cache = true;
   m_chunkLength = 0;
   m_chunkLengthString = "";
   m_htmlParser->setToStart();
