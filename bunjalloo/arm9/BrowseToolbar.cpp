@@ -59,7 +59,7 @@ void BrowseToolbar::tick()
   if (visible())
   {
     Sprite * spinner(m_sprites[SPRITE_CONNECT_STATUS]);
-    if (m_view.document().status() != Document::LOADED)
+    if (m_view.document().status() != Document::LOADED_PAGE)
     {
       spinner->setTile(TILES_PER_ICON * ICON_SPINNER);
       m_angle+=32;
@@ -100,7 +100,7 @@ void BrowseToolbar::handlePress(int i)
       m_view.controller().next();
       break;
     case SPRITE_STOP_REFRESH:
-      if (m_view.document().status() == Document::LOADED)
+      if (m_view.document().status() == Document::LOADED_PAGE)
       {
         m_view.controller().reload();
       }
@@ -139,7 +139,7 @@ void BrowseToolbar::updateIcons()
   m_sprites[SPRITE_HIDE]->setTile( TILES_PER_ICON * ICON_HIDE_LEFT);
   m_sprites[SPRITE_BACK]->setTile( TILES_PER_ICON * ( m_view.document().hasPreviousHistory() ? ICON_BACK: ICON_BACK_DISABLE));
   m_sprites[SPRITE_FORWARD]->setTile( TILES_PER_ICON * ( m_view.document().hasNextHistory() ? ICON_FORWARD: ICON_FORWARD_DISABLE));
-  m_sprites[SPRITE_STOP_REFRESH]->setTile( TILES_PER_ICON * ( m_view.document().status() != Document::LOADED ? ICON_STOP: ICON_REFRESH));
+  m_sprites[SPRITE_STOP_REFRESH]->setTile( TILES_PER_ICON * ( m_view.document().status() != Document::LOADED_PAGE ? ICON_STOP: ICON_REFRESH));
   m_sprites[SPRITE_BOOKMARK]->setTile( TILES_PER_ICON * ICON_BOOKMARK);
   m_sprites[SPRITE_GO_URL]->setTile( TILES_PER_ICON * ICON_GO_URL);
   m_sprites[SPRITE_SAVE_AS]->setTile( TILES_PER_ICON * ICON_SAVE_AS);
@@ -167,7 +167,7 @@ void BrowseToolbar::updateIcons()
         break;
     }
   }
-  if (m_view.document().status() == Document::LOADED)
+  if (m_view.document().status() == Document::LOADED_PAGE)
   {
     m_sprites[SPRITE_CONNECT_STATUS]->setTile( TILES_PER_ICON * wifiIcon);
   }

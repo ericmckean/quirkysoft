@@ -82,7 +82,7 @@ void Updater::show()
 void Updater::getZip()
 {
   m_state = INI_FAIL;
-  if (m_document.status() == Document::LOADED
+  if (m_document.status() == Document::LOADED_HTML
       and not m_controller.stopped()
       and m_document.htmlDocument()->mimeType() == HtmlParser::TEXT_PLAIN)
   {

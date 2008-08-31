@@ -89,7 +89,7 @@ void CacheTest::testLoadCheck()
   // check that a new load returns "true", loaded from cache
   readFile("test.txt");
   m_document->appendData(m_data, m_length);
-  m_document->setStatus(Document::LOADED);
+  m_document->setStatus(Document::LOADED_HTML);
   result = m_cache->load(next);
   CPPUNIT_ASSERT(result);
 

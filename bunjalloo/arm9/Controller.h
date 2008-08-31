@@ -32,6 +32,8 @@ class Controller
 {
   friend class HttpClient;
   public:
+
+    static const char LICENCE_URL[];
     //!Constructor.
     Controller();
     //! Destructor
@@ -81,9 +83,6 @@ class Controller
      */
     const Config & config() const;
 
-    /** Show the software licence.*/
-    void showLicence();
-
     /** Loops forever.*/
     void mainLoop();
 
@@ -115,6 +114,7 @@ class Controller
     SaveAs_t m_saveAs;
     std::string m_saveFileName;
     std::queue<URI> m_downloadQ;
+    bool m_checkingQueue;
 
 
     void localFile(const std::string &);
@@ -132,5 +132,9 @@ class Controller
     void checkUpdates();
 
     void checkDownloadQueue();
+
+    /** Show the software licence.*/
+    void showLicence();
+
 };
 #endif
