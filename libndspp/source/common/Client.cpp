@@ -286,9 +286,9 @@ int Client::read(int max)
     // on the DS this plays tricks with us.
     // May return not ready when the socket has actually been closed.
     // In that case, recv will return -1 with errno == ESHUTDOWN.
-#ifndef ARM9
+//#ifndef ARM9
     return RETRY_LATER;
-#endif
+//#endif
   }
   errno = 0;
   int amountRead = ::recv(m_tcp_socket, s_buffer, max, 0 /*MSG_DONTWAIT*/);

@@ -64,5 +64,5 @@ def build(bld):
 
   if Options.commands['install']:
     bld.install_files('${PREFIX}', nds.target)
-    [bld.install_files('${PREFIX}/data/bunjalloo/%s'%d, 'data/bunjalloo/%s/*'%d) for d in ('config', 'docs', 'fonts')]
+    [bld.install_files('${PREFIX}/data/bunjalloo/%s'%d, 'data/bunjalloo/%s/*'%d) for d in ('config', 'docs', 'fonts', 'cert')]
 
