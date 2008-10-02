@@ -471,11 +471,61 @@ void View::updateInput()
       tp.px, tp.py+SCREEN_HEIGHT);
 }
 
+enum {
+  HANDY_RIGHT,
+  HANDY_LEFT,
+  HANDY_UP,
+  HANDY_DOWN,
+  HANDY_B,
+  HANDY_X,
+  HANDY_Y,
+  HANDY_A
+};
+// Keys for right handed people
+static unsigned short s_righthanded[] = {
+  KEY_RIGHT,
+  KEY_LEFT,
+  KEY_UP,
+  KEY_DOWN,
+  KEY_B,
+  KEY_X,
+  KEY_Y,
+  KEY_A
+};
+
+// Keys for left handed people
+static unsigned short s_lefthanded[] = {
+  KEY_B,
+  KEY_X,
+  KEY_Y,
+  KEY_A,
+  KEY_RIGHT,
+  KEY_LEFT,
+  KEY_UP,
+  KEY_DOWN
+};
+
+static unsigned short *s_currenthand(0);
+
+unsigned short handy2key(int val)
+{
+  return s_currenthand[val];
+}
+
 void View::browse()
 {
+  bool lefty(false);
+  if (m_controller.config().resource(Config::LEFTY,lefty))
+  {
+    s_currenthand = lefty?s_lefthanded:s_righthanded;
+  }
+  /* Default to my handedness */
+  if (!s_currenthand)
+    s_currenthand = s_righthanded;
+
   updateInput();
 
-  if (m_keyState->isRepeat(KEY_START)) {
+  if (m_keyState->isRepeat(handy2key(HANDY_A))) {
     enterUrl();
   }
   if (not m_keyboard->visible())
@@ -483,19 +533,19 @@ void View::browse()
     if (m_keyState->isRepeat(KEY_SELECT)) {
       m_toolbar->cyclePosition();
     }
-    if (m_keyState->isRepeat(KEY_DOWN)) {
+    if (m_keyState->isRepeat(handy2key(HANDY_DOWN))) {
       // scroll down ...
       m_scrollPane->down();
     }
-    if (m_keyState->isRepeat(KEY_UP)) {
+    if (m_keyState->isRepeat(handy2key(HANDY_UP))) {
       // scroll up ...
       m_scrollPane->up();
     }
-    if (m_keyState->isRepeat(KEY_RIGHT)) {
+    if (m_keyState->isRepeat(handy2key(HANDY_RIGHT))) {
       // scroll down ...
       m_scrollPane->pageDown();
     }
-    if (m_keyState->isRepeat(KEY_LEFT)) {
+    if (m_keyState->isRepeat(handy2key(HANDY_LEFT))) {
       // scroll up ...
       m_scrollPane->pageUp();
     }
@@ -509,7 +559,7 @@ void View::browse()
     }
   }
 
-  if (m_keyState->isRepeat(KEY_A)) {
+  if (m_keyState->isRepeat(KEY_START)) {
     // render the node tree
     m_document.dumpDOM();
   }
