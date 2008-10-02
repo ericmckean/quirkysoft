@@ -50,3 +50,6 @@ update=http://quirkysoft.googlecode.com/svn/wiki/BunjallooVersion.wiki
 
 # Allow inline images
 images=1
+
+# left handed, swaps controls
+lefty=0
