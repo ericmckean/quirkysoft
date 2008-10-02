@@ -306,3 +306,13 @@ void UriTest::testEscape()
   CPPUNIT_ASSERT_EQUAL(expected, result);
 
 }
+
+void UriTest::testTwoDots()
+{
+  URI uri("http://tbn0.example.com/images?q=tbn:xFaRtM:http://www.example.net/es/blabla/FOO.jpg");
+  string expected("/images?q=tbn:xFaRtM:http://www.example.net/es/blabla/FOO.jpg");
+  CPPUNIT_ASSERT_EQUAL(expected, uri.fileName());
+  uri = uri.navigateTo(uri.fileName());
+  CPPUNIT_ASSERT_EQUAL(expected, uri.fileName());
+
+}

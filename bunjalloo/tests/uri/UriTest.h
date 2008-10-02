@@ -38,6 +38,7 @@ class UriTest : public CPPUNIT_NS::TestFixture
     CPPUNIT_TEST( testInternal );
     CPPUNIT_TEST( testCRC );
     CPPUNIT_TEST( testEscape );
+    CPPUNIT_TEST( testTwoDots );
     CPPUNIT_TEST_SUITE_END();
 
   public:
@@ -56,6 +57,7 @@ class UriTest : public CPPUNIT_NS::TestFixture
     void testInternal();
     void testCRC();
     void testEscape();
+    void testTwoDots();
 
 };
 
