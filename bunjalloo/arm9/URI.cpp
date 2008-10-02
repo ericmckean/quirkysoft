@@ -292,9 +292,17 @@ URI URI::navigateTo(const std::string & newFile ) const
   // if contains dots -> strip them out
   vector<string> pathElements;
   vector<string> newPath;
-  tokenize(newURI, pathElements, string("/"));
+  split(newURI, pathElements, string("/"));
 
   vector<string>::const_iterator it(pathElements.begin());
+
+  // skip empties at the start
+  for (; it != pathElements.end(); ++it)
+  {
+    if (not it->empty())
+      break;
+  }
+
   for (; it != pathElements.end();++it)
   {
     if ( (*it) == "..")
@@ -326,10 +334,10 @@ URI URI::navigateTo(const std::string & newFile ) const
     needSep = true;
   }
   // Make sure not to lose trailing slash
-  if (newFile[newFile.length()-1] == '/')
+  /*if (newFile[newFile.length()-1] == '/')
   {
     newURI += "/";
-  }
+  }*/
 
   tmp.setUri(newURI);
   return tmp;

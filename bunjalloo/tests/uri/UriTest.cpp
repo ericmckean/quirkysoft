@@ -316,3 +316,11 @@ void UriTest::testTwoDots()
   CPPUNIT_ASSERT_EQUAL(expected, uri.fileName());
 
 }
+
+void UriTest::testPort3()
+{
+  URI uri("http://www.example.com:1234/index");
+  uri = uri.navigateTo("/index2");
+  int expected = 1234;
+  CPPUNIT_ASSERT_EQUAL(expected, uri.port());
+}
