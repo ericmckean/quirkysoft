@@ -593,6 +593,29 @@ void View::browse()
       m_document.refresh(m_linkHref, tmp);
     }
   }
+
+  if (m_keyState->isRepeat(handy2key(HANDY_Y))) {
+    bookmarkUrl();
+  }
+  if (m_keyState->isRepeat(handy2key(HANDY_X))) {
+    preferences();
+    editConfig();
+  }
+  if (m_keyState->isRepeat(handy2key(HANDY_B))) {
+    stopOrReload();
+  }
+}
+
+void View::stopOrReload()
+{
+  if (document().status() == Document::LOADED_PAGE)
+  {
+    controller().reload();
+  }
+  else
+  {
+    controller().stop();
+  }
 }
 
 void View::pressed(ButtonI * button)
