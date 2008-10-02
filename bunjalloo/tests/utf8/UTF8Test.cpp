@@ -22,7 +22,7 @@ CPPUNIT_TEST_SUITE_REGISTRATION( UTF8Test );
 
 #define TEST_DATA(d, r, eread) \
 {\
-  char * data = d;\
+  const char *data = d;\
   const unsigned int expectedResult = r;\
   const unsigned int expectedRead = eread;\
   unsigned int actualResult;\
@@ -31,7 +31,7 @@ CPPUNIT_TEST_SUITE_REGISTRATION( UTF8Test );
   CPPUNIT_ASSERT_EQUAL( expectedRead, actualRead ); \
 }
 
-static void EncodeTest(signed int value, char * expectedData, unsigned int expectedUsed)
+static void EncodeTest(signed int value, const char *expectedData, unsigned int expectedUsed)
 {
   unsigned char encoded[6];
   unsigned int actualUsed = UTF8::encode(value, encoded);
