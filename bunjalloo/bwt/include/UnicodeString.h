@@ -72,4 +72,30 @@ void tokenize(const StringType& str,
   }
 }
 
+template<typename StringType>
+void split(const StringType& str,
+              std::vector<StringType>& tokens,
+              const StringType& delimiters)
+{
+  // pythonic split, includes empties
+  // 'this|string||is|split' -> ['this','string','','is','split']
+
+  // Special case, delimiter at start
+  std::string::size_type lastPos = 0;
+  std::string::size_type pos = str.find_first_of(delimiters, lastPos);
+  tokens.push_back(str.substr(lastPos, pos - lastPos));
+  lastPos = pos;
+  if (lastPos != std::string::npos)
+    pos = str.find_first_of(delimiters, lastPos+1);
+
+  while (lastPos != std::string::npos || pos != std::string::npos)
+  {
+    // skip delimeter (+1) subtract 1 for length. may add empty str
+    tokens.push_back(str.substr(lastPos+1, pos - 1 - lastPos));
+    lastPos = pos;
+    if (lastPos != std::string::npos)
+      pos = str.find_first_of(delimiters, lastPos+1);
+  }
+}
+
 #endif
