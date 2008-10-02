@@ -80,6 +80,8 @@ class View : public ViewI, public ButtonListener, public LinkListener
 
     void editBookmark();
 
+    void stopOrReload();
+
     /** User wants to bookmark a URL or show the bookmark page.
      */
     void bookmarkUrl();

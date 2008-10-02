@@ -100,14 +100,7 @@ void BrowseToolbar::handlePress(int i)
       m_view.controller().next();
       break;
     case SPRITE_STOP_REFRESH:
-      if (m_view.document().status() == Document::LOADED_PAGE)
-      {
-        m_view.controller().reload();
-      }
-      else
-      {
-        m_view.controller().stop();
-      }
+      m_view.stopOrReload();
       break;
     case SPRITE_SAVE_AS:
       m_view.saveAs();
