@@ -152,6 +152,9 @@ View::~View()
 
 void View::extractTitle()
 {
+  // do not store bookmark as the title
+  if (m_state == BOOKMARK)
+    return;
   // use title text..
   // extract the title from the document
   // only allow bookmarking of html? no, allow any old crap - firefox does.
