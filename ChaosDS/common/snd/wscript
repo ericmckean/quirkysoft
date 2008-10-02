@@ -19,7 +19,6 @@ def build(bld):
   lib.target = 'sounds'
   lib.install_path = 0
   lib.export_incdirs = '.'
-  lib.source = 'dummy.c'
   [lib.add_obj_file(s+'.o') for s in sources]
   taskgens.append(lib)
 

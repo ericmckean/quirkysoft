@@ -35,8 +35,6 @@
 #include "LinkListener.h"
 #include "Link.h"
 
-extern const char _binary_test_map_bin_start[];
-
 class Patcher: public LinkListener
 {
   public:
