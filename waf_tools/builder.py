@@ -11,9 +11,10 @@ def build(bld, with_vera=True, buildsdl=True):
   app_name = os.path.basename(bld.path.srcpath(bld.env))
 
   arm9 = bld.new_task_gen('cxx', 'program')
+  arm9.uselib_local = ''
   arm9.install_path = 0
   arm9.find_sources_in_dirs('arm9')
-  arm9.includes += ' .'
+  arm9.includes = ' .'
   libs = 'bwt bunjalloo'
   if with_vera:
     libs += ' vera'
@@ -39,7 +40,7 @@ def build_test(bld, uselibs='bunjalloo bwt'):
   """ Build a unit test program """
   if not bld.env['WITH_SDL']:
     return
-  if not bld.env_of_name('sdl')['HAVE_CPPUNIT']:
+  if (not bld.env_of_name('sdl')['HAVE_CPPUNIT']):
     return
   uselibs = ' '.join([ '%s_default'%l for l in uselibs.split()])
   tst = bld.new_task_gen('cxx', 'program')
@@ -48,7 +49,7 @@ def build_test(bld, uselibs='bunjalloo bwt'):
   tst.target = 'tester'
   tst.find_sources_in_dirs('.')
   tst.unit_test = 1
-  tst.includes += ' .'
+  tst.includes = ' .'
   tst.uselib_local = '%s cppunitmain'%(uselibs)
   tst.uselib = 'TEST HOST'
 
