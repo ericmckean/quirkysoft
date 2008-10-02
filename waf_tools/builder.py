@@ -3,40 +3,19 @@ import os, sys
 import Options
 import TaskGen
 
-def build(bld, buildlib=True, buildsdl=True):
+def build(bld, with_vera=True, buildsdl=True):
   """
   Build a test program, optionally building the library and optionally
   building for SDL
   """
   app_name = os.path.basename(bld.path.srcpath(bld.env))
-  taskgens = []
-  if buildlib:
-    sources = """
-                 common/fonts/vera.img
-                 common/fonts/vera.map
-                 common/fonts/vera.pal
-              """
-    arm9font = bld.new_task_gen('cxx', 'staticlib')
-    arm9font.target = 'vera'
-    arm9font.install_path = 0
-    arm9font.export_incdirs = '.'
-    arm9font.source = 'common/fonts/dummy.c '+sources
-    # need to do this, or the objects are not added!
-    [arm9font.add_obj_file(s+'.o') for s in sources.split()]
-    taskgens.append(arm9font)
-
-    hdr = bld.new_task_gen('name2h')
-    hdr.target = 'vera.h'
-    hdr.source = sources
-    taskgens.append(hdr)
-
 
   arm9 = bld.new_task_gen('cxx', 'program')
   arm9.install_path = 0
   arm9.find_sources_in_dirs('arm9')
   arm9.includes += ' .'
   libs = 'bwt bunjalloo'
-  if buildlib:
+  if with_vera:
     libs += ' vera'
   arm9.uselib_local = libs.split()
 
@@ -44,10 +23,7 @@ def build(bld, buildlib=True, buildsdl=True):
   arm9.target = app_name+'.elf'
 
   if buildsdl and bld.env['WITH_SDL']:
-    for t in taskgens: t.clone('sdl')
-
     sdl = arm9.clone('sdl')
-    sdl.uselib = 'HOST'
     sdl.target = app_name
 
   arm9bin = TaskGen.task_gen()

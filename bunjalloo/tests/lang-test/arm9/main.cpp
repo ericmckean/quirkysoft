@@ -28,8 +28,6 @@
 #include "Language.h"
 #include "vera.h"
 
-extern const char _binary_test_map_bin_start[];
-
 using namespace nds;
 int main(int argc, char * argv[])
 {
