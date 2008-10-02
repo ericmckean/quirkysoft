@@ -15,8 +15,6 @@ import UnitTest
 import Utils
 
 Task.algotype = Constants.JOBCONTROL
-# TODO: uncomment when waf issue 195 is fixed
-# Configure.autoconfig = True
 srcdir = '.'
 blddir = '_build_'
 waf_tools = 'waf_tools'
@@ -29,58 +27,86 @@ def build(bld):
     print "waf: Entering directory `%s'" % \
         (os.path.join(Build.bld.srcnode.abspath(), blddir))
   bld.add_subdirs('libndspp')
-  if bld.env['WITH_BUNJALLOO']:
-    bld.add_subdirs('bunjalloo')
-  if bld.env['WITH_CHAOS']:
-    bld.add_subdirs('ChaosDS')
+  BUILD_DIRS = {
+      'WITH_BUNJALLOO': 'bunjalloo',
+      'WITH_CHAOS': 'ChaosDS'
+      }
+  for e in BUILD_DIRS:
+    if bld.env[e]:
+      bld.add_subdirs(BUILD_DIRS[e])
 
 def set_options(opt):
   #opt.tool_options('g++')
   opt.tool_options('compiler_cxx')
   opt.tool_options('compiler_cc')
   opt.tool_options('arm', waf_tools)
-  opt.add_option('--with-dldi', action='store',
-          help='Set the DLDI patch to use (use with "build").',
-          default='', dest='with_dldi')
-  opt.add_option('--without-chaos', action='store_true',
-          help='Do not build ChaosDS (use with "configure")',
-          default=False, dest='without_chaos')
-  opt.add_option('--without-bunjalloo', action='store_true',
-          help='Do not build bunjalloo (use with "configure")',
-          default=False, dest='without_bunjalloo')
-  opt.add_option('--without-sdl', action='store_true',
-          help='Do not build the SDL port',
-          default=False, dest='without_sdl')
-
-  opt.add_option('--without-cppunit', action='store_true',
-          help='Do not build the unit tests',
-          default=False, dest='without_cppunit')
-  opt.add_option('--with-tcmalloc', action='store_true',
-          help='Use Google heap profiler tcmalloc (http://code.google.com/p/google-perftools/)',
-          default=False, dest='with_tcmalloc')
-  opt.add_option('--with-profiler', action='store_true',
-          help='Use Google CPU profiler (http://code.google.com/p/google-perftools/)',
-          default=False, dest='with_profiler')
-  opt.add_option('--with-gcov', action='store_true',
-          help='Build with gcov flags',
-          default=False, dest='with_gcov')
-
-  opt.add_option('--tags', action='store_true',
-          help='Force creation of tags file using ctags (use with "build")',
-          default=False, dest='tags')
+  OPTIONS = {
+      '--with-dldi': {
+        'action':  'store',
+        'help':    'Set the DLDI patch to use (use with "build").',
+        'default': None,
+        },
+      '--without-chaos': {
+        'action':  'store_true',
+        'help':    'Do not build ChaosDS (use with "configure")',
+        'default': False,
+        },
+      '--without-bunjalloo': {
+        'action':  'store_true',
+        'help':    'Do not build bunjalloo (use with "configure")',
+        'default': False
+        },
+      '--without-sdl': {
+        'action':  'store_true',
+        'help':    'Do not build the SDL port',
+        'default': False
+        },
+      '--without-cppunit': {
+        'action':  'store_true',
+        'help':    'Do not build the unit tests',
+        'default': False},
+      '--with-tcmalloc': {
+        'action':  'store_true',
+        'help':    'Use Google heap profiler tcmalloc (http://code.google.com/p/google-perftools/)',
+        'default': False
+        },
+      '--with-profiler': {
+        'action':  'store_true',
+        'help':    'Use Google CPU profiler (http://code.google.com/p/google-perftools/)',
+        'default': False
+        },
+      '--with-gcov': {
+        'action':  'store_true',
+        'help':    'Build with gcov flags',
+        'default': False
+        },
+      '--tags': {
+        'action':  'store_true',
+        'help':    'Force creation of tags file using ctags (use with "build")',
+        'default': False
+        }
+      }
+  ao = opt.add_option
+  for op in OPTIONS:
+    kwargs = OPTIONS[op]
+    ao(op, **kwargs)
 
 # Tool checking
-
 def arm_tool_check(conf):
   conf.check_tool('misc')
-  conf.check_tool('g++', funs='cxx_load_tools gxx_common_flags')
-  conf.check_tool('gcc', funs='cc_load_tools gcc_common_flags')
 
   # cannot check compiler_cc for devkitArm as it needs LINKFLAGS, which waf
   # stips off in the check.
-  conf.check_tool('arm7', waf_tools)
-  conf.check_tool('arm9', waf_tools)
-  conf.check_tool('grit', waf_tools)
+  ARM_TOOLS = '''
+    arm
+    grit
+    ndstool
+    dlditool
+    objcopy
+  '''.split()
+  for tool in ARM_TOOLS:
+    conf.check_tool(tool, waf_tools)
+
   without_chaos = False
   if not Options.options.without_chaos and not conf.env['HAVE_GRIT_SHARED']:
     Logs.warn("""Required version of 'grit' is v0.8 (devkitpro r22) at least.""")
@@ -91,12 +117,10 @@ def arm_tool_check(conf):
     if not conf.env['SOX'] or not conf.env['PADBIN']:
       without_chaos = True
 
-  conf.check_tool('ndstool', waf_tools)
-  conf.check_tool('dlditool', waf_tools)
-  conf.check_tool('objcopy', waf_tools)
   if not Options.options.without_chaos and without_chaos:
     Logs.warn("Chaos will not be compiled due to missing requirements")
     Options.options.without_chaos = without_chaos
+
   conf.env['WITH_CHAOS'] = not Options.options.without_chaos
   conf.env['WITH_BUNJALLOO'] = not Options.options.without_bunjalloo
 
@@ -108,133 +132,120 @@ def sdl_tool_check(conf):
   conf.check_tool('compiler_cxx')
   conf.check_tool('compiler_cc')
   conf.check_tool('grit', waf_tools)
+  conf.check_tool('objcopy', waf_tools)
   if not Options.options.without_chaos:
     conf.check_tool('sox', waf_tools)
   if not Options.options.without_cppunit:
     conf.check_tool('unit_test', waf_tools)
-  conf.check_tool('objcopy', waf_tools)
 
 # Header checking
 
 def common_header_checks(configurator):
   for header in ('png.h', 'zlib.h', 'gif_lib.h', 'matrixSsl.h'):
-    configurator.name = header
-    configurator.run()
+    configurator(header_name=header, uselib_store='HOST')
 
 def arm_header_check(conf):
   # check headers
-  e = conf.create_header_configurator()
-  e.mandatory = 1
-  e.nosystem = 1
-  e.uselib_store = 'ARM9'
-  e.name = 'fat.h'
-  e.run()
-
-  common_header_checks(e)
-
-  e.name = 'dswifi9.h'
-  e.header_code = '#include <nds/jtypes.h>'
-  e.run()
-
-  e.name = 'jpeglib.h'
-  e.header_code = '#include <stdio.h>'
-  e.run()
-
-  e.name = 'dswifi7.h'
-  e.uselib_store = 'ARM7'
-  e.header_code = '#include <nds/jtypes.h>'
-  e.run()
+  common_header_checks(conf.arm_check)
+  conf.arm_check(header_name='nds/jtypes.h dswifi9.h')
+  conf.arm_check(header_name='stdio.h jpeglib.h')
+  conf.arm_check(header_name='nds/jtypes.h dswifi7.h', uselib_store='ARM7')
 
 def sdl_header_check(conf):
-  e = conf.create_header_configurator()
-  e.mandatory = 1
-  e.name = 'SDL/SDL.h'
-  e.run()
-
-  common_header_checks(e)
-
-  e.name = 'jpeglib.h'
-  e.header_code = '#include <stdio.h>'
-  e.run()
-
+  common_header_checks(conf.check)
+  conf.sdl_check(header_name='SDL/SDL.h', mandatory=1)
+  conf.sdl_check(header_name='stdio.h jpeglib.h')
 
 # Library checking
 
 def lib_check_common(configurator):
   for l in 'png z gif jpeg matrixsslstatic unzip'.split():
-    configurator.name = l
-    configurator.run()
+    configurator(lib=l)
 
+from Configure import conf
+
+@conf
+def sdl_check(self, *k, **kw):
+  # really check for libs, in lieu of proper waf 1.5 fix
+  #if 'lib' in kw:
+  #  envc = self.env.copy()
+  #  envc['LIB'] = [kw['lib']]
+  #  kw['env'] = envc
+  kw['uselib_store'] = 'HOST'
+  # returns 0 if all is well (WTF?)
+  # returns None if failed!
+  return self.check(*k, **kw) == 0
 
 def lib_check_sdl(conf):
-  pkgconfig = conf.create_pkgconfig_configurator()
-  pkgconfig.mandatory = 1
-  pkgconfig.uselib_store = 'HOST'
+  conf.env['HAVE_CPPUNIT'] = False
+
   for i in 'libpng sdl'.split():
-    pkgconfig.name = i
-    pkgconfig.run()
+    conf.check_cfg(
+        package=i,
+        mandatory=1,
+        args='--cflags --libs',
+        uselib_store='HOST')
 
-  conf.env['HAVE_CPPUNIT'] = 0
   if not (Options.options.without_bunjalloo or Options.options.without_cppunit):
-    pkgconfig.uselib_store = 'TEST'
-    pkgconfig.name = 'cppunit'
-    pkgconfig.run()
-    if not conf.env['LIB_TEST']:
+    result = conf.check_cfg(
+        package='cppunit',
+        args='--cflags --libs',
+        uselib_store='TEST')
+    if 'LIB_TEST' not in conf.env:
       Options.options.without_cppunit = True
-      Utils.pprint('RED', 'Unit tests will not be built')
+      Utils.pprint('RED', 'cppunit not found. Unit tests will not be built')
+      Utils.pprint('RED', 'Install from http://cppunit.sourceforge.net')
+      Utils.pprint('RED', 'or try "sudo apt-get install cppunit"')
     else:
-      conf.env['HAVE_CPPUNIT'] = 1
+      conf.env['HAVE_CPPUNIT'] = True
 
-  e = conf.create_library_configurator()
-  e.mandatory = 1
-  e.uselib_store = 'HOST'
-  e.name = 'GL'
-  e.run()
-
+  perf_msg = 'Install this from http://code.google.com/p/google-perftools/'
   if Options.options.with_tcmalloc:
-    e = conf.create_library_configurator()
-    e.mandatory = 1
-    e.uselib_store = 'HOST'
-    e.name = 'tcmalloc'
-    e.run()
+    if not conf.sdl_check(lib='tcmalloc'):
+      Utils.pprint('RED', perf_msg)
   if Options.options.with_profiler:
-    e = conf.create_library_configurator()
-    e.mandatory = 1
-    e.uselib_store = 'HOST'
-    e.name = 'profiler'
-    e.run()
+    if not conf.sdl_check(lib='profiler'):
+      Utils.pprint('RED', perf_msg)
 
-  lib_check_common(e)
 
 
 def lib_check_arm7(conf):
-  e = conf.create_library_configurator()
-  e.nosystem = 1
-  e.mandatory = 1
-  e.uselib_store = 'ARM7'
-  e.name = 'dswifi7'
-  e.run()
+  conf.arm_check(lib='dswifi7', uselib_store='ARM7')
 
 def lib_check_arm9(conf):
-  e = conf.create_library_configurator()
-  e.nosystem = 1
-  e.mandatory = 1
-  e.uselib_store = 'ARM9'
-  e.name = 'dswifi9'
-  e.run()
-  lib_check_common(e)
+  conf.arm_check(lib='dswifi9')
+  lib_check_common(conf.arm_check)
 
 def check_gcov(conf):
   if Options.options.with_gcov:
-    e = conf.create_library_configurator()
-    e.mandatory = 1
-    e.uselib_store = 'HOST'
-    e.name = 'gcov'
-    e.run()
+    if conf.sdl_check(lib='gcov'):
+      flags = '-fprofile-arcs -ftest-coverage'.split()
+      for i in ('CXXFLAGS', 'CCFLAGS'):
+        conf.env[i].extend(flags)
 
-    flags = '-fprofile-arcs -ftest-coverage'.split()
-    for i in ('CXXFLAGS', 'CCFLAGS'):
-      conf.env[i].extend(flags)
+def config_status(conf):
+  conf.setenv('default')
+  Utils.pprint('GREEN',"""Summary of configure options:""")
+
+  Utils.pprint('BLUE',"""
+      Install prefix:       %(PREFIX)s
+      DLDI used:            %(DLDIFLAGS)s
+      Will build SDL code:  %(WITH_SDL)s
+      Will build Bunjalloo: %(WITH_BUNJALLOO)s
+      Will build ChaosDS:   %(WITH_CHAOS)s"""%conf.env)
+  conf.setenv('sdl')
+  Utils.pprint('BLUE',"""\
+      Cppunit found:        %(HAVE_CPPUNIT)s"""%conf.env)
+  env = {
+      'gcov': Options.options.with_gcov,
+      'tcmalloc': Options.options.with_tcmalloc,
+      'profiler': Options.options.with_profiler
+      }
+  Utils.pprint('BLUE',"""\
+      Using gcov:           %(gcov)s
+      Using tcmalloc:       %(tcmalloc)s
+      Using profiler:       %(profiler)s
+      """%env)
 
 # Main configuration entry point
 def configure(conf):
@@ -254,12 +265,15 @@ def configure(conf):
   conf.env['GRITFLAGS'] = GRITFLAGS
   if Options.options.with_dldi:
     conf.env['DLDIFLAGS'] = Options.options.with_dldi
+  else:
+    conf.env['DLDIFLAGS'] = ''
 
   conf.env['WITH_SDL'] = True
   if Options.options.without_sdl:
     Utils.pprint('BLUE','SDL version not configured')
     conf.env['WITH_SDL'] = False
     conf.env['CXXDEFINES'].extend(['sprintf_platform=siprintf'])
+    config_status(conf)
     return True
 
   sdl = Environment.Environment()
@@ -277,7 +291,12 @@ def configure(conf):
   sdl['CXXDEFINES'].extend(['sprintf_platform=sprintf'])
   conf.setenv('sdl')
   sdl_tool_check(conf)
-  lib_check_sdl(conf)
+  try:
+    lib_check_sdl(conf)
+  except :
+    pass
+  conf.sdl_check(lib='GL')
+  lib_check_common(conf.sdl_check)
 
   sdl['OBJCOPYFLAGS'] = ' -I binary -O elf32-i386 -B i386 '.split()
   # do not add -O2 FFS, it makes debugging impossible
@@ -287,6 +306,7 @@ def configure(conf):
   sdl_header_check(conf)
 
   check_gcov(conf)
+  config_status(conf)
 
 def shutdown():
   # force running unit tests

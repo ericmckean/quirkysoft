@@ -1,4 +1,5 @@
 
+from os.path import basename
 import TaskGen
 import Options
 import Logs
@@ -23,7 +24,7 @@ def detect(conf):
         if 'wav' in l.split(':')[1].split():
           have_wav = True
           break
-    conf.check_message(sox, 'has wav file format', have_wav)
+    conf.check_message(basename(sox), 'has wav file format', have_wav)
 
   if not have_wav:
     Logs.warn("""sox does not have wav. run `sudo apt-get install libsox-fmt-all'?""")

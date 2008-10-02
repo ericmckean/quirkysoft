@@ -16,6 +16,7 @@ def build(bld):
   taskgens.append(TaskGen.task_gen(source=sources))
 
   lib = bld.new_task_gen('cxx', 'staticlib')
+  lib.uselib_local = ''
   lib.target = 'sounds'
   lib.install_path = 0
   lib.export_incdirs = '.'
