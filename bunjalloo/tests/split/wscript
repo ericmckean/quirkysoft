@@ -11,6 +11,6 @@ def build(bld):
   tst.target = 'split_test'
   tst.find_sources_in_dirs('.')
   tst.includes = ' .'
-  tst.uselib_local = 'bwt_default'
+  tst.uselib_local = 'bwt'
   tst.uselib = 'HOST'
 

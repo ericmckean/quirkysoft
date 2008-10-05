@@ -13,7 +13,6 @@ def build(bld):
     obj.export_incdirs = 'include'
     obj.includes = 'include source/common'
     obj.target = 'ndspp'
-    obj.uselib_local = ''
     return obj
 
   arm9obj = createobj()

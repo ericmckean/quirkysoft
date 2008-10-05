@@ -23,7 +23,6 @@ def build(bld):
                common/fonts/vera.pal
             """
   arm9font = bld.new_task_gen('cxx', 'staticlib')
-  arm9font.uselib_local = ''
   arm9font.target = 'vera'
   arm9font.install_path = 0
   arm9font.export_incdirs = '.'
