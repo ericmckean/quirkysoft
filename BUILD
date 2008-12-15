@@ -12,8 +12,7 @@ try running:
    python waf
 
 If you are using a version from git, then you will need to install waf from
-http://waf.googlecode.com/ - version 1.5 which is currently only available in
-the svn trunk. Read on for more details...
+http://waf.googlecode.com/ - version 1.5.1 should be used. Read on for more details...
 
 Prerequisites
 =============
@@ -21,11 +20,11 @@ Prerequisites
 First I'll assume you are using Ubuntu 8.04+, or some similar modern-ish Linux
 distro. Otherwise you may have to modify these steps a little.
 
-Download and install DevkitARM, libnds, libdswifi and libfat. These can be
+Download and install devkitARM, libnds, dswifi and libfat. These can be
 found at the website http://sourceforge.net/projects/devkitpro/
 
-An experimental Linux installer is available on the DKP forums here
-http://forums.devkitpro.org/viewtopic.php?f=25&t=10 but the tar.gz files from
+An experimental Linux installer is available on the devkitPro forums here
+http://forums.devkitpro.org/viewtopic.php?f=25&t=10 but the tarball files from
 sourceforge are not too difficult to install.
 
 Set the variable DEVKITPRO to point to the /path/to/devkitpro and DEVKITARM to
@@ -36,7 +35,7 @@ point to $DEVKITPRO/devkitARM, something like this:
 
 [ TIP: place these lines in your ~/.bashrc file ]
 
-Now install the latest devkitArm:
+Now install the latest devkitARM:
 
     mkdir -p $DEVKITPRO
     cd $DEVKITPRO
@@ -61,18 +60,22 @@ driver for your card. See chishm's DLDI website http://chishm.drunkencoders.com/
 In order to automatically have the build system generate a patched ".nds" file
 you must specifiy the path to "your.dldi" driver and have the dlditool in
 $DEVKITARM/bin.  This is not required if your card automatically patches
-homebrew.
+homebrew, which most flash cards since around mid-2006 do.
 
 Building dependencies
 =====================
 
-The following tools are needed:
+The following tools are needed to download and build the 3rd party dependencies:
 
     sudo apt-get install patch
     sudo apt-get install subversion
 
-And also python 2.5. To build the dependencies for the DS version. Assuming you
-are in the ame directory as this file now:
+You will also need Python, at least version 2.4. This is probably already installed if you use Linux.
+
+To build the dependencies for the DS version, you can use the download-libs.sh
+script in the tools directory. This will download a few tar files, unpack them,
+build the contents and install the files to $DEVKITPRO/libnds. You might run
+something like this:
 
     here=$PWD
     cd /tmp/
@@ -85,8 +88,8 @@ Alternatively, use the pre-compiled libraries that are available from
 http://code.google.com/p/quirkysoft/downloads/list and copy them to
 $DEVKITPRO/libnds/ using the install.sh script.
 
-Follow its final instructions to install unzip and matrixSSL for Linux. The
-following development libraries are also needed:
+Follow download-libs.sh's final instructions to install unzip and matrixSSL for
+Linux. The following development libraries are also needed:
 
     sudo apt-get install libcppunit-dev
     sudo apt-get install libpng-dev
@@ -108,7 +111,7 @@ use the usual configure style build:
     ./configure
     make
 
-Or if you are familiar wit the waf build system, the equivalent commands are
+Or if you are familiar with the waf build system, the equivalent commands are
 valid:
 
     /path/to/waf configure
