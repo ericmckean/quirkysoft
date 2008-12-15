@@ -26,10 +26,7 @@
 #include "Text16.h"
 
 int main(void) {
-  irqInit();
   irqSet(IRQ_VBLANK, Interrupt::processVblank);
-  nds::System::setupSleepWatchdog();
-  
   Graphics::initialiseScreen();
   // debug...
   /*

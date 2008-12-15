@@ -18,12 +18,6 @@
 #include "System.h"
 #include "libnds.h"
 
-VoidFunctionPointer nds::System::s_callback(0);
-
-void nds::System::checkSleep()
-{
-}
-
 const char * nds::System::uname()
 {
   return "SDL";
@@ -37,13 +31,4 @@ int nds::System::language()
     return strtol(l, 0, 0);
   }
   return 0;
-}
-
-void nds::System::setupSleepWatchdog()
-{
-}
-
-void nds::System::registerSleepFunction(VoidFunctionPointer fn)
-{
-  s_callback = fn;
 }

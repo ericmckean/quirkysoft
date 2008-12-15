@@ -47,11 +47,6 @@ const char Controller::LICENCE_URL[] = "file:///licence";
 const static char * UNABLE_TO_LOAD = "cannot_load";
 const static int MAX_REDIRECTS(7);
 
-static void sleepCallback()
-{
-  nds::Wifi9::instance().disconnect();
-}
-
 Controller::Controller()
   : m_document(new Document()),
   m_httpClient(new HttpClient),
@@ -75,7 +70,6 @@ Controller::Controller()
   m_cache = new Cache(*m_document, useCache, clearCache);
   m_config->resource("redirects", m_maxRedirects);
   m_httpClient->setController(this);
-  nds::System::registerSleepFunction(sleepCallback);
 }
 
 Controller::~Controller()

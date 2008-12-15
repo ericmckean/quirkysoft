@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2007,2008 Richard Quirk
+  Copyright (C) 2008 Richard Quirk
 
   This program is free software: you can redistribute it and/or modify
   it under the terms of the GNU General Public License as published by
@@ -14,21 +14,13 @@
   You should have received a copy of the GNU General Public License
   along with this program.  If not, see <http://www.gnu.org/licenses/>.
 */
-#ifndef System_h_seen
-#define System_h_seen
+#include <nds.h>
+#include <maxmod9.h>
 
-// tolua_begin
-namespace nds
+void setGenericSound( u32 rate, u8 vol, u8 pan, u8 format)
 {
-  class System
-  {
-
-    public:
-      /** Get the system name. */
-      static const char * uname();
-
-      static int language();
-  };
 }
-// tolua_end
-#endif
+
+void playGenericSound(const void* data, u32 length)
+{
+}

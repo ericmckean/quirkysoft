@@ -23,16 +23,6 @@ def build(bld):
   if bld.env['WITH_SDL']:
     sdl = arm9obj.clone('sdl')
 
-
-  arm7obj = bld.new_task_gen('cxx', 'program')
-  arm7obj.install_path = 0
-  arm7obj.includes = 'arm7/source'
-  arm7obj.find_sources_in_dirs(arm7obj.includes)
-  arm7obj.uselib = 'ARM7'
-  arm7obj.uselib_local = 'ndspp-arm7'
-  arm7elfname = APPNAME+'-arm7.elf'
-  arm7obj.target = arm7elfname
-
   arm9p = bld.new_task_gen('cxx', 'program')
   arm9p.install_path = 0
   arm9p.source = 'arm9/source/main.cpp'
@@ -46,11 +36,9 @@ def build(bld):
     sdlp.target = APPNAME
 
   # generate nds
-  TaskGen.task_gen(source=arm7elfname, install_path=0)
   TaskGen.task_gen(source=arm9elfname, install_path=0)
   nds = bld.new_task_gen('ndstool')
-  nds.source = (arm7elfname.replace('.elf', '.arm'),
-                arm9elfname.replace('.elf', '.arm'))
+  nds.source = arm9elfname.replace('.elf', '.arm')
   nds.banner = generate_banner(APPNAME)
   nds.icon = 'common/data/icon_palette.bmp'
   nds.target = APPNAME+'.nds'

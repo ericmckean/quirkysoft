@@ -31,8 +31,6 @@
 using namespace nds;
 int main(int argc, char * argv[])
 {
-  irqInit();
-  irqSet(IRQ_VBLANK,0);
   // wait for arm7 to read settings.
   for (int i = 0; i < 120; ++i)
     swiWaitForVBlank();
@@ -92,7 +90,8 @@ int main(int argc, char * argv[])
 
     if (keys & KEY_TOUCH)
     {
-      touchPosition tp = touchReadXY();
+      touchPosition tp;
+      touchRead(&tp);
       Stylus stylus;
       stylus.update(Stylus::DOWN, true, tp.px, tp.py+SCREEN_HEIGHT);
       if (not needsPainting)

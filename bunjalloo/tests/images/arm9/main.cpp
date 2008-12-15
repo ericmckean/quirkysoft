@@ -46,8 +46,6 @@ const char * filenames[] = {
 
 int main(int argc, char * argv[])
 {
-  irqInit();
-  irqSet(IRQ_VBLANK,0);
   Canvas & canvas = Canvas::instance();
   canvas.fillRectangle(0, 0, canvas.width(), canvas.height(), nds::Color(31,21,21));
   int y = 0;

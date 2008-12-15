@@ -465,7 +465,8 @@ void View::updateInput()
       keysDown(),
       keysHeld(),
       keysUp());
-  touchPosition tp = touchReadXY();
+  touchPosition tp;
+  touchRead(&tp);
   Stylus::TouchType touchType = Stylus::keysToTouchType( m_keyState->isHeld(KEY_TOUCH), m_keyState->isUp(KEY_TOUCH));
   Stylus::instance()->update(touchType, m_keyState->isRepeat(KEY_TOUCH),
       tp.px, tp.py+SCREEN_HEIGHT);
@@ -689,7 +690,6 @@ void View::keyboard()
 void View::tick()
 {
   scanKeys();
-  nds::System::checkSleep();
   switch (m_state)
   {
     case BROWSE:

@@ -16,7 +16,9 @@
 */
 #include <nds/bios.h>
 #include <nds/memory.h>
+extern "C" {
 #include <nds/system.h>
+}
 #include <nds/arm9/video.h>
 #include "Video.h"
 #include "Sprite.h"
@@ -24,10 +26,10 @@
 using namespace nds;
 
 Video::Video(int screen):
-  m_DISPCNT(screen?SUB_DISPLAY_CR:DISPLAY_CR),
+  m_DISPCNT(screen?REG_DISPCNT_SUB:REG_DISPCNT),
   m_screen(screen)
 {
-  powerON(POWER_ALL_2D);
+  powerOn(POWER_ALL_2D);
   m_DISPCNT = 0;
   clear();
   setObjectsEnabled();
@@ -195,12 +197,12 @@ void Video::setThreeD(bool td)
 {
   if (td) {
     // textures? should enable a vram bank for textures too
-    powerON(POWER_ALL);
+    powerOn(POWER_ALL);
     m_DISPCNT |= ENABLE_3D|DISPLAY_BG0_ACTIVE;
     vramSetBankA(VRAM_A_TEXTURE);
   } else {
     vramSetBankA(VRAM_A_MAIN_BG);
-    powerOFF(POWER_3D_CORE|POWER_MATRIX);
+    powerOff((PM_Bits)(POWER_3D_CORE|POWER_MATRIX));
     m_DISPCNT &= ~(ENABLE_3D|DISPLAY_BG0_ACTIVE);
   }
 }
