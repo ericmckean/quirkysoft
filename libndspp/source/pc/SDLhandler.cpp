@@ -74,6 +74,7 @@ SDLhandler::SDLhandler():
   ::memset(m_vramMainBack, 0, 0x16000*2);
   ::memset(m_spriteGfx, 0, sizeof(m_spriteGfx));
   ::memset(m_subSpriteGfx, 0, sizeof(m_subSpriteGfx));
+  enableVblank(0);
 }
 
 SDLhandler::~SDLhandler()
