@@ -24,10 +24,3 @@ def build(bld):
   arm9obj.includes += ' source/arm9'
   arm9obj.find_sources_in_dirs('source/arm9 source/common')
   arm9obj.uselib = 'HOST'
-
-  arm7obj = createobj()
-  arm7obj.includes += ' source/arm7'
-  arm7obj.find_sources_in_dirs('source/arm7')
-  arm7obj.uselib = 'ARM7'
-  arm7obj.target = 'ndspp-arm7'
-

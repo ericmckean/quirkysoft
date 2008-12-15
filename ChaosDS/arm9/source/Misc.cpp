@@ -175,7 +175,8 @@ bool Misc::confirm()
       yes_pressed = 1;
     if (keysSlow & KEY_TOUCH)
     {
-      touchPosition pos = touchReadXY();
+      touchPosition pos;
+      touchRead(&pos);
       if ( yesRect.hit(pos.px, pos.py) )
       {
         yes_pressed = 2;

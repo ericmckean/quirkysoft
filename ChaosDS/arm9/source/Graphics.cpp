@@ -56,7 +56,7 @@ void Graphics::loadAllPalettes()
 
 void Graphics::initialiseScreen()
 {
-  powerON(POWER_ALL_2D);
+  powerOn(POWER_ALL_2D);
   Video & mainScreen = Video::instance();
   Video & subScreen  = Video::instance(1);
   subScreen.setMode(0);

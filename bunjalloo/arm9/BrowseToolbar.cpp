@@ -67,8 +67,8 @@ void BrowseToolbar::tick()
       spinner->setDoubleSize(false);
       spinner->setRotateScale(true);
       spinner->setRotate(1);
-      u16 cosAng = COS[m_angle] / 16;
-      u16 sinAng = SIN[m_angle] / 16;
+      u16 cosAng = cosLerp(m_angle) / 16;
+      u16 sinAng = sinLerp(m_angle) / 16;
       spinner->setAffine(cosAng, sinAng, -sinAng, cosAng);
     }
     else

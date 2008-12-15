@@ -33,7 +33,7 @@ Video::Video(int screen):
   m_DISPCNT(screen?SUB_DISPLAY_CR:DISPLAY_CR),
   m_screen(screen)
 {
-  powerON(POWER_ALL_2D);
+  powerOn(POWER_ALL_2D);
   m_DISPCNT = 0;
   clear();
   setObjectsEnabled();

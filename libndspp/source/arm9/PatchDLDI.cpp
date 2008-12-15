@@ -38,12 +38,12 @@
 
 extern "C"
 {
-  extern const u32 _io_dldi;
+  extern const u32 _io_dldi_stub;
 }
 
 const unsigned char * nds::PatchDLDI::dldiPatch()
 {
-  return (unsigned char*)((&_io_dldi) -24);
+  return (unsigned char*)((&_io_dldi_stub) -24);
 }
 
 unsigned short * nds::PatchDLDI::buffer()

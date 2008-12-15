@@ -147,9 +147,8 @@ def common_header_checks(configurator):
 def arm_header_check(conf):
   # check headers
   common_header_checks(conf.arm_check)
-  conf.arm_check(header_name='nds/jtypes.h dswifi9.h')
+  conf.arm_check(header_name='nds/ndstypes.h dswifi9.h')
   conf.arm_check(header_name='stdio.h jpeglib.h')
-  conf.arm_check(header_name='nds/jtypes.h dswifi7.h', uselib_store='ARM7')
 
 def sdl_header_check(conf):
   common_header_checks(conf.check)
@@ -207,11 +206,6 @@ def lib_check_sdl(conf):
     if not conf.sdl_check(lib='profiler'):
       Utils.pprint('RED', perf_msg)
 
-
-
-def lib_check_arm7(conf):
-  conf.arm_check(lib='dswifi7', uselib_store='ARM7')
-
 def lib_check_arm9(conf):
   conf.arm_check(lib='dswifi9')
   lib_check_common(conf.arm_check)
@@ -257,7 +251,6 @@ def configure(conf):
   conf.env['OBJCOPYFLAGS'] = """ -I binary -O elf32-littlearm -B arm
       --rename-section .data=.rodata,readonly,contents """.split()
   lib_check_arm9(conf)
-  lib_check_arm7(conf)
   GRITFLAGS='-pw 16 -gB 8 -m! -ftc -fh -q -pe64'
   DATADIR='data/bunjalloo'
   conf.env['CXXDEFINES'] = ['DATADIR=\\"%s\\"'%DATADIR]

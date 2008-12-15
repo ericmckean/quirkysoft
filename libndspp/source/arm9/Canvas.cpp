@@ -111,9 +111,9 @@ void Canvas::endPaint()
   unsigned short* temp = m_frontMain;
   m_frontMain = m_backMain;
   m_backMain = temp;
-  // flip 
+  // flip
   // base is 16KB and screen size is 256x256x2 (128KB)
-  BG3_CR ^= BG_BMP_BASE( 128 / 16 );
+  REG_BG3CNT ^= BG_BMP_BASE( 128 / 16 );
 
   // copy sub screen - buffer size * 2 since is 16 bit
   memcpy(m_frontSub, m_backSub, SCREEN_WIDTH*SCREEN_HEIGHT*2);

@@ -86,9 +86,10 @@ def arm_check(self, *k, **kw):
 
   self.check(*k, **kw)
 
-def gxx_modifier_per_proc(conf, proc):
+@conftest
+def gxx_modifier_arm_eabi(conf):
   env = conf.env
-  uselib_store = {9: 'HOST', 7: 'ARM7'}[proc]
+  uselib_store = 'HOST'
 
   cxx_flags = 'CXXFLAGS_%s' % (uselib_store)
   cc_flags = 'CCFLAGS_%s' % (uselib_store)
@@ -99,12 +100,10 @@ def gxx_modifier_per_proc(conf, proc):
 
   arch = '-mthumb -mthumb-interwork'
   env[cc_flags] = (arch + ' -ffast-math -O2 -Wall ').split()
-  if env['CC_VERSION'] == '4.3.0':
+  version = [int(v) for v in env['CC_VERSION'].split('.')]
+  if version[0] == 4 and version[1] >= 3:
     env[cc_flags].append('-Wno-array-bounds')
-  env[cc_flags].extend(
-      {9:' -march=armv5te -mtune=arm946e-s -DARM9',
-       7:' -mcpu=arm7tdmi -mtune=arm7tdmi -DARM7 '}[proc].split()
-      )
+  env[cc_flags].extend('-march=armv5te -mtune=arm946e-s -DARM9'.split())
   env[cxx_flags] = ['-g',
                     '-fno-rtti',
                     '-fno-exceptions']
@@ -113,26 +112,20 @@ def gxx_modifier_per_proc(conf, proc):
       '%s/libnds/include' % (Options.options.devkitpro)
       ]
   env[link_flags] = [
-      '-specs=ds_arm%d.specs' % (proc),
+      '-specs=ds_arm9.specs',
       '-g',
       '-mno-fpu',
-      '-Wl,-Map,map%d.map' % (proc),
+      '-Wl,-Map,map9.map',
       '-Wl,-gc-sections'] + arch.split()
 
   # check for libnds
   # cpp_path is optional, will use arm9 path if none given
-  if proc == 9:
-    conf.arm_check(lib='fat',
-        header_name='fat.h')
-  conf.arm_check(lib='nds%d'%proc, cpp_path=cpp_path, uselib_store=uselib_store)
+  conf.arm_check(lib='fat',
+      header_name='fat.h')
+  conf.arm_check(lib='nds9', cpp_path=cpp_path, uselib_store=uselib_store)
   # swap the last 2 (nds9/fat) over so linking works.
   env[cpp_flags].extend(env[cc_flags])
   env['CXXDEFINES'] = env['CCDEFINES']
-
-@conftest
-def gxx_modifier_arm_eabi(conf):
-  for proc in (7,9):
-    gxx_modifier_per_proc(conf, proc)
 
 @conftest
 def check_devkitpro(conf):

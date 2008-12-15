@@ -38,8 +38,6 @@ extern const char _binary_test_map_bin_start[];
 using namespace nds;
 int main(int argc, char * argv[])
 {
-  irqInit();
-  irqSet(IRQ_VBLANK,0);
   static Font font((unsigned char*)_binary_vera_img_bin_start, (unsigned char*)_binary_vera_map_bin_start);
   TextAreaFactory::setFont(&font);
   TextAreaFactory::usePaletteData((const char*)_binary_vera_pal_bin_start, 32);
@@ -234,7 +232,8 @@ int main(int argc, char * argv[])
 
     if (keys & KEY_TOUCH)
     {
-      touchPosition tp = touchReadXY();
+      touchPosition tp;
+      touchRead(&tp);
       Stylus stylus;
       stylus.update(Stylus::DOWN, true, tp.px, tp.py+SCREEN_HEIGHT);
       needsPainting = keyBoard->dirty();
