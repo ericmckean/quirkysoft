@@ -150,9 +150,8 @@ def detect(conf):
   ps_option = [l for l in v if option_re.match(l)]
   ok = (len(ps_option) == 2)
   conf.env['HAVE_GRIT_SHARED'] = 0
-  import Runner
   conf.check_message('grit', 'accepts -pS and -O', ok)
-  Runner.print_log(''.join(ps_option))
+  conf.log.write(''.join(ps_option))
   if ok:
     conf.env['HAVE_GRIT_SHARED'] = 1
 
@@ -170,5 +169,5 @@ def setup(bld):
   grit_str = '${GRIT} ${SRC} ${GRITFLAGS}'
   Task.simple_task_type('grit_shared_cmd', grit_str, color='CYAN', before="cc cxx")
   cls = Task.task_type_from_func('grit_shared', vars=[], func=grit_shared_wrapper , color='CYAN', before="cc cxx")
-  cls.maxjobs = 1
+  cls.maxjobs = 0
 
