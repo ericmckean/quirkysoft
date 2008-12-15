@@ -1,6 +1,6 @@
 #!/bin/sh
 
-LIBPNG=libpng-1.2.31
+LIBPNG=libpng-1.2.33
 ZLIB=zlib-1.2.3
 GIFLIB=giflib-4.1.6
 JPEGLIB=jpegsrc.v6b
