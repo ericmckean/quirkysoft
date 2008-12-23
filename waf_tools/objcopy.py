@@ -18,7 +18,6 @@ def detect(conf):
   copy = conf.find_program('cp', var='COPY')
   env['COPY'] = copy
 
-# name2h
 def build_h(task):
   """ build h file from input file names """
   env = task.env
@@ -46,18 +45,11 @@ extern "C" {
   return 0
 
 class name2h_taskgen(TaskGen.task_gen):
-  def __init__(self, *k, **kw):
-    TaskGen.task_gen.__init__(self, *k, **kw)
-
   def apply(self):
-    find_source_lst = self.path.find_resource
-    input_nodes = []
-    for filename in self.to_list(self.source):
-      node = find_source_lst(Utils.split_path(filename))
-      input_nodes.append(node)
+    find_resource = self.path.find_resource
     task = self.create_task('name2h', self.env)
-    task.set_inputs(input_nodes)
-
+    task.set_inputs([find_resource(Utils.split_path(filename))
+                    for filename in self.to_list(self.source)])
     task.set_outputs(self.path.find_or_declare(Utils.split_path(self.target)))
 
 def setup(bld):
@@ -75,33 +67,30 @@ def setup(bld):
         .snd
       """.split():
     TaskGen.declare_chain(
-        name = 'in2bin',
-        action = copy_str,
+        name='in2bin',
+        action=copy_str,
         ext_in=i,
         ext_out=i+'.bin')
   # pal.bin -> pal.bin.o
   TaskGen.declare_chain(
-      name = 'bin2o',
-      action = bin2o_str,
-      ext_in = '.bin',
-      ext_out = '.o',
+      name='bin2o',
+      action=bin2o_str,
+      ext_in='.bin',
+      ext_out='.o',
       after="in2bin",
-      reentrant = 0)
+      reentrant=0)
 
   # bin2o
   # copies file.elf to file.arm
   objcopy_str = '${OBJCOPY} -O binary ${SRC} ${TGT}'
   TaskGen.declare_chain(
-      name = 'objcopy',
-      action = objcopy_str,
-      ext_in = '.elf',
-      ext_out = '.arm',
-      before = 'ndstool_9 ndstool_7_9 ndstool_7_9_b ndstool_9_b',
-      after = 'cc_link cxx_link',
-      reentrant = 0
-  )
+      name='objcopy',
+      action=objcopy_str,
+      ext_in='.elf',
+      ext_out='.arm',
+      before='ndstool_9 ndstool_9_b',
+      after='cc_link cxx_link',
+      reentrant=0)
 
   # name2h
-  Task.task_type_from_func('name2h', vars=[], func=build_h, before="cxx cc")
-  TaskGen.task_gen.classes['name2h'] = name2h_taskgen
-
+  Task.task_type_from_func('name2h', vars=[], func=build_h, before='cc cxx')

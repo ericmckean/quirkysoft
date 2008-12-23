@@ -132,9 +132,11 @@ def check_devkitpro(conf):
   """ Set up the C and C++ flags for ARM compilation """
   if not Options.options.devkitpro:
     conf.fatal('''No DEVKITPRO variable set. Set the path to devkit pro or use the --with-devkitpro option''')
+  conf.env[DEVKITPRO] = Options.options.devkitpro
   if not Options.options.devkitarm:
     Options.options.devkitarm = os.path.join(Options.options.devkitpro, 'devkitARM')
     Logs.warn('''No DEVKITARM variable set. Using %s''' % (Options.options.devkitarm))
+  conf.env[DEVKITARM] = Options.options.devkitarm
 
 # The variable name 'detect' is magic.  These rules are evaluated in the
 # ConfigurationContext.check_tool method, calling each function by reflection

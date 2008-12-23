@@ -13,25 +13,16 @@ def dldi_func(tsk):
   result = dlditsk.run()
   return result
 
-after = 'ndstool_9 ndstool_9_b ndstool_7_9 ndstool_7_9_b'
+after = 'ndstool_9 ndstool_9_b'
 class dlditool_taskgen(TaskGen.task_gen):
-  """ Task for dlditool """
-  def __init__(self, *k, **kw):
-    TaskGen.task_gen.__init__(self, *k, **kw)
-
   def apply(self):
-    find_build = self.path.find_or_declare
-    input_nodes = []
-    for filename in self.to_list(self.source):
-      node = find_build(filename)
-      input_nodes.append(node)
-    # niceness of 160
+    find = self.path.find_or_declare
     task = self.create_task('copy', self.env)
     task.after = after
     task.chmod = ''
     task.fun = dldi_func
-    task.set_inputs(input_nodes)
-    task.set_outputs(find_build(self.target))
+    task.set_inputs([find(filename) for filename in self.to_list(self.source)])
+    task.set_outputs(find(self.target))
 
 def detect(conf):
   """ Detect dlditool in devkitarm path """

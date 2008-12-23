@@ -1,7 +1,7 @@
 """ Waf tool for generating image data using grit """
 import os, re, sys
 import Build, Task, Utils
-from TaskGen import extension, taskgen, after, task_gen
+from TaskGen import extension, taskgen, task_gen
 import Options
 
 def grit_shared_wrapper(task):
@@ -37,21 +37,6 @@ def grit_shared_wrapper(task):
   return 0
 
 class grit_shared_taskgen(task_gen):
-  def __init__(self, *k, **kw):
-    task_gen.__init__(self, *k, **kw)
-    self.gritflags = ''
-    self.palette = ''
-
-  def clone(self, variant):
-    obj = Build.bld.new_task_gen('grit_shared')
-    obj.palette = self.palette
-    obj.source = [a for a in Utils.to_list(self.source)]
-    obj.gritflags = self.gritflags
-    obj.export_incdirs = self.export_incdirs
-    if variant != 'default':
-      obj.env = Build.bld.env_of_name(variant).copy()
-    return obj
-
   def apply(self):
     find_source_lst = self.path.find_resource
     input_nodes = []
@@ -103,13 +88,11 @@ def add_include(task):
   fp = open(outfile, 'w')
   fp.write('#include "%s"\n' % (os.path.basename(infile).replace('.c','.h')))
   i = open(infile)
-  for k in i.readlines():
-    fp.write(k)
+  [fp.write(k) for k in i.readlines()]
   fp.close()
 
 @taskgen
 @extension('.pcx')
-@after('apply_core')
 def pcx_file(self, node):
   out_source_c = node.change_ext('.c')
   self.allnodes.append(out_source_c)
