@@ -62,8 +62,7 @@ void BrowseToolbar::tick()
     if (m_view.document().status() != Document::LOADED_PAGE)
     {
       spinner->setTile(TILES_PER_ICON * ICON_SPINNER);
-      m_angle+=32;
-      m_angle &= 0x1ff;
+      m_angle+=182;
       spinner->setDoubleSize(false);
       spinner->setRotateScale(true);
       spinner->setRotate(1);
