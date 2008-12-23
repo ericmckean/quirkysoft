@@ -148,8 +148,7 @@ int main(void) {
   int fadeLvl = 0;
   while(1)
   {
-    affine+=32;
-    affine &= 0x1ff;
+    affine += 182;
     // Compute sin and cos
     nds::Sprite * spinner(sprites[7]);
     spinner->setRotateScale(true);
