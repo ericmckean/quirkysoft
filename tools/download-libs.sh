@@ -1,6 +1,6 @@
 #!/bin/sh
 
-LIBPNG=libpng-1.2.33
+LIBPNG=libpng-1.2.34
 ZLIB=zlib-1.2.3
 GIFLIB=giflib-4.1.6
 JPEGLIB=jpegsrc.v6b
@@ -57,7 +57,9 @@ make -C giflib -f Makefile.ds clean install || die "Problems building giflib"
 make -C otherlibs/matrixssl/src -f Makefile.ds clean install || die "Problems building matrixSSL"
 cd jpeglib
 patch -i ../otherlibs/jpeglib/jmorecfg-remove-float.patch -p1 || die "Unable to patch JPEG to remove floats"
-CFLAGS="-Dsprintf=siprintf -Dfprintf=fiprintf -DNO_GETENV -O2 -march=armv5te -mtune=arm946e-s -ffast-math" \
+CFLAGS="-Dsprintf=siprintf -Dfprintf=fiprintf -DNO_GETENV \
+-mthumb -mthumb-interwork -fomit-frame-pointer \
+-O2 -march=armv5te -mtune=arm946e-s -ffast-math" \
  LDFLAGS="-L$DEVKITPRO/libnds/lib -lnds9 -specs=ds_arm9.specs" CC=$DEVKITARM/bin/arm-eabi-gcc ./configure --prefix=$DEVKITPRO/libnds || die "Problems configuring jpeg lib"
 make clean
 make install-lib
