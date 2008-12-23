@@ -179,6 +179,9 @@ short sinLerp(short angle);
 
 // ARM9, ARM7
 #else
+#ifdef __cplusplus
+extern "C" {
+#endif
 #include <nds/ndstypes.h>
 #include <nds/bios.h>
 #include <nds/card.h>
@@ -186,13 +189,7 @@ short sinLerp(short angle);
 #include <nds/interrupts.h>
 #include <nds/ipc.h>
 #include <nds/memory.h>
-#ifdef __cplusplus
-extern "C" {
 #include <nds/system.h>
-}
-#else
-#include <nds/system.h>
-#endif
 #include <nds/timers.h>
 #include <nds/arm9/background.h>
 #include <nds/arm9/cache.h>
@@ -209,6 +206,9 @@ extern "C" {
 // No! #include <nds/arm9/videoGL.h>
 // No! #include <nds/arm9/boxtest.h>
 #include <nds/arm9/sprite.h>
+#ifdef __cplusplus
+}
+#endif
 #ifdef ARM9
 void setGenericSound( u32 rate, u8 vol, u8 pan, u8 format);
 void playGenericSound(const void* data, u32 length);
