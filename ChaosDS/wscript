@@ -28,7 +28,7 @@ def build(bld):
   arm9p.source = 'arm9/source/main.cpp'
   arm9p.uselib_local = APPNAME+' ndspp'
   arm9p.uselib = 'HOST'
-  arm9elfname = APPNAME+'-arm9.elf'
+  arm9elfname = APPNAME+'.elf'
   arm9p.target = arm9elfname
 
   if bld.env['WITH_SDL']:

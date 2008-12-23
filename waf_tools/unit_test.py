@@ -4,20 +4,12 @@ import TaskGen
 import Task
 
 class unit_test_taskgen(TaskGen.task_gen):
-  def __init__(self, *k, **kw):
-    TaskGen.task_gen.__init__(self, *k, **kw)
-    self.run_from_srcdir = True
-
   def apply(self):
-    find_build = self.path.find_or_declare
-    input_nodes = []
-    for filename in self.to_list(self.source):
-      node = find_build(filename)
-      input_nodes.append(node)
+    find = self.path.find_or_declare
     task = self.create_task('unit_test', self.env)
-    task.run_from_srcdir = self.run_from_srcdir
-    task.set_inputs(input_nodes)
-    task.set_outputs(find_build('test.passed'))
+    task.run_from_srcdir = getattr(self, "run_from_srcdir", True)
+    task.set_inputs([find(filename) for filename in self.to_list(self.source)])
+    task.set_outputs(find('test.passed'))
 
 def detect(conf):
   pass
@@ -25,16 +17,14 @@ def detect(conf):
 def setup(bld):
   def run_unit_test(task):
     """ Execute unit tests, creating a test.passed cache file. Based on
-     www.scons.org/wiki/UnitTest modified to run tests the source dir. """
+     www.scons.org/wiki/UnitTest modified to run tests in the source dir """
     import os, subprocess
     import Options
     test_exe = task.inputs[0]
     app = test_exe.abspath(task.env)
     blddir = os.path.dirname(app)
     srcdir = os.path.dirname(test_exe.abspath())
-    cwd = None
-    if task.run_from_srcdir:
-      cwd = srcdir
+    cwd = srcdir if task.run_from_srcdir else None
     target = os.path.join(blddir, task.outputs[0].name)
     process_pipe = subprocess.Popen(app, stdout=subprocess.PIPE, cwd=cwd)
     process_pipe.wait()

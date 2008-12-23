@@ -31,9 +31,7 @@ def build(bld):
       'WITH_BUNJALLOO': 'bunjalloo',
       'WITH_CHAOS': 'ChaosDS'
       }
-  for e in BUILD_DIRS:
-    if bld.env[e]:
-      bld.add_subdirs(BUILD_DIRS[e])
+  [bld.add_subdirs(v) for e,v in BUILD_DIRS.items() if bld.env[e]]
 
 def set_options(opt):
   #opt.tool_options('g++')
@@ -87,9 +85,7 @@ def set_options(opt):
         }
       }
   ao = opt.add_option
-  for op in OPTIONS:
-    kwargs = OPTIONS[op]
-    ao(op, **kwargs)
+  [ao(op, **kwargs) for op, kwargs in OPTIONS.items()]
 
 # Tool checking
 def arm_tool_check(conf):
@@ -97,15 +93,13 @@ def arm_tool_check(conf):
 
   # cannot check compiler_cc for devkitArm as it needs LINKFLAGS, which waf
   # stips off in the check.
-  ARM_TOOLS = '''
-    arm
-    grit
-    ndstool
-    dlditool
-    objcopy
-  '''.split()
-  for tool in ARM_TOOLS:
-    conf.check_tool(tool, waf_tools)
+  [conf.check_tool(tool, waf_tools) for tool in '''
+        arm
+        grit
+        ndstool
+        dlditool
+        objcopy
+      '''.split()]
 
   without_chaos = False
   if not Options.options.without_chaos and not conf.env['HAVE_GRIT_SHARED']:
@@ -141,8 +135,8 @@ def sdl_tool_check(conf):
 # Header checking
 
 def common_header_checks(configurator):
-  for header in ('png.h', 'zlib.h', 'gif_lib.h', 'matrixSsl.h'):
-    configurator(header_name=header, uselib_store='HOST')
+  [configurator(header_name=header, uselib_store='HOST')
+      for header in ('png.h', 'zlib.h', 'gif_lib.h', 'matrixSsl.h')]
 
 def arm_header_check(conf):
   # check headers
@@ -158,8 +152,7 @@ def sdl_header_check(conf):
 # Library checking
 
 def lib_check_common(configurator):
-  for l in 'png z gif jpeg matrixsslstatic unzip'.split():
-    configurator(lib=l)
+  [configurator(lib=l) for l in 'png z gif jpeg matrixsslstatic unzip'.split()]
 
 from Configure import conf
 
