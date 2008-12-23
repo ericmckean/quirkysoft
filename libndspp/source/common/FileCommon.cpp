@@ -17,6 +17,8 @@
 #include <fcntl.h>
 #include <unistd.h>
 #include <sys/types.h>
+#include <dirent.h>
+#include <cstring>
 #include "File.h"
 using namespace std;
 
@@ -199,5 +201,24 @@ bool nds::File::cpCommon(const char * src, const char * dst)
     ok = false;
   }
   return ok;
+}
+
+void nds::File::lsCommon(const char * path, std::vector<std::string> & entries)
+{
+  DIR * dir = ::opendir(path);
+  if (dir == NULL)
+  {
+    return;
+  }
+  struct dirent * ent;
+
+  while ( (ent = ::readdir(dir)) != 0)
+  {
+    if (strcmp( ent->d_name, ".") != 0 and strcmp(ent->d_name, "..") != 0 )
+    {
+      entries.push_back(ent->d_name);
+    }
+  }
+  ::closedir(dir);
 }
 

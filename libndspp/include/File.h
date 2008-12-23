@@ -140,6 +140,7 @@ namespace nds   // tolua_export
       static bool mkdirCommon(const char * path);
       static int mkdir(const char * path, unsigned int mode);
       static bool cpCommon(const char * src, const char * dst);
+      static void lsCommon(const char * path, std::vector<std::string> & entries);
 
       DISALLOW_COPY_AND_ASSIGN(File);
   }; // tolua_export
