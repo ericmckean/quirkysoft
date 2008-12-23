@@ -18,11 +18,10 @@
 #include "File.h"
 #include "MiniMessage.h"
 #include <errno.h>
-#include <string.h>
+#include <cstring>
 #include <string>
 #include <stdio.h>
 #include <unistd.h>
-#include <dirent.h>
 #include <utime.h>
 
 using namespace nds;
@@ -283,24 +282,7 @@ bool File::unlink(const char * path)
 
 void nds::File::ls(const char * path, std::vector<std::string> & entries)
 {
-  if (exists(path) == F_DIR)
-  {
-    DIR * dir = ::opendir(toFat(path).c_str());
-    if (dir == NULL)
-    {
-      return;
-    }
-    struct dirent * ent;
-
-    while ( (ent = ::readdir(dir)) != 0)
-    {
-      if (strcmp( ent->d_name, ".") != 0 and strcmp(ent->d_name, "..") != 0 )
-      {
-        entries.push_back(ent->d_name);
-      }
-    }
-    ::closedir(dir);
-  }
+  lsCommon(toFat(path).c_str(), entries);
 }
 
 bool nds::File::cp(const char *src, const char *dst)

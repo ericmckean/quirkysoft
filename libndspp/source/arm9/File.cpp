@@ -22,7 +22,7 @@
 #include <fat.h>
 #include <unistd.h>
 #include <stdio.h>
-#include <sys/dir.h>
+#include <dirent.h>
 
 using namespace nds;
 
@@ -233,25 +233,9 @@ bool nds::File::unlink(const char * path)
 
 void nds::File::ls(const char * path, std::vector<std::string> & entries)
 {
-  if (exists(path) == F_DIR)
-  {
-    DIR_ITER * dir = ::diropen(path);
-    if (dir == NULL)
-    {
-      return;
-    }
-    struct stat st;
-    char filename[256];
-    while (::dirnext(dir, filename, &st) == 0)
-    {
-      if (strcmp(filename, ".") != 0 and strcmp(filename, "..") != 0 )
-      {
-        entries.push_back(filename);
-      }
-    }
-    ::dirclose(dir);
-  }
+  lsCommon(path, entries);
 }
+
 bool nds::File::cp(const char *src, const char *dst)
 {
   FatLibrary::instance();
