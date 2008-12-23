@@ -4,7 +4,8 @@ http://code.google.com/p/quirkysoft
 
 ==Installation==
 
-Unzip the zip file to the root of your flash card.
+Unzip the zip file to the root of your flash card. Make sure the directory
+/data/bunjalloo/fonts exists, with all the contents from the zip.
 
 Patch bunjalloo.nds for your flash card using the DLDI tool from
 http://chishm.drunkencoders.com/DLDI/

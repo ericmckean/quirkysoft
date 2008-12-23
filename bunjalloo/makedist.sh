@@ -32,11 +32,11 @@ VERSION=$( grep -i version arm9/version_number.c  | sed 's/.*"\(.*\)".*/\1/g')
 
 
 TEMP=$(getopt -o hutv:l: --long version:,last:,upload,tag,help -- "$@")
-    
+
 if [ $? != 0 ] ; then
   echo "Try '$0 --help' for more information"
   exit 1
-fi  
+fi
 
 last=$(git branch -r | grep $project | grep -v tags|tail -1|cut -c3-)
 
