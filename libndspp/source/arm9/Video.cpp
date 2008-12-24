@@ -31,10 +31,10 @@ Video::Video(int screen):
 {
   powerOn(POWER_ALL_2D);
   m_DISPCNT = 0;
-  clear();
   setObjectsEnabled();
   setObjectMapDimensions(1);
   setBanks();
+  clear();
 }
 
 void Video::setBanks()
@@ -70,12 +70,24 @@ void Video::blend(BLDMOD_MODE_t mode, int first, int second)
 
 void Video::clear()
 {
-  for (int i = 0; i < 256; ++i) {
-    BG_PALETTE[i] = 0;
-    BG_PALETTE_SUB[i] = 0;
-    SPRITE_PALETTE[i] = 0;
-    SPRITE_PALETTE_SUB[i] = 0;
+  u16 *bgpal = BG_PALETTE;
+  u16 *sppal = BG_PALETTE;
+  u16 *gfx = BG_GFX;
+  if (m_screen) {
+    bgpal = BG_PALETTE_SUB;
+    sppal = SPRITE_PALETTE_SUB;
+    gfx = BG_GFX_SUB;
   }
+
+  for (int i = 0; i < 256; ++i) {
+    bgpal[i] = 0;
+    sppal[i] = 0;
+  }
+  /* Clear VRAM */
+  for (int i = 0; i < 0x40000; ++i) {
+    gfx[i] = 0;
+  }
+
   /* Clear all sprites */
   Sprite::disableAll(m_screen);
 }
