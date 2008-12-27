@@ -40,7 +40,7 @@ class ZipFile
   public:
     /** Create an object for handling zipped files.
      */
-    ZipFile(ExtractListener * listener = 0);
+    explicit ZipFile(ExtractListener * listener);
 
     /** Close the zip file on destruction. */
     ~ZipFile();

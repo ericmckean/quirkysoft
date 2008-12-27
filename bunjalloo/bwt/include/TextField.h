@@ -20,7 +20,6 @@
 #include "TextEntryI.h"
 #include "UnicodeString.h"
 
-class TextArea;
 /** An entry that displays a single line of text.*/
 class TextField: public TextContainer, public TextEntryI
 {

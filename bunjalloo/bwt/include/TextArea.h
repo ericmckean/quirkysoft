@@ -22,8 +22,6 @@
 #include "Component.h"
 #include <list>
 
-class Link;
-class FormControl;
 /** A widget for displaying text.*/
 class TextArea : public Component
 {

@@ -34,7 +34,6 @@ class EditPopup;
 class ProgressBar;
 class ScrollPane;
 class SearchEntry;
-class Stylus;
 class TextField;
 class Toolbar;
 class Updater;

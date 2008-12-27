@@ -152,7 +152,7 @@ def sdl_header_check(conf):
 # Library checking
 
 def lib_check_common(configurator):
-  [configurator(lib=l) for l in 'png z gif jpeg matrixsslstatic unzip'.split()]
+  [configurator(lib=l) for l in 'png gif jpeg matrixsslstatic unzip z'.split()]
 
 from Configure import conf
 
