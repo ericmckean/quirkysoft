@@ -24,7 +24,6 @@
 class Controller;
 class Document;
 class Button;
-class RichTextArea;
 class View;
 
 class Updater: public ButtonListener

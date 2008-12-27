@@ -49,7 +49,7 @@ CPPUNIT_TEST_SUITE_REGISTRATION( ZipFileTest );
 
 void ZipFileTest::setUp()
 {
-  m_zipfile = new ZipFile;
+  m_zipfile = new ZipFile(0);
   m_hasTestDir = false;
 }
 void ZipFileTest::cdTestDir()

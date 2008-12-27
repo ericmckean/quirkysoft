@@ -21,9 +21,6 @@
 #include "ButtonI.h"
 #include "UnicodeString.h"
 
-class TextArea;
-class ButtonListener;
-
 /** A press-style button with a textual label. */
 class Button: public TextContainer, public ButtonI
 {

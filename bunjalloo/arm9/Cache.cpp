@@ -39,7 +39,7 @@ Cache::Cache(Document & document, bool useCache, bool clearCache)
   }
 }
 
-std::string uri2CacheFile(const URI & uri)
+static std::string uri2CacheFile(const URI & uri)
 {
   // strip #internal from URI
   std::string crc = uri.navigateTo(uri.fileName()).crc32();

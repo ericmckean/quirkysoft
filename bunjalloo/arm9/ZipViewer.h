@@ -22,7 +22,6 @@
 #include "ButtonListener.h"
 #include "ZipFile.h"
 
-class RichTextArea;
 class CheckBox;
 class View;
 
