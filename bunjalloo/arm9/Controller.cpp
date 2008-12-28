@@ -281,7 +281,7 @@ void Controller::checkUpdates()
   }
   Updater * updater = new Updater(*this, *m_document, *m_view);
   m_view->setUpdater(updater);
-  updater->init();
+  updater->show();
 }
 
 void Controller::localConfigFile(const std::string & fileName)
