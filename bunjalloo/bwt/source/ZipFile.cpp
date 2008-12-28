@@ -294,9 +294,9 @@ class ZipFileImpl
         return;
       }
 
+      char filename_inzip[256];
       for (unsigned int i = 0; i < gi.number_entry; i++)
       {
-        char filename_inzip[256];
         unz_file_info file_info;
         err = unzGetCurrentFileInfo(m_file,&file_info,filename_inzip,sizeof(filename_inzip),NULL,0,NULL,0);
         if (err!=UNZ_OK)
