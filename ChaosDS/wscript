@@ -43,5 +43,3 @@ def build(bld):
   nds.banner = generate_banner(APPNAME)
   nds.icon = 'common/data/icon_palette.bmp'
   nds.target = APPNAME+'.nds'
-  if Options.commands['install']:
-    bld.install_files('${PREFIX}', nds.target)
