@@ -4,7 +4,7 @@
 #include "Palette.h"
 #include "Video.h"
 #include "libnds.h"
-#include "font.h"
+#include "minimessage_data.h"
 
 using nds::MiniMessage;
 
@@ -46,7 +46,7 @@ void MiniMessage::init()
   m_background.setEnabled();
   m_background.setColor(16);
   unsigned short *tileData = m_background.tileData();
-  dmaCopy(fontTiles, tileData, fontTilesLen);
+  dmaCopy(minimessage_dataTiles, tileData, minimessage_dataTilesLen);
   nds::Palette p(0);
   p[0] = 0;
   p[1] = nds::Color(31, 31, 31);
