@@ -526,11 +526,11 @@ void View::browse()
 
   updateInput();
 
-  if (m_keyState->isRepeat(handy2key(HANDY_A))) {
-    enterUrl();
-  }
   if (not m_keyboard->visible())
   {
+    if (m_keyState->isRepeat(handy2key(HANDY_A))) {
+      enterUrl();
+    }
     if (m_keyState->isRepeat(KEY_SELECT)) {
       m_toolbar->cyclePosition();
     }
@@ -557,6 +557,17 @@ void View::browse()
     if (m_keyState->isRepeat(KEY_R)) {
       if (m_toolbar == m_browseToolbar)
         m_controller.next();
+    }
+
+    if (m_keyState->isRepeat(handy2key(HANDY_Y))) {
+      bookmarkUrl();
+    }
+    if (m_keyState->isRepeat(handy2key(HANDY_X))) {
+      preferences();
+      editConfig();
+    }
+    if (m_keyState->isRepeat(handy2key(HANDY_B))) {
+      stopOrReload();
     }
   }
 
@@ -593,17 +604,6 @@ void View::browse()
       int tmp;
       m_document.refresh(m_linkHref, tmp);
     }
-  }
-
-  if (m_keyState->isRepeat(handy2key(HANDY_Y))) {
-    bookmarkUrl();
-  }
-  if (m_keyState->isRepeat(handy2key(HANDY_X))) {
-    preferences();
-    editConfig();
-  }
-  if (m_keyState->isRepeat(handy2key(HANDY_B))) {
-    stopOrReload();
   }
 }
 
