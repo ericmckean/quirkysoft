@@ -21,6 +21,7 @@
 #include "StylusListener.h"
 
 class ScrollBar;
+namespace nds { class Sprite; }
 
 /** A scrollable view of many Components. The view may be larger than the
  * screen and this class handles the positioning of all the child widgets. */
@@ -131,6 +132,7 @@ class ScrollPane: public Component
     unsigned short m_backgroundColour;
     bool m_stretchChildren;
     bool m_touchedMe;
+    nds::Sprite *m_scrollAnywhereSprite;
 
     void layoutChildren();
     void calculateScrollBar();
@@ -145,6 +147,10 @@ class ScrollPane: public Component
     };
     void up(ScrollType type);
     void down(ScrollType type);
+    bool anywhereScroll(const Stylus *stylus);
+    void showScrollAnywhere(const Stylus *stylus);
+    void hideScrollAnywhere();
+    bool isScrollBarShowing() const;
 
     DISALLOW_COPY_AND_ASSIGN(ScrollPane);
 };

@@ -14,11 +14,14 @@
   You should have received a copy of the GNU General Public License
   along with this program.  If not, see <http://www.gnu.org/licenses/>.
 */
+#include <cstdlib>
 #include "Canvas.h"
 #include "Palette.h"
 #include "ScrollPane.h"
 #include "ScrollBar.h"
 #include "Stylus.h"
+#include "scroll_img.h"
+#include "Sprite.h"
 
 Component * ScrollPane::s_popup(0);
 // TODO: make configurable.
@@ -38,10 +41,12 @@ ScrollPane::ScrollPane()
   m_scrollBar(new ScrollBar),
   m_backgroundColour(nds::Color(31,31,31)),
   m_stretchChildren(false),
-  m_touchedMe(false)
+  m_touchedMe(false),
+  m_scrollAnywhereSprite(new nds::Sprite(0, 16, 16, 20*8, 256))
 {
   m_scrollBar->setScrollable(this);
   m_preferredWidth = nds::Canvas::instance().width();
+  m_scrollAnywhereSprite->loadTileData(scroll_imgTiles, scroll_imgTilesLen);
 }
 
 void ScrollPane::setStretchChildren(bool s)
@@ -277,14 +282,22 @@ void ScrollPane::down(ScrollType type)
   calculateScrollBar();
 }
 
-void ScrollPane::showScrollBar(const nds::Rectangle & clip)
+bool ScrollPane::isScrollBarShowing() const
 {
   if (m_children.empty())
   {
-    return;
+    return false;
   }
 
   if (m_scrollBar->height() < m_scrollBar->total()) {
+    return true;
+  }
+  return false;
+}
+
+void ScrollPane::showScrollBar(const nds::Rectangle & clip)
+{
+  if (isScrollBarShowing()) {
     m_scrollBar->paint(clip);
   }
 }
@@ -367,6 +380,7 @@ bool ScrollPane::scrollBarHit(int x, int y)
 
 bool ScrollPane::stylusUp(const Stylus * stylus)
 {
+  hideScrollAnywhere();
   if (not visible())
     return false;
   m_dirty = true;
@@ -406,6 +420,7 @@ bool ScrollPane::stylusDownFirst(const Stylus * stylus)
     // call stylusDownFirst on children too
     FOR_EACH_CHILD(stylusDownFirst);
   }
+  showScrollAnywhere(stylus);
   // No! If this is invisible, unregister children so it doesn't do naughty
   // stylus stuff on things that are invisible.
   return false;
@@ -438,7 +453,7 @@ bool ScrollPane::stylusDown(const Stylus * stylus)
     return true;
   }
   FOR_EACH_CHILD(stylusDown);
-  return false;
+  return anywhereScroll(stylus);
 }
 
 void ScrollPane::upBlock()
@@ -584,4 +599,56 @@ int ScrollPane::visibleHeight() const
   if (m_children.empty())
     return 0;
   return m_scrollBar->total() - m_scrollBar->visibleRange();
+}
+
+/** Keeps a value and restores it when instance goes out of scope. */
+template <typename T>
+class ValueKeeper {
+  public:
+    ValueKeeper(T &value): m_ref(value), m_initialValue(value) { }
+    ~ValueKeeper() {
+      m_ref = m_initialValue;
+    }
+    void set(T value) {
+      m_ref = value;
+    }
+
+  private:
+    T &m_ref;
+    T m_initialValue;
+};
+
+bool ScrollPane::anywhereScroll(const Stylus *stylus)
+{
+  const int &lastY(stylus->lastY());
+  const int &startY(stylus->startY());
+
+  ValueKeeper<int> scrollIncrement(m_scrollIncrement);
+  scrollIncrement.set(abs(lastY - startY));
+  if (lastY < startY) {
+    up();
+    return true;
+  }
+  if (lastY > startY) {
+    down();
+    return true;
+  }
+  return false;
+}
+
+void ScrollPane::showScrollAnywhere(const Stylus *stylus)
+{
+  if (not isScrollBarShowing()) {
+    return;
+  }
+  m_scrollAnywhereSprite->setEnabled(true);
+  m_scrollAnywhereSprite->setX(stylus->startX()-m_scrollAnywhereSprite->width()/2);
+  m_scrollAnywhereSprite->setY(stylus->startY()-192-m_scrollAnywhereSprite->height()/2);
+  m_scrollAnywhereSprite->update();
+}
+
+void ScrollPane::hideScrollAnywhere()
+{
+  m_scrollAnywhereSprite->setEnabled(false);
+  m_scrollAnywhereSprite->update();
 }
