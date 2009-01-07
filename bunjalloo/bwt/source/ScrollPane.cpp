@@ -207,7 +207,7 @@ void ScrollPane::screenUp()
 void ScrollPane::pageUp()
 {
   int initialScrollIncrement = m_scrollIncrement;
-  m_scrollIncrement = m_bounds.h - m_bounds.h/16;
+  m_scrollIncrement = (m_bounds.h - m_bounds.h/16)/2;
   up(SCROLL_WITH_ADJUST);
   m_scrollIncrement = initialScrollIncrement;
 }
@@ -251,7 +251,7 @@ void ScrollPane::screenDown()
 void ScrollPane::pageDown()
 {
   int initialScrollIncrement = m_scrollIncrement;
-  m_scrollIncrement = m_bounds.h - m_bounds.h/16;
+  m_scrollIncrement = (m_bounds.h - m_bounds.h/16)/2;
   down(SCROLL_WITH_ADJUST);
   m_scrollIncrement = initialScrollIncrement;
 }
