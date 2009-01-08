@@ -18,6 +18,7 @@
 #include "Document.h"
 #include "URI.h"
 #include "File.h"
+#include "config_defs.h"
 
 const char * Cache::CACHE_DIR("/"DATADIR"/cache");
 

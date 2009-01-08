@@ -17,6 +17,7 @@
 #include <vector>
 #include <cstring>
 #include "libnds.h"
+#include "config_defs.h"
 #include "Cache.h"
 #include "Config.h"
 #include "ConfigParser.h"

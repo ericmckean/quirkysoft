@@ -32,7 +32,7 @@ def build(bld):
     obj = bld.new_task_gen('grit_shared')
     obj.palette = d
     obj.find_sources_in_dirs(d)
-    obj.gritflags = flags
+    obj.gritflags = flags.split()
     obj.export_incdirs = d
     if bld.env['WITH_SDL']:
       obj.clone('sdl')
