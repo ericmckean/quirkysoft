@@ -246,7 +246,7 @@ def configure(conf):
   lib_check_arm9(conf)
   GRITFLAGS='-pw 16 -gB 8 -m! -ftc -fh -q -pe64'
   DATADIR='data/bunjalloo'
-  conf.env['CXXDEFINES'] = ['DATADIR=\\"%s\\"'%DATADIR]
+  conf.define('DATADIR', DATADIR)
 
   conf.env['GRITFLAGS'] = GRITFLAGS
   if Options.options.with_dldi:
@@ -255,10 +255,12 @@ def configure(conf):
     conf.env['DLDIFLAGS'] = ''
 
   conf.env['WITH_SDL'] = True
+  conf.define('sprintf_platform', 'siprintf', quote=False)
+  config_h = 'bunjalloo/bwt/include/config_defs.h'
+  conf.write_config_header(config_h)
   if Options.options.without_sdl:
     Utils.pprint('BLUE','SDL version not configured')
     conf.env['WITH_SDL'] = False
-    conf.env['CXXDEFINES'].extend(['sprintf_platform=siprintf'])
     config_status(conf)
     return True
 
@@ -267,15 +269,15 @@ def configure(conf):
   conf.set_env_name('sdl', sdl)
   sdl.set_variant('sdl')
 
-  for f in ('GRITFLAGS', 'CXXDEFINES', 'LIBPATH'):
+  for f in ('GRITFLAGS', 'LIBPATH'):
     if type(conf.env[f]) == type([]):
       sdl[f] = [x for x in conf.env[f]]
     else:
       sdl[f] = conf.env[f]
 
-  conf.env['CXXDEFINES'].extend(['sprintf_platform=siprintf'])
-  sdl['CXXDEFINES'].extend(['sprintf_platform=sprintf'])
   conf.setenv('sdl')
+  conf.define('sprintf_platform', 'sprintf', quote=False)
+  conf.define('DATADIR', DATADIR)
   sdl_tool_check(conf)
   try:
     lib_check_sdl(conf)
@@ -293,6 +295,7 @@ def configure(conf):
 
   check_gcov(conf)
   config_status(conf)
+  conf.write_config_header(config_h)
 
 def shutdown():
   # force running unit tests

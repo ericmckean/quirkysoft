@@ -16,6 +16,7 @@
 */
 #include <libgen.h>
 #include "ndspp.h"
+#include "config_defs.h"
 #include "libnds.h"
 #include "BrowseToolbar.h"
 #include "BookmarkToolbar.h"

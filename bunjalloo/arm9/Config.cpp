@@ -15,6 +15,7 @@
   along with this program.  If not, see <http://www.gnu.org/licenses/>.
 */
 #include <cstdlib>
+#include "config_defs.h"
 #include "Config.h"
 #include "MiniMessage.h"
 #include "File.h"

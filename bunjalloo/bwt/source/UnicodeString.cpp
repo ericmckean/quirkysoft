@@ -14,6 +14,7 @@
   You should have received a copy of the GNU General Public License
   along with this program.  If not, see <http://www.gnu.org/licenses/>.
 */
+#include "config_defs.h"
 #include "UnicodeString.h"
 #include "UTF8.h"
 using std::string;

@@ -17,6 +17,7 @@
 #include <algorithm>
 #include <functional>
 #include "libnds.h"
+#include "config_defs.h"
 #include "Config.h"
 #include "Controller.h"
 #include "Document.h"
