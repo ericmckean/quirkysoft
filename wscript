@@ -135,38 +135,33 @@ def sdl_tool_check(conf):
 # Header checking
 
 def common_header_checks(configurator):
-  [configurator(header_name=header, uselib_store='HOST')
-      for header in ('png.h', 'zlib.h', 'gif_lib.h', 'matrixSsl.h')]
+  configurator(header_name='png.h zlib.h gif_lib.h matrixSsl.h', mandatory=1)
 
 def arm_header_check(conf):
   # check headers
-  common_header_checks(conf.arm_check)
-  conf.arm_check(header_name='nds/ndstypes.h dswifi9.h')
-  conf.arm_check(header_name='stdio.h jpeglib.h')
+  common_header_checks(conf.host_check)
+  conf.host_check(header_name='nds/ndstypes.h dswifi9.h', mandatory=1)
+  conf.host_check(header_name='stdio.h jpeglib.h', mandatory=1)
 
 def sdl_header_check(conf):
-  common_header_checks(conf.check)
-  conf.sdl_check(header_name='SDL/SDL.h', mandatory=1)
-  conf.sdl_check(header_name='stdio.h jpeglib.h')
+  common_header_checks(conf.host_check)
+  conf.host_check(header_name='SDL/SDL.h', mandatory=1)
+  conf.host_check(header_name='stdio.h jpeglib.h', mandatory=1)
 
 # Library checking
 
 def lib_check_common(configurator):
-  [configurator(lib=l) for l in 'png gif jpeg matrixsslstatic unzip z'.split()]
+  [configurator(lib=l, mandatory=1)
+      for l in 'png gif jpeg matrixsslstatic unzip z'.split()]
 
 from Configure import conf
 
 @conf
-def sdl_check(self, *k, **kw):
-  # really check for libs, in lieu of proper waf 1.5 fix
-  #if 'lib' in kw:
-  #  envc = self.env.copy()
-  #  envc['LIB'] = [kw['lib']]
-  #  kw['env'] = envc
-  kw['uselib_store'] = 'HOST'
-  # returns 0 if all is well (WTF?)
-  # returns None if failed!
-  return self.check(*k, **kw) == 0
+def host_check(self, *k, **kw):
+  uselib = 'HOST'
+  kw['uselib_store'] = uselib
+  kw['uselib'] = uselib
+  return self.check(*k, **kw)
 
 def lib_check_sdl(conf):
   conf.env['HAVE_CPPUNIT'] = False
@@ -193,19 +188,19 @@ def lib_check_sdl(conf):
 
   perf_msg = 'Install this from http://code.google.com/p/google-perftools/'
   if Options.options.with_tcmalloc:
-    if not conf.sdl_check(lib='tcmalloc'):
+    if not conf.host_check(lib='tcmalloc'):
       Utils.pprint('RED', perf_msg)
   if Options.options.with_profiler:
-    if not conf.sdl_check(lib='profiler'):
+    if not conf.host_check(lib='profiler'):
       Utils.pprint('RED', perf_msg)
 
 def lib_check_arm9(conf):
-  conf.arm_check(lib='dswifi9')
-  lib_check_common(conf.arm_check)
+  conf.host_check(lib='dswifi9', mandatory=1)
+  lib_check_common(conf.host_check)
 
 def check_gcov(conf):
   if Options.options.with_gcov:
-    if conf.sdl_check(lib='gcov'):
+    if conf.host_check(lib='gcov'):
       flags = '-fprofile-arcs -ftest-coverage'.split()
       for i in ('CXXFLAGS', 'CCFLAGS'):
         conf.env[i].extend(flags)
@@ -269,11 +264,7 @@ def configure(conf):
   conf.set_env_name('sdl', sdl)
   sdl.set_variant('sdl')
 
-  for f in ('GRITFLAGS', 'LIBPATH'):
-    if type(conf.env[f]) == type([]):
-      sdl[f] = [x for x in conf.env[f]]
-    else:
-      sdl[f] = conf.env[f]
+  sdl['GRITFLAGS'] = GRITFLAGS
 
   conf.setenv('sdl')
   conf.define('sprintf_platform', 'sprintf', quote=False)
@@ -283,8 +274,8 @@ def configure(conf):
     lib_check_sdl(conf)
   except :
     pass
-  conf.sdl_check(lib='GL')
-  lib_check_common(conf.sdl_check)
+  conf.host_check(lib='GL')
+  lib_check_common(conf.host_check)
 
   sdl['OBJCOPYFLAGS'] = ' -I binary -O elf32-i386 -B i386 '.split()
   # do not add -O2 FFS, it makes debugging impossible
