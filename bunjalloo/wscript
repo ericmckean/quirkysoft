@@ -47,7 +47,10 @@ def build(bld):
     patched.source = nds.target
     patched.target = APPNAME+'-patched.nds'
 
-  bld.add_subdirs('bwt tests')
+  subdirs = ['bwt']
+  if Options.commands['check']:
+    subdirs += ['tests']
+  bld.add_subdirs(' '.join(subdirs))
 
   if Options.commands['install']:
     bld.install_files('${PREFIX}', nds.target)
