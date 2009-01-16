@@ -29,11 +29,6 @@ create_deps.sh
 Create a tar of dependencies, for uploading to the web. You probably don't
 need to use this.
 
-git-*
-=====
-
-Scripts for working with git and subversion. This was from when I used SVN.
-
 issues.py
 =========
 
@@ -43,5 +38,10 @@ issues.
 test-time.sh
 ============
 
-See how long a program takes to run, runs multiple times. 
+See how long a program takes to run, runs multiple times.
 Usage test-time.sh prog times
+
+wikify.py
+=========
+
+Offline wiki to html converter
