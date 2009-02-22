@@ -16,7 +16,8 @@
 */
 #include <dirent.h>
 #include <string>
-#include <stdlib.h>
+#include <cstdlib>
+#include <cstring>
 #include "PatchDLDI.h"
 
 const unsigned char * nds::PatchDLDI::dldiPatch()

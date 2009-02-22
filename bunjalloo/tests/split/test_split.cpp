@@ -1,9 +1,12 @@
 #include <iostream>
 #include "UnicodeString.h"
 #include <cstdio>
-using namespace std;
+#include <cstdlib>
+
 int main(int argc, char *argv[])
 {
+  using std::string;
+  using std::vector;
   string s(argv[1]);
   string sep(argv[2]);
   vector<string> out;

@@ -19,6 +19,7 @@
 #include "MiniMessage.h"
 #include <errno.h>
 #include <cstring>
+#include <cstdlib>
 #include <string>
 #include <stdio.h>
 #include <unistd.h>
