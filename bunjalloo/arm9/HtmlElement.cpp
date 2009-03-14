@@ -93,7 +93,6 @@ void HtmlElement::appendText(unsigned int value)
       if (not isWhitespace(value) or (isWhitespace(value) and not isWhitespace(text[text.length()-1])))
       {
         utf8::unchecked::append(value, back_inserter(m_children.back()->m_text));
-        //m_children.back()->m_text += value;
       }
       return;
     }

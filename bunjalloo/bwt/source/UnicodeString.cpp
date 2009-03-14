@@ -150,3 +150,10 @@ void split(const std::string &str,
       pos = str.find_first_of(delimiters, lastPos+1);
   }
 }
+
+std::string nextWordAdvanceWord(
+    const std::string::const_iterator &it,
+    const std::string::const_iterator &end_it)
+{
+  return "";
+}

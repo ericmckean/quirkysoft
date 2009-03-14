@@ -38,4 +38,7 @@ void split(const std::string &str,
               std::vector<std::string> &tokens,
               const std::string &delimiters);
 
+std::string nextWordAdvanceWord(
+    const std::string::const_iterator &it,
+    const std::string::const_iterator &end_it);
 #endif
