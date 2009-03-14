@@ -40,7 +40,7 @@ int main(int argc, char * argv[])
   ScrollPane scrollPane;
   Canvas &canvas(Canvas::instance());
   RichTextArea * rich = (RichTextArea*)TextAreaFactory::create(TextAreaFactory::TXT_RICH);
-  rich->appendText(string2unicode("Zip contains\n"));
+  rich->appendText("Zip contains\n");
   ZipFile *zipfile = new ZipFile(0);
 
   vector<string> files;
@@ -50,10 +50,10 @@ int main(int argc, char * argv[])
   for (vector<string>::const_iterator it(files.begin()); it != files.end(); ++it)
   {
     const string& file(*it);
-    rich->appendText(string2unicode(file));
-    rich->appendText(string2unicode("\n"));
+    rich->appendText(file);
+    rich->appendText("\n");
   }
-  rich->appendText(string2unicode("End of zip file\n"));
+  rich->appendText("End of zip file\n");
 
   scrollPane.setTopLevel();
   scrollPane.add(rich);
