@@ -97,7 +97,7 @@ View::View(Document & doc, Controller & c):
   m_controller(c),
   m_keyboard(new Keyboard),
   m_renderer(new ViewRender(this)),
-  m_addressBar(new TextField(UnicodeString())),
+  m_addressBar(new TextField("")),
   m_browseToolbar(new BrowseToolbar(*this)),
   m_bookmarkToolbar(new BookmarkToolbar(*this)),
   m_prefsToolbar( new PreferencesToolbar(*this)),
@@ -163,8 +163,8 @@ void View::extractTitle()
   const HtmlElement * title = m_document.titleNode();
   if (title)
   {
-    const UnicodeString & titleText = title->firstChild()->text();
-    m_bookmarkTitleUtf8 = unicode2string(titleText, true);
+    const std::string &titleText = title->firstChild()->text();
+    m_bookmarkTitleUtf8 = titleText;
   }
   else
   {
@@ -241,7 +241,7 @@ void View::notify()
         string s(m_filenameForProgress);
         sprintf_platform(buffer, " %d%%", pc);
         s += buffer;
-        m_progress->setText(string2unicode(s));
+        m_progress->setText(s);
         m_progress->setVisible();
         m_keyboard->forceRedraw();
         m_scrollPane->forceRedraw();
@@ -278,7 +278,7 @@ void View::notify()
 
 void View::enterUrl()
 {
-  m_addressBar->setText(string2unicode(m_document.uri()));
+  m_addressBar->setText(m_document.uri());
   m_keyboard->setTitle(T(ENTER_URL_TITLE));
   m_keyboard->editText(m_addressBar);
   m_toolbar->setVisible(false);
@@ -451,7 +451,7 @@ void View::saveAs()
   string fileName(nds::File::base(uri.fileName().c_str()));
   makeNiceFileName(fileName);
 
-  m_addressBar->setText(string2unicode(fileName));
+  m_addressBar->setText(fileName);
   m_keyboard->setTitle(T(SAVE_AS_TITLE));
   m_keyboard->editText(m_addressBar);
   m_toolbar->setVisible(false);
@@ -781,7 +781,7 @@ void View::tick()
 void View::doEnterUrl()
 {
   m_state = BROWSE;
-  string newAddress = unicode2string(m_keyboard->result());
+  string newAddress = m_keyboard->result();
   if (not newAddress.empty() and m_keyboard->selected() == Keyboard::OK)
   {
     // check for search
@@ -798,7 +798,7 @@ void View::doEnterUrl()
 
 void View::doEditBookmark()
 {
-  const UnicodeString & value = m_keyboard->result();
+  const std::string &value = m_keyboard->result();
   if (not value.empty() and m_keyboard->selected() == Keyboard::OK)
   {
     m_editPopup->postEdit(value);
@@ -808,7 +808,7 @@ void View::doEditBookmark()
 
 void View::doSaveAs()
 {
-  string fileName = unicode2string(m_keyboard->result());
+  string fileName = m_keyboard->result();
   if (not fileName.empty() and m_keyboard->selected() == Keyboard::OK)
   {
     m_toolbar->setVisible(true);

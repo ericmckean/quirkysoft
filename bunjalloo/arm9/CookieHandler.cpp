@@ -84,8 +84,8 @@ void CookieHandler::showAdd()
   renderer->doTitle(T("add_ck_title"));
   m_siteButton->setSelected();
   URI uri(m_view.document().uri());
-  UnicodeString server(string2unicode(uri.server()));
-  UnicodeString topLevel(string2unicode(CookieJar::topLevel(uri.server())));
+  std::string server(uri.server());
+  std::string topLevel(CookieJar::topLevel(uri.server()));
 
   switch (uri.protocol())
   {
@@ -150,13 +150,13 @@ void CookieHandler::showEdit()
     CheckBox * check(new CheckBox);
     m_checkboxes.push_back(check);
     renderer->add(check);
-    renderer->textArea()->appendText(string2unicode(*it));
+    renderer->textArea()->appendText(*it);
     renderer->insertNewline();
   }
   renderer->add(static_cast<Button*>(m_deleteSelected));
   renderer->add(static_cast<Button*>(m_editSelected));
   renderer->insertNewline();
-  renderer->textArea()->appendText(string2unicode(" --- "));
+  renderer->textArea()->appendText(" --- ");
   renderer->insertNewline();
   renderer->add(static_cast<Button*>(m_ok));
   renderer->done(true);

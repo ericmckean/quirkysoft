@@ -41,7 +41,7 @@ ComboBox::ComboBox():
   scrollPane()->setTopLevel(false);
 }
 
-void ComboBox::addItem(const UnicodeString & item)
+void ComboBox::addItem(const std::string & item)
 {
   if (button()->text().empty())
   {
@@ -179,7 +179,7 @@ Button * ComboBox::button() {
   return (Button*)m_children.back();
 }
 
-const UnicodeString & ComboBox::selectedItem() const
+const std::string & ComboBox::selectedItem() const
 {
   return ((Button*)scrollPane()->childAt(m_selectedIndex))->text();
 }

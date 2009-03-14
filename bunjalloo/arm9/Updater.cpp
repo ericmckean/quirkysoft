@@ -30,6 +30,7 @@
 #include "ParameterSet.h"
 #include "RichTextArea.h"
 #include "Updater.h"
+#include "UnicodeString.h"
 #include "Version.h"
 #include "View.h"
 #include "ViewRender.h"
@@ -98,7 +99,7 @@ void Updater::getZip()
         if (text->isa(HtmlConstants::TEXT))
         {
           // yipee
-          const string & data = unicode2string(text->text(), true);
+          const string & data = text->text();
           vector<string> lines;
           string download, size;
           tokenize(data, lines, string("\n"));
@@ -182,10 +183,10 @@ void Updater::askUpdate()
     textArea.appendText(T("update_ask"));
     textArea.insertNewline();
     textArea.appendText(T("new_ver"));
-    textArea.appendText(string2unicode(m_newVersion));
+    textArea.appendText(m_newVersion);
     textArea.insertNewline();
     textArea.appendText(T("cur_ver"));
-    textArea.appendText(string2unicode(VERSION));
+    textArea.appendText(VERSION);
     renderer.insertNewline();
     addOk();
     addCancel();
@@ -195,7 +196,7 @@ void Updater::askUpdate()
   else
   {
     textArea.appendText(T("fail_zip"));
-    textArea.appendText(string2unicode(m_newVersion));
+    textArea.appendText(m_newVersion);
     renderer.insertNewline();
     addCancel();
     renderer.insertNewline();
@@ -249,7 +250,7 @@ void Updater::alreadyGotLatest()
   RichTextArea & textArea(*(m_view.renderer()->textArea()));
   textArea.appendText(T("alrdy_upd"));
   textArea.insertNewline();
-  textArea.appendText(string2unicode(m_newVersion));
+  textArea.appendText(m_newVersion);
   textArea.insertNewline();
   textArea.insertNewline();
   addCancel();

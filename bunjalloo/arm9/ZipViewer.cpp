@@ -54,7 +54,7 @@ void ZipViewer::setFilename(const std::string & filename)
 void ZipViewer::show()
 {
   ViewRender *renderer(m_view.renderer());
-  renderer->doTitle(string2unicode(nds::File::base(m_view.document().uri().c_str())));
+  renderer->doTitle(nds::File::base(m_view.document().uri().c_str()));
   ZipFile file(this);
   file.open(m_filename.c_str());
 
@@ -79,7 +79,7 @@ void ZipViewer::show()
 
   for (vector<string>::const_iterator it(contents.begin()); it != contents.end(); ++it)
   {
-    const UnicodeString & u(string2unicode(*it));
+    const std::string & u(*it);
     CheckBox * cb = new CheckBox;
     cb->setSelected();
     renderer->add(cb);
@@ -147,9 +147,8 @@ void ZipViewer::pressed(ButtonI * button)
 
 void ZipViewer::before(const char * name)
 {
-  UnicodeString u(string2unicode(name));
   ProgressBar & progressBar(m_view.progressBar());
-  progressBar.setText(u);
+  progressBar.setText(name);
   m_view.tick();
 }
 

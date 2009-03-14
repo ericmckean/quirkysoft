@@ -18,7 +18,6 @@
 #define TextArea_h_seen
 
 #include "Font.h"
-#include "UnicodeString.h"
 #include "Component.h"
 #include <list>
 
@@ -48,7 +47,7 @@ class TextArea : public Component
     /** Append text to the text area.
      * @param unicodeString the text to append.
      */
-    /*virtual*/ void appendText(const UnicodeString & unicodeString);
+    void appendText(const std::string &unicodeString);
 
     /** Clear the text (empty the document model).
      */
@@ -57,7 +56,7 @@ class TextArea : public Component
     /** Get the text that is held internally.
      * @param returnString the return value.
      */
-    void document(UnicodeString & returnString) const;
+    void document(std::string & returnString) const;
 
     /** Get the current font.
      * @return the current font.
@@ -91,7 +90,7 @@ class TextArea : public Component
      * @param unicodeString the string to check the size of.
      * @return the size of the string in pixels.
      */
-    int textSize(const UnicodeString & unicodeString) const;
+    int textSize(const std::string & unicodeString) const;
 
     /** A hack for debugging.
      * @return the current document converted to a char string.
@@ -118,8 +117,8 @@ class TextArea : public Component
     virtual bool stylusDown(const Stylus * stylus) { return false; }
 
   protected:
-    /** The document model contains one UnicodeString per line of text.*/
-    std::vector<UnicodeString> m_document;
+    /** The document model contains one std::string per line of text.*/
+    std::vector<std::string> m_document;
 
     /** Perform layout of the text. This is a pretty costly procedure in terms
      * of memory and CPU.
@@ -129,10 +128,10 @@ class TextArea : public Component
     /** Get the current (last) line of text.
      * @return the last line of text in the document vector.
      */
-    inline UnicodeString & currentLine();
+    inline std::string & currentLine();
 
     /** Called for each line of text that is visible. */
-    virtual void printu(const UnicodeString & unicodeString);
+    virtual void printu(const std::string & unicodeString);
     /** Print a single character. */
     bool doSingleChar(unsigned int value);
 
@@ -143,10 +142,10 @@ class TextArea : public Component
     int m_cursory;
     int m_initialCursorx;
 
-    const UnicodeString nextWord(const UnicodeString & unicodeString,
+    const std::string nextWord(const std::string & unicodeString,
         int currPosition) const;
-    void advanceWord(const UnicodeString & unicodeString, int wordLength,
-        int & currPosition, UnicodeString::const_iterator & it) const;
+    void advanceWord(const std::string & unicodeString, int wordLength,
+        int & currPosition, std::string::const_iterator & it) const;
 
     virtual void incrLine();
     /** Set the cursor position. This is where the text will be "drawn" the
@@ -177,10 +176,10 @@ const Font & TextArea::font() const {
   return *m_font;
 }
 
-UnicodeString & TextArea::currentLine()
+std::string & TextArea::currentLine()
 {
   if (m_document.empty())
-    m_document.push_back(UnicodeString());
+    m_document.push_back(std::string());
   return m_document.back();
 }
 int TextArea::cursorY() const

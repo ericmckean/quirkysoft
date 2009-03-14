@@ -67,12 +67,12 @@ bool FormTextArea::isMultiLine() const
   return textArea()->isMultiLine();
 }
 
-void FormTextArea::text(UnicodeString & returnString) const
+void FormTextArea::text(std::string &returnString) const
 {
   textArea()->text(returnString);
 }
 
-void FormTextArea::setText(const UnicodeString & text)
+void FormTextArea::setText(const std::string &text)
 {
   textArea()->setText(text);
   textNode()->text() = text;

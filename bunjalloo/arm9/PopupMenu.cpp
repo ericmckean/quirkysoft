@@ -30,7 +30,7 @@ PopupMenu::~PopupMenu()
   Stylus::instance()->unregisterListener(this);
 }
 
-void PopupMenu::addMenuItem(const UnicodeString & name, Callback cb, void * data)
+void PopupMenu::addMenuItem(const std::string &name, Callback cb, void * data)
 {
   addItem(name);
   using std::pair;

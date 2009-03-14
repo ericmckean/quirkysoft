@@ -23,6 +23,7 @@
 #include "RichTextArea.h"
 #include "Stylus.h"
 #include "UTF8.h"
+#include "UnicodeString.h"
 #include "WidgetColors.h"
 using namespace std;
 using namespace nds;
@@ -54,9 +55,9 @@ void RichTextArea::removeClickables()
   m_state = Link::STATE_PLAIN;
 }
 
-static bool isEmpty(const UnicodeString & line)
+static bool isEmpty(const std::string & line)
 {
-  UnicodeString::const_iterator it(line.begin());
+  std::string::const_iterator it(line.begin());
   for (; it != line.end(); ++it)
   {
     if (not isWhitespace(*it))
@@ -67,7 +68,7 @@ static bool isEmpty(const UnicodeString & line)
   return true;
 }
 
-void RichTextArea::appendText(const UnicodeString & unicodeString)
+void RichTextArea::appendText(const std::string & unicodeString)
 {
   if (m_document.size() > 1
       and isEmpty(unicodeString)
@@ -161,10 +162,10 @@ void RichTextArea::incrLine()
   m_lineNumber++;
 }
 
-void RichTextArea::printu(const UnicodeString & unicodeString)
+void RichTextArea::printu(const std::string & unicodeString)
 {
-  UnicodeString::const_iterator it(unicodeString.begin());
-  static const UnicodeString delimeter(string2unicode(" \r\n	"));
+  std::string::const_iterator it(unicodeString.begin());
+  static const std::string delimeter(" \r\n\t");
   unsigned int lastPosition = unicodeString.find_last_not_of(delimeter);
   unsigned int i = 0;
   bool centred(m_centred);
@@ -262,7 +263,7 @@ unsigned int RichTextArea::charIndexToLine(unsigned int charIndex) const
   unsigned int line = 0;
   unsigned int total = 0;
   int fontHeight = font().height();
-  std::vector<UnicodeString>::const_iterator it(m_document.begin());
+  std::vector<std::string>::const_iterator it(m_document.begin());
   for (; it != m_document.end() and total < charIndex; ++it)
   {
     total += it->length();
@@ -287,8 +288,8 @@ unsigned int RichTextArea::documentSize(int endLine) const
   {
     endLine = m_document.size();
   }
-  std::vector<UnicodeString>::const_iterator it(m_document.begin());
-  std::vector<UnicodeString>::const_iterator end(m_document.end());
+  std::vector<std::string>::const_iterator it(m_document.begin());
+  std::vector<std::string>::const_iterator end(m_document.end());
   for (int i = 0; it != end and i != endLine; ++it, ++i)
   {
     total += it->length();
@@ -322,7 +323,7 @@ void RichTextArea::paint(const nds::Rectangle & clip)
   // work out what happens when we skip lines.
   int dy;
   int lineNum = lineAt(m_bounds.y, dy);
-  std::vector<UnicodeString>::const_iterator it(m_document.begin());
+  std::vector<std::string>::const_iterator it(m_document.begin());
   int skipLines(lineNum);
   // printf("Skip %d lines dy %d\n", skipLines, dy);
   if (skipLines > 0)
@@ -421,7 +422,7 @@ int RichTextArea::pointToCharIndex(int x, int y) const
   if (lineNum >= m_document.size())
     return NO_INDEX;
   unsigned int charNumber = documentSize(lineNum);
-  const UnicodeString & line(m_document[lineNum]);
+  const std::string & line(m_document[lineNum]);
   int caretChar = NO_INDEX;
   for (int i = 0, size = m_bounds.x; i < (int)line.length(); ++i, ++charNumber)
   {
@@ -598,7 +599,7 @@ void RichTextArea::insertNewline()
 {
   bool pnl = parseNewline();
   setParseNewline();
-  RichTextArea::appendText(string2unicode("\n"));
+  RichTextArea::appendText("\n");
   setParseNewline(pnl);
 }
 
