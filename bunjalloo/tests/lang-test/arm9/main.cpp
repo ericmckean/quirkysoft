@@ -41,7 +41,7 @@ int main(int argc, char * argv[])
   ScrollPane scrollPane;
   Language::instance().setDirectory("data/docs");
   TextField * tf = new TextField(T("text"));
-  TextField * passwd = new TextField(UnicodeString());
+  TextField * passwd = new TextField(std::string());
   RichTextArea * rich = (RichTextArea*)TextAreaFactory::create(TextAreaFactory::TXT_RICH);
   Button * goBtn = new Button(T("Go"));
   rich->appendText(T("long"));

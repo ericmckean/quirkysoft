@@ -19,7 +19,7 @@
 #include "ndspp.h"
 #include "File.h"
 #include "Font.h"
-//#include "FormControl.h"
+#include "UnicodeString.h"
 #include "Canvas.h"
 #include "Link.h"
 #include "Palette.h"
@@ -110,7 +110,7 @@ void TextArea::clearText()
   currentLine();
 }
 
-void TextArea::appendText(const std::string & unicodeString)
+void TextArea::appendText(const std::string &unicodeString)
 {
   if (m_document.empty())
   {
@@ -119,11 +119,11 @@ void TextArea::appendText(const std::string & unicodeString)
   // append text, adding in new lines as needed to wrap.
   int currPosition = 0;
   // find the next space character
-  // TODO: fix this to use utf-8 iterator
-  for (std::string::const_iterator it(unicodeString.begin());
-      it != unicodeString.end();)
+  std::string::const_iterator it = unicodeString.begin();
+  std::string::const_iterator end_it = unicodeString.end();
+  while (it != end_it)
   {
-    const std::string word(nextWord(unicodeString, currPosition));
+    const std::string word(nextWordAdvanceWord(it, end_it));
     int size = textSize(word);
 
     // if the word ends with a new line, then increment the height.
@@ -199,8 +199,7 @@ void TextArea::checkLetter(Font::Glyph & g)
   }
 }
 
-const std::string TextArea::nextWord(const std::string & unicodeString, int currPosition) const
-{
+#if 0
   std::string word;
   if (m_parseNewline)
   {
@@ -242,6 +241,7 @@ const std::string TextArea::nextWord(const std::string & unicodeString, int curr
   }
   return word;
 }
+#endif
 
 void TextArea::advanceWord(const std::string & unicodeString, int wordLength,
     int & currPosition, std::string::const_iterator & it) const
