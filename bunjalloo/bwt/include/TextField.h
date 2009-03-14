@@ -18,7 +18,6 @@
 #define TextField_h_seen
 #include "TextContainer.h"
 #include "TextEntryI.h"
-#include "UnicodeString.h"
 
 /** An entry that displays a single line of text.*/
 class TextField: public TextContainer, public TextEntryI
@@ -28,14 +27,14 @@ class TextField: public TextContainer, public TextEntryI
     /** Construct a new TextField.
      * @param text the initial text to show.
      */
-    TextField(const UnicodeString & text);
+    TextField(const std::string & text);
 
     // from TextEntryI
-    virtual void text(UnicodeString & returnString) const
+    virtual void text(std::string &returnString) const
     {
       returnString = TextContainer::text();
     }
-    virtual void setText(const UnicodeString & text)
+    virtual void setText(const std::string &text)
     {
       TextContainer::setText(text);
     }

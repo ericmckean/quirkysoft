@@ -25,7 +25,6 @@ class Updater;
 class View;
 class ZipViewer;
 #include <map>
-#include "UnicodeString.h"
 #include "Visitor.h"
 #include "HtmlElementFwd.h"
 
@@ -39,7 +38,7 @@ class ViewRender: public Visitor, public ViewI
     void add(Component *component);
     void done(bool resetScroll);
     RichTextArea * textArea();
-    void doTitle(const UnicodeString & str);
+    void doTitle(const std::string & str);
 
     void textAreas(std::list<RichTextArea*>& textAreas);
     void insertNewline();
@@ -104,13 +103,13 @@ class ViewRender: public Visitor, public ViewI
     bool m_pendingNewline;
 
     const HtmlElement * m_lastElement;
-    typedef std::map<UnicodeString, FormRadio*> FormGroupMap;
+    typedef std::map<std::string, FormRadio*> FormGroupMap;
     FormGroupMap m_radioGroup;
 
     void setBgColor(const HtmlElement * body);
     void renderSelect(const HtmlElement * body);
-    void doImage(const UnicodeString & unicode,
-        const UnicodeString & src);
+    void doImage(const std::string & unicode,
+        const std::string & src);
     void doTitle(const HtmlElement * title);
     void renderInput(const HtmlElement * inputElement);
     void renderTextArea(const HtmlElement * inputElement);

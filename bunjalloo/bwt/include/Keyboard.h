@@ -20,7 +20,6 @@
 #include "Component.h"
 #include "ButtonListener.h"
 #include "TextListener.h"
-#include "UnicodeString.h"
 
 class Button;
 class EditableTextArea;
@@ -43,7 +42,7 @@ class Keyboard : public Component, public TextListener, public ButtonListener
     /** Get the result of the last string entered (after Enter is "pressed").
      * @return the last string entered.
      */
-    UnicodeString result() const;
+    std::string result() const;
 
     /** Set the Component that paints the top level.
      * @param topLevel the top level component that will be hidden when the
@@ -78,7 +77,7 @@ class Keyboard : public Component, public TextListener, public ButtonListener
       return m_selectedStatus;
     }
 
-    void setTitle(const UnicodeString & title);
+    void setTitle(const std::string & title);
 
     void forceRedraw();
 
@@ -116,7 +115,7 @@ class Keyboard : public Component, public TextListener, public ButtonListener
     };
     SpecialKey buttonToSpecialKey(const ButtonI * button);
 
-    UnicodeString m_initialText;
+    std::string m_initialText;
     ScrollPane * m_topLevel;
     TextEntryI * m_entry;
 
@@ -124,11 +123,11 @@ class Keyboard : public Component, public TextListener, public ButtonListener
 
     void createRow(int x, int y, const char * text, int keys);
     void createSpecialKey(int x, int y, int w, int h,
-                          const UnicodeString & text, Button * button);
+                          const std::string & text, Button * button);
     void updateRow(const char * newText, int keys, int offset);
     void updateModifierKeys();
     void updateLayout(const char * text, const char * numbers);
-    void appendText(const UnicodeString & text);
+    void appendText(const std::string & text);
     void layoutViewer();
     void applyResult();
 

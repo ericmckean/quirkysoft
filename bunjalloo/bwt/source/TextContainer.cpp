@@ -21,7 +21,7 @@
 const int TextContainer::BORDER_WIDTH(5);
 const int TextContainer::BORDER_HEIGHT(5);
 
-TextContainer::TextContainer(const UnicodeString & text) :
+TextContainer::TextContainer(const std::string & text) :
   Component()
 {
   add(TextAreaFactory::create());
@@ -40,7 +40,7 @@ TextContainer::TextContainer():
   add(TextAreaFactory::create());
 }
 
-void TextContainer::setText(const UnicodeString & text)
+void TextContainer::setText(const std::string & text)
 {
   bool needLayout = false;
   if (m_text != text)
@@ -72,8 +72,8 @@ void TextContainer::layout()
   {
     textArea()->setSize(textArea()->textSize(m_text), textArea()->font().height());
   }
-  UnicodeString appendText;
-  UnicodeString::const_iterator it(m_text.begin());
+  std::string appendText;
+  std::string::const_iterator it(m_text.begin());
   int size(0);
   for (; it != m_text.end() and size <= textArea()->width(); ++it)
   {
@@ -108,7 +108,7 @@ void TextContainer::setBackgroundColor(unsigned short color)
   textArea()->setBackgroundColor(color);
 }
 
-const UnicodeString & TextContainer::text() const
+const std::string & TextContainer::text() const
 {
   return m_text;
 }

@@ -30,7 +30,7 @@ class RichTextArea: public TextArea
     ~RichTextArea();
 
     /** Overridden from TextArea. */
-    virtual void appendText(const UnicodeString & unicodeString);
+    virtual void appendText(const std::string &unicodeString);
 
     /** Add a Link to the text.
      * @param href the document address to link to.
@@ -76,7 +76,7 @@ class RichTextArea: public TextArea
   protected:
     /** Overloaded from TextArea. This checks the current char vs the links to
      * see if the current character is a link or not.*/
-    virtual void printu(const UnicodeString & unicodeString);
+    virtual void printu(const std::string &unicodeString);
 
     virtual void incrLine();
 

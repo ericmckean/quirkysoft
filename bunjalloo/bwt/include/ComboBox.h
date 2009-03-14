@@ -17,8 +17,8 @@
 #ifndef ComboBox_h_seen
 #define ComboBox_h_seen
 #include "Component.h"
-#include "UnicodeString.h"
 #include "ButtonListener.h"
+#include <string>
 
 class ScrollPane;
 class Button;
@@ -38,7 +38,7 @@ class ComboBox: public Component,
     /** Add an item to the list. If it is the first item, it is selected.
      * @param item the text to add.
      */
-    void addItem(const UnicodeString & item);
+    void addItem(const std::string &item);
 
     /** A button on the drop down list has been pressed. Set the text of the
      * main button to the selected item.
@@ -47,7 +47,7 @@ class ComboBox: public Component,
     void pressed(ButtonI * button);
 
     int selectedIndex() const;
-    const UnicodeString & selectedItem() const;
+    const std::string & selectedItem() const;
     void setSelectedIndex(int select);
     unsigned int items() const;
 

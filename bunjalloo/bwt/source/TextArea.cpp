@@ -32,8 +32,8 @@ const static nds::Color EDGE(20,20,20);
 const static nds::Color SHADOW(28,28,28);
 const static unsigned char NEWLINE('\n');
 
-static const unicodeint intDelimiters[] = {0x0020, 0x0009, 0x000a, 0x000b, 0x000c, 0x000d};
-static const UnicodeString s_delimiters(intDelimiters,6);
+static const char intDelimiters[] = {0x20, 0x09, 0x0a, 0x0b, 0x0c, 0x0d};
+static const std::string s_delimiters(intDelimiters,6);
 static const int INDENT(16);
 
 TextArea::TextArea(Font * font) :
@@ -89,9 +89,9 @@ void TextArea::printAt(Font::Glyph & g, int xPosition, int yPosition)
   }
 }
 
-void TextArea::document(UnicodeString & returnString) const
+void TextArea::document(std::string & returnString) const
 {
-  std::vector<UnicodeString>::const_iterator it(m_document.begin());
+  std::vector<std::string>::const_iterator it(m_document.begin());
   for (; it != m_document.end(); ++it)
   {
     returnString.append(*it);
@@ -102,7 +102,7 @@ void TextArea::clearText()
 {
   // Could do the following to completely free the memory, but there
   // is a fair chance it will be reused anyway... speed vs memory again :-/
-  std::vector<UnicodeString> tmp;
+  std::vector<std::string> tmp;
   m_document.swap(tmp);
   m_appendPosition = 0;
   m_preferredWidth = -1;
@@ -110,7 +110,7 @@ void TextArea::clearText()
   currentLine();
 }
 
-void TextArea::appendText(const UnicodeString & unicodeString)
+void TextArea::appendText(const std::string & unicodeString)
 {
   if (m_document.empty())
   {
@@ -119,10 +119,11 @@ void TextArea::appendText(const UnicodeString & unicodeString)
   // append text, adding in new lines as needed to wrap.
   int currPosition = 0;
   // find the next space character
-  for (UnicodeString::const_iterator it(unicodeString.begin());
+  // TODO: fix this to use utf-8 iterator
+  for (std::string::const_iterator it(unicodeString.begin());
       it != unicodeString.end();)
   {
-    const UnicodeString word(nextWord(unicodeString, currPosition));
+    const std::string word(nextWord(unicodeString, currPosition));
     int size = textSize(word);
 
     // if the word ends with a new line, then increment the height.
@@ -131,7 +132,7 @@ void TextArea::appendText(const UnicodeString & unicodeString)
     {
       // trim spaces from the end of the line
       // this word overflows the line - make a new line to hold the text.
-      m_document.push_back(UnicodeString());
+      m_document.push_back(std::string());
       m_appendPosition = 0;
       m_preferredHeight += m_font->height();
     }
@@ -146,7 +147,7 @@ void TextArea::appendText(const UnicodeString & unicodeString)
     if (m_parseNewline and word[word.length()-1] == NEWLINE)
     {
       m_appendPosition = 0;
-      m_document.push_back(UnicodeString());
+      m_document.push_back(std::string());
       m_preferredHeight += font().height();
     }
   }
@@ -155,7 +156,7 @@ void TextArea::appendText(const UnicodeString & unicodeString)
 void TextArea::layoutText()
 {
   // need to shuffle the document about... this requires a new copy of it.
-  UnicodeString tmp;
+  std::string tmp;
   bool pnl = parseNewline();
   setParseNewline();
   document(tmp);
@@ -198,9 +199,9 @@ void TextArea::checkLetter(Font::Glyph & g)
   }
 }
 
-const UnicodeString TextArea::nextWord(const UnicodeString & unicodeString, int currPosition) const
+const std::string TextArea::nextWord(const std::string & unicodeString, int currPosition) const
 {
-  UnicodeString word;
+  std::string word;
   if (m_parseNewline)
   {
     // if we are parsing new lines, look for the next delimiter
@@ -222,8 +223,8 @@ const UnicodeString TextArea::nextWord(const UnicodeString & unicodeString, int 
   if (size > width() and word.size() > 1)
   {
     // This is a very long word, split it up
-    UnicodeString::const_iterator it(word.begin());
-    UnicodeString shorterWord;
+    std::string::const_iterator it(word.begin());
+    std::string shorterWord;
     int size(0);
     for (; it != word.end(); ++it)
     {
@@ -242,8 +243,8 @@ const UnicodeString TextArea::nextWord(const UnicodeString & unicodeString, int 
   return word;
 }
 
-void TextArea::advanceWord(const UnicodeString & unicodeString, int wordLength,
-    int & currPosition, UnicodeString::const_iterator & it) const
+void TextArea::advanceWord(const std::string & unicodeString, int wordLength,
+    int & currPosition, std::string::const_iterator & it) const
 {
   if (m_parseNewline) {
     it += wordLength;
@@ -257,9 +258,9 @@ void TextArea::advanceWord(const UnicodeString & unicodeString, int wordLength,
   }
 }
 
-void TextArea::printu(const UnicodeString & unicodeString)
+void TextArea::printu(const std::string & unicodeString)
 {
-  UnicodeString::const_iterator it(unicodeString.begin());
+  std::string::const_iterator it(unicodeString.begin());
   for (; it != unicodeString.end() and m_cursory < m_bounds.bottom(); ++it)
   {
     unsigned int value(*it);
@@ -270,9 +271,9 @@ void TextArea::printu(const UnicodeString & unicodeString)
   }
 }
 
-int TextArea::textSize(const UnicodeString & unicodeString) const
+int TextArea::textSize(const std::string & unicodeString) const
 {
-  UnicodeString::const_iterator it(unicodeString.begin());
+  std::string::const_iterator it(unicodeString.begin());
   int size(0);
   for (; it != unicodeString.end(); ++it)
   {
@@ -423,7 +424,7 @@ void TextArea::paint(const nds::Rectangle & clip)
   setCursor(m_bounds.x, m_bounds.y);
   Canvas::instance().fillRectangle(clip.x, clip.y, clip.w, clip.h, m_bgCol);
   // work out the number of lines to skip
-  std::vector<UnicodeString>::const_iterator it(m_document.begin());
+  std::vector<std::string>::const_iterator it(m_document.begin());
   int skipLines = linesToSkip();
   if (skipLines > 0)
   {
@@ -446,13 +447,13 @@ std::string TextArea::asString() const
 {
   std::string returnString;
   bool needComma(false);
-  std::vector<UnicodeString>::const_iterator it(m_document.begin());
+  std::vector<std::string>::const_iterator it(m_document.begin());
   for (; it != m_document.end(); ++it)
   {
     if (needComma)
       returnString += ",\n";
     returnString += "[\"";
-    returnString.append(unicode2string(*it));
+    returnString.append(*it);
     returnString += "\"]";
     needComma = true;
   }

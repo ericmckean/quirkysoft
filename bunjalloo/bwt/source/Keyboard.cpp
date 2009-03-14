@@ -43,13 +43,13 @@ static const char * EXTRA =
 static const char * EXTRA_SHIFT =
 "\xc0\xc1\xc2\xc3\xc4\xc5\xc6\xc8\xc9\xca\xcb\xcc\xcd\xce\xcf\xd0\xd1\xd2\xd3\xd4\xd5\xd6\xd9\xda\xdb\xdc\xa2\x7c\xff\xdd\xde\xc7\xdf";
 
-static const UnicodeString BACKSPACE_STR(string2unicode("BkSp."));
-static const UnicodeString CAPS_STR(string2unicode("Cap"));
-static const UnicodeString ENTER_STR(string2unicode(" Enter"));
-static const UnicodeString SHIFT_STR(string2unicode("Shift"));
-static const UnicodeString SPACE_STR(string2unicode(" "));
-static const UnicodeString EXTRA_STR(string2unicode(" Alt"));
-static const UnicodeString CLEAR_STR(string2unicode(" Clr"));
+static const std::string BACKSPACE_STR("BkSp.");
+static const std::string CAPS_STR("Cap");
+static const std::string ENTER_STR(" Enter");
+static const std::string SHIFT_STR("Shift");
+static const std::string SPACE_STR(" ");
+static const std::string EXTRA_STR(" Alt");
+static const std::string CLEAR_STR(" Clr");
 
 const static int KEY_HEIGHT = 18;
 const static int KEY_WIDTH = 19;
@@ -203,7 +203,7 @@ void Keyboard::initUI()
   m_scrollPane->setVisible(true);
 }
 
-void Keyboard::createSpecialKey(int x, int y, int w, int h, const UnicodeString & text, Button * button)
+void Keyboard::createSpecialKey(int x, int y, int w, int h, const std::string & text, Button * button)
 {
   button->setSize(w, h);
   button->setLocation(x, y);
@@ -214,11 +214,12 @@ void Keyboard::createSpecialKey(int x, int y, int w, int h, const UnicodeString 
 
 void Keyboard::updateRow(const char * newText, int keys, int offset)
 {
+  // TODO: fix this to use utf-8
   for (int i = 0; i < keys; ++i)
   {
     Button & key(*(Button*)m_children[i+offset]);
-    unicodeint uchar[] = { (unsigned char)newText[i]&0xff, 0};
-    key.setText(UnicodeString(uchar));
+    char uchar[] = { newText[i]&0xff, 0};
+    key.setText(std::string(uchar));
   }
 }
 
@@ -227,9 +228,10 @@ void Keyboard::createRow(int x, int y, const char * text, int keys)
   for (int i = 0; i < keys; ++i)
   {
     Button * key = new Button();
-    unicodeint uchar[] = {text[i], 0};
+    // TODO: fix this for utf-8
+    char uchar[] = {text[i], 0};
     key->setSize(KEY_WIDTH, KEY_HEIGHT);
-    key->setText(UnicodeString(uchar));
+    key->setText(std::string(uchar));
     //key->setLocation(x+i*(KEY_WIDTH+1), y);
     key->setLocation(x+i*(KEY_WIDTH), y);
     add(key);
@@ -237,9 +239,9 @@ void Keyboard::createRow(int x, int y, const char * text, int keys)
   }
 }
 
-UnicodeString Keyboard::result() const
+std::string Keyboard::result() const
 {
-  UnicodeString tmp;
+  std::string tmp;
   m_textArea->text(tmp);
   return tmp;
 }
@@ -252,7 +254,7 @@ void Keyboard::applyResult()
   this->setVisible(false);
   if (m_selectedStatus == OK)
   {
-    UnicodeString tmp;
+    std::string tmp;
     m_textArea->text(tmp);
     if (m_entry) {
       m_entry->setText(tmp);
@@ -325,7 +327,7 @@ void Keyboard::pressed(ButtonI * button)
       m_capsLock = not m_capsLock;
       break;
     case SPKY_ENTER:
-      appendText(string2unicode("\n"));
+      appendText("\n");
       break;
     case SPKY_BACKSPACE:
       m_textArea->deleteChar();
@@ -361,7 +363,7 @@ void Keyboard::pressed(ButtonI * button)
   updateModifierKeys();
 }
 
-void Keyboard::appendText(const UnicodeString & text)
+void Keyboard::appendText(const std::string & text)
 {
   m_textArea->appendText(text);
   layoutViewer();
@@ -480,11 +482,11 @@ bool Keyboard::tick()
 
 #ifndef ARM9
   static int pressed = 0;
-  unicodeint sdlKeyPress[2] = { keysRealKeyboard(), 0};
+  char sdlKeyPress[2] = { keysRealKeyboard(), 0};
   if ((not pressed) and sdlKeyPress[0])
   {
     pressed = 30;
-    appendText(UnicodeString(sdlKeyPress));
+    appendText(std::string(sdlKeyPress));
     m_dirty = true;
     return true;
   }
@@ -499,7 +501,7 @@ bool Keyboard::multiLine() const
   return m_entry->isMultiLine();
 }
 
-void Keyboard::setTitle(const UnicodeString & title)
+void Keyboard::setTitle(const std::string & title)
 {
   m_richTextArea->clearText();
   m_richTextArea->appendText(title);

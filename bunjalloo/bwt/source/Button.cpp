@@ -36,7 +36,7 @@ Button::Button() :
   setBackgroundColor(WidgetColors::BUTTON_FOREGROUND);
 }
 
-Button::Button(const UnicodeString & label) :
+Button::Button(const std::string & label) :
   TextContainer(label),
   m_decoration(true)
 {

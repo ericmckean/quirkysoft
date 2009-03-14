@@ -23,7 +23,7 @@
 #include "WidgetColors.h"
 #include "Stylus.h"
 
-TextField::TextField(const UnicodeString & text) :
+TextField::TextField(const std::string & text) :
   TextContainer(text), m_touched(false)
 {
 }

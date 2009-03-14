@@ -234,7 +234,7 @@ void Controller::loadError()
 {
   m_document->reset();
   m_document->appendLocalData(s_errorText, strlen(s_errorText));
-  string errorStr(unicode2string(T(UNABLE_TO_LOAD), true));
+  string errorStr(T(UNABLE_TO_LOAD), true);
   m_document->appendLocalData(errorStr.c_str(), errorStr.length());
   string href("<a href='");
   href += m_document->uri();

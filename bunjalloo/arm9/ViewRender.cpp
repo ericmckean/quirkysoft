@@ -63,28 +63,27 @@ RichTextArea * ViewRender::textArea()
   return m_textArea;
 }
 
-static UnicodeString extractImageText(const HtmlElement * element, bool hasAltText)
+static std::string extractImageText(const HtmlElement * element, bool hasAltText)
 {
-  const UnicodeString & altText = element->attribute("alt");
+  const std::string & altText = element->attribute("alt");
   // NO! It might not be a HtmlImageElement - could be a HtmlInputElement
   if (hasAltText) {
     return altText;
   }
-  const UnicodeString & srcText = element->attribute("src");
+  const std::string & srcText = element->attribute("src");
   if (not srcText.empty())
   {
-    string tmp = unicode2string(srcText);
-    const char * bname = nds::File::base(tmp.c_str());
+    const char * bname = nds::File::base(srcText.c_str());
     string bnamestr(bname);
     bnamestr = "["+ bnamestr+"]";
-    return string2unicode(bnamestr);
+    return bnamestr;
   }
-  return string2unicode("[IMG]");
+  return "[IMG]";
 }
 
 void ViewRender::setBgColor(const HtmlElement * body)
 {
-  UnicodeString bgcolor = body->attribute("bgcolor");
+  std::string bgcolor = body->attribute("bgcolor");
   if (not bgcolor.empty())
   {
     unsigned int rgb8 = ((HtmlBodyElement*)body)->bgColor();
@@ -97,8 +96,8 @@ void ViewRender::setBgColor(const HtmlElement * body)
   }
 }
 
-void ViewRender::doImage(const UnicodeString & imgStr,
-    const UnicodeString & src)
+void ViewRender::doImage(const std::string & imgStr,
+    const std::string & src)
 {
   bool show(false);
   m_self->controller().config().resource(Config::SHOW_IMAGES,show);
@@ -108,7 +107,7 @@ void ViewRender::doImage(const UnicodeString & imgStr,
     if (not src.empty())
     {
       URI uri(m_self->document().uri());
-      const URI &imgUri(uri.navigateTo(unicode2string(src)));
+      const URI &imgUri(uri.navigateTo(src));
       std::string filename;
       switch (imgUri.protocol())
       {
@@ -137,7 +136,7 @@ void ViewRender::doImage(const UnicodeString & imgStr,
     // the old image display - shows a text value only + clickage
     if (not imgStr.empty())
     {
-      textArea()->addImage(unicode2string(src));
+      textArea()->addImage(src);
       textArea()->appendText(imgStr);
       textArea()->endImage();
     }
@@ -273,7 +272,7 @@ void ViewRender::setUpdater(Updater * updater)
   m_updater = updater;
 }
 
-void ViewRender::doTitle(const UnicodeString & str)
+void ViewRender::doTitle(const std::string & str)
 {
   HtmlElement * newElement = ElementFactory::create(HtmlConstants::TITLE_TAG);
   HtmlElement * text = ElementFactory::create(HtmlConstants::TEXT);
@@ -343,7 +342,7 @@ static const int MIN_SIZE(8);
 
 void ViewRender::renderInput(const HtmlElement * inputElement)
 {
-  string sizeText = unicode2string(inputElement->attribute("size"));
+  string sizeText = inputElement->attribute("size");
   int size(0);
   if (not sizeText.empty())
   {
@@ -363,8 +362,7 @@ void ViewRender::renderInput(const HtmlElement * inputElement)
         FormControl * submitButton = new FormControl(inputElement,
             type == HtmlInputElement::SUBMIT?(
             inputElement->attribute("value").empty()?
-            string2unicode("Submit"):
-            inputElement->attribute("value")):
+            "Submit" : inputElement->attribute("value")):
             extractImageText(inputElement, hasAltText)
             );
         submitButton->setListener(m_self);
@@ -412,7 +410,7 @@ void ViewRender::renderInput(const HtmlElement * inputElement)
     case HtmlInputElement::RADIO:
       {
         // see if there is a RadioGroup with this name
-        UnicodeString name = inputElement->attribute("name");
+        std::string name = inputElement->attribute("name");
         // FIXME - get the group.
         // m_textArea = 0;
         RadioButton * radio = new RadioButton;
@@ -490,18 +488,18 @@ void ViewRender::notify()
 // Visitor implementation
 void ViewRender::begin(HtmlAnchorElement & element)
 {
-  const UnicodeString & href(element.attribute("href"));
+  const std::string & href(element.attribute("href"));
   m_hrefViewed = false;
   m_hrefForLink.clear();
   if (not href.empty())
   {
-    URI newUri = URI(m_self->m_document.uri()).navigateTo(unicode2string(href));
+    URI newUri = URI(m_self->m_document.uri()).navigateTo(href);
     m_hrefViewed = m_self->m_controller.cache()->contains(newUri, false);
-    m_hrefForLink = unicode2string(href);
+    m_hrefForLink = href;
   }
   else
   {
-    textArea()->addLink(unicode2string(href));
+    textArea()->addLink(href);
   }
 }
 
@@ -635,7 +633,7 @@ bool ViewRender::visit(HtmlImageElement & element)
   // hurrah for alt text. some people set it to "", which screws up any
   // easy way to display it (see w3m google.com - Google [hp1] [hp2] [hp3]... huh?)
   bool hasAltText = element.hasAltText();
-  UnicodeString imgText = extractImageText(&element, hasAltText);
+  const std::string &imgText = extractImageText(&element, hasAltText);
   doImage(imgText, element.attribute("src"));
   return true;
 }
