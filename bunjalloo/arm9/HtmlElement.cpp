@@ -20,13 +20,15 @@
 #include "HtmlConstants.h"
 #include "HtmlElement.h"
 #include "HtmlParser.h"
+#include "UnicodeString.h"
+#include "utf8.h"
 
 using namespace std;
 
 #include "Visitor.h"
 IMPLEMENT_ACCEPT(HtmlElement);
 
-const UnicodeString * HtmlElement::attributePtr(const std::string & name) const
+const std::string *HtmlElement::attributePtr(const std::string & name) const
 {
   if (name == "id")
   {
@@ -47,19 +49,19 @@ const UnicodeString * HtmlElement::attributePtr(const std::string & name) const
   return 0;
 }
 
-UnicodeString HtmlElement::attribute(const std::string & name) const
+std::string HtmlElement::attribute(const std::string & name) const
 {
-   const UnicodeString * ptr = attributePtr(name);
+   const std::string *ptr = attributePtr(name);
    if (ptr)
    {
      return *ptr;
    }
-   return UnicodeString();
+   return std::string();
 }
 
-void HtmlElement::setAttribute(const std::string & name, const UnicodeString & value)
+void HtmlElement::setAttribute(const std::string & name, const std::string & value)
 {
-   UnicodeString * ptr = const_cast<UnicodeString*>(attributePtr(name));
+  std::string * ptr = const_cast<std::string*>(attributePtr(name));
    if (ptr)
    {
      *ptr = value;
@@ -87,10 +89,11 @@ void HtmlElement::appendText(unsigned int value)
   {
     if (m_children.back()->isa(HtmlConstants::TEXT))
     {
-      UnicodeString & text(m_children.back()->m_text);
+      std::string & text(m_children.back()->m_text);
       if (not isWhitespace(value) or (isWhitespace(value) and not isWhitespace(text[text.length()-1])))
       {
-        m_children.back()->m_text += value;
+        utf8::unchecked::append(value, back_inserter(m_children.back()->m_text));
+        //m_children.back()->m_text += value;
       }
       return;
     }
@@ -99,7 +102,7 @@ void HtmlElement::appendText(unsigned int value)
   if (isWhitespace(value))
     return;
   HtmlElement* textNode = new HtmlElement(HtmlConstants::TEXT);
-  textNode->m_text = value;
+  utf8::unchecked::append(value, back_inserter(textNode->m_text));
   append(textNode);
 }
 
@@ -127,7 +130,7 @@ HtmlElement * HtmlElement::clone() const
 void HtmlElement::dump() const
 {
   std::basic_string<wchar_t> dumper;
-  UnicodeString::const_iterator it(m_text.begin());
+  std::string::const_iterator it(m_text.begin());
   for (; it != m_text.end(); ++it)
   {
     dumper += *it;
@@ -185,7 +188,7 @@ ElementList HtmlElement::elementsByTagName(const std::string & name) const
 
 void HtmlElement::clearText() const
 {
-  UnicodeString().swap(m_text);
+  std::string().swap(m_text);
 }
 
 void HtmlElement::visitChildren(Visitor & visitor)

@@ -18,7 +18,6 @@
 #define Language_h_seen
 
 #include <map>
-#include "UnicodeString.h"
 #include "util/classhelper.h"
 
 /** Define to make translation a bit easier.
@@ -39,11 +38,11 @@ class Language: public FileParser
     static Language & instance();
 
     /** Translate a string to the locale specific translation. If a
-     * translation doesn't exist, then s is unicodified and returned.
+     * translation doesn't exist, then s returned unchanged.
      * @param s the programmer string
-     * @return the user string in the current language.
+     * @return the user string in the current language in UTF8.
      */
-    UnicodeString translate(const std::string & s);
+    const std::string &translate(const std::string & s);
 
     /** Set the language */
     void setLanguage(const std::string & l);

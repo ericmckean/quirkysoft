@@ -26,7 +26,7 @@ class HtmlTextAreaElement:public HtmlElement
     {}
 
     virtual void setAttribute(const std::string & name,
-        const UnicodeString & value);
+        const std::string & value);
     int rows() const;
     int cols() const;
 
@@ -34,7 +34,7 @@ class HtmlTextAreaElement:public HtmlElement
   protected:
     int m_rows;
     int m_cols;
-    UnicodeString m_name;
-    const UnicodeString * attributePtr(const std::string & name) const;
+    std::string m_name;
+    const std::string * attributePtr(const std::string & name) const;
 };
 #endif

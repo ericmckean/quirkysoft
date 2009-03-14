@@ -104,7 +104,7 @@ const std::string & Document::uri() const
 }
 
 // const char * Document::asText() const
-const UnicodeString & Document::asText() const
+const std::string & Document::asText() const
 {
   return m_htmlDocument->data();
 }

@@ -21,6 +21,7 @@
 #include "File.h"
 #include "Language.h"
 #include "URI.h"
+#include "UnicodeString.h"
 
 static const char * s_datadir = DATADIR;
 static const char s_configFile[] = "config.ini";
@@ -227,8 +228,7 @@ void Config::updateConfig(const std::string & first, const std::string & second,
     std::vector<std::string> & lines)
 {
   bool replaced(false);
-  string valUnescaped(unicode2string(URI::unescape(string2unicode(second)), true));
-  callback(first, valUnescaped);
+  callback(first, second);
   for (std::vector<std::string>::iterator it(lines.begin());
       it != lines.end(); ++it)
   {
@@ -242,7 +242,7 @@ void Config::updateConfig(const std::string & first, const std::string & second,
       {
         win = true;
       }
-      line = first + "=" + valUnescaped;
+      line = first + "=" + second;
       if (win)
         line += "\r";
       break;
@@ -253,7 +253,7 @@ void Config::updateConfig(const std::string & first, const std::string & second,
   {
     string line(first);
     line += "=";
-    line += valUnescaped;
+    line += second;
     string & firstLine(lines.front());
     if (firstLine[firstLine.length()-1] == '\r')
     {

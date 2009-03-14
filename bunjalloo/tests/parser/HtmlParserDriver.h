@@ -26,7 +26,7 @@ class HtmlParserDriver : public HtmlParser
 
   public :
 
-    UnicodeString m_data;
+    std::string m_data;
     std::vector<std::string> m_tags;
     std::vector< AttributeVector > m_attributes;
 

@@ -570,7 +570,8 @@ bool ViewRender::visit(HtmlElement & element)
 {
   if (not element.text().empty())
   {
-    textArea()->appendText(element.text());
+    const std::string &et(element.text());
+    textArea()->appendText(et.c_str());
   }
   else if (element.isa(HtmlConstants::BR_TAG))
   {

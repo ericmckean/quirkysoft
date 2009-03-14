@@ -13,3 +13,6 @@ giflib version 4.1.2, a library for manipulating gif files.
 
 MatrixSSL 1.8.3 embedded, open source SSL implementation
   Copyright (c) PeerSec Networks, 2002-2007.
+
+utf8 2.x http://utfcpp.sourceforge.net/
+  Copyright 2006 Nemanja Trifunovic
