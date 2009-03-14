@@ -20,6 +20,7 @@
 using std::string;
 using std::vector;
 
+#if 0
 std::string unicode2string(const UnicodeString & ustr, bool byteencode)
 {
   std::string str;
@@ -68,6 +69,7 @@ UnicodeString string2unicode(const std::string & str)
   }
   return ustr;
 }
+#endif
 
 bool isWhitespace(unsigned int value)
 {
@@ -93,6 +95,7 @@ void stripWhitespace(std::string & modify)
     modify = modify.substr(firstNonBlank, (lastNonBlank-firstNonBlank+1));
 }
 
+#if 0
 void stripWhitespace(UnicodeString & modify)
 {
   if (modify.empty())
@@ -101,4 +104,49 @@ void stripWhitespace(UnicodeString & modify)
   int firstNonBlank = modify.find_first_not_of(delimter);
   int lastNonBlank = modify.find_last_not_of(delimter);
   modify = modify.substr(firstNonBlank, (lastNonBlank-firstNonBlank+1));
+}
+#endif
+void tokenize(const std::string &str,
+              std::vector<std::string> &tokens,
+              const std::string &delimiters)
+{
+  // Skip delimiters at beginning.
+  std::string::size_type lastPos = str.find_first_not_of(delimiters, 0);
+  // Find first "non-delimiter".
+  std::string::size_type pos     = str.find_first_of(delimiters, lastPos);
+
+  while (std::string::npos != pos || std::string::npos != lastPos)
+  {
+    // Found a token, add it to the vector.
+    tokens.push_back(str.substr(lastPos, pos - lastPos));
+    // Skip delimiters.  Note the "not_of"
+    lastPos = str.find_first_not_of(delimiters, pos);
+    // Find next "non-delimiter"
+    pos = str.find_first_of(delimiters, lastPos);
+  }
+}
+
+void split(const std::string &str,
+              std::vector<std::string> &tokens,
+              const std::string &delimiters)
+{
+  // pythonic split, includes empties
+  // 'this|string||is|split' -> ['this','string','','is','split']
+
+  // Special case, delimiter at start
+  std::string::size_type lastPos = 0;
+  std::string::size_type pos = str.find_first_of(delimiters, lastPos);
+  tokens.push_back(str.substr(lastPos, pos - lastPos));
+  lastPos = pos;
+  if (lastPos != std::string::npos)
+    pos = str.find_first_of(delimiters, lastPos+1);
+
+  while (lastPos != std::string::npos || pos != std::string::npos)
+  {
+    // skip delimeter (+1) subtract 1 for length. may add empty str
+    tokens.push_back(str.substr(lastPos+1, pos - 1 - lastPos));
+    lastPos = pos;
+    if (lastPos != std::string::npos)
+      pos = str.find_first_of(delimiters, lastPos+1);
+  }
 }

@@ -16,7 +16,8 @@
 */
 #ifndef URI_h_seen
 #define URI_h_seen
-#include "UnicodeString.h"
+#include <string>
+
 /** Encapsulate a URI.*/
 class URI
 {
@@ -37,8 +38,8 @@ class URI
      * @param input The "raw" user string.
      * @return The "safe" string that can be used as a URI.
      */
-    static UnicodeString escape(const UnicodeString & input);
-    static UnicodeString unescape(const UnicodeString & input);
+    static std::string escape(const std::string& input);
+    static std::string unescape(const std::string& input);
 
     /** Create an empty URI.*/
     URI();

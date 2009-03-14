@@ -22,6 +22,7 @@
 #include "File.h"
 #include "ParameterSet.h"
 #include "URI.h"
+#include "UnicodeString.h"
 #include "Delete.h"
 
 using namespace std;

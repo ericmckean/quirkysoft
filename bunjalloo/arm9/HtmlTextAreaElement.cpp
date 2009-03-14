@@ -21,9 +21,9 @@ IMPLEMENT_ACCEPT(HtmlTextAreaElement);
 
 static const int MINIMUM_ROWS(4);
 static const int MINIMUM_COLS(10);
-const UnicodeString * HtmlTextAreaElement::attributePtr(const std::string & name) const
+const std::string * HtmlTextAreaElement::attributePtr(const std::string & name) const
 {
-  const UnicodeString * p = HtmlElement::attributePtr(name);
+  const std::string * p = HtmlElement::attributePtr(name);
   if (p) {
     return p;
   }
@@ -35,16 +35,16 @@ const UnicodeString * HtmlTextAreaElement::attributePtr(const std::string & name
 }
 
 void HtmlTextAreaElement::setAttribute(const std::string & name,
-    const UnicodeString & value)
+    const std::string & value)
 {
   HtmlElement::setAttribute(name, value);
   if (name == "rows")
   {
-    m_rows = strtol( unicode2string(value).c_str(), 0, 10);
+    m_rows = strtol( value.c_str(), 0, 10);
   }
   if (name == "cols")
   {
-    m_cols = strtol( unicode2string(value).c_str(), 0, 10);
+    m_cols = strtol( value.c_str(), 0, 10);
   }
 }
 int HtmlTextAreaElement::rows() const

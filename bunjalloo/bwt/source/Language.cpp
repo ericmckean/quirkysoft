@@ -36,15 +36,15 @@ Language & Language::instance()
   return s_language;
 }
 
-UnicodeString Language::translate(const std::string & s)
+const std::string &Language::translate(const std::string & s)
 {
   // find s, if exists return m_strings[s] else return string2unicode(s);
   TranslateMap::const_iterator it(m_strings.find(s));
   if (it != m_strings.end())
   {
-    return string2unicode(it->second);
+    return it->second;
   }
-  return string2unicode(s);
+  return s;
 }
 
 void Language::setLanguage(const std::string & l)

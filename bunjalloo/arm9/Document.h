@@ -17,7 +17,7 @@
 #ifndef Document_h_seen
 #define Document_h_seen
 #include <vector>
-#include "UnicodeString.h"
+#include <string>
 #include "ViewI.h"
 
 class HeaderParser;
@@ -71,7 +71,7 @@ class Document
     /** Get the model as text.
      * @return a string of universal characters.
      */
-    const UnicodeString & asText() const;
+    const std::string &asText() const;
 
     /** Get the root node of the document model.
      * @return The root node.

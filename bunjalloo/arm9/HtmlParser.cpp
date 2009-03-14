@@ -1504,8 +1504,8 @@ void HtmlParser::refresh(std::string & refreshUrl, int & time) const
 
 void HtmlParser::checkMetaTagHttpEquiv(const HtmlElement * meta)
 {
-  string httpEquiv = unicode2string(meta->attribute("http-equiv"));
-  string content = unicode2string( meta->attribute("content"));
+  string httpEquiv = meta->attribute("http-equiv");
+  string content =  meta->attribute("content");
   if (not httpEquiv.empty() and not content.empty())
   {
     transform(httpEquiv.begin(), httpEquiv.end(), httpEquiv.begin(), ::tolower);

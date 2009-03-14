@@ -91,7 +91,7 @@ void DocumentTest::testHtmlAttributes()
   m_document->appendLocalData(m_data, m_length);
   const HtmlElement * result = m_document->rootNode();
   string expected("en");
-  string attribResult = unicode2string(result->attribute("lang"));
+  string attribResult = result->attribute("lang");
   CPPUNIT_ASSERT_EQUAL(expected, attribResult);
 }
 
@@ -213,7 +213,7 @@ void DocumentTest::testAnchor()
       const HtmlElement * a = element->firstChild();
       CPPUNIT_ASSERT(a != 0);
       CPPUNIT_ASSERT(a->isa("a"));
-      string href = unicode2string(a->attribute("href"));
+      string href = a->attribute("href");
       string expected("anchor");
       CPPUNIT_ASSERT_EQUAL(expected, href);
     }
@@ -244,7 +244,7 @@ void DocumentTest::testBrokenAnchor()
       const HtmlElement * a = element->firstChild();
       CPPUNIT_ASSERT(a != 0);
       CPPUNIT_ASSERT(a->isa("a"));
-      string href = unicode2string(a->attribute("href"));
+      string href = a->attribute("href");
       string expected("anchor");
       CPPUNIT_ASSERT_EQUAL(expected, href);
     }
@@ -295,7 +295,7 @@ void DocumentTest::testSimpleBodyA()
     expected = "meta";
     CPPUNIT_ASSERT_EQUAL(expected, (*headIt)->tagName());
     expected = "content-type";
-    CPPUNIT_ASSERT_EQUAL(expected, unicode2string((*headIt)->attribute("http-equiv")));
+    CPPUNIT_ASSERT_EQUAL(expected, (*headIt)->attribute("http-equiv"));
     ++headIt;
     expected = "title";
     CPPUNIT_ASSERT_EQUAL(expected, (*headIt)->tagName());
@@ -546,6 +546,7 @@ void DocumentTest::testAttribs()
   CPPUNIT_ASSERT(root->isa("html"));
 }
 
+#if 0
 void DocumentTest::testUnicode2String()
 {
   UnicodeString uc;
@@ -554,6 +555,7 @@ void DocumentTest::testUnicode2String()
   string expected = "%C2%A9";
   CPPUNIT_ASSERT_EQUAL(expected, c);
 }
+#endif
 
 void DocumentTest::testActiveFormatters()
 {
@@ -649,27 +651,13 @@ void DocumentTest::testHistoryWithConfig()
 
 void DocumentTest::testTokenize()
 {
-  string str("ABCD:EFGH");
-  UnicodeString uc = string2unicode(str);
+  string str("ABCD:EFáGH");
   vector<string> strTokens;
-  vector<UnicodeString> uniTokens;
   tokenize(str, strTokens, string(":"));
-  {
-    string expected("ABCD");
-    CPPUNIT_ASSERT_EQUAL(expected, strTokens[0]);
-    expected = "EFGH";
-    CPPUNIT_ASSERT_EQUAL(expected, strTokens[1]);
-  }
-
-  unsigned short v[] = { ':', 0};
-  tokenize(uc, uniTokens, UnicodeString(v));
-
-  {
-    UnicodeString expected(string2unicode("ABCD"));
-    CPPUNIT_ASSERT(expected == uniTokens[0]);
-    expected = string2unicode("EFGH");
-    CPPUNIT_ASSERT(expected == uniTokens[1]);
-  }
+  string expected("ABCD");
+  CPPUNIT_ASSERT_EQUAL(expected, strTokens[0]);
+  expected = "EFáGH";
+  CPPUNIT_ASSERT_EQUAL(expected, strTokens[1]);
 
 }
 

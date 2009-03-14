@@ -16,6 +16,7 @@
 */
 #include "config_defs.h"
 #include "URI.h"
+#include "UnicodeString.h"
 #include <zlib.h>
 #include <algorithm>
 #include <vector>
@@ -364,15 +365,15 @@ static bool isEscapable(unsigned int value)
     or value == '=' or value == '/' or value == ':' or value == '@';
 }
 
-UnicodeString URI::escape(const UnicodeString & input)
+std::string URI::escape(const std::string &input)
 {
   // escape non URI values like space and stuff.
-  UnicodeString output;
-  UnicodeString::const_iterator it(input.begin());
+  std::string output;
+  std::string::const_iterator it(input.begin());
   char buffer[4];
   for ( ; it != input.end(); ++it)
   {
-    unsigned int value = *it;
+    char value = *it;
     if ( isEscapable(value))
     {
       sprintf_platform(buffer, "%%%02X", value);
@@ -390,11 +391,11 @@ UnicodeString URI::escape(const UnicodeString & input)
   return output;
 }
 
-UnicodeString URI::unescape(const UnicodeString & input)
+std::string URI::unescape(const std::string & input)
 {
   // convert %XX to char
-  UnicodeString output;
-  UnicodeString::const_iterator it(input.begin());
+  std::string output;
+  std::string::const_iterator it(input.begin());
   for ( ; it != input.end(); ++it)
   {
     unsigned int value = *it;

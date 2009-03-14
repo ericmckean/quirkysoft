@@ -294,14 +294,14 @@ void UriTest::testCRC()
 
 void UriTest::testEscape()
 {
-  string result = unicode2string(URI::escape(string2unicode("/blah&#?=:@")), true);
+  string result = URI::escape("/blah&#?=:@");
   string expected("%2Fblah%26%23%3F%3D%3A%40");
   CPPUNIT_ASSERT_EQUAL(expected, result);
-  result = unicode2string(URI::unescape(string2unicode("%2Fblah%26%23%3F%3D%3A%40")), true);
+  result = URI::unescape("%2Fblah%26%23%3F%3D%3A%40");
   expected = "/blah&#?=:@";
   CPPUNIT_ASSERT_EQUAL(expected, result);
 
-  result = unicode2string(URI::unescape(string2unicode("%2Fblah%2%2")), true);
+  result = URI::unescape("%2Fblah%2%2");
   expected = "/blah%2%2";
   CPPUNIT_ASSERT_EQUAL(expected, result);
 
