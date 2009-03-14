@@ -71,9 +71,9 @@ int main(int argc, char * argv[])
     if (pos != string::npos)
     {
       rich->addLink( file, false);
-      rich->appendText( string2unicode(file));
+      rich->appendText(file);
       rich->endLink();
-      rich->appendText(string2unicode("\n"));
+      rich->appendText("\n");
 
     }
   }

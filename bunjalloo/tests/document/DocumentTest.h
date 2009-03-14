@@ -50,7 +50,7 @@ class DocumentTest : public CPPUNIT_NS::TestFixture
   CPPUNIT_TEST( testHeader);
   CPPUNIT_TEST( testHeader2);
   CPPUNIT_TEST( testAttribs);
-  CPPUNIT_TEST( testUnicode2String);
+  //CPPUNIT_TEST( testUnicode2String);
   CPPUNIT_TEST( testActiveFormatters);
   CPPUNIT_TEST( testHistory);
   CPPUNIT_TEST( testHistoryWithConfig);
@@ -90,7 +90,7 @@ class DocumentTest : public CPPUNIT_NS::TestFixture
   void testHeader();
   void testHeader2();
   void testAttribs();
-  void testUnicode2String();
+  //void testUnicode2String();
   void testActiveFormatters();
   void testHistory();
   void testBodyEnd();
