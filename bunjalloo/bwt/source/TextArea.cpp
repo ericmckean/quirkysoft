@@ -124,7 +124,7 @@ void TextArea::appendText(const std::string &unicodeString)
   std::string::const_iterator end_it = unicodeString.end();
   while (it != end_it)
   {
-    const std::string &word(nextWordAdvanceWord(&it, end_it));
+    const std::string &word(nextWordAdvanceWord(&it, end_it, m_parseNewline));
     int size = textSize(word);
 
     // if the word ends with a new line, then increment the height.
@@ -142,8 +142,6 @@ void TextArea::appendText(const std::string &unicodeString)
     m_preferredWidth += size;
     currentLine().append(word);
     m_appendPosition += size;
-    //advanceWord(unicodeString, word.length(), currPosition, it);
-
     // if the word ended in a NEWLINE, then go onto the next line.
     if (m_parseNewline and word[word.length()-1] == NEWLINE)
     {
@@ -266,7 +264,7 @@ void TextArea::printu(const std::string & unicodeString)
   for (; it != unicodeString.end() and m_cursory < m_bounds.bottom(); ++it)
   {
     unsigned int value(*it);
-    if ( doSingleChar(value) )
+    if (doSingleChar(value))
     {
       break;
     }

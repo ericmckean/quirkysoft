@@ -165,7 +165,6 @@ void RichTextArea::incrLine()
 
 void RichTextArea::printu(const std::string & unicodeString)
 {
-  std::string::const_iterator it(unicodeString.begin());
   static const std::string delimeter(" \r\n\t");
   unsigned int lastPosition = findLastNotOf(unicodeString, delimeter);
   unsigned int i = 0;
@@ -176,8 +175,9 @@ void RichTextArea::printu(const std::string & unicodeString)
     int w = textSize(unicodeString.substr(0, lastPosition));
     m_cursorx = m_bounds.x + ((m_bounds.w - w)/2);
   }
-  std::string::const_iterator end_it(unicodeString.end());
 
+  std::string::const_iterator it(unicodeString.begin());
+  std::string::const_iterator end_it(unicodeString.end());
   while (it != end_it)
   {
     if (m_nextEvent == m_paintPosition)
@@ -185,14 +185,15 @@ void RichTextArea::printu(const std::string & unicodeString)
       handleNextEvent();
     }
     ++m_paintPosition;
+    unsigned int value(utf8::next(it, end_it));
     if (i > lastPosition) {
       continue;
     }
-    unsigned int value(utf8::next(it, end_it));
-    if ( doSingleChar(value) )
+    if (doSingleChar(value))
     {
       break;
     }
+    ++i;
   }
 }
 

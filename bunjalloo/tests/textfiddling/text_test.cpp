@@ -26,6 +26,8 @@ class TextTest : public CPPUNIT_NS::TestFixture
   CPPUNIT_TEST(testUnicode);
   CPPUNIT_TEST(testFindLast);
   CPPUNIT_TEST(testFindLast2);
+  CPPUNIT_TEST(testCrap);
+  CPPUNIT_TEST(testNewline);
   CPPUNIT_TEST_SUITE_END();
 
 public:
@@ -36,6 +38,8 @@ public:
   void testUnicode();
   void testFindLast();
   void testFindLast2();
+  void testNewline();
+  void testCrap();
 };
 
 CPPUNIT_TEST_SUITE_REGISTRATION(TextTest);
@@ -54,13 +58,13 @@ void TextTest::testSimple()
   std::string::const_iterator it(s.begin());
   std::string::const_iterator end_it(s.end());
 
-  std::string result = nextWordAdvanceWord(&it, end_it);
-  CPPUNIT_ASSERT_EQUAL(std::string("this"), result);
-  result = nextWordAdvanceWord(&it, end_it);
-  CPPUNIT_ASSERT_EQUAL(std::string("is"), result);
-  result = nextWordAdvanceWord(&it, end_it);
-  CPPUNIT_ASSERT_EQUAL(std::string("a"), result);
-  result = nextWordAdvanceWord(&it, end_it);
+  std::string result = nextWordAdvanceWord(&it, end_it, false);
+  CPPUNIT_ASSERT_EQUAL(std::string("this "), result);
+  result = nextWordAdvanceWord(&it, end_it, false);
+  CPPUNIT_ASSERT_EQUAL(std::string("is "), result);
+  result = nextWordAdvanceWord(&it, end_it, false);
+  CPPUNIT_ASSERT_EQUAL(std::string("a "), result);
+  result = nextWordAdvanceWord(&it, end_it, false);
   CPPUNIT_ASSERT_EQUAL(std::string("string"), result);
 }
 
@@ -69,16 +73,24 @@ void TextTest::testUnicode() {
   std::string::const_iterator it(s.begin());
   std::string::const_iterator end_it(s.end());
 
-  std::string result = nextWordAdvanceWord(&it, end_it);
-  CPPUNIT_ASSERT_EQUAL(std::string("thís"), result);
-  result = nextWordAdvanceWord(&it, end_it);
-  CPPUNIT_ASSERT_EQUAL(std::string("ís"), result);
-  result = nextWordAdvanceWord(&it, end_it);
-  CPPUNIT_ASSERT_EQUAL(std::string("à"), result);
-  result = nextWordAdvanceWord(&it, end_it);
-  CPPUNIT_ASSERT_EQUAL(std::string("üniÇod€"), result);
-  result = nextWordAdvanceWord(&it, end_it);
+  std::string result = nextWordAdvanceWord(&it, end_it, false);
+  CPPUNIT_ASSERT_EQUAL(std::string("thís "), result);
+  result = nextWordAdvanceWord(&it, end_it, false);
+  CPPUNIT_ASSERT_EQUAL(std::string("ís "), result);
+  result = nextWordAdvanceWord(&it, end_it, false);
+  CPPUNIT_ASSERT_EQUAL(std::string("à "), result);
+  result = nextWordAdvanceWord(&it, end_it, false);
+  CPPUNIT_ASSERT_EQUAL(std::string("üniÇod€ "), result);
+  result = nextWordAdvanceWord(&it, end_it, false);
   CPPUNIT_ASSERT_EQUAL(std::string("strîñg"), result);
+}
+
+void TextTest::testCrap() {
+  std::string s("\"«»\n");
+  std::string::const_iterator it(s.begin());
+  std::string::const_iterator end_it(s.end());
+  std::string result = nextWordAdvanceWord(&it, end_it, false);
+  CPPUNIT_ASSERT_EQUAL(s, result);
 }
 
 void TextTest::testFindLast() {
@@ -97,4 +109,18 @@ void TextTest::testFindLast2() {
   static const std::string delimeter(" \t");
   int lastPosition = findLastNotOf(s, delimeter);
   CPPUNIT_ASSERT_EQUAL(3, lastPosition);
+}
+
+void TextTest::testNewline() {
+  std::string s("line with\nnew line");
+  std::string::const_iterator it(s.begin());
+  std::string::const_iterator end_it(s.end());
+  std::string result = nextWordAdvanceWord(&it, end_it, false);
+  CPPUNIT_ASSERT_EQUAL(std::string("line "), result);
+  result = nextWordAdvanceWord(&it, end_it, false);
+  CPPUNIT_ASSERT_EQUAL(std::string("with\n"), result);
+  result = nextWordAdvanceWord(&it, end_it, false);
+  CPPUNIT_ASSERT_EQUAL(std::string("new "), result);
+  result = nextWordAdvanceWord(&it, end_it, false);
+  CPPUNIT_ASSERT_EQUAL(std::string("line"), result);
 }

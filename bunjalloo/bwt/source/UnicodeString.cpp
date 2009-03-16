@@ -154,8 +154,10 @@ void split(const std::string &str,
 
 std::string nextWordAdvanceWord(
     std::string::const_iterator *it,
-    const std::string::const_iterator &end_it)
+    const std::string::const_iterator &end_it,
+    bool parseNewline)
 {
+  // set up delimeter set
   std::set<uint32_t> delimeters;
   static const char intDelimiters[] = {0x20, 0x09, 0x0a, 0x0b, 0x0c, 0x0d, 0x0};
   for (const char *d(intDelimiters); *d != 0; ++d) {
@@ -163,20 +165,23 @@ std::string nextWordAdvanceWord(
   }
   std::set<uint32_t>::const_iterator set_end(delimeters.end());
 
-  while (*it != end_it) {
-    uint32_t value = utf8::peek_next(*it, end_it);
-    if (delimeters.find(value) == set_end) {
-      break;
+  // skip whitespace at the start of the word
+  if (!parseNewline) {
+    while (*it != end_it) {
+      uint32_t value = utf8::peek_next(*it, end_it);
+      if (delimeters.find(value) == set_end) {
+        break;
+      }
+      utf8::next(*it, end_it);
     }
-    utf8::next(*it, end_it);
   }
+  // find the end of the word
   std::string::const_iterator start(*it);
   while (*it != end_it) {
-    uint32_t value = utf8::peek_next(*it, end_it);
+    uint32_t value = utf8::next(*it, end_it);
     if (delimeters.find(value) != set_end) {
       break;
     }
-    utf8::next(*it, end_it);
   }
   return string(start, *it);
 }
