@@ -23,7 +23,7 @@
 #include "RichTextArea.h"
 #include "Stylus.h"
 #include "utf8.h"
-#include "UnicodeString.h"
+#include "string_utils.h"
 #include "WidgetColors.h"
 using namespace std;
 using namespace nds;

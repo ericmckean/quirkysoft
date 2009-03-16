@@ -21,7 +21,7 @@
 #include "Language.h"
 #include "NodeDumper.h"
 #include "View.h"
-#include "UnicodeString.h"
+#include "string_utils.h"
 
 EditPopup::EditPopup(View * parent):
   m_parent(parent)

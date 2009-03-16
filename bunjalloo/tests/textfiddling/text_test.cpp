@@ -15,7 +15,7 @@
   along with this program.  If not, see <http://www.gnu.org/licenses/>.
 */
 #include "BoxLayout.h"
-#include "UnicodeString.h"
+#include "string_utils.h"
 
 #include <cppunit/extensions/HelperMacros.h>
 

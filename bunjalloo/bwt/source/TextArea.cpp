@@ -19,7 +19,7 @@
 #include "ndspp.h"
 #include "File.h"
 #include "Font.h"
-#include "UnicodeString.h"
+#include "string_utils.h"
 #include "Canvas.h"
 #include "Link.h"
 #include "Palette.h"

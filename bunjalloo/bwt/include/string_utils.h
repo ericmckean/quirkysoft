@@ -14,8 +14,8 @@
   You should have received a copy of the GNU General Public License
   along with this program.  If not, see <http://www.gnu.org/licenses/>.
 */
-#ifndef UnicodeString_h_seen
-#define UnicodeString_h_seen
+#ifndef string_utils_h_seen
+#define string_utils_h_seen
 #include <string>
 #include <vector>
 

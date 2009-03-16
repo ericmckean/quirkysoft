@@ -24,7 +24,7 @@
 #include "HtmlDocument.h"
 #include "HeaderParser.h"
 #include "Document.h"
-#include "UnicodeString.h"
+#include "string_utils.h"
 
 using namespace std;
 

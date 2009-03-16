@@ -20,7 +20,7 @@
 #include "HtmlConstants.h"
 #include "HtmlElement.h"
 #include "HtmlParser.h"
-#include "UnicodeString.h"
+#include "string_utils.h"
 #include "utf8.h"
 
 using namespace std;

@@ -2,7 +2,7 @@
 #include <string>
 #include <vector>
 #include "Version.h"
-#include "UnicodeString.h"
+#include "string_utils.h"
 
 Version::Version(const char * version):
   m_major(0),
