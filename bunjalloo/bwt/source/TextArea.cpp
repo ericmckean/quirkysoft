@@ -24,7 +24,6 @@
 #include "Link.h"
 #include "Palette.h"
 #include "TextArea.h"
-#include "UTF8.h"
 #include "utf8.h"
 
 using namespace nds;
@@ -284,7 +283,7 @@ int TextArea::textSize(const std::string &unicodeString) const
     uint32_t value = utf8::next(it, end_it);
     if (value != NEWLINE)
     {
-      if (value == UTF8::MALFORMED)
+      if (value == 0xfffd)
         value = '?';
       Font::Glyph g;
       m_font->glyph(value, g);
@@ -296,7 +295,7 @@ int TextArea::textSize(const std::string &unicodeString) const
 
 bool TextArea::doSingleChar(unsigned int value)
 {
-  if (value == UTF8::MALFORMED) {
+  if (value == 0xfffd) {
     value = '?';
   }
   Font::Glyph g;

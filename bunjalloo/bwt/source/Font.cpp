@@ -18,7 +18,7 @@
 #include "Font.h"
 #include "Palette.h"
 #include "File.h"
-#include "UTF8.h"
+#include "utf8.h"
 #include "ISO_8859_1.h"
 using namespace std;
 using namespace nds;
@@ -202,17 +202,17 @@ void Font::textSize(const char * text, int amount, int & width, int & height, co
   width = 0;
   height = m_height;
   int maxWidth = 0;
-  int total = 0;
-  while (total < amount)
+  const char *end(text + amount);
+  while (text != end)
   {
     unsigned int value;
-    unsigned int read(1);
     if (utf8) {
-      read = UTF8::decode(text, value);
+      value = utf8::next(text, end);
     } else {
       value = ISO_8859_1::decode(text[0]&0xff);
+      text++;
     }
-    if (value == UTF8::MALFORMED) {
+    if (value == 0xfffd) {
       value = '?';
     }
     if (value == '\n')
@@ -227,8 +227,6 @@ void Font::textSize(const char * text, int amount, int & width, int & height, co
     if (width >= maxWidth) {
       maxWidth = width;
     }
-    text += read;
-    total += read;
   }
   width = maxWidth;
 }

@@ -21,7 +21,7 @@
 #include "ScrollPane.h"
 #include "Stylus.h"
 #include "TextListener.h"
-#include "UTF8.h"
+#include "utf8.h"
 #include "WidgetColors.h"
 using nds::Canvas;
 using nds::Color;
@@ -72,13 +72,16 @@ void EditableTextArea::paint(const nds::Rectangle & clip)
         std::string tmp;
         if (not echoText())
         {
-          std::string(m_document[m_caretLine].length(),'*').swap(tmp);
+          const std::string &line(m_document[m_caretLine]);
+          std::string(utf8::distance(line.begin(), line.end()), '*').swap(tmp);
         }
         const std::string &line(echoText()?m_document[m_caretLine]:tmp);
-        for (int i = 0; i < (int)line.length() and i < m_caretChar; ++i)
+        std::string::const_iterator it(line.begin());
+        std::string::const_iterator end(line.end());
+        for (int i = 0; it != end and i < m_caretChar; ++i)
         {
-          unsigned int value(line[i]);
-          if (value == UTF8::MALFORMED)
+          unsigned int value(utf8::next(it, end));
+          if (value == 0xfffd)
             value = '?';
           Font::Glyph g;
           font().glyph(value, g);
@@ -306,7 +309,7 @@ void EditableTextArea::setCaret(int x, int y)
     for (int i = 0; i < (int)line.length(); ++i)
     {
       unsigned int value(line[i]);
-      if (value == UTF8::MALFORMED)
+      if (value == 0xfffd)
         value = '?';
       Font::Glyph g;
       font().glyph(value, g);

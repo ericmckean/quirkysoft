@@ -22,7 +22,6 @@
 #include "Rectangle.h"
 #include "RichTextArea.h"
 #include "Stylus.h"
-#include "UTF8.h"
 #include "utf8.h"
 #include "UnicodeString.h"
 #include "WidgetColors.h"
@@ -430,7 +429,7 @@ int RichTextArea::pointToCharIndex(int x, int y) const
   for (int i = 0, size = m_bounds.x; i < (int)line.length(); ++i, ++charNumber)
   {
     unsigned int value(line[i]);
-    if (value == UTF8::MALFORMED)
+    if (value == 0xfffd)
       value = '?';
     Font::Glyph g;
     font().glyph(value, g);
