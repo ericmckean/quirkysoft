@@ -224,7 +224,9 @@ void Image::renderLine(const unsigned char * line, int n)
 
   //printf("m_currentLine %d\n", m_currentLine);
   u16 *db = &m_data[m_width*m_currentLine];
-  for (int x = m_realWidth; x > 0; x--, line += m_bpp)
+  int bytes = (m_channels * m_bpp)/8;
+
+  for (int x = m_realWidth; x > 0; x--, line += bytes)
   {
     int lastX = x-1;
     if (((lastX * xScale)/256) == ((x*xScale)/256))
@@ -234,7 +236,14 @@ void Image::renderLine(const unsigned char * line, int n)
     if (m_channels >= 3)
     {
       // standard RGB or RGBA images.
-      db[0] = RGB8(line[0], line[1], line[2]);
+      switch (m_bpp) {
+        case 16:
+          db[0] = RGB8(line[0], line[2], line[4]);
+          break;
+        default:
+          db[0] = RGB8(line[0], line[1], line[2]);
+          break;
+      }
     }
     else if (m_paletteSize == 0)
     {
@@ -347,7 +356,7 @@ void Image::readPng()
    m_realWidth =info_ptr->width;
    m_realHeight =info_ptr->height;
    m_channels = png_get_channels(png_ptr, info_ptr);
-   m_bpp = m_channels;
+   m_bpp = png_get_bit_depth(png_ptr, info_ptr);
    unsigned int h = m_height;
    unsigned int w = m_width;
    calculateScale();
