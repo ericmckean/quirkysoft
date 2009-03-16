@@ -21,7 +21,7 @@
 #include "File.h"
 #include "Language.h"
 #include "URI.h"
-#include "UnicodeString.h"
+#include "string_utils.h"
 
 static const char * s_datadir = DATADIR;
 static const char s_configFile[] = "config.ini";

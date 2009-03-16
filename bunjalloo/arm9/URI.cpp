@@ -16,7 +16,7 @@
 */
 #include "config_defs.h"
 #include "URI.h"
-#include "UnicodeString.h"
+#include "string_utils.h"
 #include <zlib.h>
 #include <algorithm>
 #include <vector>

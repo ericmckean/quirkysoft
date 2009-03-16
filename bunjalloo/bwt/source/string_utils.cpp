@@ -16,7 +16,7 @@
 */
 #include <set>
 #include "config_defs.h"
-#include "UnicodeString.h"
+#include "string_utils.h"
 #include "utf8.h"
 using std::string;
 using std::vector;

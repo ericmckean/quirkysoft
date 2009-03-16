@@ -17,7 +17,6 @@
 #ifndef HtmlParserDriver_h_seen
 #define HtmlParserDriver_h_seen
 
-#include "UnicodeString.h"
 #include "HtmlParser.h"
 #include <vector>
 

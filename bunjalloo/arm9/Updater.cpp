@@ -30,7 +30,7 @@
 #include "ParameterSet.h"
 #include "RichTextArea.h"
 #include "Updater.h"
-#include "UnicodeString.h"
+#include "string_utils.h"
 #include "Version.h"
 #include "View.h"
 #include "ViewRender.h"

@@ -23,7 +23,7 @@
 #include "HtmlElement.h"
 #include "HtmlParser.h"
 #include "ParameterSet.h"
-#include "UnicodeString.h"
+#include "string_utils.h"
 #include "ISO_8859_1.h"
 #include "utf8.h"
 #include "File.h"
