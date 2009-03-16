@@ -14,9 +14,10 @@
   You should have received a copy of the GNU General Public License
   along with this program.  If not, see <http://www.gnu.org/licenses/>.
 */
+#include <set>
 #include "config_defs.h"
 #include "UnicodeString.h"
-#include "UTF8.h"
+#include "utf8.h"
 using std::string;
 using std::vector;
 
@@ -152,8 +153,44 @@ void split(const std::string &str,
 }
 
 std::string nextWordAdvanceWord(
-    const std::string::const_iterator &it,
+    std::string::const_iterator *it,
     const std::string::const_iterator &end_it)
 {
-  return "";
+  std::set<uint32_t> delimeters;
+  static const char intDelimiters[] = {0x20, 0x09, 0x0a, 0x0b, 0x0c, 0x0d, 0x0};
+  for (const char *d(intDelimiters); *d != 0; ++d) {
+    delimeters.insert(*d);
+  }
+  std::set<uint32_t>::const_iterator set_end(delimeters.end());
+
+  while (*it != end_it) {
+    uint32_t value = utf8::peek_next(*it, end_it);
+    if (delimeters.find(value) == set_end) {
+      break;
+    }
+    utf8::next(*it, end_it);
+  }
+  std::string::const_iterator start(*it);
+  while (*it != end_it) {
+    uint32_t value = utf8::peek_next(*it, end_it);
+    if (delimeters.find(value) != set_end) {
+      break;
+    }
+    utf8::next(*it, end_it);
+  }
+  return string(start, *it);
+}
+
+size_t findLastNotOf(const std::string &str, const std::string &delim) {
+  size_t last = str.find_last_not_of(delim);
+  std::string::const_iterator it(str.begin());
+  it += last;
+  if (it == str.end()) {
+    return last;
+  }
+  while (!utf8::is_valid(it, str.end())) {
+    ++it;
+    ++last;
+  }
+  return last;
 }

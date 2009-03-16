@@ -39,6 +39,8 @@ void split(const std::string &str,
               const std::string &delimiters);
 
 std::string nextWordAdvanceWord(
-    const std::string::const_iterator &it,
+    std::string::const_iterator *it,
     const std::string::const_iterator &end_it);
+
+size_t findLastNotOf(const std::string &str, const std::string &delim);
 #endif

@@ -25,6 +25,7 @@
 #include "Palette.h"
 #include "TextArea.h"
 #include "UTF8.h"
+#include "utf8.h"
 
 using namespace nds;
 using namespace std;
@@ -117,13 +118,13 @@ void TextArea::appendText(const std::string &unicodeString)
     m_preferredWidth = 0;
   }
   // append text, adding in new lines as needed to wrap.
-  int currPosition = 0;
+  // int currPosition = 0;
   // find the next space character
   std::string::const_iterator it = unicodeString.begin();
   std::string::const_iterator end_it = unicodeString.end();
   while (it != end_it)
   {
-    const std::string word(nextWordAdvanceWord(it, end_it));
+    const std::string &word(nextWordAdvanceWord(&it, end_it));
     int size = textSize(word);
 
     // if the word ends with a new line, then increment the height.
@@ -141,7 +142,7 @@ void TextArea::appendText(const std::string &unicodeString)
     m_preferredWidth += size;
     currentLine().append(word);
     m_appendPosition += size;
-    advanceWord(unicodeString, word.length(), currPosition, it);
+    //advanceWord(unicodeString, word.length(), currPosition, it);
 
     // if the word ended in a NEWLINE, then go onto the next line.
     if (m_parseNewline and word[word.length()-1] == NEWLINE)
@@ -200,6 +201,7 @@ void TextArea::checkLetter(Font::Glyph & g)
 }
 
 #if 0
+{
   std::string word;
   if (m_parseNewline)
   {
@@ -271,13 +273,14 @@ void TextArea::printu(const std::string & unicodeString)
   }
 }
 
-int TextArea::textSize(const std::string & unicodeString) const
+int TextArea::textSize(const std::string &unicodeString) const
 {
   std::string::const_iterator it(unicodeString.begin());
+  std::string::const_iterator end_it(unicodeString.end());
   int size(0);
-  for (; it != unicodeString.end(); ++it)
+  while (it != end_it)
   {
-    unsigned int value(*it);
+    uint32_t value = utf8::next(it, end_it);
     if (value != NEWLINE)
     {
       if (value == UTF8::MALFORMED)
