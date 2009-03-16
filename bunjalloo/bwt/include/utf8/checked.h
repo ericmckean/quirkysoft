@@ -141,13 +141,11 @@ namespace utf8
             case internal::OK :
                 break;
             case internal::NOT_ENOUGH_ROOM :
-                throw not_enough_room();
             case internal::INVALID_LEAD :
             case internal::INCOMPLETE_SEQUENCE :
             case internal::OVERLONG_SEQUENCE :
-                throw invalid_utf8(*it);
             case internal::INVALID_CODE_POINT :
-                throw invalid_code_point(cp);
+                return 0xfffd;
         }
         return cp;        
     }

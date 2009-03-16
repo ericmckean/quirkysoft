@@ -23,6 +23,7 @@
 #include "RichTextArea.h"
 #include "Stylus.h"
 #include "UTF8.h"
+#include "utf8.h"
 #include "UnicodeString.h"
 #include "WidgetColors.h"
 using namespace std;
@@ -166,7 +167,7 @@ void RichTextArea::printu(const std::string & unicodeString)
 {
   std::string::const_iterator it(unicodeString.begin());
   static const std::string delimeter(" \r\n\t");
-  unsigned int lastPosition = unicodeString.find_last_not_of(delimeter);
+  unsigned int lastPosition = findLastNotOf(unicodeString, delimeter);
   unsigned int i = 0;
   bool centred(m_centred);
   if (centred)
@@ -175,8 +176,9 @@ void RichTextArea::printu(const std::string & unicodeString)
     int w = textSize(unicodeString.substr(0, lastPosition));
     m_cursorx = m_bounds.x + ((m_bounds.w - w)/2);
   }
+  std::string::const_iterator end_it(unicodeString.end());
 
-  for (; it != unicodeString.end() ; ++it, ++i)
+  while (it != end_it)
   {
     if (m_nextEvent == m_paintPosition)
     {
@@ -186,7 +188,7 @@ void RichTextArea::printu(const std::string & unicodeString)
     if (i > lastPosition) {
       continue;
     }
-    unsigned int value(*it);
+    unsigned int value(utf8::next(it, end_it));
     if ( doSingleChar(value) )
     {
       break;

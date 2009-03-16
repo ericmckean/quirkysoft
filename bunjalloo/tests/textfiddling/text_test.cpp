@@ -21,8 +21,11 @@
 
 class TextTest : public CPPUNIT_NS::TestFixture
 {
-  CPPUNIT_TEST_SUITE( TextTest );
-  CPPUNIT_TEST( testSimple );
+  CPPUNIT_TEST_SUITE(TextTest);
+  CPPUNIT_TEST(testSimple);
+  CPPUNIT_TEST(testUnicode);
+  CPPUNIT_TEST(testFindLast);
+  CPPUNIT_TEST(testFindLast2);
   CPPUNIT_TEST_SUITE_END();
 
 public:
@@ -30,7 +33,9 @@ public:
   void tearDown();
 
   void testSimple();
-
+  void testUnicode();
+  void testFindLast();
+  void testFindLast2();
 };
 
 CPPUNIT_TEST_SUITE_REGISTRATION(TextTest);
@@ -49,7 +54,47 @@ void TextTest::testSimple()
   std::string::const_iterator it(s.begin());
   std::string::const_iterator end_it(s.end());
 
-  std::string w1 = nextWordAdvanceWord(it, end_it);
-  CPPUNIT_ASSERT_EQUAL(std::string("this"), w1);
+  std::string result = nextWordAdvanceWord(&it, end_it);
+  CPPUNIT_ASSERT_EQUAL(std::string("this"), result);
+  result = nextWordAdvanceWord(&it, end_it);
+  CPPUNIT_ASSERT_EQUAL(std::string("is"), result);
+  result = nextWordAdvanceWord(&it, end_it);
+  CPPUNIT_ASSERT_EQUAL(std::string("a"), result);
+  result = nextWordAdvanceWord(&it, end_it);
+  CPPUNIT_ASSERT_EQUAL(std::string("string"), result);
+}
 
+void TextTest::testUnicode() {
+  std::string s("thís ís à üniÇod€ strîñg");
+  std::string::const_iterator it(s.begin());
+  std::string::const_iterator end_it(s.end());
+
+  std::string result = nextWordAdvanceWord(&it, end_it);
+  CPPUNIT_ASSERT_EQUAL(std::string("thís"), result);
+  result = nextWordAdvanceWord(&it, end_it);
+  CPPUNIT_ASSERT_EQUAL(std::string("ís"), result);
+  result = nextWordAdvanceWord(&it, end_it);
+  CPPUNIT_ASSERT_EQUAL(std::string("à"), result);
+  result = nextWordAdvanceWord(&it, end_it);
+  CPPUNIT_ASSERT_EQUAL(std::string("üniÇod€"), result);
+  result = nextWordAdvanceWord(&it, end_it);
+  CPPUNIT_ASSERT_EQUAL(std::string("strîñg"), result);
+}
+
+void TextTest::testFindLast() {
+  std::string s(" ñÑaá$Ó");
+  static const std::string delimeter(" \r\n\t");
+  int lastPosition = findLastNotOf(s, delimeter);
+  CPPUNIT_ASSERT_EQUAL(11, lastPosition);
+
+  s = "Ña";
+  lastPosition = findLastNotOf(s, delimeter);
+  CPPUNIT_ASSERT_EQUAL(2, lastPosition);
+}
+
+void TextTest::testFindLast2() {
+  std::string s(" Ñ  ");
+  static const std::string delimeter(" \t");
+  int lastPosition = findLastNotOf(s, delimeter);
+  CPPUNIT_ASSERT_EQUAL(3, lastPosition);
 }
