@@ -25,7 +25,7 @@
 #include "ParameterSet.h"
 #include "UnicodeString.h"
 #include "ISO_8859_1.h"
-#include "UTF8.h"
+#include "utf8.h"
 #include "File.h"
 #include "Delete.h"
 
@@ -205,8 +205,7 @@ void HtmlParserImpl::next()
 {
   m_lastPosition = m_position;
   if (m_encoding == HtmlParser::UTF8_ENCODING) {
-    unsigned int read = UTF8::decode(m_position, m_value);
-    m_position += read;
+    m_value = utf8::next(m_position, m_end);
   } else {
     m_value = ISO_8859_1::decode((*m_position)&0xff);
     m_position++;
