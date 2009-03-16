@@ -269,7 +269,7 @@ unsigned int RichTextArea::charIndexToLine(unsigned int charIndex) const
   std::vector<std::string>::const_iterator it(m_document.begin());
   for (; it != m_document.end() and total < charIndex; ++it)
   {
-    total += it->length();
+    total += utf8::distance(it->begin(), it->end());
     line++;
   }
   return line*fontHeight;
@@ -295,7 +295,7 @@ unsigned int RichTextArea::documentSize(int endLine) const
   std::vector<std::string>::const_iterator end(m_document.end());
   for (int i = 0; it != end and i != endLine; ++it, ++i)
   {
-    total += it->length();
+    total += utf8::distance(it->begin(), it->end());
   }
   return total;
 }
