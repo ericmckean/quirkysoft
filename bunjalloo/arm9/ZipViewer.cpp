@@ -20,7 +20,6 @@
 #include "Document.h"
 #include "File.h"
 #include "Language.h"
-#include "PatchDLDI.h"
 #include "ProgressBar.h"
 #include "RichTextArea.h"
 #include "View.h"
@@ -35,7 +34,6 @@ static const string ndsExt(".nds");
 ZipViewer::ZipViewer(View & view):
   m_view(view),
   m_unzip(0),
-  m_unzipAndPatch(0),
   m_fileCount(0),
   m_index(0)
 {
@@ -45,7 +43,6 @@ void ZipViewer::setFilename(const std::string & filename)
 {
   m_filename = filename;
   m_unzip = 0;
-  m_unzipAndPatch = 0;
   m_fileCount = 0;
   // don't delete here - the textArea already handles that
   m_checkboxes.clear();
@@ -70,10 +67,6 @@ void ZipViewer::show()
     m_unzip = unzipButton;
     renderer->textArea()->appendText(T(" "));
 
-    Button * patch = new Button(T("unzip_patch"));
-    patch->setListener(this);
-    renderer->add(patch);
-    m_unzipAndPatch = patch;
     renderer->insertNewline();
   }
 
@@ -106,39 +99,12 @@ void ZipViewer::unzip()
   }
 }
 
-void ZipViewer::unzipAndPatch()
-{
-  unzip();
-  ZipFile file(this);
-  file.open(m_filename.c_str());
-  if (file.is_open())
-  {
-    vector<string> contents;
-    file.list(contents);
-    for (vector<string>::const_iterator it(contents.begin()); it!= contents.end(); ++it)
-    {
-      string lowName(*it);
-      transform(lowName.begin(), lowName.end(), lowName.begin(), ::tolower);
-      if (lowName.rfind(ndsExt) == (lowName.length() - ndsExt.length()))
-      {
-        const string & name(*it);
-        nds::PatchDLDI dldi(name.c_str());
-        dldi.patch();
-      }
-    }
-  }
-}
-
 void ZipViewer::pressed(ButtonI * button)
 {
   if (button == m_unzip)
   {
     // unzip the file
     unzip();
-  }
-  else if (button == m_unzipAndPatch)
-  {
-    unzipAndPatch();
   }
   ProgressBar & progressBar(m_view.progressBar());
   progressBar.setVisible(false);
