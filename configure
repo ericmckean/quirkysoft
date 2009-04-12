@@ -9,9 +9,9 @@ if [ "$NOCOLOR" ] ; then
     RED=""
     GREEN=""
 else
-    NORMAL="\x1b[0m"
-    RED="\x1b[01;91m"
-    GREEN="\x1b[32m"
+    NORMAL='\033[0m'
+    RED='\033[01;91m'
+    GREEN='\033[01;92m'
 fi
 
 EXIT_SUCCESS=0
