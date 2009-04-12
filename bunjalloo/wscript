@@ -6,7 +6,7 @@ import Options
 
 def build(bld):
   import os
-  from builder import generate_banner
+  from ndstool import generate_banner
 
   APPNAME = 'bunjalloo'
   os.unsetenv('NDS_DLDI')
@@ -49,6 +49,11 @@ def build(bld):
 
   subdirs = ['bwt']
   if Options.commands['check']:
+    import sys
+    sys.path.append('bunjalloo')
+    import build_tests
+    setattr(bld.__class__, 'build_test', build_tests.build_test)
+    setattr(bld.__class__, 'build_test_program', build_tests.build)
     subdirs += ['tests']
   bld.add_subdirs(' '.join(subdirs))
 

@@ -45,3 +45,16 @@ def setup(bld):
   Task.simple_task_type('ndstool', ndstool_str%'', color='BLUE', after="objcopy", before="unit_test")
   Task.simple_task_type('ndstool_banner', ndstool_str%' -b ${SRC[1].srcpath(env)} ${NDSTOOL_ICON} \'${NDSTOOL_BANNER}\'',
       color='BLUE', after="objcopy", before="unit_test")
+
+def generate_banner(app, comment="", author=None):
+  if author == None:
+    author = '?'
+    try:
+      import pwd
+      author = pwd.getpwnam(os.getlogin()).pw_gecos.split(',')[0]
+    except:
+      pass
+  banner = '%s;%s;By %s'%(app.title(), comment, author)
+  if sys.platform.startswith('win'):
+    banner = banner.replace(' ', '_')
+  return banner

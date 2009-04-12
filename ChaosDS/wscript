@@ -6,7 +6,7 @@ import Options
 
 def build(bld):
   import os
-  from builder import generate_banner
+  from ndstool import generate_banner
 
   bld.add_subdirs('common/img')
   bld.add_subdirs('common/snd')
