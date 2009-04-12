@@ -71,7 +71,7 @@ void Video::blend(BLDMOD_MODE_t mode, int first, int second)
 void Video::clear()
 {
   u16 *bgpal = BG_PALETTE;
-  u16 *sppal = BG_PALETTE;
+  u16 *sppal = SPRITE_PALETTE;
   u16 *gfx = BG_GFX;
   if (m_screen) {
     bgpal = BG_PALETTE_SUB;
