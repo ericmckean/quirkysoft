@@ -63,9 +63,9 @@ void Video::blend(BLDMOD_MODE_t mode, int first, int second)
 {
   int blnd((first)|((second)<<8)|(BLDMOD_MODE(mode)));
   if (m_screen)
-    SUB_BLEND_CR = blnd;
+    REG_BLDCNT_SUB = blnd;
   else
-    BLEND_CR = blnd;
+    REG_BLDCNT = blnd;
 }
 
 void Video::clear()
@@ -125,10 +125,10 @@ void Video::setFade(int level)
          BLDMOD_BG0 | BLDMOD_BG1 | BLDMOD_BG2| BLDMOD_OBJ ,
          BLDMOD_BD );
   if (m_screen) {
-    SUB_BLEND_Y = level;
+    REG_BLDY_SUB = level;
   }
   else {
-    BLEND_Y = level;
+    REG_BLDY = level;
   }
 
 }
@@ -138,10 +138,10 @@ void Video::setBlendAB(int A, int B)
   A = A>0x1f?0x1f:A<0?0:A;
   B = B>0x1f?0x1f:B<0?0:B;
   if (m_screen) {
-    SUB_BLEND_AB = (A)|((B)<<8);
+    REG_BLDALPHA_SUB = (A)|((B)<<8);
   }
   else {
-    BLEND_AB = (A)|((B)<<8);
+    REG_BLDALPHA = (A)|((B)<<8);
   }
 }
 
@@ -187,9 +187,9 @@ void Video::setWhite(int level)
         BLDMOD_BG2 | BLDMOD_BG1 | BLDMOD_BG0 | BLDMOD_BD | BLDMOD_OBJ,
          0 );
   if (m_screen)
-    SUB_BLEND_Y = level;
+    REG_BLDY_SUB = level;
   else
-    BLEND_Y = level;
+    REG_BLDY = level;
 }
 
 void Video::whiteout(bool towhite, unsigned int speed)
