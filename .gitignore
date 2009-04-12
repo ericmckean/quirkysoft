@@ -1,4 +1,7 @@
 *~
+.waf-*
+/waf
+/Makefile
 _build_
 bunjalloo/data/bunjalloo/cache
 bunjalloo/data/bunjalloo/config.ini
