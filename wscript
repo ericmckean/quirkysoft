@@ -31,6 +31,7 @@ def build(bld):
       'WITH_BUNJALLOO': 'bunjalloo',
       'WITH_CHAOS': 'ChaosDS'
       }
+  # append the helper functions
   [bld.add_subdirs(v) for e,v in BUILD_DIRS.items() if bld.env[e]]
 
 def set_options(opt):

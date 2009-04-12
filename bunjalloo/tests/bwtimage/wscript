@@ -1,8 +1,4 @@
 #!/usr/bin/env python
 # encoding: utf-8
-import sys
-sys.path.append('waf_tools')
-import builder
-
 def build(bld):
-  builder.build_test(bld, 'ndspp')
+    bld.build_test('ndspp')
