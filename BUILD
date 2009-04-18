@@ -12,7 +12,7 @@ try running:
    python waf
 
 If you are using a version from git, then you will need to install waf from
-http://waf.googlecode.com/ - version 1.5.1 should be used. Read on for more details...
+http://waf.googlecode.com/ - version 1.5.6 should be used. Read on for more details...
 
 Prerequisites
 =============
