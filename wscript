@@ -22,10 +22,6 @@ sys.path.append(waf_tools)
 
 def build(bld):
   Task.g_shuffle = False
-  # overcome chdir problems for jump-to-error
-  #if not Options.commands['clean']:
-  #  print "waf: Entering directory `%s'" % \
-  #      (os.path.join(Build.bld.srcnode.abspath(), blddir))
   bld.add_subdirs('libndspp')
   BUILD_DIRS = {
       'WITH_BUNJALLOO': 'bunjalloo',
