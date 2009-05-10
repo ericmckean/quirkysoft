@@ -27,6 +27,7 @@ class Cookie
   public:
     /** Create an empty Cookie.*/
     Cookie()
+      : m_port(80), m_secure(false)
     {}
 
     /** Create a Cookie from parameters.
@@ -109,7 +110,7 @@ class Cookie
   private:
     std::string m_name;
     std::string m_value;
-    int         m_port;
+    int m_port;
     std::string m_domain;
     std::string m_path;
     bool m_secure;

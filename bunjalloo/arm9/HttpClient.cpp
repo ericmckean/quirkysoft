@@ -371,7 +371,7 @@ retryEncode:
 
 int SslClient::sslRead(char * buf, int len)
 {
-  int bytes, rc, remaining;
+  int bytes, rc;
   unsigned char error, alertLevel, alertDescription, performRead;
 
   if (m_conn->ssl == 0 || len <= 0) {
@@ -383,7 +383,7 @@ int SslClient::sslRead(char * buf, int len)
      returned, free the inbuf.  */
   if (m_conn->inbuf.buf) {
     if (m_conn->inbuf.start < m_conn->inbuf.end) {
-      remaining = (int)(m_conn->inbuf.end - m_conn->inbuf.start);
+      int remaining = (int)(m_conn->inbuf.end - m_conn->inbuf.start);
       bytes = (int)min(len, remaining);
       memcpy(buf, m_conn->inbuf.start, bytes);
       m_conn->inbuf.start += bytes;

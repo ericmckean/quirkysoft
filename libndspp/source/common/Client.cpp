@@ -56,8 +56,7 @@ Client::~Client()
 
 void Client::setConnection(const char * ip, int port)
 {
-  if (m_ip)
-    free(m_ip);
+  free(m_ip);
   m_ip = (char*)malloc(strlen(ip)+1);
   //printf("%s\n",ip);
   memcpy(m_ip, ip, strlen(ip));
