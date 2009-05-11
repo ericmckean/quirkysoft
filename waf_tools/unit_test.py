@@ -24,7 +24,9 @@ def setup(bld):
     app = test_exe.abspath(task.env)
     blddir = os.path.dirname(app)
     srcdir = os.path.dirname(test_exe.abspath())
-    cwd = srcdir if task.run_from_srcdir else None
+    cwd = None
+    if task.run_from_srcdir:
+      cwd = srcdir
     target = os.path.join(blddir, task.outputs[0].name)
     process_pipe = subprocess.Popen(app, stdout=subprocess.PIPE, cwd=cwd)
     process_pipe.wait()
