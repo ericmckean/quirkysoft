@@ -3,9 +3,9 @@ import os, re, sys
 import Build, Task, Utils
 from TaskGen import extension, taskgen, task_gen
 import Options
+import shutil
 
 def grit_shared_wrapper(task):
-  import shutil
   # wrapper for grit shared
   shrd_cmd = Task.TaskBase.classes['grit_shared_cmd'](task.env)
   shrd_cmd.set_inputs(task.inputs)
@@ -30,8 +30,7 @@ def grit_shared_wrapper(task):
           op.close()
           os.unlink(src)
         else:
-          shutil.move(src, dst)
-        #print "moved %s to %s"%(src, dst)
+          shutil.move(src, dst + os.path.sep + os.path.basename(src))
     except IOError:
       return 1
   return 0
