@@ -23,28 +23,22 @@ def detect(conf):
     process_pipe = subprocess.Popen([sox, '-h'], stdout=subprocess.PIPE, stderr=subprocess.PIPE)
     process_pipe.wait()
     have_wav = False
+    have_one = False
     v = process_pipe.stdout.readlines()
     v.extend(process_pipe.stderr.readlines())
     for l in v:
       if l.upper().find('FILE FORMATS') != -1:
         if 'wav' in l.split(':')[1].split():
           have_wav = True
-          break
-      elif l.upper().find('VERSION') != -1:
-        version = l.split()[-1]
+      elif l.upper().find('-1'):
+        have_one = True
 
-    if version:
-      version = version.split('.')
-      # new flag in later versions of sox - uses -1 instead of -b
-      if version[0] >= 14 and version[1] >= '2':
-        flags += '-1 '
-      else:
-        flags += '-b '
-
-      if not conf.env['SOXFLAGS']:
-        conf.env['SOXFLAGS'] = flags.split()
+    if have_one:
+      flags += '-1 '
     else:
-      have_wav = False
+      flags += '-b '
+    if not conf.env['SOXFLAGS']:
+      conf.env['SOXFLAGS'] = flags.split()
 
     conf.check_message(basename(sox), 'has wav file format', have_wav)
 
