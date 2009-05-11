@@ -9,21 +9,43 @@ def detect(conf):
   sox = conf.find_program('sox', var='SOX')
   conf.env['SOX'] = sox
   if sox:
-    flags = " -r 16000 -s -b -c 1 "
-    if not conf.env['SOXFLAGS']:
-      conf.env['SOXFLAGS'] = flags.split()
+    flags = " -r 16000 -s -c 1 "
     # check sox SUPPORTED FILE FORMATS has wav
     # else: sudo apt-get install libsox-fmt-all
+    process_pipe = subprocess.Popen([sox, '--version'], stdout=subprocess.PIPE, stderr=subprocess.PIPE)
+    result = process_pipe.wait()
+    version = None
+    if result == 0:
+      v = process_pipe.stdout.readlines()
+      v.extend(process_pipe.stderr.readlines())
+      version = v[0].split()[-1]
+
     process_pipe = subprocess.Popen([sox, '-h'], stdout=subprocess.PIPE, stderr=subprocess.PIPE)
     process_pipe.wait()
     have_wav = False
     v = process_pipe.stdout.readlines()
     v.extend(process_pipe.stderr.readlines())
     for l in v:
-      if l.upper().startswith('SUPPORTED FILE FORMATS'):
+      if l.upper().find('FILE FORMATS') != -1:
         if 'wav' in l.split(':')[1].split():
           have_wav = True
           break
+      elif l.upper().find('VERSION') != -1:
+        version = l.split()[-1]
+
+    if version:
+      version = version.split('.')
+      # new flag in later versions of sox - uses -1 instead of -b
+      if version[0] >= 14 and version[1] >= '2':
+        flags += '-1 '
+      else:
+        flags += '-b '
+
+      if not conf.env['SOXFLAGS']:
+        conf.env['SOXFLAGS'] = flags.split()
+    else:
+      have_wav = False
+
     conf.check_message(basename(sox), 'has wav file format', have_wav)
 
   if not have_wav:
