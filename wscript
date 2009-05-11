@@ -21,17 +21,23 @@ waf_tools = 'waf_tools'
 sys.path.append(waf_tools)
 
 def build(bld):
+  bld.check_generate_eclipse()
   Task.g_shuffle = False
   bld.add_subdirs('libndspp')
   BUILD_DIRS = {
       'WITH_BUNJALLOO': 'bunjalloo',
       'WITH_CHAOS': 'ChaosDS'
       }
-  # append the helper functions
   [bld.add_subdirs(v) for e,v in BUILD_DIRS.items() if bld.env[e]]
 
+def pre_build():
+    print "pre build"
+
+def post_build():
+    print "Post build"
+
 def set_options(opt):
-  #opt.tool_options('g++')
+  opt.tool_options('eclipse_cdt', waf_tools)
   opt.tool_options('compiler_cxx')
   opt.tool_options('compiler_cc')
   opt.tool_options('arm', waf_tools)
@@ -79,7 +85,7 @@ def set_options(opt):
         'action':  'store_true',
         'help':    'Force creation of tags file using ctags (use with "build")',
         'default': False
-        }
+        },
       }
   ao = opt.add_option
   [ao(op, **kwargs) for op, kwargs in OPTIONS.items()]
@@ -246,6 +252,7 @@ def configure(conf):
   else:
     conf.env['DLDIFLAGS'] = ''
 
+  conf.check_tool('eclipse_cdt', tooldir=waf_tools)
   conf.env['WITH_SDL'] = True
   conf.define('sprintf_platform', 'siprintf', quote=False)
   config_h = 'bunjalloo/bwt/include/config_defs.h'
