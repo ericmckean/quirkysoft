@@ -30,7 +30,7 @@ def detect(conf):
       if l.upper().find('FILE FORMATS') != -1:
         if 'wav' in l.split(':')[1].split():
           have_wav = True
-      elif l.upper().find('-1'):
+      elif l.upper().find('-1') != -1:
         have_one = True
 
     if have_one:
