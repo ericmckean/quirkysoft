@@ -805,7 +805,7 @@ unsigned int HtmlParserImpl::consumeEntity()
     const char * start = m_position;
     unsigned int found(0);
     // the longest entity is 10 characters.
-    char sofar[11];
+    char sofar[12];
     int index = 0;
     while ((m_position != m_end) and index < 11)
     {
