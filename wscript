@@ -1,6 +1,7 @@
 #!/usr/bin/env python
 
 import Build
+import Scripting
 import Configure
 import Constants
 import Environment
@@ -303,20 +304,19 @@ def check(context):
   ut.run()
   ut.print_results()
 
-  ctags = Build.bld.env['CTAGS']
-  if Options.commands['build'] and ctags:
+def tags(context):
+  Scripting.commands += ['build', 'do_ctags']
+
+def do_ctags(context):
+  if Build.bld:
+    ctags = Build.bld.env['CTAGS']
+    if not ctags:
+      return
     # create ctags if we recompiled any program, or force with --tags option
-    for obj in Build.bld.all_task_gen:
-      if (getattr(obj,'type','') == 'program'
-          and obj.link_task
-          and getattr(obj.link_task,"executed",0) != 0):
-        Options.options.tags = True
-        break
-    if Options.options.tags:
-      import commands
-      # create the tags file in the build directory, but include all the source files
-      top_dir = Build.bld.srcnode.abspath()
-      launch_dir = Options.launch_dir
-      os.chdir(launch_dir)
-      commands.getoutput('%s -R --c++-kinds=+p --fields=+iaS --extra=+q %s'%(ctags, top_dir))
-      Utils.pprint('BLUE','Created tags')
+    import commands
+    # create the tags file in the build directory, but include all the source files
+    top_dir = Build.bld.srcnode.abspath()
+    launch_dir = Options.launch_dir
+    os.chdir(launch_dir)
+    commands.getoutput('%s -R --c++-kinds=+p --fields=+iaS --extra=+q %s'%(ctags, top_dir))
+    Utils.pprint('BLUE','Created tags')
