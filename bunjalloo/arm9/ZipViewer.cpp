@@ -83,8 +83,8 @@ void ZipViewer::show()
 void ZipViewer::unzip()
 {
   ProgressBar & progressBar(m_view.progressBar());
-  progressBar.setMax(m_fileCount);
-  progressBar.setMin(0);
+  progressBar.setMaximum(m_fileCount);
+  progressBar.setMinimum(0);
   progressBar.setVisible();
   m_index = 0;
   progressBar.setValue(m_index);

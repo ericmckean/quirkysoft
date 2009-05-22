@@ -50,24 +50,24 @@ unsigned int ProgressBar::value() const
   return m_value;
 }
 
-void ProgressBar::setMin(int min)
+void ProgressBar::setMinimum(int mini)
 {
-  m_min = min;
+  m_min = mini;
   m_dirty = true;
 }
 
-unsigned int ProgressBar::min() const
+unsigned int ProgressBar::minimum() const
 {
   return m_min;
 }
 
-void ProgressBar::setMax(int max)
+void ProgressBar::setMaximum(int maxi)
 {
-  m_max = max;
+  m_max = maxi;
   m_dirty = true;
 }
 
-unsigned int ProgressBar::max() const
+unsigned int ProgressBar::maximum() const
 {
   return m_max;
 }

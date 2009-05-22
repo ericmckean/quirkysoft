@@ -32,10 +32,10 @@ class ProgressBar: public TextContainer
 
     void setValue(int val);
     unsigned int value() const;
-    void setMin(int min);
-    unsigned int min() const;
-    void setMax(int max);
-    unsigned int max() const;
+    void setMinimum(int mini);
+    unsigned int minimum() const;
+    void setMaximum(int maxi);
+    unsigned int maximum() const;
 
     virtual void paint(const nds::Rectangle & clip);
 
