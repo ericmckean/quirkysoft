@@ -29,8 +29,6 @@
 using std::vector;
 using std::string;
 
-static const string ndsExt(".nds");
-
 ZipViewer::ZipViewer(View & view):
   m_view(view),
   m_unzip(0),
@@ -72,7 +70,7 @@ void ZipViewer::show()
 
   for (vector<string>::const_iterator it(contents.begin()); it != contents.end(); ++it)
   {
-    const std::string & u(*it);
+    const string & u(*it);
     CheckBox * cb = new CheckBox;
     cb->setSelected();
     renderer->add(cb);
