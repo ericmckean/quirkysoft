@@ -4,15 +4,8 @@ import os
 import Constants
 
 def build(bld):
-  obj = bld.new_task_gen('cxx', 'staticlib')
-  if bld.env['WITH_SDL']:
-    obj.install_path = 0
-    obj.env = bld.env_of_name('sdl').copy()
-    obj.source = '''Main.cpp'''
-    obj.target = '''cppunitmain'''
-
   # build subdirs
-  here = obj.path.abspath()
+  here = bld.path.abspath()
   [bld.add_subdirs(d) for d in os.listdir(here)
       if os.path.exists(os.path.join(here,d,Constants.WSCRIPT_FILE))]
 

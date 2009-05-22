@@ -39,7 +39,7 @@ def build_test(bld, uselibs='bunjalloo bwt'):
   """ Build a unit test program """
   if not bld.env['WITH_SDL']:
     return
-  if (not bld.env_of_name('sdl')['HAVE_CPPUNIT']):
+  if (not bld.env_of_name('sdl')['HAVE_UNITTESTS']):
     return
   uselibs = ' '.join([ '%s'%l for l in uselibs.split()])
   tst = bld.new_task_gen('cxx', 'program')
@@ -49,7 +49,7 @@ def build_test(bld, uselibs='bunjalloo bwt'):
   tst.find_sources_in_dirs('.')
   tst.unit_test = 1
   tst.includes = ' .'
-  tst.uselib_local = '%s cppunitmain'%(uselibs)
+  tst.uselib_local = '%s'%(uselibs)
   tst.uselib = 'TEST HOST'
 
   # Cached unit tests.
