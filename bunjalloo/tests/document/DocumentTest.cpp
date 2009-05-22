@@ -19,17 +19,35 @@
 #include <list>
 #include <fstream>
 #include "HtmlParser.h"
-#include "DocumentTest.h"
 #include "HtmlElement.h"
 #include "HtmlDocument.h"
 #include "HeaderParser.h"
 #include "Document.h"
 #include "string_utils.h"
+#include <gtest/gtest.h>
 
 using namespace std;
 
-// Registers the fixture into the 'registry'
-CPPUNIT_TEST_SUITE_REGISTRATION( DocumentTest );
+class DocumentTest : public testing::Test
+{
+  protected:
+    Document * m_document;
+    char * m_data;
+    unsigned int m_length;
+
+    void readFile(const char * fileName);
+
+    void TearDown() {
+      delete m_document;
+      delete [] m_data;
+    }
+
+    void SetUp() {
+      m_data = 0;
+      m_length = 0;
+      m_document = DocumentFactory::create();
+    }
+};
 
 void DocumentTest::readFile(const char * fileName)
 {
@@ -37,7 +55,7 @@ void DocumentTest::readFile(const char * fileName)
   string inputFileName("input/");
   inputFileName += fileName;
   testFile.open(inputFileName.c_str(), ios::in);
-  CPPUNIT_ASSERT(testFile.is_open());
+  EXPECT_TRUE(testFile.is_open());
   if (testFile.is_open())
   {
     testFile.seekg(0, ios::end);
@@ -48,96 +66,79 @@ void DocumentTest::readFile(const char * fileName)
     m_data[m_length] = 0;
     testFile.close();
   }
-  CPPUNIT_ASSERT(m_data != 0);
-  CPPUNIT_ASSERT(m_length != 0);
+  EXPECT_TRUE(m_data != 0);
+  EXPECT_TRUE(m_length != 0);
 }
 
-void DocumentTest::tearDown()
-{
-  
-  delete m_document;
-  if (m_data != 0)
-  {
-    delete [] m_data;
-  }
-}
-
-void DocumentTest::setUp()
-{
-  m_data = 0;
-  m_length = 0;
-  m_document = new Document;
-}
-
-void DocumentTest::test0()
+TEST_F(DocumentTest, 0)
 {
   const string expected("file:///test0.txt");
   m_document->setUri(expected);
   string result = m_document->uri();
-  CPPUNIT_ASSERT_EQUAL( expected , result);
+  EXPECT_EQ( expected , result);
 }
 
-void DocumentTest::test1()
+TEST_F(DocumentTest, 1)
 {
   readFile("test1.txt");
   m_document->appendData(m_data, m_length);
   m_document->setStatus(Document::LOADED_HTML);
   const HtmlElement * result = m_document->rootNode();
-  CPPUNIT_ASSERT( result != 0);
+  EXPECT_TRUE( result != 0);
 }
 
-void DocumentTest::testHtmlAttributes()
+TEST_F(DocumentTest, HtmlAttributes)
 {
   readFile("html-attrs.html");
   m_document->appendLocalData(m_data, m_length);
   const HtmlElement * result = m_document->rootNode();
   string expected("en");
   string attribResult = result->attribute("lang");
-  CPPUNIT_ASSERT_EQUAL(expected, attribResult);
+  EXPECT_EQ(expected, attribResult);
 }
 
-void DocumentTest::testHead()
+TEST_F(DocumentTest, Head)
 {
   readFile("head.html");
   m_document->appendLocalData(m_data, m_length);
   const HtmlElement * result = m_document->rootNode();
-  CPPUNIT_ASSERT(result->hasChildren());
+  EXPECT_TRUE(result->hasChildren());
   const HtmlElement * child = result->firstChild();
-  CPPUNIT_ASSERT(child != 0);
-  CPPUNIT_ASSERT(child->isa("head"));
+  EXPECT_TRUE(child != 0);
+  EXPECT_TRUE(child->isa("head"));
 }
 
-void DocumentTest::testEmpty()
+TEST_F(DocumentTest, Empty)
 {
   readFile("empty.html");
   m_document->appendLocalData(m_data, m_length);
   const HtmlElement * result = m_document->rootNode();
-  CPPUNIT_ASSERT(result != 0);
+  EXPECT_TRUE(result != 0);
 }
 
-void DocumentTest::testHead2()
+TEST_F(DocumentTest, Head2)
 {
   readFile("head2.html");
   m_document->appendLocalData(m_data, m_length);
   const HtmlElement * result = m_document->rootNode();
-  CPPUNIT_ASSERT(result->hasChildren());
+  EXPECT_TRUE(result->hasChildren());
   const HtmlElement * child = result->firstChild();
-  CPPUNIT_ASSERT(child != 0);
-  CPPUNIT_ASSERT(child->isa("head"));
+  EXPECT_TRUE(child != 0);
+  EXPECT_TRUE(child->isa("head"));
 }
 
-void DocumentTest::testHead3()
+TEST_F(DocumentTest, Head3)
 {
   readFile("head3.html");
   m_document->appendLocalData(m_data, m_length);
   const HtmlElement * result = m_document->rootNode();
-  CPPUNIT_ASSERT(result->hasChildren());
+  EXPECT_TRUE(result->hasChildren());
   const HtmlElement * child = result->firstChild();
-  CPPUNIT_ASSERT(child != 0);
-  CPPUNIT_ASSERT(child->isa("head"));
+  EXPECT_TRUE(child != 0);
+  EXPECT_TRUE(child->isa("head"));
   const HtmlElement * meta = child->firstChild();
-  CPPUNIT_ASSERT(meta != 0);
-  CPPUNIT_ASSERT(meta->isa("meta"));
+  EXPECT_TRUE(meta != 0);
+  EXPECT_TRUE(meta->isa("meta"));
 
   ElementList::const_iterator it(result->children().begin());
   int index(0);
@@ -145,62 +146,62 @@ void DocumentTest::testHead3()
   {
     HtmlElement * element(*it);
     if (index == 0) {
-    CPPUNIT_ASSERT(element->isa("head"));
+    EXPECT_TRUE(element->isa("head"));
     }
     else if (index == 1)
     {
-    CPPUNIT_ASSERT(element->isa("body"));
+    EXPECT_TRUE(element->isa("body"));
     }
   }
 }
 
-void DocumentTest::testTitle()
+TEST_F(DocumentTest, Title)
 {
   readFile("title.html");
   m_document->appendLocalData(m_data, m_length);
   m_document->setStatus(Document::LOADED_HTML);
   const HtmlElement * root = m_document->rootNode();
-  CPPUNIT_ASSERT(root->hasChildren());
+  EXPECT_TRUE(root->hasChildren());
   const HtmlElement * child = root->firstChild();
-  CPPUNIT_ASSERT(child != 0);
-  CPPUNIT_ASSERT(child->isa("head"));
+  EXPECT_TRUE(child != 0);
+  EXPECT_TRUE(child->isa("head"));
   const HtmlElement * meta = child->firstChild();
-  CPPUNIT_ASSERT(meta != 0);
-  CPPUNIT_ASSERT(meta->isa("title"));
+  EXPECT_TRUE(meta != 0);
+  EXPECT_TRUE(meta->isa("title"));
 
   const ElementList & rootChilds = root->children();
-  CPPUNIT_ASSERT(rootChilds.size() > 1);
+  EXPECT_TRUE(rootChilds.size() > 1);
   ElementList::const_iterator it(rootChilds.begin());
   int index(0);
   for (; it != rootChilds.end(); ++it,++index)
   {
     HtmlElement * element(*it);
     if (index == 1) {
-      CPPUNIT_ASSERT(element->isa("body"));
+      EXPECT_TRUE(element->isa("body"));
     }
   }
 
 }
 
-void DocumentTest::testGoogle()
+TEST_F(DocumentTest, Google)
 {
   readFile("google.html");
   m_document->appendLocalData(m_data, m_length);
   const HtmlElement * root = m_document->rootNode();
-  CPPUNIT_ASSERT(root != 0);
+  EXPECT_TRUE(root != 0);
 }
 
 
-void DocumentTest::testAnchor()
+TEST_F(DocumentTest, Anchor)
 {
   readFile("anchor.html");
   m_document->appendLocalData(m_data, m_length);
   const HtmlElement * root = m_document->rootNode();
-  CPPUNIT_ASSERT(root != 0);
+  EXPECT_TRUE(root != 0);
 
   const HtmlElement * child = root->firstChild();
-  CPPUNIT_ASSERT(child != 0);
-  CPPUNIT_ASSERT(child->isa("head"));
+  EXPECT_TRUE(child != 0);
+  EXPECT_TRUE(child->isa("head"));
 
   const ElementList & rootChilds = root->children();
   ElementList::const_iterator it(rootChilds.begin());
@@ -209,29 +210,29 @@ void DocumentTest::testAnchor()
   {
     HtmlElement * element(*it);
     if (index == 1) {
-      CPPUNIT_ASSERT(element->isa("body"));
-      CPPUNIT_ASSERT(element->hasChildren());
+      EXPECT_TRUE(element->isa("body"));
+      EXPECT_TRUE(element->hasChildren());
       const HtmlElement * a = element->firstChild();
-      CPPUNIT_ASSERT(a != 0);
-      CPPUNIT_ASSERT(a->isa("a"));
+      EXPECT_TRUE(a != 0);
+      EXPECT_TRUE(a->isa("a"));
       string href = a->attribute("href");
       string expected("anchor");
-      CPPUNIT_ASSERT_EQUAL(expected, href);
+      EXPECT_EQ(expected, href);
     }
   }
 }
 
 
-void DocumentTest::testBrokenAnchor()
+TEST_F(DocumentTest, BrokenAnchor)
 {
   readFile("anchor-broken.html");
   m_document->appendLocalData(m_data, m_length);
   const HtmlElement * root = m_document->rootNode();
-  CPPUNIT_ASSERT(root != 0);
+  EXPECT_TRUE(root != 0);
 
   const HtmlElement * child = root->firstChild();
-  CPPUNIT_ASSERT(child != 0);
-  CPPUNIT_ASSERT(child->isa("head"));
+  EXPECT_TRUE(child != 0);
+  EXPECT_TRUE(child->isa("head"));
 
   const ElementList & rootChilds = root->children();
   ElementList::const_iterator it(rootChilds.begin());
@@ -240,80 +241,80 @@ void DocumentTest::testBrokenAnchor()
   {
     HtmlElement * element(*it);
     if (index == 1) {
-      CPPUNIT_ASSERT(element->isa("body"));
-      CPPUNIT_ASSERT(element->hasChildren());
+      EXPECT_TRUE(element->isa("body"));
+      EXPECT_TRUE(element->hasChildren());
       const HtmlElement * a = element->firstChild();
-      CPPUNIT_ASSERT(a != 0);
-      CPPUNIT_ASSERT(a->isa("a"));
+      EXPECT_TRUE(a != 0);
+      EXPECT_TRUE(a->isa("a"));
       string href = a->attribute("href");
       string expected("anchor");
-      CPPUNIT_ASSERT_EQUAL(expected, href);
+      EXPECT_EQ(expected, href);
     }
   }
 }
 
-void DocumentTest::testCharacterStart()
+TEST_F(DocumentTest, CharacterStart)
 {
   readFile("character-start.html");
   m_document->appendLocalData(m_data, m_length);
   m_document->setStatus(Document::LOADED_HTML);
   const HtmlElement * root = m_document->rootNode();
-  CPPUNIT_ASSERT(root != 0);
+  EXPECT_TRUE(root != 0);
 }
-void DocumentTest::testEndTagStart()
+TEST_F(DocumentTest, EndTagStart)
 {
   readFile("endtag-start.html");
   m_document->appendLocalData(m_data, m_length);
   m_document->setStatus(Document::LOADED_HTML);
   const HtmlElement * root = m_document->rootNode();
-  CPPUNIT_ASSERT(root != 0);
+  EXPECT_TRUE(root != 0);
   string rootType = root->tagName();
   string expected("html");
-  CPPUNIT_ASSERT_EQUAL(expected, rootType);
+  EXPECT_EQ(expected, rootType);
 }
 
-void DocumentTest::testSimpleBodyA()
+TEST_F(DocumentTest, SimpleBodyA)
 {
   readFile("simple.html");
   m_document->appendLocalData(m_data, m_length);
   m_document->setStatus(Document::LOADED_HTML);
   const HtmlElement * root = m_document->rootNode();
-  CPPUNIT_ASSERT(root != 0);
+  EXPECT_TRUE(root != 0);
   string expected("html");
-  CPPUNIT_ASSERT_EQUAL( expected, root->tagName());
+  EXPECT_EQ( expected, root->tagName());
 
-  CPPUNIT_ASSERT(root->hasChildren());
+  EXPECT_TRUE(root->hasChildren());
 
   const ElementList & children = root->children();
   ElementList::const_iterator childIt(children.begin());
   expected = "head";
-  CPPUNIT_ASSERT_EQUAL(expected, (*childIt)->tagName());
+  EXPECT_EQ(expected, (*childIt)->tagName());
   // now check the head:
   {
     // meta and title
     HtmlElement * head = *childIt;
     ElementList::const_iterator headIt(head->children().begin());
     expected = "meta";
-    CPPUNIT_ASSERT_EQUAL(expected, (*headIt)->tagName());
+    EXPECT_EQ(expected, (*headIt)->tagName());
     expected = "content-type";
-    CPPUNIT_ASSERT_EQUAL(expected, (*headIt)->attribute("http-equiv"));
+    EXPECT_EQ(expected, (*headIt)->attribute("http-equiv"));
     ++headIt;
     expected = "title";
-    CPPUNIT_ASSERT_EQUAL(expected, (*headIt)->tagName());
+    EXPECT_EQ(expected, (*headIt)->tagName());
     HtmlElement * title = *headIt;
-    CPPUNIT_ASSERT(title->hasChildren());
+    EXPECT_TRUE(title->hasChildren());
     expected = "#TEXT";
-    CPPUNIT_ASSERT_EQUAL(expected, title->firstChild()->tagName());
+    EXPECT_EQ(expected, title->firstChild()->tagName());
     ++headIt;
   }
   ++childIt;
   expected = "body";
-  CPPUNIT_ASSERT_EQUAL(expected, (*childIt)->tagName());
+  EXPECT_EQ(expected, (*childIt)->tagName());
   ++childIt;
-  CPPUNIT_ASSERT(children.end() == childIt);
+  EXPECT_TRUE(children.end() == childIt);
 }
 
-void DocumentTest::testMismatchFormat()
+TEST_F(DocumentTest, MismatchFormat)
 {
   readFile("mismatch-format.html");
   // should produce this:
@@ -335,85 +336,85 @@ void DocumentTest::testMismatchFormat()
   m_document->appendLocalData(m_data, m_length);
   m_document->setStatus(Document::LOADED_HTML);
   const HtmlElement * root = m_document->rootNode();
-  CPPUNIT_ASSERT(root != 0);
+  EXPECT_TRUE(root != 0);
   string rootType = root->tagName();
   string expected("html");
-  CPPUNIT_ASSERT_EQUAL(expected, rootType);
+  EXPECT_EQ(expected, rootType);
 
 }
 
-void DocumentTest::testLi()
+TEST_F(DocumentTest, Li)
 {
   readFile("test-li.html");
   m_document->appendLocalData(m_data, m_length);
   m_document->setStatus(Document::LOADED_HTML);
   const HtmlElement * root = m_document->rootNode();
-  CPPUNIT_ASSERT(root != 0);
-  CPPUNIT_ASSERT(root->isa("html"));
+  EXPECT_TRUE(root != 0);
+  EXPECT_TRUE(root->isa("html"));
   HtmlElement * body = root->lastChild();
-  CPPUNIT_ASSERT(body != 0);
-  CPPUNIT_ASSERT(body->isa("body"));
-  CPPUNIT_ASSERT(body->firstChild()->isa("li"));
+  EXPECT_TRUE(body != 0);
+  EXPECT_TRUE(body->isa("body"));
+  EXPECT_TRUE(body->firstChild()->isa("li"));
 }
 
-void DocumentTest::testDD()
+TEST_F(DocumentTest, DD)
 {
   readFile("test-dd.html");
   m_document->appendLocalData(m_data, m_length);
   m_document->setStatus(Document::LOADED_HTML);
   const HtmlElement * root = m_document->rootNode();
-  CPPUNIT_ASSERT(root != 0);
-  CPPUNIT_ASSERT(root->isa("html"));
+  EXPECT_TRUE(root != 0);
+  EXPECT_TRUE(root->isa("html"));
   HtmlElement * body = root->lastChild();
-  CPPUNIT_ASSERT(body != 0);
-  CPPUNIT_ASSERT(body->isa("body"));
-  CPPUNIT_ASSERT(body->firstChild()->isa("dd"));
+  EXPECT_TRUE(body != 0);
+  EXPECT_TRUE(body->isa("body"));
+  EXPECT_TRUE(body->firstChild()->isa("dd"));
 }
 
-void DocumentTest::testPlaintext()
+TEST_F(DocumentTest, Plaintext)
 {
   readFile("plaintext.html");
   m_document->appendLocalData(m_data, m_length);
   m_document->setStatus(Document::LOADED_HTML);
   const HtmlElement * root = m_document->rootNode();
-  CPPUNIT_ASSERT(root != 0);
-  CPPUNIT_ASSERT(root->isa("html"));
+  EXPECT_TRUE(root != 0);
+  EXPECT_TRUE(root->isa("html"));
 }
 
 
-void DocumentTest::testFont()
+TEST_F(DocumentTest, Font)
 {
   readFile("font.html");
   m_document->appendLocalData(m_data, m_length);
   m_document->setStatus(Document::LOADED_HTML);
   const HtmlElement * root = m_document->rootNode();
-  CPPUNIT_ASSERT(root != 0);
-  CPPUNIT_ASSERT(root->isa("html"));
+  EXPECT_TRUE(root != 0);
+  EXPECT_TRUE(root->isa("html"));
 }
 
-void DocumentTest::testFont2()
+TEST_F(DocumentTest, Font2)
 {
   readFile("font2.html");
   m_document->appendLocalData(m_data, m_length);
   m_document->setStatus(Document::LOADED_HTML);
   const HtmlElement * root = m_document->rootNode();
-  CPPUNIT_ASSERT(root != 0);
-  CPPUNIT_ASSERT(root->isa("html"));
+  EXPECT_TRUE(root != 0);
+  EXPECT_TRUE(root->isa("html"));
 }
 
-void DocumentTest::testPin8()
+TEST_F(DocumentTest, Pin8)
 {
   readFile("pineight.txt");
   // tests for end script tag after end of chunk
   m_document->appendData(m_data, m_length);
   m_document->setStatus(Document::LOADED_HTML);
   const HtmlElement * root = m_document->rootNode();
-  CPPUNIT_ASSERT(root != 0);
-  CPPUNIT_ASSERT(root->isa("html"));
+  EXPECT_TRUE(root != 0);
+  EXPECT_TRUE(root->isa("html"));
 }
 
 
-void DocumentTest::testClarin()
+TEST_F(DocumentTest, Clarin)
 {
   readFile("clarin.txt");
   // tests for end script tag after end of chunk
@@ -447,50 +448,50 @@ void DocumentTest::testClarin()
   m_document->appendData(data, 2252);
   m_document->setStatus(Document::LOADED_HTML);
   const HtmlElement * root = m_document->rootNode();
-  CPPUNIT_ASSERT(root != 0);
-  CPPUNIT_ASSERT(root->isa("html"));
-  CPPUNIT_ASSERT(root->hasChildren());
+  EXPECT_TRUE(root != 0);
+  EXPECT_TRUE(root->isa("html"));
+  EXPECT_TRUE(root->hasChildren());
 }
 
 
-void DocumentTest::testAdoption()
+TEST_F(DocumentTest, Adoption)
 {
   readFile("adoption.html");
   // test the adoption algorithm
   m_document->appendLocalData(m_data, m_length);
   m_document->setStatus(Document::LOADED_HTML);
   const HtmlElement * root = m_document->rootNode();
-  CPPUNIT_ASSERT(root != 0);
-  CPPUNIT_ASSERT(root->isa("html"));
+  EXPECT_TRUE(root != 0);
+  EXPECT_TRUE(root->isa("html"));
   const HtmlElement * body = root->lastChild();
   const ElementList & children = body->children();
   int childcount = children.size();
-  CPPUNIT_ASSERT_EQUAL(2, childcount);
+  EXPECT_EQ(2, childcount);
 }
 
-void DocumentTest::testAdoption2()
+TEST_F(DocumentTest, Adoption2)
 {
   readFile("adoption2.html");
   // test the adoption algorithm
   m_document->appendLocalData(m_data, m_length);
   m_document->setStatus(Document::LOADED_HTML);
   const HtmlElement * root = m_document->rootNode();
-  CPPUNIT_ASSERT(root != 0);
-  CPPUNIT_ASSERT(root->isa("html"));
+  EXPECT_TRUE(root != 0);
+  EXPECT_TRUE(root->isa("html"));
 }
 
-void DocumentTest::testHeader()
+TEST_F(DocumentTest, Header)
 {
   readFile("header1.html");
   // test the adoption algorithm
   m_document->appendLocalData(m_data, m_length);
   m_document->setStatus(Document::LOADED_HTML);
   const HtmlElement * root = m_document->rootNode();
-  CPPUNIT_ASSERT(root != 0);
-  CPPUNIT_ASSERT(root->isa("html"));
+  EXPECT_TRUE(root != 0);
+  EXPECT_TRUE(root->isa("html"));
   const HtmlElement * body = root->lastChild();
-  CPPUNIT_ASSERT(body != 0);
-  CPPUNIT_ASSERT(body->isa("body"));
+  EXPECT_TRUE(body != 0);
+  EXPECT_TRUE(body->isa("body"));
   const HtmlElement * h1(0);
   ElementList::const_iterator it(body->children().begin());
   for (; it != body->children().end(); ++it)
@@ -502,22 +503,22 @@ void DocumentTest::testHeader()
       break;
     }
   }
-  CPPUNIT_ASSERT(it != body->children().end());
-  CPPUNIT_ASSERT(h1 != 0);
+  EXPECT_TRUE(it != body->children().end());
+  EXPECT_TRUE(h1 != 0);
 }
 
-void DocumentTest::testHeader2()
+TEST_F(DocumentTest, Header2)
 {
   readFile("header2.html");
   // test the adoption algorithm
   m_document->appendLocalData(m_data, m_length);
   m_document->setStatus(Document::LOADED_HTML);
   const HtmlElement * root = m_document->rootNode();
-  CPPUNIT_ASSERT(root != 0);
-  CPPUNIT_ASSERT(root->isa("html"));
+  EXPECT_TRUE(root != 0);
+  EXPECT_TRUE(root->isa("html"));
   const HtmlElement * body = root->lastChild();
-  CPPUNIT_ASSERT(body != 0);
-  CPPUNIT_ASSERT(body->isa("body"));
+  EXPECT_TRUE(body != 0);
+  EXPECT_TRUE(body->isa("body"));
   const HtmlElement * h1(0);
   const HtmlElement * h2(0);
   ElementList::const_iterator it(body->children().begin());
@@ -533,54 +534,54 @@ void DocumentTest::testHeader2()
       h2 = element;
     }
   }
-  CPPUNIT_ASSERT(h1 != 0);
-  CPPUNIT_ASSERT(h2 != 0);
+  EXPECT_TRUE(h1 != 0);
+  EXPECT_TRUE(h2 != 0);
 }
 
-void DocumentTest::testAttribs()
+TEST_F(DocumentTest, Attribs)
 {
   readFile("attrib.html");
   m_document->appendLocalData(m_data, m_length);
   m_document->setStatus(Document::LOADED_HTML);
   const HtmlElement * root = m_document->rootNode();
-  CPPUNIT_ASSERT(root != 0);
-  CPPUNIT_ASSERT(root->isa("html"));
+  EXPECT_TRUE(root != 0);
+  EXPECT_TRUE(root->isa("html"));
 }
 
 #if 0
-void DocumentTest::testUnicode2String()
+TEST_F(DocumentTest, Unicode2String)
 {
   UnicodeString uc;
   uc += 0xa9;
   string c = unicode2string(uc);
   string expected = "%C2%A9";
-  CPPUNIT_ASSERT_EQUAL(expected, c);
+  EXPECT_EQ(expected, c);
 }
 #endif
 
-void DocumentTest::testActiveFormatters()
+TEST_F(DocumentTest, ActiveFormatters)
 {
   readFile("issue29.html");
   m_document->appendLocalData(m_data, m_length);
   m_document->setStatus(Document::LOADED_HTML);
   const HtmlElement * root = m_document->rootNode();
-  CPPUNIT_ASSERT(root != 0);
-  CPPUNIT_ASSERT(root->isa("html"));
+  EXPECT_TRUE(root != 0);
+  EXPECT_TRUE(root->isa("html"));
 
   // get the body node
   ElementList bodyNodes = root->elementsByTagName("body");
-  CPPUNIT_ASSERT(bodyNodes.size() == 1);
+  EXPECT_TRUE(bodyNodes.size() == 1);
 
   const HtmlElement * body = bodyNodes.front();
   const HtmlElement * bold = body->firstChild();
-  CPPUNIT_ASSERT(bold->isa("b"));
+  EXPECT_TRUE(bold->isa("b"));
 
   ElementList pNodes = bold->elementsByTagName("p");
-  CPPUNIT_ASSERT(pNodes.size() == 2);
+  EXPECT_TRUE(pNodes.size() == 2);
 
   // now see if the 2nd p node has multiple children
   const HtmlElement * p = pNodes.back();
-  CPPUNIT_ASSERT(p->children().size() == 1);
+  EXPECT_TRUE(p->children().size() == 1);
 
 
   const HtmlElement * child = p->firstChild();
@@ -592,10 +593,10 @@ void DocumentTest::testActiveFormatters()
     depth++;
   }
   int expectedDepth = 1;
-  CPPUNIT_ASSERT_EQUAL(expectedDepth, depth);
+  EXPECT_EQ(expectedDepth, depth);
 }
 
-void DocumentTest::testHistory()
+TEST_F(DocumentTest, History)
 {
   readFile("attrib.html");
   m_document->setUri("attrib.html");
@@ -603,8 +604,8 @@ void DocumentTest::testHistory()
   m_document->setPosition(10);
   m_document->setStatus(Document::LOADED_HTML);
   const HtmlElement * root = m_document->rootNode();
-  CPPUNIT_ASSERT(root != 0);
-  CPPUNIT_ASSERT(root->isa("html"));
+  EXPECT_TRUE(root != 0);
+  EXPECT_TRUE(root->isa("html"));
 
   delete [] m_data;
   readFile("anchor.html");
@@ -612,31 +613,31 @@ void DocumentTest::testHistory()
   m_document->appendLocalData(m_data, m_length);
   m_document->setStatus(Document::LOADED_HTML);
   root = m_document->rootNode();
-  CPPUNIT_ASSERT(root != 0);
-  CPPUNIT_ASSERT(root->isa("html"));
-  CPPUNIT_ASSERT_EQUAL(-1, m_document->position());
+  EXPECT_TRUE(root != 0);
+  EXPECT_TRUE(root->isa("html"));
+  EXPECT_EQ(-1, m_document->position());
 
   string prev = m_document->gotoPreviousHistory();
 
   string expected = "attrib.html";
-  CPPUNIT_ASSERT_EQUAL(expected, prev);
-  CPPUNIT_ASSERT_EQUAL(10, m_document->position());
+  EXPECT_EQ(expected, prev);
+  EXPECT_EQ(10, m_document->position());
 }
 
-void DocumentTest::testBodyEnd()
+TEST_F(DocumentTest, BodyEnd)
 {
   readFile("body.html");
   m_document->appendLocalData(m_data, m_length);
   m_document->setStatus(Document::LOADED_HTML);
   const HtmlElement * root = m_document->rootNode();
-  CPPUNIT_ASSERT(root != 0);
-  CPPUNIT_ASSERT(root->isa("html"));
+  EXPECT_TRUE(root != 0);
+  EXPECT_TRUE(root->isa("html"));
   const HtmlElement * body = root->lastChild();
-  CPPUNIT_ASSERT(body != 0);
-  CPPUNIT_ASSERT(body->isa("body"));
+  EXPECT_TRUE(body != 0);
+  EXPECT_TRUE(body->isa("body"));
 }
 
-void DocumentTest::testHistoryWithConfig()
+TEST_F(DocumentTest, HistoryWithConfig)
 {
   m_document->setUri("attrib.html");
   m_document->setUri("anchor.html");
@@ -645,24 +646,24 @@ void DocumentTest::testHistoryWithConfig()
   m_document->clearConfigHistory();
   string result = m_document->uri();
   string expected = "anchor.html";
-  CPPUNIT_ASSERT_EQUAL(expected, result);
-  CPPUNIT_ASSERT( not m_document->hasNextHistory());
+  EXPECT_EQ(expected, result);
+  EXPECT_TRUE( not m_document->hasNextHistory());
 
 }
 
-void DocumentTest::testTokenize()
+TEST_F(DocumentTest, Tokenize)
 {
   string str("ABCD:EFáGH");
   vector<string> strTokens;
   tokenize(str, strTokens, string(":"));
   string expected("ABCD");
-  CPPUNIT_ASSERT_EQUAL(expected, strTokens[0]);
+  EXPECT_EQ(expected, strTokens[0]);
   expected = "EFáGH";
-  CPPUNIT_ASSERT_EQUAL(expected, strTokens[1]);
+  EXPECT_EQ(expected, strTokens[1]);
 
 }
 
-void DocumentTest::testNoCacheHtml()
+TEST_F(DocumentTest, NoCacheHtml)
 {
   readFile("nocache.txt");
   // tests for no-cache and mime type breakage
@@ -670,20 +671,20 @@ void DocumentTest::testNoCacheHtml()
   m_document->setStatus(Document::LOADED_HTML);
   HtmlParser::MimeType mimeType = m_document->htmlDocument()->mimeType();
   HtmlParser::MimeType expected = HtmlParser::TEXT_HTML;
-  CPPUNIT_ASSERT_EQUAL(expected, mimeType);
+  EXPECT_EQ(expected, mimeType);
 }
 
-void DocumentTest::testEntities()
+TEST_F(DocumentTest, Entities)
 {
   readFile("entities.html");
   // tests for entities that are nasty
   m_document->appendLocalData(m_data, m_length);
   m_document->setStatus(Document::LOADED_HTML);
   const HtmlElement * root = m_document->rootNode();
-  CPPUNIT_ASSERT(root != 0);
-  CPPUNIT_ASSERT(root->isa("html"));
+  EXPECT_TRUE(root != 0);
+  EXPECT_TRUE(root->isa("html"));
   const HtmlElement * body = root->lastChild();
-  CPPUNIT_ASSERT(body != 0);
-  CPPUNIT_ASSERT(body->isa("body"));
+  EXPECT_TRUE(body != 0);
+  EXPECT_TRUE(body->isa("body"));
 }
 

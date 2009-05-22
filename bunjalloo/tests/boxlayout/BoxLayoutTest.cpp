@@ -16,43 +16,19 @@
 */
 #include "BoxLayout.h"
 
-#include <cppunit/extensions/HelperMacros.h>
+#include <gtest/gtest.h>
 
-class BoxLayoutTest : public CPPUNIT_NS::TestFixture
+class BoxLayoutTest : public testing::Test
 {
-  CPPUNIT_TEST_SUITE( BoxLayoutTest );
-  CPPUNIT_TEST( testSimple );
-  CPPUNIT_TEST( testPacked );
-  CPPUNIT_TEST( testPacked2 );
-  CPPUNIT_TEST( testPacked3 );
-  CPPUNIT_TEST( testResize );
-  CPPUNIT_TEST( testSetLocation );
-  CPPUNIT_TEST( testNastySize );
-  CPPUNIT_TEST( testResizeImages );
-  CPPUNIT_TEST( testNewline );
-  CPPUNIT_TEST_SUITE_END();
-
-public:
-  BoxLayout *m_layout;
-  void setUp();
-  void tearDown();
-
-  void testSimple();
-  void testPacked();
-  void testPacked2();
-  void testPacked3();
-  void testResize();
-  void testSetLocation();
-  void testNastySize();
-  void testResizeImages();
-  void testNewline();
-
+  protected:
+    BoxLayout *m_layout;
+    void SetUp();
+    void TearDown();
 };
 
 class MockComponent: public Component
 {
   public:
-
     void setPreferredSize(int w, int h)
     {
       m_preferredWidth = w;
@@ -67,22 +43,19 @@ class MockComponent: public Component
     virtual bool stylusDown(const Stylus * stylus) { return false; }
 };
 
-// Registers the fixture into the 'registry'
-CPPUNIT_TEST_SUITE_REGISTRATION( BoxLayoutTest );
-
-void BoxLayoutTest::setUp()
+void BoxLayoutTest::SetUp()
 {
-  m_layout = new BoxLayout;
+  m_layout = new BoxLayout();
   m_layout->setSize(255, 192*2);
   m_layout->setLocation(0, 0);
 }
 
-void BoxLayoutTest::tearDown()
+void BoxLayoutTest::TearDown()
 {
   delete m_layout;
 }
 
-void BoxLayoutTest::testSimple()
+TEST_F(BoxLayoutTest, Simple)
 {
   /*
    * Test that the simple case works:
@@ -111,13 +84,13 @@ void BoxLayoutTest::testSimple()
   Rectangle r2 = r1;
   r2.y = r1.bottom();
 
-  CPPUNIT_ASSERT_MESSAGE("Component 1 bounds", r1 == comp1->bounds());
-  CPPUNIT_ASSERT_MESSAGE("Component 2 bounds", r2 == comp2->bounds());
-  CPPUNIT_ASSERT_EQUAL(r2.bottom(), m_layout->height());
-  CPPUNIT_ASSERT_EQUAL(2U, m_layout->boxCount());
+  EXPECT_TRUE(r1 == comp1->bounds()) << "Component 1 bounds";
+  EXPECT_TRUE(r2 == comp2->bounds()) << "Component 2 bounds";
+  EXPECT_EQ(r2.bottom(), m_layout->height());
+  EXPECT_EQ(2U, m_layout->boxCount());
 }
 
-void BoxLayoutTest::testPacked()
+TEST_F(BoxLayoutTest, Packed)
 {
   /*
    * Test that packing 2 in one box works
@@ -144,12 +117,12 @@ void BoxLayoutTest::testPacked()
   Rectangle r2 = r1;
   r2.x = r1.right();
 
-  CPPUNIT_ASSERT_MESSAGE("Component 1 bounds", r1 == comp1->bounds());
-  CPPUNIT_ASSERT_MESSAGE("Component 2 bounds", r2 == comp2->bounds());
-  CPPUNIT_ASSERT_EQUAL(1U, m_layout->boxCount());
+  EXPECT_TRUE(r1 == comp1->bounds()) << "Component 1 bounds";
+  EXPECT_TRUE(r2 == comp2->bounds()) << "Component 2 bounds";
+  EXPECT_EQ(1U, m_layout->boxCount());
 }
 
-void BoxLayoutTest::testPacked2()
+TEST_F(BoxLayoutTest, Packed2)
 {
   /*
    * Test that packing 3 in one box, with odd heights, works
@@ -187,13 +160,13 @@ void BoxLayoutTest::testPacked2()
   Rectangle r3 = r1;
   r3.x = r2.right();
 
-  CPPUNIT_ASSERT_MESSAGE("Component 1 bounds", r1 == comp1->bounds());
-  CPPUNIT_ASSERT_MESSAGE("Component 2 bounds", r2 == comp2->bounds());
-  CPPUNIT_ASSERT_MESSAGE("Component 2 bounds", r3 == comp3->bounds());
-  CPPUNIT_ASSERT_EQUAL(1U, m_layout->boxCount());
+  EXPECT_TRUE(r1 == comp1->bounds()) << "Component 1 bounds";
+  EXPECT_TRUE(r2 == comp2->bounds()) << "Component 2 bounds";
+  EXPECT_TRUE(r3 == comp3->bounds()) << "Component 2 bounds";
+  EXPECT_EQ(1U, m_layout->boxCount());
 }
 
-void BoxLayoutTest::testPacked3()
+TEST_F(BoxLayoutTest, Packed3)
 {
   /*
    * Test that packing 3 in one box, with odd heights,
@@ -244,14 +217,14 @@ void BoxLayoutTest::testPacked3()
   Rectangle r4 = larger;
   r4.y = r2.bottom();
 
-  CPPUNIT_ASSERT_MESSAGE("Component 1 bounds", r1 == comp1->bounds());
-  CPPUNIT_ASSERT_MESSAGE("Component 2 bounds", r2 == comp2->bounds());
-  CPPUNIT_ASSERT_MESSAGE("Component 3 bounds", r3 == comp3->bounds());
-  CPPUNIT_ASSERT_MESSAGE("Component 4 bounds", r4 == comp4->bounds());
-  CPPUNIT_ASSERT_EQUAL(2U, m_layout->boxCount());
+  EXPECT_TRUE(r1 == comp1->bounds()) << "Component 1 bounds";
+  EXPECT_TRUE(r2 == comp2->bounds()) << "Component 2 bounds";
+  EXPECT_TRUE(r3 == comp3->bounds()) << "Component 3 bounds";
+  EXPECT_TRUE(r4 == comp4->bounds()) << "Component 4 bounds";
+  EXPECT_EQ(2U, m_layout->boxCount());
 }
 
-void BoxLayoutTest::testResize()
+TEST_F(BoxLayoutTest, Resize)
 {
   /*
    * Test that the simple resizing case works:
@@ -283,9 +256,9 @@ void BoxLayoutTest::testResize()
   m_layout->add(comp2);
 
   small.x = r1.right();
-  CPPUNIT_ASSERT_MESSAGE("Component 1 bounds pre-resize", r1 == comp1->bounds());
-  CPPUNIT_ASSERT_MESSAGE("Component 2 bounds pre-resize", small == comp2->bounds());
-  CPPUNIT_ASSERT_EQUAL(1U, m_layout->boxCount());
+  EXPECT_TRUE(r1 == comp1->bounds()) << "Component 1 bounds pre-resize";
+  EXPECT_TRUE(small == comp2->bounds()) << "Component 2 bounds pre-resize";
+  EXPECT_EQ(1U, m_layout->boxCount());
 
   // now resize..
   comp2->setSize(r1.w, r1.h);
@@ -295,12 +268,12 @@ void BoxLayoutTest::testResize()
   Rectangle r2 = r1;
   r2.y = r1.bottom();
 
-  CPPUNIT_ASSERT_MESSAGE("Component 1 bounds", r1 == comp1->bounds());
-  CPPUNIT_ASSERT_MESSAGE("Component 2 bounds", r2 == comp2->bounds());
-  CPPUNIT_ASSERT_EQUAL(2U, m_layout->boxCount());
+  EXPECT_TRUE(r1 == comp1->bounds()) << "Component 1 bounds";
+  EXPECT_TRUE(r2 == comp2->bounds()) << "Component 2 bounds";
+  EXPECT_EQ(2U, m_layout->boxCount());
 }
 
-void BoxLayoutTest::testSetLocation()
+TEST_F(BoxLayoutTest, SetLocation)
 {
   /*
    * Test that setting the location of the BoxLayout moves all the children but
@@ -334,19 +307,19 @@ void BoxLayoutTest::testSetLocation()
   Rectangle r2 = r1;
   r2.y = r1.bottom();
 
-  CPPUNIT_ASSERT_MESSAGE("Component 1 bounds", r1 == comp1->bounds());
-  CPPUNIT_ASSERT_MESSAGE("Component 2 bounds", r2 == comp2->bounds());
-  CPPUNIT_ASSERT_EQUAL(2U, m_layout->boxCount());
+  EXPECT_TRUE(r1 == comp1->bounds()) << "Component 1 bounds";
+  EXPECT_TRUE(r2 == comp2->bounds()) << "Component 2 bounds";
+  EXPECT_EQ(2U, m_layout->boxCount());
 
   m_layout->setLocation(0, -10);
   r1.y = -10;
   r2.y = r1.bottom();
-  CPPUNIT_ASSERT_MESSAGE("Component 1 bounds after setLocation", r1 == comp1->bounds());
-  CPPUNIT_ASSERT_MESSAGE("Component 2 bounds after setLocation", r2 == comp2->bounds());
-  CPPUNIT_ASSERT_EQUAL(2U, m_layout->boxCount());
+  EXPECT_TRUE(r1 == comp1->bounds()) << "Component 1 bounds after setLocation";
+  EXPECT_TRUE(r2 == comp2->bounds()) << "Component 2 bounds after setLocation";
+  EXPECT_EQ(2U, m_layout->boxCount());
 }
 
-void BoxLayoutTest::testNastySize()
+TEST_F(BoxLayoutTest, NastySize)
 {
   /*
    * Test that the simple case works:
@@ -381,13 +354,13 @@ void BoxLayoutTest::testNastySize()
   Rectangle r2 = r1;
   r2.y = r1.bottom();
 
-  CPPUNIT_ASSERT_MESSAGE("Component 1 bounds", r1 == comp1->bounds());
-  CPPUNIT_ASSERT_MESSAGE("Component 2 bounds", r2 == comp2->bounds());
-  CPPUNIT_ASSERT_EQUAL(r2.bottom(), m_layout->height());
-  CPPUNIT_ASSERT_EQUAL(2U, m_layout->boxCount());
+  EXPECT_TRUE(r1 == comp1->bounds()) << "Component 1 bounds";
+  EXPECT_TRUE(r2 == comp2->bounds()) << "Component 2 bounds";
+  EXPECT_EQ(r2.bottom(), m_layout->height());
+  EXPECT_EQ(2U, m_layout->boxCount());
 }
 
-void BoxLayoutTest::testResizeImages()
+TEST_F(BoxLayoutTest, ResizeImages)
 {
   /*
    * Test a "real life" resize case.
@@ -449,12 +422,12 @@ void BoxLayoutTest::testResizeImages()
     Rectangle ex4 = {ex3.right(), 26, 0, 0};
     Rectangle ex5 = ex1; ex5.y = ex3.bottom();
 
-    CPPUNIT_ASSERT(ex1 == c1->bounds());
-    CPPUNIT_ASSERT(ex2 == c2->bounds());
-    CPPUNIT_ASSERT(ex3 == c3->bounds());
-    CPPUNIT_ASSERT(ex4 == c4->bounds());
-    CPPUNIT_ASSERT(ex5 == c5->bounds());
-    CPPUNIT_ASSERT_EQUAL(3U, m_layout->boxCount());
+    EXPECT_TRUE(ex1 == c1->bounds());
+    EXPECT_TRUE(ex2 == c2->bounds());
+    EXPECT_TRUE(ex3 == c3->bounds());
+    EXPECT_TRUE(ex4 == c4->bounds());
+    EXPECT_TRUE(ex5 == c5->bounds());
+    EXPECT_EQ(3U, m_layout->boxCount());
   }
 
   c2->setSize(249, 94);
@@ -482,12 +455,12 @@ void BoxLayoutTest::testResizeImages()
     Rectangle ex4 = {ex3.right(), ex2.bottom(), 0, 0};
     Rectangle ex5 = ex1; ex5.y = ex3.bottom();
 
-    CPPUNIT_ASSERT(ex1 == c1->bounds());
-    CPPUNIT_ASSERT(ex2 == c2->bounds());
-    CPPUNIT_ASSERT(ex3 == c3->bounds());
-    CPPUNIT_ASSERT(ex4 == c4->bounds());
-    CPPUNIT_ASSERT(ex5 == c5->bounds());
-    CPPUNIT_ASSERT_EQUAL(4U, m_layout->boxCount());
+    EXPECT_TRUE(ex1 == c1->bounds());
+    EXPECT_TRUE(ex2 == c2->bounds());
+    EXPECT_TRUE(ex3 == c3->bounds());
+    EXPECT_TRUE(ex4 == c4->bounds());
+    EXPECT_TRUE(ex5 == c5->bounds());
+    EXPECT_EQ(4U, m_layout->boxCount());
   }
 
   /*
@@ -517,17 +490,17 @@ void BoxLayoutTest::testResizeImages()
     Rectangle ex4 = {0, ex3.bottom(), 249, 232};
     Rectangle ex5 = ex1; ex5.y = ex4.bottom();
 
-    CPPUNIT_ASSERT(ex1 == c1->bounds());
-    CPPUNIT_ASSERT(ex2 == c2->bounds());
-    CPPUNIT_ASSERT(ex3 == c3->bounds());
-    CPPUNIT_ASSERT(ex4 == c4->bounds());
-    CPPUNIT_ASSERT(ex5 == c5->bounds());
-    CPPUNIT_ASSERT_EQUAL(5U, m_layout->boxCount());
-    CPPUNIT_ASSERT_EQUAL(26+94+52+232+26, m_layout->height());
+    EXPECT_TRUE(ex1 == c1->bounds());
+    EXPECT_TRUE(ex2 == c2->bounds());
+    EXPECT_TRUE(ex3 == c3->bounds());
+    EXPECT_TRUE(ex4 == c4->bounds());
+    EXPECT_TRUE(ex5 == c5->bounds());
+    EXPECT_EQ(5U, m_layout->boxCount());
+    EXPECT_EQ(26+94+52+232+26, m_layout->height());
   }
 }
 
-void BoxLayoutTest::testNewline()
+TEST_F(BoxLayoutTest, Newline)
 {
   /*
    * Test that adding a new line and resizing works
@@ -580,11 +553,10 @@ void BoxLayoutTest::testNewline()
   Rectangle r4 = r3;
   r4.x = r3.right();
 
-
-  CPPUNIT_ASSERT(r1 == c1->bounds());
-  CPPUNIT_ASSERT(r2 == c2->bounds());
-  CPPUNIT_ASSERT(r3 == c3->bounds());
-  CPPUNIT_ASSERT(r4 == c4->bounds());
-  CPPUNIT_ASSERT_EQUAL(r3.bottom(), m_layout->height());
-  CPPUNIT_ASSERT_EQUAL(2U, m_layout->boxCount());
+  EXPECT_TRUE(r1 == c1->bounds());
+  EXPECT_TRUE(r2 == c2->bounds());
+  EXPECT_TRUE(r3 == c3->bounds());
+  EXPECT_TRUE(r4 == c4->bounds());
+  EXPECT_EQ(r3.bottom(), m_layout->height());
+  EXPECT_EQ(2U, m_layout->boxCount());
 }

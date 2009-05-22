@@ -14,25 +14,27 @@
   You should have received a copy of the GNU General Public License
   along with this program.  If not, see <http://www.gnu.org/licenses/>.
 */
-#include "CookieTest.h"
 #include "CookieJar.h"
 #include "URI.h"
+#include <gtest/gtest.h>
 
 using namespace std;
 
-// Registers the fixture into the 'registry'
-CPPUNIT_TEST_SUITE_REGISTRATION( CookieTest );
-
-void CookieTest::setUp()
+class CookieTest : public testing::Test
 {
-  m_cookieJar = new CookieJar;
-}
-void CookieTest::tearDown()
-{
-  delete m_cookieJar;
-}
+  protected:
+    CookieJar * m_cookieJar;
 
-void CookieTest::testBasic()
+    void SetUp() {
+      m_cookieJar = new CookieJar();
+    }
+
+    void TearDown() {
+      delete m_cookieJar;
+    }
+};
+
+TEST_F(CookieTest, Basic)
 {
   URI uri("http://localhost/");
   m_cookieJar->setAcceptCookies("localhost");
@@ -43,10 +45,10 @@ void CookieTest::testBasic()
   m_cookieJar->addCookieHeader(uri, requestHeader);
   string resultHeader;
   m_cookieJar->cookiesForRequest(uri, resultHeader);
-  CPPUNIT_ASSERT_EQUAL(expectedHeader, resultHeader);
+  EXPECT_EQ(expectedHeader, resultHeader);
 }
 
-void CookieTest::testRepeats()
+TEST_F(CookieTest, Repeats)
 {
   URI uri("http://localhost/");
   m_cookieJar->setAcceptCookies("localhost");
@@ -59,45 +61,45 @@ void CookieTest::testRepeats()
 
   string resultHeader;
   m_cookieJar->cookiesForRequest(uri, resultHeader);
-  CPPUNIT_ASSERT_EQUAL(expectedHeader, resultHeader);
+  EXPECT_EQ(expectedHeader, resultHeader);
 }
 
-void CookieTest::testAccept()
+TEST_F(CookieTest, Accept)
 {
   const string server("foobar.com");
   bool expected = false;
   bool result = m_cookieJar->acceptCookies(server);
-  CPPUNIT_ASSERT_EQUAL_MESSAGE("Should reject foobar.com", expected, result);
+  EXPECT_EQ(expected, result) << "Should reject foobar.com";
   // now set to allow
   m_cookieJar->setAcceptCookies(server, true);
   expected = true;
   result = m_cookieJar->acceptCookies(server);
-  CPPUNIT_ASSERT_EQUAL_MESSAGE("Should allow foobar.com", expected, result);
+  EXPECT_EQ(expected, result) << "Should allow foobar.com";
 }
 
-void CookieTest::testCalcTopLevel()
+TEST_F(CookieTest, CalcTopLevel)
 {
   const string alreadyTop("toplevel.com");
   string result = CookieJar::topLevel(alreadyTop);
-  CPPUNIT_ASSERT_EQUAL(alreadyTop, result);
+  EXPECT_EQ(alreadyTop, result);
 
   const string subdomain("www.someurl.com");
   string expected = "someurl.com";
   result = CookieJar::topLevel(subdomain);
-  CPPUNIT_ASSERT_EQUAL(expected, result);
+  EXPECT_EQ(expected, result);
 
   const string dotcom(".com");
   expected = ".com";
   result = CookieJar::topLevel(dotcom);
-  CPPUNIT_ASSERT_EQUAL(expected, result);
+  EXPECT_EQ(expected, result);
 
   const string justcom("com");
   expected = "com";
   result = CookieJar::topLevel(justcom);
-  CPPUNIT_ASSERT_EQUAL(expected, result);
+  EXPECT_EQ(expected, result);
 }
 
-void CookieTest::testSubDomain()
+TEST_F(CookieTest, SubDomain)
 {
   const string settingServer("www.domain.com");
   const string subDomain("sub.domain.com");
@@ -106,9 +108,9 @@ void CookieTest::testSubDomain()
 
   bool expected = true;
   bool result = m_cookieJar->acceptCookies(settingServer);
-  CPPUNIT_ASSERT_EQUAL_MESSAGE("Should allow www.domain.com", expected, result);
+  EXPECT_EQ(expected, result) << "Should allow www.domain.com";
   result = m_cookieJar->acceptCookies(subDomain);
-  CPPUNIT_ASSERT_EQUAL_MESSAGE("Should allow sub.domain.com", expected, result);
+  EXPECT_EQ(expected, result) << "Should allow sub.domain.com";
 
   URI uri("http://sub.domain.com/");
   // now set cookie for sub domain - www.domain should not read it
@@ -118,15 +120,14 @@ void CookieTest::testSubDomain()
 
   string resultHeader;
   m_cookieJar->cookiesForRequest(uri, resultHeader);
-  CPPUNIT_ASSERT_EQUAL(expectedHeader, resultHeader);
+  EXPECT_EQ(expectedHeader, resultHeader);
   // check www.domain.com doesn't return it
   uri.setUri("http://www.domain.com");
   resultHeader = "";
   m_cookieJar->cookiesForRequest(uri, resultHeader);
   expectedHeader = "";
-  CPPUNIT_ASSERT(m_cookieJar->hasCookieForDomain(URI("sub.domain.com"),"subcount") != 0);
-  CPPUNIT_ASSERT_EQUAL(expectedHeader, resultHeader);
-
+  EXPECT_TRUE(m_cookieJar->hasCookieForDomain(URI("sub.domain.com"),"subcount") != 0);
+  EXPECT_EQ(expectedHeader, resultHeader);
 
   // check that setting a cookie readable across all domains works
   // set for uri www.domain.com, but with domain=domain.com, ie. top level.
@@ -136,15 +137,15 @@ void CookieTest::testSubDomain()
   uri.setUri("http://some.domain.com");
   resultHeader = "";
   m_cookieJar->cookiesForRequest(uri, resultHeader);
-  CPPUNIT_ASSERT(m_cookieJar->hasCookieForDomain(URI("domain.com"),"topcount") != 0);
-  CPPUNIT_ASSERT(m_cookieJar->hasCookieForDomain(URI("domain.com"),"subcount") == 0);
-  CPPUNIT_ASSERT_EQUAL(expectedHeader, resultHeader);
+  EXPECT_TRUE(m_cookieJar->hasCookieForDomain(URI("domain.com"),"topcount") != 0);
+  EXPECT_TRUE(m_cookieJar->hasCookieForDomain(URI("domain.com"),"subcount") == 0);
+  EXPECT_EQ(expectedHeader, resultHeader);
 
   // test that for domain.com it includes the top level cookie
   uri.setUri("http://domain.com");
   resultHeader = "";
   m_cookieJar->cookiesForRequest(uri, resultHeader);
-  CPPUNIT_ASSERT_EQUAL(expectedHeader, resultHeader);
+  EXPECT_EQ(expectedHeader, resultHeader);
 
   // now test that for sub.domain.com it returns the domain.com cookie AND the
   // sub.domain.com specific cookie.
@@ -152,11 +153,11 @@ void CookieTest::testSubDomain()
   uri.setUri("http://sub.domain.com");
   resultHeader = "";
   m_cookieJar->cookiesForRequest(uri, resultHeader);
-  CPPUNIT_ASSERT_EQUAL(expectedHeader, resultHeader);
+  EXPECT_EQ(expectedHeader, resultHeader);
 
 }
 
-void CookieTest::testPath()
+TEST_F(CookieTest, Path)
 {
   const string settingServer("www.domain.com");
   const string subDomain("sub.domain.com");
@@ -171,22 +172,22 @@ void CookieTest::testPath()
   string resultHeader;
   m_cookieJar->cookiesForRequest(uri, resultHeader);
   // check it works
-  CPPUNIT_ASSERT_EQUAL(expectedHeader, resultHeader);
+  EXPECT_EQ(expectedHeader, resultHeader);
 
   // check some other path cannot read it
   uri.setUri("http://sub.domain.com/");
   resultHeader = "";
   m_cookieJar->cookiesForRequest(uri, resultHeader);
   expectedHeader = "";
-  CPPUNIT_ASSERT_EQUAL(expectedHeader, resultHeader);
+  EXPECT_EQ(expectedHeader, resultHeader);
 
   // check a sub dir can read it
   uri.setUri("http://sub.domain.com/accounts/mine");
   resultHeader = "";
   m_cookieJar->cookiesForRequest(uri, resultHeader);
   expectedHeader = "Cookie: topcount=2\r\n";
-  CPPUNIT_ASSERT(m_cookieJar->hasCookieForDomain(uri,"topcount") != 0);
-  CPPUNIT_ASSERT_EQUAL(expectedHeader, resultHeader);
+  EXPECT_TRUE(m_cookieJar->hasCookieForDomain(uri,"topcount") != 0);
+  EXPECT_EQ(expectedHeader, resultHeader);
 
   // test adding some unrelated site's cookie
   m_cookieJar->setAcceptCookies("elsewhere.com");
@@ -197,7 +198,7 @@ void CookieTest::testPath()
   expectedHeader = "Cookie: SD=richard\r\n";
   resultHeader = "";
   m_cookieJar->cookiesForRequest(uri, resultHeader);
-  CPPUNIT_ASSERT_EQUAL(expectedHeader, resultHeader);
+  EXPECT_EQ(expectedHeader, resultHeader);
 
 
   m_cookieJar->setAcceptCookies("mail.gmail.com");
@@ -209,11 +210,11 @@ void CookieTest::testPath()
   resultHeader = "";
   uri.setUri("https://mail.gmail.com/mail/?zx=fizzbuzz&sva=1");
   m_cookieJar->cookiesForRequest(uri, resultHeader);
-  CPPUNIT_ASSERT_EQUAL(expectedHeader, resultHeader);
+  EXPECT_EQ(expectedHeader, resultHeader);
 
 }
 
-void CookieTest::testGoogleLogin()
+TEST_F(CookieTest, GoogleLogin)
 {
   // this test checks that setting a cookie from a cgi file correctly
   // changes the path to the directory name.
@@ -228,11 +229,11 @@ void CookieTest::testGoogleLogin()
 
   uri.setUri("https://www.google.com/accounts/ServiceLoginAuth?service=mail");
   m_cookieJar->cookiesForRequest(uri, resultHeader);
-  CPPUNIT_ASSERT_EQUAL(expectedHeader, resultHeader);
+  EXPECT_EQ(expectedHeader, resultHeader);
 
 }
 
-void CookieTest::testSecure()
+TEST_F(CookieTest, Secure)
 {
   // don't send secure cookies via non secure connection
   m_cookieJar->setAcceptCookies("domain.com");
@@ -243,17 +244,17 @@ void CookieTest::testSecure()
   string expectedHeader = "Cookie: LSID=ff9123\r\n";
   string resultHeader;
   m_cookieJar->cookiesForRequest(uri, resultHeader);
-  CPPUNIT_ASSERT_EQUAL(expectedHeader, resultHeader);
+  EXPECT_EQ(expectedHeader, resultHeader);
 
   // what about non secure?
   uri.setUri("http://sub.domain.com/accounts/");
   resultHeader = "";
   expectedHeader = "";
   m_cookieJar->cookiesForRequest(uri, resultHeader);
-  CPPUNIT_ASSERT_EQUAL(expectedHeader, resultHeader);
+  EXPECT_EQ(expectedHeader, resultHeader);
 }
 
-void CookieTest::testExpireRenew()
+TEST_F(CookieTest, ExpireRenew)
 {
   // make sure that we renew cookies
   m_cookieJar->setAcceptCookies("domain.com");
@@ -264,7 +265,7 @@ void CookieTest::testExpireRenew()
   string expectedHeader = "Cookie: LSID=EXPIRED\r\n";
   string resultHeader;
   m_cookieJar->cookiesForRequest(uri, resultHeader);
-  CPPUNIT_ASSERT_EQUAL(expectedHeader, resultHeader);
+  EXPECT_EQ(expectedHeader, resultHeader);
 
   // now renew it
   uri.setUri("https://sub.domain.com/accounts/foo");
@@ -273,7 +274,7 @@ void CookieTest::testExpireRenew()
   expectedHeader = "Cookie: LSID=newval\r\n";
   resultHeader = "";
   m_cookieJar->cookiesForRequest(uri, resultHeader);
-  CPPUNIT_ASSERT_EQUAL(expectedHeader, resultHeader);
+  EXPECT_EQ(expectedHeader, resultHeader);
 
 }
 
