@@ -16,111 +16,77 @@
 */
 #include "BoxLayout.h"
 #include "string_utils.h"
+#include <gtest/gtest.h>
 
-#include <cppunit/extensions/HelperMacros.h>
-
-class TextTest : public CPPUNIT_NS::TestFixture
-{
-  CPPUNIT_TEST_SUITE(TextTest);
-  CPPUNIT_TEST(testSimple);
-  CPPUNIT_TEST(testUnicode);
-  CPPUNIT_TEST(testFindLast);
-  CPPUNIT_TEST(testFindLast2);
-  CPPUNIT_TEST(testCrap);
-  CPPUNIT_TEST(testNewline);
-  CPPUNIT_TEST_SUITE_END();
-
-public:
-  void setUp();
-  void tearDown();
-
-  void testSimple();
-  void testUnicode();
-  void testFindLast();
-  void testFindLast2();
-  void testNewline();
-  void testCrap();
-};
-
-CPPUNIT_TEST_SUITE_REGISTRATION(TextTest);
-
-void TextTest::setUp()
-{
-}
-
-void TextTest::tearDown()
-{
-}
-
-void TextTest::testSimple()
+TEST(TextTest, Simple)
 {
   std::string s("this is a string");
   std::string::const_iterator it(s.begin());
   std::string::const_iterator end_it(s.end());
 
   std::string result = nextWordAdvanceWord(&it, end_it, false);
-  CPPUNIT_ASSERT_EQUAL(std::string("this "), result);
+  EXPECT_EQ(std::string("this "), result);
   result = nextWordAdvanceWord(&it, end_it, false);
-  CPPUNIT_ASSERT_EQUAL(std::string("is "), result);
+  EXPECT_EQ(std::string("is "), result);
   result = nextWordAdvanceWord(&it, end_it, false);
-  CPPUNIT_ASSERT_EQUAL(std::string("a "), result);
+  EXPECT_EQ(std::string("a "), result);
   result = nextWordAdvanceWord(&it, end_it, false);
-  CPPUNIT_ASSERT_EQUAL(std::string("string"), result);
+  EXPECT_EQ(std::string("string"), result);
 }
 
-void TextTest::testUnicode() {
+TEST(TextTest, Unicode) {
   std::string s("thís ís à üniÇod€ strîñg");
   std::string::const_iterator it(s.begin());
   std::string::const_iterator end_it(s.end());
 
   std::string result = nextWordAdvanceWord(&it, end_it, false);
-  CPPUNIT_ASSERT_EQUAL(std::string("thís "), result);
+  EXPECT_EQ(std::string("thís "), result);
   result = nextWordAdvanceWord(&it, end_it, false);
-  CPPUNIT_ASSERT_EQUAL(std::string("ís "), result);
+  EXPECT_EQ(std::string("ís "), result);
   result = nextWordAdvanceWord(&it, end_it, false);
-  CPPUNIT_ASSERT_EQUAL(std::string("à "), result);
+  EXPECT_EQ(std::string("à "), result);
   result = nextWordAdvanceWord(&it, end_it, false);
-  CPPUNIT_ASSERT_EQUAL(std::string("üniÇod€ "), result);
+  EXPECT_EQ(std::string("üniÇod€ "), result);
   result = nextWordAdvanceWord(&it, end_it, false);
-  CPPUNIT_ASSERT_EQUAL(std::string("strîñg"), result);
+  EXPECT_EQ(std::string("strîñg"), result);
 }
 
-void TextTest::testCrap() {
+TEST(TextTest, Crap) {
   std::string s("\"«»\n");
   std::string::const_iterator it(s.begin());
   std::string::const_iterator end_it(s.end());
   std::string result = nextWordAdvanceWord(&it, end_it, false);
-  CPPUNIT_ASSERT_EQUAL(s, result);
+  EXPECT_EQ(s, result);
 }
 
-void TextTest::testFindLast() {
+TEST(TextTest, FindLast) {
   std::string s(" ñÑaá$Ó");
   static const std::string delimeter(" \r\n\t");
   int lastPosition = findLastNotOf(s, delimeter);
-  CPPUNIT_ASSERT_EQUAL(11, lastPosition);
+  EXPECT_EQ(11, lastPosition);
 
   s = "Ña";
   lastPosition = findLastNotOf(s, delimeter);
-  CPPUNIT_ASSERT_EQUAL(2, lastPosition);
+  EXPECT_EQ(2, lastPosition);
 }
 
-void TextTest::testFindLast2() {
+TEST(TextTest, FindLast2) {
   std::string s(" Ñ  ");
   static const std::string delimeter(" \t");
   int lastPosition = findLastNotOf(s, delimeter);
-  CPPUNIT_ASSERT_EQUAL(3, lastPosition);
+  EXPECT_EQ(3, lastPosition);
 }
 
-void TextTest::testNewline() {
+TEST(TextTest, Newline) {
   std::string s("line with\nnew line");
   std::string::const_iterator it(s.begin());
   std::string::const_iterator end_it(s.end());
   std::string result = nextWordAdvanceWord(&it, end_it, false);
-  CPPUNIT_ASSERT_EQUAL(std::string("line "), result);
+  EXPECT_EQ(std::string("line "), result);
   result = nextWordAdvanceWord(&it, end_it, false);
-  CPPUNIT_ASSERT_EQUAL(std::string("with\n"), result);
+  EXPECT_EQ(std::string("with\n"), result);
   result = nextWordAdvanceWord(&it, end_it, false);
-  CPPUNIT_ASSERT_EQUAL(std::string("new "), result);
+  EXPECT_EQ(std::string("new "), result);
   result = nextWordAdvanceWord(&it, end_it, false);
-  CPPUNIT_ASSERT_EQUAL(std::string("line"), result);
+  EXPECT_EQ(std::string("line"), result);
 }
