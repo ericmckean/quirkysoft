@@ -63,7 +63,7 @@ def set_options(opt):
         'help':    'Do not build the SDL port',
         'default': False
         },
-      '--without-cppunit': {
+      '--without-tests': {
         'action':  'store_true',
         'help':    'Do not build the unit tests',
         'default': False},
@@ -133,7 +133,7 @@ def sdl_tool_check(conf):
   conf.check_tool('objcopy', waf_tools)
   if not Options.options.without_chaos:
     conf.check_tool('sox', waf_tools)
-  if not Options.options.without_cppunit:
+  if not Options.options.without_tests:
     conf.check_tool('unit_test', waf_tools)
 
 # Header checking
@@ -168,7 +168,7 @@ def host_check(self, *k, **kw):
   return self.check(*k, **kw)
 
 def lib_check_sdl(conf):
-  conf.env['HAVE_CPPUNIT'] = False
+  conf.env['HAVE_UNITTESTS'] = False
 
   for i in 'libpng sdl'.split():
     conf.check_cfg(
@@ -177,18 +177,20 @@ def lib_check_sdl(conf):
         args='--cflags --libs',
         uselib_store='HOST')
 
-  if not (Options.options.without_bunjalloo or Options.options.without_cppunit):
+  if not (Options.options.without_bunjalloo or Options.options.without_tests):
     result = conf.check_cfg(
-        package='cppunit',
-        args='--cflags --libs',
+        path='gtest-config',
+        package='',
+        msg='Checking for gtest',
+        args='--cppflags --ldflags --libs',
         uselib_store='TEST')
     if 'LIB_TEST' not in conf.env:
-      Options.options.without_cppunit = True
-      Utils.pprint('RED', 'cppunit not found. Unit tests will not be built')
-      Utils.pprint('RED', 'Install from http://cppunit.sourceforge.net')
-      Utils.pprint('RED', 'or try "sudo apt-get install cppunit"')
+      Options.options.without_tests = True
+      Utils.pprint('RED', 'gtest not found. Unit tests will not be built')
+      Utils.pprint('RED', 'Install from http://code.google.com/p/googletest/')
     else:
-      conf.env['HAVE_CPPUNIT'] = True
+      conf.env['LIB_TEST'].append('gtest_main')
+      conf.env['HAVE_UNITTESTS'] = True
 
   perf_msg = 'Install this from http://code.google.com/p/google-perftools/'
   if Options.options.with_tcmalloc:
@@ -221,7 +223,7 @@ def config_status(conf):
       Will build ChaosDS:   %(WITH_CHAOS)s"""%conf.env)
   conf.setenv('sdl')
   Utils.pprint('BLUE',"""\
-      Cppunit found:        %(HAVE_CPPUNIT)s"""%conf.env)
+      Test lib found:       %(HAVE_UNITTESTS)s"""%conf.env)
   env = {
       'gcov': Options.options.with_gcov,
       'tcmalloc': Options.options.with_tcmalloc,
