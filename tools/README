@@ -41,6 +41,20 @@ test-time.sh
 See how long a program takes to run, runs multiple times.
 Usage test-time.sh prog times
 
+update-devkitpro.sh
+===================
+
+A script for Linux to keep your devkitARM install up to date.
+
+Set DEVKITPRO to the place you want to install the toolchain to. Then run this
+script.
+
+  export DEVKITPRO=$HOME/devkitpro
+  ./update-devkitpro.sh
+
+This will download the devkitProUpdate.ini that is used for the Windows
+installer, and install the relevant files for Nintendo DS development.
+
 wikify.py
 =========
 
