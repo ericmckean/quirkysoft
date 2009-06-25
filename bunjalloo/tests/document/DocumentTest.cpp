@@ -45,7 +45,7 @@ class DocumentTest : public testing::Test
     void SetUp() {
       m_data = 0;
       m_length = 0;
-      m_document = DocumentFactory::create();
+      m_document = new Document();
     }
 };
 
