@@ -10,6 +10,9 @@ die() {
   exit 1
 }
 
+test -z $DEVKITPRO && die "Set DEVKITPRO"
+cd $DEVKITPRO
+
 if [ ! -e ${LIBPNG}.tar.bz2 ] ; then
   wget ftp://ftp.simplesystems.org/pub/libpng/png/src/${LIBPNG}.tar.bz2 || \
   die "Unable to download ${LIBPNG}"
