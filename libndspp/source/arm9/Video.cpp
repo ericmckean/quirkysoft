@@ -15,6 +15,7 @@
   along with this program.  If not, see <http://www.gnu.org/licenses/>.
 */
 #include <nds/bios.h>
+#include <nds/interrupts.h>
 #include <nds/memory.h>
 extern "C" {
 #include <nds/system.h>

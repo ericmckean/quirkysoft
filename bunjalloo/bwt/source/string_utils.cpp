@@ -15,6 +15,7 @@
   along with this program.  If not, see <http://www.gnu.org/licenses/>.
 */
 #include <set>
+#include <stdint.h>
 #include "config_defs.h"
 #include "string_utils.h"
 #include "utf8.h"

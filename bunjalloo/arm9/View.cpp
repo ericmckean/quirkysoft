@@ -15,6 +15,7 @@
   along with this program.  If not, see <http://www.gnu.org/licenses/>.
 */
 #include <libgen.h>
+#include <cstdio>
 #include "ndspp.h"
 #include "config_defs.h"
 #include "libnds.h"
@@ -219,8 +220,8 @@ void View::notify()
       break;
     case Document::INPROGRESS:
       {
-        m_progress->setMax(100);
-        m_progress->setMin(0);
+        m_progress->setMaximum(100);
+        m_progress->setMinimum(0);
         if (not m_document.historyEnabled()) // FIXME: should be "downloading embedded images"
         {
           tick(); // ?

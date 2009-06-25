@@ -38,6 +38,7 @@
 */
 #include <cstring>
 #include <cstdlib>
+#include <cstdio>
 #include "unzip.h"
 #include "ZipFile.h"
 #include "File.h"

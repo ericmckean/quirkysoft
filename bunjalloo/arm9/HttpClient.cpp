@@ -42,6 +42,7 @@
 #include <string>
 #include <algorithm>
 #include <cstring>
+#include <cstdio>
 #include "libnds.h"
 #include "System.h"
 #include "Config.h"

@@ -16,7 +16,8 @@
 */
 //#include <iostream>
 #include <assert.h>
-#include <stdlib.h>
+#include <cstdlib>
+#include <cstdio>
 #include <ctype.h>
 #include <algorithm>
 #include "Entity.h"

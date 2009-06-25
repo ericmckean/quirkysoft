@@ -16,6 +16,7 @@
 */
 #include <assert.h>
 #include <algorithm>
+#include <cstdio>
 #include "ElementFactory.h"
 #include "HtmlElement.h"
 #include "HtmlConstants.h"
