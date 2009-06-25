@@ -19,6 +19,7 @@
 #include <sys/types.h>
 #include <dirent.h>
 #include <cstring>
+#include <cstdio>
 #include "File.h"
 using namespace std;
 

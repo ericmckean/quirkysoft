@@ -19,6 +19,7 @@
 #include "string_utils.h"
 #include <zlib.h>
 #include <algorithm>
+#include <cstdio>
 #include <vector>
 #include <functional>
 

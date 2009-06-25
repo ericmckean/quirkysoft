@@ -35,10 +35,10 @@ static const unsigned int WINSIZE(16384);
 
 HeaderParser::HeaderParser(HtmlParser * htmlParser, CookieJar * cookieJar):
   m_uri(*(new URI())),
+  m_value(0),
   m_position(0),
   m_end(0),
   m_lastPosition(0),
-  m_value(0),
   m_gzip(false),
   m_cache(true),
   m_httpStatusCode(200),
