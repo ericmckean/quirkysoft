@@ -74,13 +74,13 @@ bool TextField::stylusDownRepeat(const Stylus * stylus)
 {
   return false;
 }
+
 bool TextField::stylusDown(const Stylus * stylus)
 {
   if (not m_bounds.hit(stylus->lastX(), stylus->lastY()))
   {
     m_touched = false;
     m_dirty = true;
-    return true;
   }
   return false;
 }
