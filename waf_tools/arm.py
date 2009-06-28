@@ -46,10 +46,10 @@ def detect(conf):
   env[DEVKITARM] = Options.options.devkitarm
 
   ccflags = """-ffast-math -O2 -Wall -mthumb -mthumb-interwork -march=armv5te
-               -mtune=arm946e-s -Wno-array-bounds""".split()
-  cxxflags = ccflags + '-g -fno-rtti -fno-exceptions'.split()
+               -mtune=arm946e-s -Wno-array-bounds -fomit-frame-pointer""".split()
+  cxxflags = ccflags + '-fno-rtti -fno-exceptions'.split()
   ccdefines = ['ARM9']
-  linkflags = """-specs=ds_arm9.specs -g -mno-fpu -Wl,-Map,map9.map
+  linkflags = """-specs=ds_arm9.specs -Wl,-Map,map9.map
                  -Wl,-gc-sections -mthumb -mthumb-interwork""".split()
   arm_eabi = os.path.join(Options.options.devkitarm, 'bin', 'arm-eabi-')
   env.table.update({
