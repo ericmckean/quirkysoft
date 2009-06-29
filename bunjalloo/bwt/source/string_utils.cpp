@@ -22,57 +22,6 @@
 using std::string;
 using std::vector;
 
-#if 0
-std::string unicode2string(const UnicodeString & ustr, bool byteencode)
-{
-  std::string str;
-  UnicodeString::const_iterator it(ustr.begin());
-  unsigned char encoded[6];
-  for ( ; it != ustr.end() ; ++it)
-  {
-    int used = UTF8::encode(*it, encoded);
-    if (used == 1) {
-      str += *it;
-    }
-    else
-    {
-      char buffer[4];
-      for (int i = 0; i < used; ++i)
-      {
-        if (byteencode)
-        {
-          str += (char)encoded[i];
-        }
-        else
-        {
-          // convert to %hex
-          str += '%';
-          sprintf_platform(buffer, "%02X", encoded[i]);
-          str += buffer;
-        }
-      }
-    }
-  }
-  return str;
-}
-
-UnicodeString string2unicode(const std::string & str)
-{
-  UnicodeString ustr;
-  const char * p = str.c_str();
-  size_t len = str.length();
-  for (size_t i = 0 ; i < len; )
-  {
-    unsigned int val;
-    unsigned int read = UTF8::decode(p, val);
-    ustr += val;
-    p += read;
-    i += read;
-  }
-  return ustr;
-}
-#endif
-
 bool isWhitespace(unsigned int value)
 {
   if (value > 0x0020)

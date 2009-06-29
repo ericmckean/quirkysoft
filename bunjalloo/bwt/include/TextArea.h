@@ -144,8 +144,6 @@ class TextArea : public Component
 
     const std::string nextWord(const std::string & unicodeString,
         int currPosition) const;
-    void advanceWord(const std::string & unicodeString, int wordLength,
-        int & currPosition, std::string::const_iterator & it) const;
 
     virtual void incrLine();
     /** Set the cursor position. This is where the text will be "drawn" the
