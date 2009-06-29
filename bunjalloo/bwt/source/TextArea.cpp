@@ -200,66 +200,6 @@ void TextArea::checkLetter(Font::Glyph & g)
   }
 }
 
-#if 0
-{
-  std::string word;
-  if (m_parseNewline)
-  {
-    // if we are parsing new lines, look for the next delimiter
-    unsigned int position = unicodeString.find_first_of(s_delimiters,currPosition);
-    position = position==string::npos?unicodeString.length():position;
-    word = unicodeString.substr(currPosition,position-currPosition+1);
-  }
-  else
-  {
-    // not parsing new lines, so look for the next proper word, then the next non word
-    unsigned int position = unicodeString.find_first_not_of(s_delimiters,currPosition);
-    position = unicodeString.find_first_of(s_delimiters,position);
-    position = position==string::npos?unicodeString.length():position;
-    // now make a word delimited with spaces.
-    word = unicodeString.substr(currPosition,position-currPosition);
-    word += ' ';
-  }
-  int size(textSize(word));
-  if (size > width() and word.size() > 1)
-  {
-    // This is a very long word, split it up
-    std::string::const_iterator it(word.begin());
-    std::string shorterWord;
-    int size(0);
-    for (; it != word.end(); ++it)
-    {
-      unsigned int value(*it);
-      if (value == UTF8::MALFORMED)
-        value = '?';
-      Font::Glyph g;
-      m_font->glyph(value, g);
-      if ( (size + g.width) >= width()) {
-        return shorterWord;
-      }
-      shorterWord += *it;
-      size += g.width;
-    }
-  }
-  return word;
-}
-#endif
-
-void TextArea::advanceWord(const std::string & unicodeString, int wordLength,
-    int & currPosition, std::string::const_iterator & it) const
-{
-  if (m_parseNewline) {
-    it += wordLength;
-    currPosition += wordLength;
-  }
-  else {
-    unsigned int position = unicodeString.find_first_not_of(s_delimiters,currPosition+wordLength);
-    position = position==string::npos?unicodeString.length():position;
-    it += position - currPosition;
-    currPosition = position;
-  }
-}
-
 void TextArea::printu(const std::string & unicodeString)
 {
   std::string::const_iterator it(unicodeString.begin());
