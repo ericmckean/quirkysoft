@@ -89,3 +89,13 @@ TEST(TextTest, Newline) {
   result = nextWordAdvanceWord(&it, end_it, false);
   EXPECT_EQ(std::string("line"), result);
 }
+
+TEST(TextTest, ReallyLongLine) {
+  std::string s("[http://code.google.com/p/gdata-python-client gdata-python-client]");
+  std::string::const_iterator it(s.begin());
+  std::string::const_iterator end_it(s.end());
+  std::string result = nextWordAdvanceWord(&it, end_it, false);
+  EXPECT_EQ(std::string("[http://code.google.com/p/gdata-python-client "), result);
+  result = nextWordAdvanceWord(&it, end_it, false);
+  EXPECT_EQ(std::string("gdata-python-client]"), result);
+}
