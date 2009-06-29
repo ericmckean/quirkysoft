@@ -634,6 +634,9 @@ bool ViewRender::visit(HtmlImageElement & element)
   // easy way to display it (see w3m google.com - Google [hp1] [hp2] [hp3]... huh?)
   bool hasAltText = element.hasAltText();
   const std::string &imgText = extractImageText(&element, hasAltText);
+  if (m_textArea) {
+    m_textArea->endLink();
+  }
   doImage(imgText, element.attribute("src"));
   return true;
 }
