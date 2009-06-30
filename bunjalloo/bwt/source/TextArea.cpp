@@ -114,11 +114,12 @@ static std::string shorterWordFromLong(
     std::string::const_iterator *it,
     const std::string::const_iterator &end_it,
     int width,
-    Font *font)
+    Font *font,
+    int *size)
 {
   // This is a very long word, split it up
   std::string shorterWord;
-  int size(0);
+  *size = 0;
   while (*it != end_it)
   {
     // store the start of the unicode code point
@@ -128,7 +129,7 @@ static std::string shorterWordFromLong(
       value = '?';
     Font::Glyph g;
     font->glyph(value, g);
-    if ( (size + g.width) >= width) {
+    if ( (*size + g.width) >= width) {
       // rewind to the start of that last code point
       *it = a;
       return shorterWord;
@@ -136,7 +137,7 @@ static std::string shorterWordFromLong(
     for (; a != *it; ++a) {
       shorterWord += *a;
     }
-    size += g.width;
+    *size += g.width;
   }
   return shorterWord;
 }
@@ -161,7 +162,7 @@ void TextArea::appendText(const std::string &unicodeString)
     if (size > width() and word.size() > 1)
     {
       it = backup_it;
-      word = shorterWordFromLong(&it, end_it, width(), m_font);
+      word = shorterWordFromLong(&it, end_it, width(), m_font, &size);
     }
 
     // if the word ends with a new line, then increment the height.
