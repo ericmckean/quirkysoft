@@ -24,6 +24,8 @@ using std::vector;
 
 bool isWhitespace(unsigned int value)
 {
+  if (value == 0x00A0)
+    return true;
   if (value > 0x0020)
     return false;
   return (
