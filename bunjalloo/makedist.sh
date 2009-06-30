@@ -103,7 +103,7 @@ echo "Created ChangeLog-$VERSION and ShortLog-$VERSION"
 popd > /dev/null
 
 if test "$tag" = "yes" ; then
-  git tag -m "Bunjalloo release ${VERSION}" ${VERSION}
+  git tag -m "Bunjalloo release ${VERSION}" v${VERSION}
 fi
 
 if test "$upload" = "yes" ; then
