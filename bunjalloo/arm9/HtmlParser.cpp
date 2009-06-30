@@ -857,7 +857,7 @@ void HtmlParserImpl::handleEntityInAttributeValue()
     }
     else
     {
-      m_attribute->value += value;
+      utf8::unchecked::append(value, back_inserter(m_attribute->value));
     }
   }
   m_state = m_lastState;
