@@ -17,7 +17,7 @@ do
   fi
   cd ../.. >/dev/null
   echo $line...
-  $BUNJALLOO $line 0
+  $BUNJALLOO $line 0 &> /dev/null
   if test  $? -ne 0; then
     echo $line caused a crash
     exit 1
