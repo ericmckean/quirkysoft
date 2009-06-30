@@ -242,9 +242,9 @@ void TextArea::checkLetter(Font::Glyph & g)
 void TextArea::printu(const std::string & unicodeString)
 {
   std::string::const_iterator it(unicodeString.begin());
-  for (; it != unicodeString.end() and m_cursory < m_bounds.bottom(); ++it)
+  for (; it != unicodeString.end() and m_cursory < m_bounds.bottom(); )
   {
-    unsigned int value(*it);
+    uint32_t value = utf8::next(it, unicodeString.end());
     if (doSingleChar(value))
     {
       break;
