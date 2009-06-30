@@ -1,10 +1,7 @@
 #!/bin/bash
-SVN="svn"
 UPLOAD="googlecode_upload.py"
 
 repo=https://quirkysoft.googlecode.com/svn
-trunk=$repo/trunk
-tags=$repo/tags
 project=bunjalloo
 upload="no"
 tag="no"
@@ -28,7 +25,7 @@ else
     cd -
   fi
 fi
-VERSION=$( grep -i version arm9/version_number.c  | sed 's/.*"\(.*\)".*/\1/g')
+VERSION=$(grep -i version arm9/version_number.c  | sed 's/.*"\(.*\)".*/\1/g')
 
 
 TEMP=$(getopt -o hutv:l: --long version:,last:,upload,tag,help -- "$@")
@@ -38,7 +35,7 @@ if [ $? != 0 ] ; then
   exit 1
 fi
 
-last=$(git branch -r | grep $project | grep -v tags|tail -1|cut -c3-)
+last=$(git tag | tail -1)
 
 eval set -- "$TEMP"
 
@@ -55,7 +52,7 @@ while true ; do
     echo "Options available are:"
     echo "-v, --version=VERSION    Set the distro version number"
     echo "-u, --upload             Upload the files too"
-    echo "-t, --tag                Create a svn tag for the release"
+    echo "-t, --tag                Create a tag for the release"
     echo "-h, --help               This message."
     echo "-l, --last=LAST          Use LAST as the branch/tag for the last release."
     exit 0
@@ -66,12 +63,11 @@ while true ; do
 done
 
 makedistdir=$(pwd)
-revision=$(git svn find-rev HEAD)
 
 # Create the zip file
 distdir=$project-$VERSION
 zipname=$distdir.zip
-$WAF -p || die "Error in build"
+$WAF check -p || die "Error in build"
 cd ..
 $WAF configure --prefix=$distdir || die "Error running configure"
 cd -
@@ -107,8 +103,7 @@ echo "Created ChangeLog-$VERSION and ShortLog-$VERSION"
 popd > /dev/null
 
 if test "$tag" = "yes" ; then
-  tagname=${project}_${VERSION}_r${revision}
-  $SVN cp $trunk $tags/$tagname || die "Unable to make tag $tagname"
+  git tag -m "Bunjalloo release ${VERSION}" ${VERSION}
 fi
 
 if test "$upload" = "yes" ; then
