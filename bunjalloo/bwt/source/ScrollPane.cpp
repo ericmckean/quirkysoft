@@ -620,6 +620,8 @@ class ValueKeeper {
 
 bool ScrollPane::anywhereScroll(const Stylus *stylus)
 {
+  if (not m_scrollAnywhereSprite->enabled())
+    return false;
   const int &lastY(stylus->lastY());
   const int &startY(stylus->startY());
 
@@ -638,9 +640,11 @@ bool ScrollPane::anywhereScroll(const Stylus *stylus)
 
 void ScrollPane::showScrollAnywhere(const Stylus *stylus)
 {
-  if (not isScrollBarShowing()) {
+  if (not isScrollBarShowing())
     return;
-  }
+  if (not m_bounds.hit(stylus->startX(), stylus->startY()))
+    return;
+
   m_scrollAnywhereSprite->setEnabled(true);
   m_scrollAnywhereSprite->setX(stylus->startX()-m_scrollAnywhereSprite->width()/2);
   m_scrollAnywhereSprite->setY(stylus->startY()-192-m_scrollAnywhereSprite->height()/2);
