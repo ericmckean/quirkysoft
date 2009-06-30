@@ -420,7 +420,6 @@ bool ScrollPane::stylusDownFirst(const Stylus * stylus)
     // call stylusDownFirst on children too
     FOR_EACH_CHILD(stylusDownFirst);
   }
-  showScrollAnywhere(stylus);
   // No! If this is invisible, unregister children so it doesn't do naughty
   // stylus stuff on things that are invisible.
   return false;
@@ -438,6 +437,7 @@ bool ScrollPane::stylusDownRepeat(const Stylus * stylus)
     return true;
   }
   FOR_EACH_CHILD(stylusDownRepeat);
+  showScrollAnywhere(stylus);
   return false;
 }
 
