@@ -14,6 +14,8 @@
   You should have received a copy of the GNU General Public License
   along with this program.  If not, see <http://www.gnu.org/licenses/>.
 */
+#include "utf8.h"
+#include <stdint.h>
 #include "TextAreaFactory.h"
 #include "TextArea.h"
 #include "TextContainer.h"
@@ -72,22 +74,24 @@ void TextContainer::layout()
   {
     textArea()->setSize(textArea()->textSize(m_text), textArea()->font().height());
   }
-  std::string appendText;
   std::string::const_iterator it(m_text.begin());
+  std::string::const_iterator end_it(m_text.end());
+  std::string::const_iterator start(m_text.begin());
   int size(0);
-  for (; it != m_text.end() and size <= textArea()->width(); ++it)
+  for (; it != end_it and size <= textArea()->width();)
   {
+    uint32_t value = utf8::next(it, end_it);
     Font::Glyph g;
-    textArea()->font().glyph(*it, g);
+    textArea()->font().glyph(value, g);
     if ((size + g.width) <= textArea()->width()) {
       size += g.width;
-      appendText += *it;
     } else {
       break;
     }
   }
+  std::string subs(start, it);
   textArea()->clearText();
-  textArea()->appendText(appendText);
+  textArea()->appendText(subs);
   if (width() == 0)
   {
     m_bounds.w = size + BORDER_WIDTH;
