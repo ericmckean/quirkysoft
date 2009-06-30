@@ -445,7 +445,7 @@ void Image::readGif()
   m_realWidth = gifFile->SWidth;
   m_realHeight = gifFile->SHeight;
   m_channels = 1;
-  m_bpp = m_channels;
+  m_bpp = m_channels * 8;
   unsigned int h = m_height;
   unsigned int w = m_width;
   calculateScale();
@@ -622,7 +622,7 @@ class JpegFileStream
       }
 
       jpeg_calc_output_dimensions(&cinfo);
-      m_scanLine = (unsigned char*)calloc(bytes_per_pixel()*width(), 1);
+      m_scanLine = (unsigned char*)calloc(components()*width(), 1);
       return jpeg_start_decompress(&cinfo);
     }
 
@@ -643,7 +643,7 @@ class JpegFileStream
 
     int bytes_per_pixel() const
     {
-      return cinfo.output_components;
+      return 1;
     }
 
     bool decode(void * &scanline)
@@ -753,7 +753,7 @@ void Image::readJpeg()
     void * scanline;
     if (not inputStream->decode(scanline))
       break;
-    m_bpp = inputStream->bytes_per_pixel();
+    m_bpp = inputStream->bytes_per_pixel() * 8;
     renderLine((const unsigned char*)scanline, line);
   }
   inputStream->done();
