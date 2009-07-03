@@ -65,11 +65,9 @@ Controller::Controller()
   TextAreaFactory::usePaletteName(font+".pal");
   m_view = new View(*m_document, *this);
   bool useCache(false);
-  bool clearCache(false);
   m_config->resource(Config::USECACHE, useCache);
-  m_config->resource(Config::CLEARCACHE, clearCache);
 
-  m_cache = new Cache(*m_document, useCache, clearCache);
+  m_cache = new Cache(*m_document, useCache);
   m_config->resource("redirects", m_maxRedirects);
   m_httpClient->setController(this);
 }
