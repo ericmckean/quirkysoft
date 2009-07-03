@@ -300,3 +300,12 @@ void File::utime(const char * path, const utimbuf * buf)
 {
   ::utime(path, buf);
 }
+
+time_t File::mtime(const char * path)
+{
+  struct stat buf;
+  buf.st_mtime = 0;
+  ::stat(toFat(path).c_str(), &buf);
+  return buf.st_mtime;
+}
+

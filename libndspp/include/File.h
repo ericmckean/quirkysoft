@@ -17,6 +17,7 @@
 #ifndef File_h_seen
 #define File_h_seen
 
+#include <time.h>
 #include <string>
 #include <vector>
 #include "util/classhelper.h"
@@ -83,6 +84,9 @@ namespace nds   // tolua_export
        */
       static void ls(const char * path, std::vector<std::string> & entries);
 
+
+      /** Get the time since last modified */
+      static time_t mtime(const char * path);
 
       //! Create a file object.
       File();
