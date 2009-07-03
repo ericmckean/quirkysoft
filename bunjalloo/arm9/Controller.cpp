@@ -22,6 +22,7 @@
 #include "Config.h"
 #include "ConfigParser.h"
 #include "CookieJar.h"
+#include "HeaderParser.h"
 #include "Language.h"
 #include "Controller.h"
 #include "Document.h"
@@ -413,11 +414,7 @@ URI Controller::downloadingFile() const
 void Controller::finishFetchHttp(const URI & uri)
 {
   // check the caching status
-  if (not m_document->shouldCache())
-  {
-    // oops, remove it
-    m_cache->remove(uri);
-  }
+  m_cache->setControl(m_document->uri(), m_document->headerParser().cacheControl());
   if (m_document->status() == Document::REDIRECTED and m_document->historyEnabled() and m_redirected < m_maxRedirects)
   {
     // redirected.

@@ -60,7 +60,6 @@ class HtmlDocument : public HtmlParser
     void dumpAF();
 
     void handleEOF();
-
   protected:
     virtual void handleStartEndTag(const std::string & tag, const AttributeVector & attrs);
     virtual void handleStartTag(const std::string & tag, const AttributeVector & attrs);

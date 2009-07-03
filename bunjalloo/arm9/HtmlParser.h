@@ -89,6 +89,8 @@ class HtmlParser
      */
     void setCacheFile(const std::string & filename);
 
+    void parseCacheControl(const std::string &value);
+
     enum MimeType
     {
       IMAGE_PNG,
