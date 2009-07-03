@@ -6,6 +6,9 @@
 class CacheControl
 {
   public:
+
+    CacheControl();
+
     /**
      * Set relative seconds since the last time a value was changed.  This may
      * seem a little weird, but it means the CacheControl itself doesn't have
@@ -29,11 +32,20 @@ class CacheControl
     void setExpires(const std::string &value);
 
     /**
+     * Reset cache flags to default.
+     */
+    void reset();
+
+    /**
      * Find out if we should be caching the page based on what we know.
      * @returns true if we should cache the page
      */
     bool shouldCache() const;
   private:
+    unsigned int m_maxAge;
+    unsigned int m_time;
+    bool m_noCache;
+    bool m_noStore;
 };
 
 #endif

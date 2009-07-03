@@ -258,6 +258,7 @@ def configure(conf):
   conf.check_tool('eclipse_cdt', tooldir=waf_tools)
   conf.env['WITH_SDL'] = True
   conf.define('sprintf_platform', 'siprintf', quote=False)
+  conf.define('sscanf_platform', 'siscanf', quote=False)
   config_h = 'bunjalloo/bwt/include/config_defs.h'
   conf.write_config_header(config_h)
   if Options.options.without_sdl:
@@ -275,6 +276,7 @@ def configure(conf):
 
   conf.setenv('sdl')
   conf.define('sprintf_platform', 'sprintf', quote=False)
+  conf.define('sscanf_platform', 'sscanf', quote=False)
   conf.define('DATADIR', DATADIR)
   sdl_tool_check(conf)
   try:

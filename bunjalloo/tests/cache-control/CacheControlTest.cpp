@@ -14,16 +14,66 @@
   You should have received a copy of the GNU General Public License
   along with this program.  If not, see <http://www.gnu.org/licenses/>.
 */
+#define private public
 #include "CacheControl.h"
+#undef private
 #include <gtest/gtest.h>
 
 TEST(CacheControl, max_age)
 {
   CacheControl cc;
-  cc.setSeconds(0);
   cc.setCacheControl("max-age=0");
   cc.setSeconds(1);
 
+  EXPECT_EQ(0U, cc.m_maxAge);
+  EXPECT_FALSE(cc.shouldCache());
+
+  cc.setCacheControl("max-age=3600");
+  cc.setSeconds(60);
+  EXPECT_EQ(3600U, cc.m_maxAge);
+  EXPECT_TRUE(cc.shouldCache());
+
+  cc.setSeconds(3760);
   EXPECT_FALSE(cc.shouldCache());
 }
 
+TEST(CacheControl, bad_max_age)
+{
+  CacheControl cc;
+  cc.setCacheControl("max-age=ch");
+  cc.setSeconds(1);
+
+  EXPECT_EQ(0U, cc.m_maxAge);
+  EXPECT_FALSE(cc.shouldCache());
+}
+
+TEST(CacheControl, no_cache)
+{
+  CacheControl cc;
+  cc.setCacheControl("no-cache");
+  EXPECT_FALSE(cc.shouldCache());
+
+  cc.setCacheControl("max-age=3600");
+  cc.setSeconds(60);
+
+  EXPECT_TRUE(cc.shouldCache());
+  cc.setCacheControl("no-cache");
+  EXPECT_FALSE(cc.shouldCache());
+}
+
+TEST(CacheControl, public_no_cache)
+{
+  CacheControl cc;
+  cc.setCacheControl("public,max-age=0");
+  cc.setSeconds(1);
+  EXPECT_FALSE(cc.shouldCache());
+}
+
+TEST(CacheControl, reset)
+{
+  CacheControl cc;
+  cc.setCacheControl("no-cache");
+  EXPECT_FALSE(cc.shouldCache());
+  cc.reset();
+  EXPECT_TRUE(cc.shouldCache());
+}

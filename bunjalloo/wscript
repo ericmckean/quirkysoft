@@ -25,7 +25,7 @@ def build(bld):
   arm9p = bld.new_task_gen('cxx', 'program')
   arm9p.install_path = 0
   arm9p.source = 'arm9/Main.cpp'
-  arm9p.uselib_local = APPNAME+' ndspp bwt '
+  arm9p.uselib_local = APPNAME+' bwt ndspp '
   arm9p.uselib = 'HOST'
   arm9elfname = APPNAME+'.elf'
   arm9p.target = arm9elfname
