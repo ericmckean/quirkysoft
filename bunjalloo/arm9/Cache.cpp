@@ -26,16 +26,12 @@
 
 const char * Cache::CACHE_DIR("/"DATADIR"/cache");
 
-Cache::Cache(Document & document, bool useCache, bool clearCache)
+Cache::Cache(Document & document, bool useCache)
 : m_document(document), m_useCache(useCache)
 {
   m_fileIds.clear();
   if (m_useCache)
   {
-    if (clearCache and nds::File::exists(CACHE_DIR) != nds::File::F_NONE)
-    {
-      nds::File::rmrf(CACHE_DIR);
-    }
     if (nds::File::exists(CACHE_DIR) == nds::File::F_NONE and not nds::File::mkdir(CACHE_DIR) )
     {
       // didn't exist, nor can we make it..

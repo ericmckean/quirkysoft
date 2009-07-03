@@ -33,9 +33,8 @@ class Cache
     /** Create the cache.
      * @param document needed for setCacheFile, so doc model persists itself.
      * @param useCache use a cache or not.
-     * @param clearCache clear the cache at start or not.
      */
-    Cache(Document & document, bool useCache, bool clearCache);
+    Cache(Document & document, bool useCache);
 
     /** Does the given URI live in the cache already?
      * @param uri the uri to check.
