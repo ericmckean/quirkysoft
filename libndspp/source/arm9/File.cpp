@@ -267,3 +267,10 @@ void File::utime(const char * path, const utimbuf * buf)
   */
 }
 
+
+time_t nds::File::mtime(const char * path) {
+  struct stat buf;
+  buf.st_mtime = 0;
+  ::stat(path, &buf);
+  return buf.st_mtime;
+}

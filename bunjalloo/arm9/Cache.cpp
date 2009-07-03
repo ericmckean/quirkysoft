@@ -14,8 +14,11 @@
   You should have received a copy of the GNU General Public License
   along with this program.  If not, see <http://www.gnu.org/licenses/>.
 */
+#include <time.h>
+#include <stdio.h>
 #include "Cache.h"
 #include "CacheControl.h"
+#include "HeaderParser.h"
 #include "Document.h"
 #include "URI.h"
 #include "File.h"
@@ -121,21 +124,30 @@ bool Cache::load(const URI & uri)
   {
     m_document.setCacheFile("");
     std::string cacheFile(uri2CacheFile(uri));
-    if (contains(uri) and nds::File::exists(uri2CacheFile(uri).c_str()) == nds::File::F_REG)
+    if (contains(uri) and nds::File::exists(cacheFile.c_str()) == nds::File::F_REG)
     {
       add(uri);
       if (m_document.historyEnabled())
         m_document.reset();
       feed(cacheFile+".hdr");
       m_document.appendData("\r\n", 2);
-      feed(cacheFile);
-      return true;
+      // now check the cache control header
+      CacheControl control(m_document.headerParser().cacheControl());
+      time_t now(::time(0));
+      time_t then(nds::File::mtime(cacheFile.c_str()));
+      control.setSeconds(now - then);
+      printf("now vs cache: %d %d\n", now, then);
+      if (control.shouldCache()) {
+        printf("Read from cache %s\n", uri.asString().c_str());
+        feed(cacheFile);
+        return true;
+      }
+      printf("reloaded %s\n", uri.asString().c_str());
+      if (m_document.historyEnabled())
+        m_document.reset();
     }
-    else
-    {
-      add(uri);
-      m_document.setCacheFile(cacheFile);
-    }
+    add(uri);
+    m_document.setCacheFile(cacheFile);
   }
   return false;
 }
@@ -151,7 +163,10 @@ std::string Cache::fileName(const URI & uri) const
 
 void Cache::setControl(const std::string &uri, const CacheControl &control)
 {
+  /*
   if (not control.shouldCache()) {
+    printf("Explicitly remove from cache %s\n", uri.c_str());
     remove(uri);
   }
+  */
 }

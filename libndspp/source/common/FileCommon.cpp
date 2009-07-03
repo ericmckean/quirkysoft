@@ -222,4 +222,3 @@ void nds::File::lsCommon(const char * path, std::vector<std::string> & entries)
   }
   ::closedir(dir);
 }
-

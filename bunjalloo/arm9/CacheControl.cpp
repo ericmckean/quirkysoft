@@ -10,8 +10,11 @@ CacheControl::CacheControl()
   m_noCache(false),
   m_noStore(false)
 {}
+
 void CacheControl::reset()
 {
+  if (!this) return;
+
   m_noCache = false;
   m_noStore = false;
   m_time = 0;
