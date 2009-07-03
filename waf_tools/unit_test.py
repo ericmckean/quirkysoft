@@ -34,7 +34,7 @@ def setup(bld):
     if Options.options.verbose or returncode:
       if task.run_from_srcdir:
         # this sorts out jump-to-errors in e.g. vim
-        print "waf: Entering directory `%s'" % (srcdir)
+        print "waf: Entering directory `%s'" % (bld.bdir)
       print process_pipe.stdout.read()
     out = 'FAILED'
     if returncode == 0:
