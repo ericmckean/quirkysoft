@@ -19,10 +19,11 @@
 
 
 #include <string>
-#include <map>
+#include <set>
 
 class Document;
 class URI;
+class CacheControl;
 /** Store web pages on disk to save requesting them again. */
 class Cache
 {
@@ -71,10 +72,16 @@ class Cache
      */
     inline bool useCache() const;
 
+    /** Set the cache control headers for a URI.
+     * @param uri the URI in question
+     * @param control the Cache-Control/Expires headers.
+     */
+    void setControl(const std::string &uri, const CacheControl &control);
+
   private:
     Document & m_document;
     bool m_useCache;
-    typedef std::map<int, int> CachedMap;
+    typedef std::set<int> CachedMap;
     CachedMap m_fileIds;
 
     void feed(const std::string & filename);

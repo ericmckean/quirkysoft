@@ -22,6 +22,7 @@
 #include "HeaderParser.h"
 #include "HtmlElement.h"
 #include "CookieJar.h"
+#include "CacheControl.h"
 #include "URI.h"
 
 using namespace std;
@@ -44,7 +45,7 @@ Document::Document():
   m_amount(0),
   m_cookieJar(new CookieJar),
   m_htmlDocument(new HtmlDocument),
-  m_headerParser(new HeaderParser(m_htmlDocument,m_cookieJar)),
+  m_headerParser(new HeaderParser(m_htmlDocument,m_cookieJar, new CacheControl())),
   m_headerListener(new DocumentHeaderListener(*this)),
   m_historyEnabled(true)
 {
@@ -394,11 +395,6 @@ int & Document::currentHistoryPosition()
 const int & Document::currentHistoryPosition() const
 {
   return m_historyPosition->second;
-}
-
-bool Document::shouldCache() const
-{
-  return m_headerParser->shouldCache();
 }
 
 unsigned int Document::dataExpected() const

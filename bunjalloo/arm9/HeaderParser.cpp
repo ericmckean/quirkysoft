@@ -15,16 +15,17 @@
   along with this program.  If not, see <http://www.gnu.org/licenses/>.
 */
 #include <assert.h>
+#include <zlib.h>
 #include <cstdlib>
 #include <cstring>
 #include <algorithm>
+#include "CacheControl.h"
 #include "CookieJar.h"
 #include "File.h"
 #include "HeaderParser.h"
 #include "HtmlElement.h"
 #include "HtmlParser.h"
 #include "URI.h"
-#include <zlib.h>
 
 using namespace std;
 static const string HTTP1("HTTP/1.");
@@ -33,18 +34,22 @@ static const unsigned char FIELD_VALUE_SEP(':');
 static const int ZWINDOW_SIZE(47);
 static const unsigned int WINSIZE(16384);
 
-HeaderParser::HeaderParser(HtmlParser * htmlParser, CookieJar * cookieJar):
+HeaderParser::HeaderParser(HtmlParser * htmlParser,
+    CookieJar * cookieJar,
+    CacheControl *cacheControl
+    )
+:
   m_uri(*(new URI())),
   m_value(0),
   m_position(0),
   m_end(0),
   m_lastPosition(0),
   m_gzip(false),
-  m_cache(true),
   m_httpStatusCode(200),
   m_expected(0),
   m_htmlParser(htmlParser),
   m_cookieJar(cookieJar),
+  m_cacheControl(cacheControl),
   m_headerListener(0),
   m_stream(new z_stream_s),
   m_window(new char[WINSIZE])
@@ -52,7 +57,9 @@ HeaderParser::HeaderParser(HtmlParser * htmlParser, CookieJar * cookieJar):
   reset();
 }
 HeaderParser::~HeaderParser()
-{ }
+{
+  delete m_cacheControl;
+}
 
 void HeaderParser::setListener(HeaderListener * listener)
 {
@@ -69,7 +76,6 @@ void HeaderParser::reset()
   m_redirect = "";
   m_chunked = false;
   m_gzip = false;
-  m_cache = true;
   m_chunkLength = 0;
   m_chunkLengthString = "";
   m_htmlParser->setToStart();
@@ -177,13 +183,11 @@ void HeaderParser::handleHeader(const std::string & field, const std::string & v
   }
   else if (field == "cache-control")
   {
-    if (value.find("no-cache") != string::npos)
-    {
-      if (not m_cacheFile.empty())
-      {
-        m_cache = false;
-      }
-    }
+    m_cacheControl->setCacheControl(value);
+  }
+  else if (field == "expires")
+  {
+    m_cacheControl->setExpires(value);
   }
   else if (field == "set-cookie")
   {
@@ -452,7 +456,6 @@ void HeaderParser::setCacheFile(const std::string & cacheFile)
   {
     nds::File f;
     f.open(cacheFile.c_str(), "w");
-    m_cache = true;
   }
 }
 
@@ -471,7 +474,7 @@ void HeaderParser::addToCacheFile(const std::string & text)
   }
 }
 
-bool HeaderParser::shouldCache() const
+const CacheControl &HeaderParser::cacheControl() const
 {
-  return m_cache;
+  return *m_cacheControl;
 }

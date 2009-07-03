@@ -92,9 +92,9 @@ void Cache::feed(const std::string & filename)
 
 void Cache::add(const URI & uri)
 {
-  m_fileIds[uri.crc32int()] = 1;
+  m_fileIds.insert(uri.crc32int());
   const URI & noint(uri.navigateTo(uri.fileName()));
-  m_fileIds[noint.crc32int()] = 1;
+  m_fileIds.insert(noint.crc32int());
 }
 
 void Cache::remove(const URI & uri)
@@ -146,4 +146,8 @@ std::string Cache::fileName(const URI & uri) const
     return uri2CacheFile(uri);
   }
   return "";
+}
+
+void Cache::setControl(const std::string &uri, const CacheControl &control)
+{
 }

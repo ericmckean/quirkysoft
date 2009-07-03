@@ -40,7 +40,7 @@ class ParserTest : public testing::Test
       m_data = 0;
       m_length = 0;
       m_htmlParser = new HtmlParserDriver();
-      m_headerParser = new HeaderParser(m_htmlParser, 0);
+      m_headerParser = new HeaderParser(m_htmlParser, 0, 0);
     }
 
     void readFile(const char * fileName);

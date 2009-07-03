@@ -19,9 +19,10 @@
 #include <string>
 
 
-class HtmlParser;
-class HtmlElement;
+class CacheControl;
 class CookieJar;
+class HtmlElement;
+class HtmlParser;
 class URI;
 
 class HeaderListener
@@ -41,7 +42,7 @@ class HeaderParser
      * @param html a pointer to the HtmlParser for parsing the rest of the message.
      * @param cookieJar a pointer to the class that manages the cookies.
      */
-    HeaderParser(HtmlParser * html, CookieJar * cookieJar);
+    HeaderParser(HtmlParser * html, CookieJar * cookieJar, CacheControl *cacheControl);
 
     /** Destructor.*/
     ~HeaderParser();
@@ -85,9 +86,9 @@ class HeaderParser
     void setCacheFile(const std::string & cacheFile);
     const std::string & cacheFile() const;
 
-    bool shouldCache() const;
-
     void setListener(HeaderListener * listener);
+
+    const CacheControl &cacheControl() const;
 
   private:
     enum HeaderState
@@ -116,7 +117,6 @@ class HeaderParser
     std::string m_redirect;
     bool m_chunked;
     bool m_gzip;
-    bool m_cache;
     int m_chunkLength;
     std::string m_chunkLengthString;
     unsigned int m_httpStatusCode;
@@ -124,6 +124,7 @@ class HeaderParser
 
     HtmlParser* m_htmlParser;
     CookieJar * m_cookieJar;
+    CacheControl * m_cacheControl;
     HeaderListener * m_headerListener;
 
     std::string m_cacheFile;
