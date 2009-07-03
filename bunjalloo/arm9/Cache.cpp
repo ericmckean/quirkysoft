@@ -15,6 +15,7 @@
   along with this program.  If not, see <http://www.gnu.org/licenses/>.
 */
 #include "Cache.h"
+#include "CacheControl.h"
 #include "Document.h"
 #include "URI.h"
 #include "File.h"
@@ -150,4 +151,7 @@ std::string Cache::fileName(const URI & uri) const
 
 void Cache::setControl(const std::string &uri, const CacheControl &control)
 {
+  if (not control.shouldCache()) {
+    remove(uri);
+  }
 }
