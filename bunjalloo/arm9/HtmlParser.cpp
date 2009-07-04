@@ -343,7 +343,8 @@ void HtmlParserImpl::handleCloseTagOpen()
     if (nextFew.substr(0, nextFew.length()-1) == m_lastStartTagToken)
     {
       // check next
-      switch (nextFew[nextFew.length()-1])
+      int check = nextFew[nextFew.length()-1];
+      switch (check)
       {
         case 0x0009:
         case 0x000A:
