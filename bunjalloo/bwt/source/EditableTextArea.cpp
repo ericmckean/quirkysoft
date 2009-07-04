@@ -141,13 +141,12 @@ void EditableTextArea::deleteChar()
 void EditableTextArea::recalculateCaret()
 {
 
-  std::string & line(m_document[m_caretLine]);
   m_caretPixelX = -1;
-  int oldLength = line.length();
+  int oldLength = characters(m_caretLine);
   int oldPrevLength = -1;
   if (m_caretLine > 0)
   {
-    oldPrevLength = m_document[m_caretLine-1].length();
+    oldPrevLength = characters(m_caretLine-1);
   }
   // redo the text layout
   layoutText();
@@ -161,12 +160,12 @@ void EditableTextArea::recalculateCaret()
   if (m_caretLine == (int)m_document.size())
   {
     m_caretLine--;
-    m_caretChar = m_document[m_caretLine].length();
+    m_caretChar = characters(m_caretLine);
     m_caretPixelX = -1;
   }
   else
   {
-    int newLength = m_document[m_caretLine].length();
+    int newLength = characters(m_caretLine);
 
     // work out if the caret should overflow
     // also, what if it "underflows"?
@@ -198,6 +197,17 @@ void EditableTextArea::recalculateCaret()
   // ensure m_document is never empty.
   currentLine();
 }
+
+static std::string insertAt(const std::string &line, int position, const std::string &extra)
+{
+  std::string::const_iterator it(line.begin());
+  utf8::unchecked::advance(it, position);
+  std::string start(line.begin(), it);
+  start.append(extra);
+  start.append(it, line.end());
+  return start ;
+}
+
 void EditableTextArea::appendText(const std::string & unicodeString)
 {
   /* FIXME - virtual TextArea::appendText
@@ -215,7 +225,7 @@ void EditableTextArea::appendText(const std::string & unicodeString)
     if (not listener())
     {
       m_caretLine = m_document.size()-1;
-      m_caretChar = m_document[m_caretLine].size();
+      m_caretChar = characters(m_caretLine);
       m_caretPixelX = -1;
     }
   }
@@ -226,16 +236,18 @@ void EditableTextArea::appendText(const std::string & unicodeString)
     // the m_caretLine should increase by one and reshuffle the line.
     std::string & line(m_document[m_caretLine]);
     // Check we don't walk off the edge, just in case...
-    if (m_caretChar > (int)line.length())
+    int end = characters(m_caretLine);
+    if (m_caretChar > end)
     {
-      m_caretChar = line.length();
+      m_caretChar = end;
     }
     if (line.empty())
     {
       line.append(unicodeString);
     }
-    else
-      line.insert(m_caretChar, unicodeString);
+    else {
+      line = insertAt(line, m_caretChar, unicodeString);
+    }
     if (unicodeString.length() == 1 and unicodeString[0] == '\n')
     {
       m_appendedNewLine = true;
@@ -243,7 +255,7 @@ void EditableTextArea::appendText(const std::string & unicodeString)
     else
     {
       m_appendedNewLine = false;
-      m_caretChar++;
+      m_caretChar += utf8::distance(unicodeString.begin(), unicodeString.end());
     }
     recalculateCaret();
   }
@@ -300,15 +312,19 @@ void EditableTextArea::setCaret(int x, int y)
     m_caretChar = 0;
     m_caretPixelX = -1;
     std::string tmp;
+    size_t lineLength(characters(m_caretLine));
     if (not echoText())
     {
-      std::string(m_document[m_caretLine].length(),'*').swap(tmp);
+      std::string(lineLength, '*').swap(tmp);
     }
     const std::string & line(echoText()?m_document[m_caretLine]:tmp);
     int size = 0;
-    for (int i = 0; i < (int)line.length(); ++i)
+    int character = 0;
+    std::string::const_iterator end(line.end());
+    for (std::string::const_iterator it(line.begin());
+        it != end; character++)
     {
-      unsigned int value(line[i]);
+      unsigned int value(utf8::next(it, end));
       if (value == 0xfffd)
         value = '?';
       Font::Glyph g;
@@ -317,12 +333,12 @@ void EditableTextArea::setCaret(int x, int y)
       if (size > x)
       {
         size -= g.width;
-        m_caretChar = i;
+        m_caretChar = character;
         m_caretPixelX = size;
         return;
       }
     }
-    m_caretChar = line.length();
+    m_caretChar = lineLength;
     m_caretPixelX = size;
   }
 }

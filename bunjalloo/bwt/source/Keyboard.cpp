@@ -15,6 +15,7 @@
   along with this program.  If not, see <http://www.gnu.org/licenses/>.
 */
 #include <cstring>
+#include <utf8.h>
 #include "libnds.h"
 #include "Button.h"
 #include "Canvas.h"
@@ -36,12 +37,8 @@ static const char * LETTERS          = "qwertyuiopasdfghjklzxcvbnm,./[]:\"";
 static const char * LETTERS_SHIFT    = "QWERTYUIOPASDFGHJKLZXCVBNM<>?{};'";
 
 // QWERTYUIOPASDFGHJKLZXCVBNM{};'<>?
-// ~àá\ãäåèéêëìíîïñðòóôõöùúûü¿£¥ýþç¡
-// ÀÀÁÂÃÄÅÈÉÊÝÞËÌÍÎÏÑÐÇßÒÓÔÕÖÙÚÛÜ¢|ÿ
-static const char * EXTRA =
-"~\\\xe1\xe2\xe4\xe5\xe6\xe8\xe9\xea\xeb\xec\xed\xee\xef\xf0\xf1\xf2\xf3\xf4\xf5\xf6\xf9\xfa\xfb\xfc\xbf\xa3\xa5\xfd\xfe\xe7\xa1";
-static const char * EXTRA_SHIFT =
-"\xc0\xc1\xc2\xc3\xc4\xc5\xc6\xc8\xc9\xca\xcb\xcc\xcd\xce\xcf\xd0\xd1\xd2\xd3\xd4\xd5\xd6\xd9\xda\xdb\xdc\xa2\x7c\xff\xdd\xde\xc7\xdf";
+static const char * EXTRA = "~\\àáãäåèéêëìíîïñðòóôõöùúûü¿£¥ýþç¡";
+static const char * EXTRA_SHIFT = "ÀÀÁÂÃÄÅÈÉÊÝÞËÌÍÎÏÑÐÇßÒÓÔÕÖÙÚÛÜ¢|ÿ";
 
 static const std::string BACKSPACE_STR("BkSp.");
 static const std::string CAPS_STR("Cap");
@@ -215,11 +212,14 @@ void Keyboard::createSpecialKey(int x, int y, int w, int h, const std::string & 
 void Keyboard::updateRow(const char * newText, int keys, int offset)
 {
   // TODO: fix this to use utf-8
+  const char *it(newText);
+  const char *end(newText + strlen(newText));
   for (int i = 0; i < keys; ++i)
   {
     Button & key(*(Button*)m_children[i+offset]);
-    char uchar[] = { newText[i]&0xff, 0};
-    key.setText(std::string(uchar));
+    std::string uchar;
+    utf8::unchecked::append(utf8::next(it, end), back_inserter(uchar));
+    key.setText(uchar);
   }
 }
 
@@ -429,7 +429,7 @@ void Keyboard::updateLayout(const char * text, const char * numbers)
   updateRow(text, size, start);
   // now the odd keys
   // special, end of chars. [] and /"
-  text += size;
+  utf8::unchecked::advance(text, size);
   start += size;
   updateRow(text, ROW4_LENGTH, start);
 

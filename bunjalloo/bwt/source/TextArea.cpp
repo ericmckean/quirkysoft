@@ -15,6 +15,7 @@
   along with this program.  If not, see <http://www.gnu.org/licenses/>.
 */
 #include <assert.h>
+#include <utf8.h>
 #include "libnds.h"
 #include "ndspp.h"
 #include "File.h"
@@ -443,3 +444,8 @@ std::string TextArea::asString() const
   return returnString;
 }
 
+size_t TextArea::characters(size_t line) const
+{
+  return utf8::distance(m_document[line].begin(),
+      m_document[line].end());
+}
