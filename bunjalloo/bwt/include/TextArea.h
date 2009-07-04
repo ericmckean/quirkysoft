@@ -92,6 +92,8 @@ class TextArea : public Component
      */
     int textSize(const std::string & unicodeString) const;
 
+    size_t characters(size_t line) const;
+
     /** A hack for debugging.
      * @return the current document converted to a char string.
      */

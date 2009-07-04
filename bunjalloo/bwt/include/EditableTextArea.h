@@ -75,6 +75,7 @@ class EditableTextArea: public TextArea, public TextEntryI
 
   private:
     int m_caretLine;
+    // the character in the current line (not the byte)
     int m_caretChar;
     int m_caretPixelX;
     bool m_appendedNewLine;
