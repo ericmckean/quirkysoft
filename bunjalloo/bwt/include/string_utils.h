@@ -44,4 +44,10 @@ std::string nextWordAdvanceWord(
     bool parseNewline);
 
 size_t findLastNotOf(const std::string &str, const std::string &delim);
+
+/** Remove the last character from the string */
+void removeLastCharacter(std::string &line);
+
+/** Remove the character at the given position from the string */
+void removeOneCharacter(std::string &line, int pos);
 #endif

@@ -99,3 +99,44 @@ TEST(TextTest, ReallyLongLine) {
   result = nextWordAdvanceWord(&it, end_it, false);
   EXPECT_EQ(std::string("gdata-python-client]"), result);
 }
+
+TEST(TextTest, removes_last_character)
+{
+  std::string s("some utf8 texts");
+  removeLastCharacter(s);
+  EXPECT_EQ("some utf8 text", s);
+}
+
+TEST(TextTest, removes_last_character_unicode)
+{
+  std::string s("some utf8 text with ñ");
+  removeLastCharacter(s);
+  EXPECT_EQ("some utf8 text with ", s);
+}
+
+TEST(TextTest, removes_character_inline)
+{
+  std::string s("some utf8 text");
+  removeOneCharacter(s, 2);
+  EXPECT_EQ("soe utf8 text", s);
+}
+
+TEST(TextTest, removes_character_zeroth)
+{
+  std::string s("foo");
+  removeOneCharacter(s, -1);
+  EXPECT_EQ("foo", s);
+
+  removeOneCharacter(s, 0);
+  EXPECT_EQ("oo", s);
+}
+
+TEST(TextTest, removes_character_inline_unicode)
+{
+  std::string s("some ñ text");
+  removeOneCharacter(s, 6);
+  EXPECT_EQ("some ñtext", s);
+
+  removeOneCharacter(s, 5);
+  EXPECT_EQ("some text", s);
+}
