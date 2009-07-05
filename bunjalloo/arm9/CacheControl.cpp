@@ -61,4 +61,24 @@ bool CacheControl::shouldCache() const
     return false;
   }
   return m_maxAge >= m_time;
+#if 0
+http://www.w3.org/Protocols/rfc2616/rfc2616-sec13.html#sec13.2
+  response_time = time(0);
+  request_time = time(0) at time of request
+  date_value = Date: header from response
+  age_value = Age: header from response
+  max_age_value = max-age: header from response
+
+  apparent_age = max(0, response_time - date_value);
+  corrected_received_age = max(apparent_age, age_value);
+  response_delay = response_time - request_time;
+  corrected_initial_age = corrected_received_age + response_delay;
+  resident_time = now - response_time;
+  current_age   = corrected_initial_age + resident_time;
+  if have max_age:
+    freshness_lifetime = max_age_value
+  else
+    freshness_lifetime = expires_value - date_value
+  response_is_fresh = (freshness_lifetime > current_age)
+#endif
 }
