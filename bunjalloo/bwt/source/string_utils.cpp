@@ -151,3 +151,38 @@ size_t findLastNotOf(const std::string &str, const std::string &delim) {
   }
   return last;
 }
+
+void removeLastCharacter(std::string &line)
+{
+  std::string::iterator last(line.begin());
+  std::string::iterator end(line.end());
+
+  for (std::string::iterator it(line.begin());
+      it != end; )
+  {
+    last = it;
+    utf8::next(it, end);
+  }
+  line.erase(last, end);
+}
+
+void removeOneCharacter(std::string &line, int pos)
+{
+  if (pos < 0)
+    return;
+  std::string::iterator last(line.begin());
+  std::string::iterator end(line.end());
+
+  int i(0);
+  std::string::iterator it(line.begin());
+  for (;
+      it != end; ++i)
+  {
+    last = it;
+    utf8::next(it, end);
+    if (i == pos) {
+      break;
+    }
+  }
+  line.erase(last, it);
+}

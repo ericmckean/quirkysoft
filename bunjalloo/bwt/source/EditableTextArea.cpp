@@ -23,6 +23,7 @@
 #include "TextListener.h"
 #include "utf8.h"
 #include "WidgetColors.h"
+#include "string_utils.h"
 using nds::Canvas;
 using nds::Color;
 
@@ -72,8 +73,7 @@ void EditableTextArea::paint(const nds::Rectangle & clip)
         std::string tmp;
         if (not echoText())
         {
-          const std::string &line(m_document[m_caretLine]);
-          std::string(utf8::distance(line.begin(), line.end()), '*').swap(tmp);
+          std::string(characters(m_caretLine), '*').swap(tmp);
         }
         const std::string &line(echoText()?m_document[m_caretLine]:tmp);
         std::string::const_iterator it(line.begin());
@@ -101,13 +101,13 @@ void EditableTextArea::text(std::string & returnString) const
 
 void EditableTextArea::deleteChar()
 {
-  // delete a single char
+  // delete a single character
   if (m_caretLine == -1)
   {
     std::string & line(currentLine());
     if (not line.empty())
     {
-      line.erase(line.length()-1, 1);
+      removeLastCharacter(line);
     }
   }
   else
@@ -115,7 +115,7 @@ void EditableTextArea::deleteChar()
     if (m_caretChar == 0) {
       if (m_caretLine) {
         m_caretLine--;
-        m_caretChar = m_document[m_caretLine].length();
+        m_caretChar = characters(m_caretLine);
       }
       else
       {
@@ -123,7 +123,6 @@ void EditableTextArea::deleteChar()
       }
     }
 
-    std::string & line(m_document[m_caretLine]);
     m_caretChar -= 1;
     if (m_caretChar == -1)
     {
@@ -131,7 +130,7 @@ void EditableTextArea::deleteChar()
     }
     else
     {
-      line.erase(m_caretChar, 1);
+      removeOneCharacter(m_document[m_caretLine], m_caretChar);
     }
     recalculateCaret();
   }
