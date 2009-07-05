@@ -47,7 +47,7 @@ void EditableTextArea::printu(const std::string & unicodeString)
   }
   else
   {
-    std::string tmp(unicodeString.length(), '*');
+    std::string tmp(utf8::distance(unicodeString.begin(), unicodeString.end()), '*');
     TextArea::printu(tmp);
   }
 }
@@ -139,7 +139,6 @@ void EditableTextArea::deleteChar()
 
 void EditableTextArea::recalculateCaret()
 {
-
   m_caretPixelX = -1;
   int oldLength = characters(m_caretLine);
   int oldPrevLength = -1;
@@ -185,7 +184,7 @@ void EditableTextArea::recalculateCaret()
     // check for underflow condition
     int newPrevLength = -1;
     if (m_caretLine > 0)
-      newPrevLength = m_document[m_caretLine-1].length();
+      newPrevLength = characters(m_caretLine-1);
     if (oldPrevLength != -1 and newPrevLength != -1 and oldPrevLength < newPrevLength)
     {
       // the previous line has eaten some of our text
