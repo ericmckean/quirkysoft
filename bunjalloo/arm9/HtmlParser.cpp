@@ -420,10 +420,8 @@ void HtmlParserImpl::emitTagToken()
   }
   for_each( m_tagAttributes.begin(), m_tagAttributes.end(), delete_ptr());
   m_tagAttributes.clear();
-  if (m_attribute) {
-    delete m_attribute;
-    m_attribute = 0;
-  }
+  delete m_attribute;
+  m_attribute = 0;
 }
 void HtmlParserImpl::emitComment()
 {
