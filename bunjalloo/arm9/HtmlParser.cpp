@@ -464,6 +464,15 @@ void HtmlParserImpl::handleTagName()
 void HtmlParserImpl::addAttribute()
 {
   if (m_attribute) {
+    if (m_encoding == HtmlParser::ISO_ENCODING) {
+      std::string tmp;
+      for (std::string::const_iterator it(m_attribute->value.begin());
+          it != m_attribute->value.end();
+          ++it) {
+        utf8::unchecked::append((*it)&0xff, back_inserter(tmp));
+      }
+      m_attribute->value.swap(tmp);
+    }
     m_tagAttributes.push_back(m_attribute);
   }
   m_attribute = 0;
