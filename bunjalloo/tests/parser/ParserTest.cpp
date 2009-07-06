@@ -112,7 +112,7 @@ TEST_F(ParserTest, Iso)
   HtmlParser::Encoding expected = HtmlParser::ISO_ENCODING;
   EXPECT_EQ( expected , result);
   int dataSize =  m_htmlParser->m_data.length();
-  int expectedDataSize = 6;
+  int expectedDataSize = 7;
   EXPECT_EQ( expectedDataSize , dataSize);
 }
 
@@ -124,7 +124,7 @@ TEST_F(ParserTest, Utf8)
   HtmlParser::Encoding expected = HtmlParser::UTF8_ENCODING;
   EXPECT_EQ( expected , result);
   int dataSize =  m_htmlParser->m_data.length();
-  int expectedDataSize = 6;
+  int expectedDataSize = 7;
   EXPECT_EQ( expectedDataSize , dataSize);
 }
 
@@ -199,6 +199,32 @@ TEST_F(ParserTest, BogusComment)
   m_headerParser->feed(m_data, m_length);
   int size = m_htmlParser->m_tags.size();
   EXPECT_EQ( 2 , size);
+}
+
+TEST_F(ParserTest, bogus_input_select)
+{
+  readFile("bogus_select.txt");
+  m_headerParser->feed(m_data, m_length);
+  int size = m_htmlParser->m_attributes.size();
+  EXPECT_EQ(3 , size);
+
+  const AttributeVector &inputAttrs(m_htmlParser->m_attributes[2]);
+  EXPECT_EQ(2 , inputAttrs.size());
+
+  std::string expectedInputValueUtf8("Iniciar Sesión");
+  EXPECT_EQ(expectedInputValueUtf8 , inputAttrs[1]->value);
+}
+
+TEST_F(ParserTest, iso_entity_mix)
+{
+  // regression test for the above code - shouldn't double encode utf8
+  readFile("iso_entity.txt");
+  m_headerParser->feed(m_data, m_length);
+  int size = m_htmlParser->m_attributes.size();
+  EXPECT_EQ(1 , size);
+
+  const std::string &text(m_htmlParser->m_data);
+  EXPECT_EQ("€ óóo" , text);
 }
 
 /*
