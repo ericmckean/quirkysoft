@@ -415,6 +415,7 @@ void View::preferences()
   // add cookie + edit
   // add shortcut + edit
   setToolbar(m_prefsToolbar);
+  editConfig();
 }
 
 void View::makeNiceFileName(std::string & fileName)
