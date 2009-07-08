@@ -129,16 +129,14 @@ bool Cache::load(const URI & uri)
       m_document.appendData("\r\n", 2);
       // now check the cache control header
       CacheControl control(m_document.headerParser().cacheControl());
-      time_t now(::time(0));
       time_t then(nds::File::mtime(cacheFile.c_str()));
-      control.setSeconds(now - then);
-      printf("now vs cache: %d %d\n", now, then);
-      if (control.shouldCache()) {
-        printf("Read from cache %s\n", uri.asString().c_str());
+      control.setResponseTime(then);
+
+      time_t now(::time(0));
+      if (control.shouldCache(now)) {
         feed(cacheFile);
         return true;
       }
-      printf("reloaded %s\n", uri.asString().c_str());
       if (m_document.historyEnabled())
         m_document.reset();
     }

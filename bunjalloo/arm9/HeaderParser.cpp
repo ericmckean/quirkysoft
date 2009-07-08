@@ -26,6 +26,7 @@
 #include "HtmlElement.h"
 #include "HtmlParser.h"
 #include "URI.h"
+#include "DateUtils.h"
 
 using namespace std;
 static const string HTTP1("HTTP/1.");
@@ -188,7 +189,15 @@ void HeaderParser::handleHeader(const std::string & field, const std::string & v
   }
   else if (field == "expires")
   {
-    m_cacheControl->setExpires(value);
+    m_cacheControl->setExpires(DateUtils::parseDate(value.c_str()));
+  }
+  else if (field == "date")
+  {
+    m_cacheControl->setDate(DateUtils::parseDate(value.c_str()));
+  }
+  else if (field == "age")
+  {
+    m_cacheControl->setAge(DateUtils::parseDate(value.c_str()));
   }
   else if (field == "set-cookie")
   {
@@ -393,6 +402,7 @@ void HeaderParser::httpResponse()
   if (response.substr(0,HTTP1_LEN) == HTTP1 and response[HTTP1_LEN+1] == ' ') {
     m_httpStatusCode = strtol(response.substr(9,3).c_str(), 0, 0);
     addToCacheFile(response+"\n");
+    if (m_cacheControl) m_cacheControl->setResponseTime(::time(0));
     m_state = BEFORE_FIELD;
   } else {
     m_state = PARSE_ERROR;

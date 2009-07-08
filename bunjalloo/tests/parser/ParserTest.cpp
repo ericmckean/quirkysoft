@@ -209,7 +209,7 @@ TEST_F(ParserTest, bogus_input_select)
   EXPECT_EQ(3 , size);
 
   const AttributeVector &inputAttrs(m_htmlParser->m_attributes[2]);
-  EXPECT_EQ(2 , inputAttrs.size());
+  EXPECT_EQ(2U , inputAttrs.size());
 
   std::string expectedInputValueUtf8("Iniciar Sesión");
   EXPECT_EQ(expectedInputValueUtf8 , inputAttrs[1]->value);
