@@ -283,7 +283,7 @@ void Config::postConfiguration(const std::string & postedUrl)
   for (KeyValueMap::const_iterator it(kv.begin()); it != kv.end(); ++it)
   {
     // update the config.ini file, without breaking things
-    updateConfig(it->first, it->second, lines);
+    updateConfig(it->first, URI::unescape(it->second), lines);
   }
   file.open(cfgFilename.c_str(), "w");
   for (std::vector<std::string>::iterator it(lines.begin());
