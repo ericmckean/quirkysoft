@@ -5,25 +5,33 @@
 
 
 CacheControl::CacheControl()
-: m_maxAge(0),
-  m_time(0),
-  m_noCache(false),
-  m_noStore(false)
+: m_noCache(false),
+  m_noStore(false),
+  m_ageValue(-1),
+  m_date(-1),
+  m_expires(-1),
+  m_maxAge(-1),
+  m_requestTime(0),
+  m_responseTime(0)
 {}
 
 void CacheControl::reset()
 {
   if (!this) return;
 
+  m_ageValue = -1;
+  m_date = -1;
+  m_expires = -1;
+  m_maxAge = -1;
+  m_requestTime = 0;
+  m_responseTime = 0;
   m_noCache = false;
   m_noStore = false;
-  m_time = 0;
-  m_maxAge = 0;
 }
 
-void CacheControl::setSeconds(unsigned int time)
+void CacheControl::setAge(time_t age)
 {
-  m_time = time;
+  m_ageValue = age;
 }
 
 void CacheControl::setCacheControl(const std::string &value)
@@ -34,8 +42,6 @@ void CacheControl::setCacheControl(const std::string &value)
   // split on commas
   ParameterSet paramSet(value, ',');
   std::string ma;
-  m_time = 0;
-  m_maxAge = 0;
   if (paramSet.parameter("max-age", ma)) {
     // got
     int matches = sscanf_platform(ma.c_str(), "%d", &m_maxAge);
@@ -48,11 +54,27 @@ void CacheControl::setCacheControl(const std::string &value)
   m_noStore = paramSet.hasParameter("no-store");
 }
 
-void CacheControl::setExpires(const std::string &value)
+void CacheControl::setDate(time_t date)
 {
+  m_date = date;
 }
 
-bool CacheControl::shouldCache() const
+void CacheControl::setExpires(time_t expires)
+{
+  m_expires = expires;
+}
+
+void CacheControl::setRequestTime(time_t request)
+{
+  m_requestTime = request;
+}
+
+void CacheControl::setResponseTime(time_t response)
+{
+  m_responseTime = response;
+}
+
+bool CacheControl::shouldCache(time_t now) const
 {
   if (m_noCache) {
     return false;
@@ -60,25 +82,26 @@ bool CacheControl::shouldCache() const
   if (m_noStore) {
     return false;
   }
-  return m_maxAge >= m_time;
-#if 0
-http://www.w3.org/Protocols/rfc2616/rfc2616-sec13.html#sec13.2
-  response_time = time(0);
-  request_time = time(0) at time of request
-  date_value = Date: header from response
-  age_value = Age: header from response
-  max_age_value = max-age: header from response
 
-  apparent_age = max(0, response_time - date_value);
-  corrected_received_age = max(apparent_age, age_value);
-  response_delay = response_time - request_time;
-  corrected_initial_age = corrected_received_age + response_delay;
-  resident_time = now - response_time;
-  current_age   = corrected_initial_age + resident_time;
-  if have max_age:
-    freshness_lifetime = max_age_value
-  else
-    freshness_lifetime = expires_value - date_value
-  response_is_fresh = (freshness_lifetime > current_age)
-#endif
+  if (m_date != -1) {
+    // http://www.w3.org/Protocols/rfc2616/rfc2616-sec13.html#sec13.2
+    int apparent_age = std::max(0L, m_responseTime - m_date);
+    int corrected_received_age = std::max(apparent_age, m_ageValue);
+    int response_delay = m_responseTime - m_requestTime;
+    int corrected_initial_age = corrected_received_age + response_delay;
+    int resident_time = now - m_responseTime;
+    int current_age = corrected_initial_age + resident_time;
+    int freshness_lifetime = -1;
+    if (m_maxAge != -1) {
+      freshness_lifetime = m_maxAge;
+    }
+    else {
+      freshness_lifetime = m_expires - m_date;
+    }
+    return freshness_lifetime > current_age;
+  } else {
+    // server didn't send the date header.
+    // Cache for half a minute.
+    return (m_responseTime + m_maxAge + 30) > now;
+  }
 }

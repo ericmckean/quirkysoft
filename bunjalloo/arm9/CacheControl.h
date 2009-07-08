@@ -2,6 +2,7 @@
 #define CacheControler_h_seen
 
 #include <string>
+#include <time.h>
 
 class CacheControl
 {
@@ -10,14 +11,14 @@ class CacheControl
     CacheControl();
 
     /**
-     * Set relative seconds since the last time a value was changed.  This may
-     * seem a little weird, but it means the CacheControl itself doesn't have
-     * to keep track of time, someone else can just tell it how long has
-     * passed.
-     *
-     * @param time relative time in seconds that has gone by since we last got a cache-control header
+     * Reset cache flags to default.
      */
-    void setSeconds(unsigned int time);
+    void reset();
+
+    /** Set the age header value.
+     * @param age the age header.
+     */
+    void setAge(time_t age);
 
     /**
      * Set the cache-control header value.
@@ -26,26 +27,44 @@ class CacheControl
     void setCacheControl(const std::string &value);
 
     /**
-     * Set the expires header. This is not implemented.
-     * @param value a date representing when the page expires
+     * Set the date header.
+     * @param date the date of the server
      */
-    void setExpires(const std::string &value);
+    void setDate(time_t date);
 
     /**
-     * Reset cache flags to default.
+     * Set the expires header.
+     * @param expires the time since epoch to exires
      */
-    void reset();
+    void setExpires(time_t expires);
+
+    /**
+     * Set the time when the request was made.
+     * @param response the time of the request
+     */
+    void setRequestTime(time_t request);
+
+    /**
+     * Set the time when the response was received.
+     * @param response the time of the response
+     */
+    void setResponseTime(time_t response);
 
     /**
      * Find out if we should be caching the page based on what we know.
+     * @param now the current time (for dependency injection reasons...)
      * @returns true if we should cache the page
      */
-    bool shouldCache() const;
+    bool shouldCache(time_t now) const;
   private:
-    unsigned int m_maxAge;
-    unsigned int m_time;
     bool m_noCache;
     bool m_noStore;
+    int m_ageValue;
+    int m_date;
+    int m_expires;
+    int m_maxAge;
+    time_t m_requestTime;
+    time_t m_responseTime;
 };
 
 #endif
