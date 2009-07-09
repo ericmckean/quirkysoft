@@ -15,7 +15,9 @@
   along with this program.  If not, see <http://www.gnu.org/licenses/>.
 */
 #include <algorithm>
+#include <cstdio>
 #include "config_defs.h"
+#include "DateUtils.h"
 #include "Config.h"
 #include "Cookie.h"
 #include "CookieJar.h"
@@ -98,11 +100,25 @@ void CookieJar::addCookieHeader(const URI & uri, const std::string & request)
   {
     secure = true;
   }
-
+  int expires = -1;
+  if (lowCaseParamSet.hasParameter(EXPIRES_STR))
+  {
+    std::string expval;
+    const KeyValueMap & keyValueMap(paramSet.keyValueMap());
+    for (KeyValueMap::const_iterator it(keyValueMap.begin()); it != keyValueMap.end(); ++it)
+    {
+      string name = it->first;
+      string lowCaseName(name);
+      transform(lowCaseName.begin(), lowCaseName.end(), lowCaseName.begin(), ::tolower);
+      if (lowCaseName == EXPIRES_STR) {
+        expires = DateUtils::parseDate(it->second.c_str());
+        break;
+      }
+    }
+  }
   const KeyValueMap & keyValueMap(paramSet.keyValueMap());
   for (KeyValueMap::const_iterator it(keyValueMap.begin()); it != keyValueMap.end(); ++it)
   {
-    int expires = -1;
     string name = it->first;
     string lowCaseName(name);
     transform(lowCaseName.begin(), lowCaseName.end(), lowCaseName.begin(), ::tolower);
@@ -150,9 +166,9 @@ void CookieJar::cookiesForRequest(
   {
     Cookie *c(*it);
     if (c->name() == DOMAIN_STR)
-    {
       continue;
-    }
+    if (c->expired(now))
+      continue;
 
     if (c->matchesDomain(domain)) {
       if (not c->path().empty())

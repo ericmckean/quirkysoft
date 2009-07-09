@@ -311,7 +311,7 @@ TEST_F(CookieTest, Expires)
   Cookie *c(m_cookieJar->hasCookieForDomain(uri, "mycookie"));
   EXPECT_NE((void*)0, c);
   EXPECT_FALSE(c->expired(when - 1));
-  EXPECT_TRUE(c->expired(when + 1));
+  EXPECT_TRUE(c->expired(1246705272 + 1));
 
   when = 1246811088; // Sun 05 Jul
   resultHeader = "";

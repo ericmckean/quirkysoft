@@ -79,7 +79,4 @@ TEST(ParamSetTest, Amphersand)
   paramSet.parameter(key, result);
   EXPECT_TRUE(paramSet.hasParameter(key));
   EXPECT_EQ(expected, result);
-
-
 }
-
