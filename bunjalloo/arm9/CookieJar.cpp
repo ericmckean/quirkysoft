@@ -145,7 +145,7 @@ void CookieJar::addCookieHeader(const URI & uri, const std::string & request)
 
 void CookieJar::cookiesForRequest(
     const URI &request,
-    std::string &headers) const
+    std::string &headers)
 {
   cookiesForRequest(request, headers, ::time(0));
 }
@@ -153,7 +153,7 @@ void CookieJar::cookiesForRequest(
 void CookieJar::cookiesForRequest(
     const URI &request,
     std::string &headers,
-    time_t now) const
+    time_t now)
 {
   // printf("cookiesForRequest: %s \n",request.asString().c_str());
   string domain(request.server());
@@ -161,16 +161,19 @@ void CookieJar::cookiesForRequest(
   string tmp("Cookie: ");
   bool needSep(false);
   const static string sep("\r\nCookie: ");
+  bool haveExpired(false);
   std::vector<Cookie *>::const_iterator it(m_cookies.begin());
   for (; it != m_cookies.end(); ++it)
   {
     Cookie *c(*it);
     if (c->name() == DOMAIN_STR)
       continue;
-    if (c->expired(now))
-      continue;
-
     if (c->matchesDomain(domain)) {
+      if (c->expired(now)) {
+        haveExpired = true;
+        continue;
+      }
+
       if (not c->path().empty())
       {
         // check to see if the requested path is a sub dir of path
@@ -210,7 +213,27 @@ void CookieJar::cookiesForRequest(
     tmp += "\r\n";
     headers = tmp;
   }
-  // printf("Return: %s\n", headers.c_str());
+  if (haveExpired) {
+    gcExpiredCookies(now);
+  }
+}
+
+void CookieJar::gcExpiredCookies(time_t now)
+{
+  // there are expired cookies
+  // remove them from memory and disk
+  std::vector<Cookie *> tmp;
+  std::vector<Cookie *>::const_iterator it(m_cookies.begin());
+  for (; it != m_cookies.end(); ++it)
+  {
+    Cookie *c(*it);
+    if (c->expired(now)) {
+      delete c;
+      continue;
+    }
+    tmp.push_back(c);
+  }
+  m_cookies.swap(tmp);
 }
 
 std::string CookieJar::topLevel(const std::string & sub)

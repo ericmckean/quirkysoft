@@ -57,7 +57,7 @@ class CookieJar
      * @param headers the output headers.
      */
     void cookiesForRequest(const URI & request,
-        std::string & headers) const;
+        std::string & headers);
 
     /** Given a request, fill the headers with the defined cookies.
      * @param request the request string.
@@ -66,7 +66,7 @@ class CookieJar
      */
      void cookiesForRequest(const URI & request,
         std::string & headers,
-        time_t now) const;
+        time_t now);
 
     /** Check if there is a cookie for this domain already in the jar.
      * @param uri the URL of the cookie.
@@ -100,6 +100,8 @@ class CookieJar
     std::vector<Cookie *> m_cookies;
 
     AcceptedDomainSet m_acceptedDomains;
+
+    void gcExpiredCookies(time_t now);
 };
 
 #endif
