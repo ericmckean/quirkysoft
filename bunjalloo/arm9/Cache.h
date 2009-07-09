@@ -71,12 +71,6 @@ class Cache
      */
     inline bool useCache() const;
 
-    /** Set the cache control headers for a URI.
-     * @param uri the URI in question
-     * @param control the Cache-Control/Expires headers.
-     */
-    void setControl(const std::string &uri, const CacheControl &control);
-
   private:
     Document & m_document;
     bool m_useCache;
