@@ -15,6 +15,7 @@
   along with this program.  If not, see <http://www.gnu.org/licenses/>.
 */
 #include "CookieJar.h"
+#include "Cookie.h"
 #include "URI.h"
 #include <gtest/gtest.h>
 
@@ -278,6 +279,23 @@ TEST_F(CookieTest, ExpireRenew)
 
 }
 
+TEST_F(CookieTest, cookie_expired)
+{
+  Cookie c;
+  EXPECT_FALSE(c.expired(1));
+
+    Cookie c2("bla",
+           "buzz",
+           80,
+           "example.com",
+           "/",
+           99,
+           false);
+  EXPECT_FALSE(c2.expired(98));
+  EXPECT_FALSE(c2.expired(99));
+  EXPECT_TRUE(c2.expired(100));
+}
+
 TEST_F(CookieTest, Expires)
 {
   m_cookieJar->setAcceptCookies("example.com");
@@ -290,6 +308,10 @@ TEST_F(CookieTest, Expires)
   time_t when = 1246611088; // Fri 03 Jul
   m_cookieJar->cookiesForRequest(uri, resultHeader, when);
   EXPECT_EQ(expectedHeader, resultHeader);
+  Cookie *c(m_cookieJar->hasCookieForDomain(uri, "mycookie"));
+  EXPECT_NE((void*)0, c);
+  EXPECT_FALSE(c->expired(when - 1));
+  EXPECT_TRUE(c->expired(when + 1));
 
   when = 1246811088; // Sun 05 Jul
   resultHeader = "";

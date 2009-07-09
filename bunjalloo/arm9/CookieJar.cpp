@@ -102,6 +102,7 @@ void CookieJar::addCookieHeader(const URI & uri, const std::string & request)
   const KeyValueMap & keyValueMap(paramSet.keyValueMap());
   for (KeyValueMap::const_iterator it(keyValueMap.begin()); it != keyValueMap.end(); ++it)
   {
+    int expires = -1;
     string name = it->first;
     string lowCaseName(name);
     transform(lowCaseName.begin(), lowCaseName.end(), lowCaseName.begin(), ::tolower);
@@ -119,7 +120,7 @@ void CookieJar::addCookieHeader(const URI & uri, const std::string & request)
     else
     {
       string value = it->second;
-      Cookie * cookie = new Cookie(name, value, port, domain, path, secure);
+      Cookie * cookie = new Cookie(name, value, port, domain, path, expires, secure);
       // printf("set cookie for %s: %s = %s\n", domain.c_str(), name.c_str(), value.c_str());
       m_cookies.push_back(cookie);
     }

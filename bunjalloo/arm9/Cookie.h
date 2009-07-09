@@ -27,7 +27,7 @@ class Cookie
   public:
     /** Create an empty Cookie.*/
     Cookie()
-      : m_port(80), m_secure(false)
+      : m_port(80), m_expires(-1), m_secure(false)
     {}
 
     /** Create a Cookie from parameters.
@@ -43,6 +43,7 @@ class Cookie
            int                 port,
            const std::string & domain,
            const std::string & path,
+           int                 expires,
            bool secure
         )
       : m_name(name),
@@ -50,6 +51,7 @@ class Cookie
         m_port(port),
         m_domain(domain),
         m_path(path),
+        m_expires(expires),
         m_secure(secure)
     {
       if (m_domain[0] == '.')
@@ -107,12 +109,20 @@ class Cookie
       return m_path;
     }
 
+    bool expired(time_t now) const
+    {
+      if (m_expires == -1)
+        return false;
+      return now > m_expires;
+    }
+
   private:
     std::string m_name;
     std::string m_value;
     int m_port;
     std::string m_domain;
     std::string m_path;
+    int m_expires;
     bool m_secure;
 
 };
