@@ -154,13 +154,3 @@ std::string Cache::fileName(const URI & uri) const
   }
   return "";
 }
-
-void Cache::setControl(const std::string &uri, const CacheControl &control)
-{
-  /*
-  if (not control.shouldCache()) {
-    printf("Explicitly remove from cache %s\n", uri.c_str());
-    remove(uri);
-  }
-  */
-}

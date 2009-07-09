@@ -411,8 +411,6 @@ URI Controller::downloadingFile() const
 
 void Controller::finishFetchHttp(const URI & uri)
 {
-  // check the caching status
-  m_cache->setControl(m_document->uri(), m_document->headerParser().cacheControl());
   if (m_document->status() == Document::REDIRECTED and m_document->historyEnabled() and m_redirected < m_maxRedirects)
   {
     // redirected.
