@@ -340,6 +340,11 @@ TEST_F(CookieTest, loads_cookies)
   string resultHeader;
   m_cookieJar->cookiesForRequest(uri, resultHeader, 99);
   EXPECT_EQ(expectedHeader, resultHeader);
+
+  // check that if we have persistent cookies for example.com
+  // and we go to example2.com, that the cookies for example.com are removed
+  // this prevents the list of in-memory cookies from becoming huge.
+
 }
 
 TEST_F(CookieTest, saves_cookies)
