@@ -284,16 +284,19 @@ TEST_F(CookieTest, cookie_expired)
   Cookie c;
   EXPECT_FALSE(c.expired(1));
 
-    Cookie c2("bla",
-           "buzz",
-           80,
-           "example.com",
-           "/",
-           99,
-           false);
+  Cookie c2("bla", "buzz", 80, "example.com", "/", 99, false);
   EXPECT_FALSE(c2.expired(98));
   EXPECT_FALSE(c2.expired(99));
   EXPECT_TRUE(c2.expired(100));
+}
+
+TEST_F(CookieTest, is_session)
+{
+  Cookie c;
+  EXPECT_TRUE(c.session());
+
+  Cookie c2("bla", "buzz", 80, "example.com", "/", 99, false);
+  EXPECT_FALSE(c2.session());
 }
 
 TEST_F(CookieTest, Expires)

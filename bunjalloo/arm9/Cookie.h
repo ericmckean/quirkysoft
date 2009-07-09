@@ -111,9 +111,12 @@ class Cookie
 
     bool expired(time_t now) const
     {
-      if (m_expires == -1)
-        return false;
-      return now > m_expires;
+      return not session() and (now > m_expires);
+    }
+
+    bool session() const
+    {
+      return m_expires == -1;
     }
 
   private:
