@@ -17,7 +17,9 @@
 #include "CookieJar.h"
 #include "Cookie.h"
 #include "URI.h"
+#include "File.h"
 #include <gtest/gtest.h>
+#include <fstream>
 
 using namespace std;
 
@@ -28,9 +30,11 @@ class CookieTest : public testing::Test
 
     void SetUp() {
       m_cookieJar = new CookieJar();
+      nds::File::mkdir("data/bunjalloo/cookies");
     }
 
     void TearDown() {
+      nds::File::rmrf("data");
       delete m_cookieJar;
     }
 };
@@ -320,4 +324,34 @@ TEST_F(CookieTest, Expires)
   resultHeader = "";
   m_cookieJar->cookiesForRequest(uri, resultHeader, when);
   EXPECT_EQ("", resultHeader);
+}
+
+TEST_F(CookieTest, loads_cookies)
+{
+  m_cookieJar->setAcceptCookies("example.com");
+  // create a fake cookie file
+  ofstream testFile;
+  testFile.open("data/bunjalloo/cookies/example.com", ios::out);
+  testFile << "mycookie=foo;Expires=Sat, 04 Jul 2009 12:01:12 GMT\r\n";
+  testFile.close();
+
+  URI uri("http://example.com/accounts/foo");
+  string expectedHeader = "Cookie: mycookie=foo\r\n";
+  string resultHeader;
+  m_cookieJar->cookiesForRequest(uri, resultHeader, 99);
+  EXPECT_EQ(expectedHeader, resultHeader);
+}
+
+TEST_F(CookieTest, saves_cookies)
+{
+  m_cookieJar->setAcceptCookies("example.com");
+  URI uri("http://example.com/accounts/foo");
+  string requestHeader = "mycookie=foo;Expires=Sat, 04 Jul 2009 12:01:12 GMT\r\n";
+  m_cookieJar->addCookieHeader(uri, requestHeader);
+  ifstream testFile;
+  testFile.open("data/bunjalloo/cookies/example.com", ios::in);
+  string in;
+  testFile >> in;
+  testFile.close();
+  EXPECT_EQ(requestHeader, in);
 }

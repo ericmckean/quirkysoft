@@ -99,9 +99,15 @@ class CookieJar
     //! List of cookies.
     std::vector<Cookie *> m_cookies;
 
+    //! Name of the domain that we are caching cookies for
+    //! When this changes we dump/reload non-session cookies
+    std::string m_domain;
+
     AcceptedDomainSet m_acceptedDomains;
 
     void gcExpiredCookies(time_t now);
+    void saveCookiesToDisk();
+    void loadDomainCookies(const URI &uri);
 };
 
 #endif
