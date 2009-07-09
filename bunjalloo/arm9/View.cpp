@@ -352,7 +352,9 @@ void View::editConfig()
 {
   // show a config page with values for the configuration :-/
   URI configFile("config://index.html");
+  m_document.setHistoryEnabled(false);
   m_controller.doUri(configFile);
+  m_document.setHistoryEnabled(true);
 }
 
 void View::bookmarkCurrentPage()
