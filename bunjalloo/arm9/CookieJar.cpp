@@ -126,14 +126,17 @@ void CookieJar::addCookieHeader(const URI & uri, const std::string & request)
   }
 }
 
-void CookieJar::clear(const std::string & domain,
-    const std::string & path,
-    const std::string & name)
+void CookieJar::cookiesForRequest(
+    const URI &request,
+    std::string &headers) const
 {
+  cookiesForRequest(request, headers, ::time(0));
 }
 
-void CookieJar::cookiesForRequest(const URI & request,
-    std::string & headers) const
+void CookieJar::cookiesForRequest(
+    const URI &request,
+    std::string &headers,
+    time_t now) const
 {
   // printf("cookiesForRequest: %s \n",request.asString().c_str());
   string domain(request.server());
