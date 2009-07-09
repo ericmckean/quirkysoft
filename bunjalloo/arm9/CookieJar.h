@@ -20,6 +20,7 @@
 #include <string>
 #include <vector>
 #include <set>
+#include <time.h>
 
 class Config;
 class Cookie;
@@ -51,21 +52,21 @@ class CookieJar
      */
     void addCookieHeader(const URI & uri, const std::string & request);
 
-    /** Clear cookies for the given domain/path/name.
-     * @param domain the domain.
-     * @param path the path within the domain.
-     * @param name the cookie name.
-     */
-    void clear(const std::string & domain="",
-               const std::string & path="",
-               const std::string & name="");
-
     /** Given a request, fill the headers with the defined cookies.
      * @param request the request string.
      * @param headers the output headers.
      */
     void cookiesForRequest(const URI & request,
         std::string & headers) const;
+
+    /** Given a request, fill the headers with the defined cookies.
+     * @param request the request string.
+     * @param headers the output headers.
+     * @param now the current time (for expires checks)
+     */
+     void cookiesForRequest(const URI & request,
+        std::string & headers,
+        time_t now) const;
 
     /** Check if there is a cookie for this domain already in the jar.
      * @param uri the URL of the cookie.

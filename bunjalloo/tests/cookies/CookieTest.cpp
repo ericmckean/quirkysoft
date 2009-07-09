@@ -278,3 +278,21 @@ TEST_F(CookieTest, ExpireRenew)
 
 }
 
+TEST_F(CookieTest, Expires)
+{
+  m_cookieJar->setAcceptCookies("example.com");
+  // check that cookies expire when they should
+  URI uri("http://example.com/accounts/foo");
+  string requestHeader = "mycookie=foo;Expires=Sat, 04 Jul 2009 12:01:12 GMT\r\n";
+  m_cookieJar->addCookieHeader(uri, requestHeader);
+  string expectedHeader = "Cookie: mycookie=foo\r\n";
+  string resultHeader;
+  time_t when = 1246611088; // Fri 03 Jul
+  m_cookieJar->cookiesForRequest(uri, resultHeader, when);
+  EXPECT_EQ(expectedHeader, resultHeader);
+
+  when = 1246811088; // Sun 05 Jul
+  resultHeader = "";
+  m_cookieJar->cookiesForRequest(uri, resultHeader, when);
+  EXPECT_EQ("", resultHeader);
+}
