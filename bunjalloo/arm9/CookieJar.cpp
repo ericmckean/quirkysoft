@@ -161,6 +161,7 @@ void CookieJar::addCookieHeader(const URI & uri, const std::string & request)
     {
       // replace with new value
       existingCookie->setValue(it->second);
+      existingCookie->setExpires(expires);
     }
     else
     {
