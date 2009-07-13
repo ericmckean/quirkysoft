@@ -135,6 +135,8 @@ const HtmlElement * Document::titleNode() const
       if (not titles.empty())
       {
         title = titles.front();
+        if (not title->hasChildren())
+          title = 0;
       }
     }
   }
