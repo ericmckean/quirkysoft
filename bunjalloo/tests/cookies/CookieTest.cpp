@@ -308,7 +308,7 @@ TEST_F(CookieTest, Expires)
 {
   m_cookieJar->setAcceptCookies("example.com");
   // check that cookies expire when they should
-  URI uri("http://example.com/accounts/foo");
+  URI uri("http://example.com/");
   string requestHeader = "mycookie=foo;Expires=Sat, 04 Jul 2009 12:01:12 GMT\r\n";
   m_cookieJar->addCookieHeader(uri, requestHeader);
   string expectedHeader = "Cookie: mycookie=foo\r\n";
@@ -331,14 +331,24 @@ TEST_F(CookieTest, cookie_to_string)
 {
   m_cookieJar->setAcceptCookies("example.com");
   string requestHeader = "mycookie=foo";
-  URI uri("http://example.com/accounts/foo");
+  URI uri("http://example.com/");
   m_cookieJar->addCookieHeader(uri, requestHeader + "\r\n");
   Cookie *c(m_cookieJar->hasCookieForDomain(uri, "mycookie"));
-  EXPECT_EQ(requestHeader, c->asString());
+  EXPECT_EQ(requestHeader + ";path=/", c->asString());
 
   requestHeader = "mycookie=foo;Expires=Sat, 04 Jul 2009 12:01:12 GMT";
   m_cookieJar->addCookieHeader(uri, requestHeader + "\r\n");
   c = m_cookieJar->hasCookieForDomain(uri, "mycookie");
+  EXPECT_EQ(requestHeader+ ";path=/", c->asString());
+}
+
+TEST_F(CookieTest, cookie_to_string_2)
+{
+  m_cookieJar->setAcceptCookies("example.com");
+  string requestHeader = "mycookie=foo;Expires=Sat, 04 Jul 2009 12:01:12 GMT;path=/;secure";
+  URI uri("http://example.com/accounts/foo");
+  m_cookieJar->addCookieHeader(uri, requestHeader + "\r\n");
+  Cookie *c(m_cookieJar->hasCookieForDomain(uri, "mycookie"));
   EXPECT_EQ(requestHeader, c->asString());
 }
 
@@ -385,7 +395,7 @@ TEST_F(CookieTest, saves_cookies)
   f.readlines(lines);
   f.close();
   EXPECT_EQ(1U, lines.size());
-  EXPECT_EQ(requestHeader.substr(0, requestHeader.length() - 2), lines[0]);
+  EXPECT_EQ(requestHeader.substr(0, requestHeader.length() - 2) + ";path=/accounts", lines[0]);
 }
 
 TEST_F(CookieTest, doesnt_save_session_cookies)
@@ -397,4 +407,23 @@ TEST_F(CookieTest, doesnt_save_session_cookies)
   nds::File f;
   f.open("data/bunjalloo/cookies/example.com", "r");
   EXPECT_FALSE(f.is_open());
+}
+
+TEST_F(CookieTest, saves_multiple_cookies)
+{
+  m_cookieJar->setAcceptCookies("example.com");
+  URI uri("http://example.com/accounts/foo");
+  string requestHeader = "mycookie=foo;Expires=Sat, 04 Jul 2009 12:01:12 GMT\r\n";
+  m_cookieJar->addCookieHeader(uri, requestHeader);
+  requestHeader = "mycookie2=bar;Expires=Sun, 05 Jul 2009 13:22:00 GMT;path=/\r\n";
+  m_cookieJar->addCookieHeader(uri, requestHeader);
+  nds::File f;
+  f.open("data/bunjalloo/cookies/example.com", "r");
+  EXPECT_TRUE(f.is_open());
+  std::vector<std::string> lines;
+  f.readlines(lines);
+  f.close();
+  ASSERT_EQ(2U, lines.size());
+  EXPECT_EQ("mycookie=foo;Expires=Sat, 04 Jul 2009 12:01:12 GMT;path=/accounts", lines[0]);
+  EXPECT_EQ("mycookie2=bar;Expires=Sun, 05 Jul 2009 13:22:00 GMT;path=/", lines[1]);
 }
