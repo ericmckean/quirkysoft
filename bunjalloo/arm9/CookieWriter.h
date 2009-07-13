@@ -7,5 +7,7 @@ class CookieWriter
 {
   public:
     void operator()(Cookie *cookie);
+
+    void remove(const char *domain);
 };
 #endif

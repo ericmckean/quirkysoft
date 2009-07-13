@@ -155,7 +155,7 @@ TEST_F(CookieTest, SubDomain)
 
   // now test that for sub.domain.com it returns the domain.com cookie AND the
   // sub.domain.com specific cookie.
-  expectedHeader = "Cookie: subcount=1\r\nCookie: topcount=2\r\n";
+  expectedHeader = "Cookie: subcount=1; topcount=2\r\n";
   uri.setUri("http://sub.domain.com");
   resultHeader = "";
   m_cookieJar->cookiesForRequest(uri, resultHeader);
@@ -256,6 +256,21 @@ TEST_F(CookieTest, Secure)
   uri.setUri("http://sub.domain.com/accounts/");
   resultHeader = "";
   expectedHeader = "";
+  m_cookieJar->cookiesForRequest(uri, resultHeader);
+  EXPECT_EQ(expectedHeader, resultHeader);
+}
+
+TEST_F(CookieTest, ignore_httponly)
+{
+  m_cookieJar->setAcceptCookies("example.com");
+  URI uri("http://example.com/");
+  string requestHeader = "mycookie=1234;path=/;HttpOnly\r\n";
+  m_cookieJar->addCookieHeader(uri, requestHeader);
+  requestHeader = "mycookie2=5678;path=/;HttpOnly\r\n";
+  m_cookieJar->addCookieHeader(uri, requestHeader);
+
+  string expectedHeader = "Cookie: mycookie=1234; mycookie2=5678\r\n";
+  string resultHeader;
   m_cookieJar->cookiesForRequest(uri, resultHeader);
   EXPECT_EQ(expectedHeader, resultHeader);
 }
@@ -426,4 +441,9 @@ TEST_F(CookieTest, saves_multiple_cookies)
   ASSERT_EQ(2U, lines.size());
   EXPECT_EQ("mycookie=foo;Expires=Sat, 04 Jul 2009 12:01:12 GMT;path=/accounts", lines[0]);
   EXPECT_EQ("mycookie2=bar;Expires=Sun, 05 Jul 2009 13:22:00 GMT;path=/", lines[1]);
+
+  string resultHeader;
+  m_cookieJar->cookiesForRequest(uri, resultHeader, 0);
+  string expectedHeader = "Cookie: mycookie=foo; mycookie2=bar\r\n";
+  EXPECT_EQ(expectedHeader, resultHeader);
 }

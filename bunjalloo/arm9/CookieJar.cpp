@@ -33,6 +33,7 @@ static const char * PATH_STR("path");
 static const char * DOMAIN_STR("domain");
 static const char * SECURE_STR("secure");
 static const char * EXPIRES_STR("expires");
+static const char * HTTP_ONLY("httponly");
 static const char COOKIE_TEMPLATE[] = "ckallow-example.txt";
 
 CookieJar::CookieJar()
@@ -156,7 +157,8 @@ void CookieJar::addCookieHeader(const URI & uri, const std::string & request)
     string lowCaseName(name);
     transform(lowCaseName.begin(), lowCaseName.end(), lowCaseName.begin(), ::tolower);
     if (lowCaseName == PATH_STR or lowCaseName == SECURE_STR
-        or lowCaseName == EXPIRES_STR or lowCaseName == DOMAIN_STR)
+        or lowCaseName == HTTP_ONLY or lowCaseName == EXPIRES_STR
+        or lowCaseName == DOMAIN_STR)
     {
       continue;
     }
@@ -175,13 +177,17 @@ void CookieJar::addCookieHeader(const URI & uri, const std::string & request)
       m_cookies.push_back(cookie);
     }
   }
+  m_domain = uri.server();
   saveCookiesToDisk();
 }
 
 void CookieJar::saveCookiesToDisk()
 {
-  // save to disk
-  for_each(m_cookies.begin(), m_cookies.end(), CookieWriter());
+  CookieWriter cw;
+  if (not m_domain.empty()) {
+    cw.remove(m_domain.c_str());
+  }
+  for_each(m_cookies.begin(), m_cookies.end(), cw);
 }
 
 void CookieJar::cookiesForRequest(
@@ -202,7 +208,7 @@ void CookieJar::cookiesForRequest(
   // find a cookie in the jar that corresponds to the requested domain...
   string tmp("Cookie: ");
   bool needSep(false);
-  const static string sep("\r\nCookie: ");
+  const static string sep("; ");
   bool haveExpired(false);
   std::vector<Cookie *>::const_iterator it(m_cookies.begin());
   for (; it != m_cookies.end(); ++it)

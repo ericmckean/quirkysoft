@@ -13,8 +13,16 @@ void CookieWriter::operator()(Cookie *cookie)
   std::string filename(COOKIE_DIR);
   filename += cookie->domain();
   nds::File f;
-  f.open(filename.c_str(), "w");
+  f.open(filename.c_str(), "a");
   if (f.is_open()) {
     f.write(cookie->asString().c_str());
+    f.write("\n");
   }
+}
+
+void CookieWriter::remove(const char *domain)
+{
+  std::string filename(COOKIE_DIR);
+  filename += domain;
+  nds::File::rmrf(filename.c_str());
 }
