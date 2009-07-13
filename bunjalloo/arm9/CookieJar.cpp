@@ -20,6 +20,7 @@
 #include "DateUtils.h"
 #include "Config.h"
 #include "Cookie.h"
+#include "CookieWriter.h"
 #include "CookieJar.h"
 #include "File.h"
 #include "ParameterSet.h"
@@ -175,6 +176,7 @@ void CookieJar::addCookieHeader(const URI & uri, const std::string & request)
 void CookieJar::saveCookiesToDisk()
 {
   // save to disk
+  for_each(m_cookies.begin(), m_cookies.end(), CookieWriter());
 }
 
 void CookieJar::cookiesForRequest(

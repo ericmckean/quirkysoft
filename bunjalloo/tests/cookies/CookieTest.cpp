@@ -16,6 +16,7 @@
 */
 #include "CookieJar.h"
 #include "Cookie.h"
+#include "CookieWriter.h"
 #include "URI.h"
 #include "File.h"
 #include <gtest/gtest.h>
@@ -326,6 +327,15 @@ TEST_F(CookieTest, Expires)
   EXPECT_EQ("", resultHeader);
 }
 
+TEST_F(CookieTest, writes_to_file)
+{
+  Cookie c("bla", "buzz", 80, "example.com", "/", 99, false);
+  nds::File file;
+  CookieWriter cw;
+  cw(&c);
+  EXPECT_TRUE(nds::File::exists("data/bunjalloo/cookie/example.com"));
+}
+
 TEST_F(CookieTest, loads_cookies)
 {
   m_cookieJar->setAcceptCookies("example.com");
@@ -359,4 +369,15 @@ TEST_F(CookieTest, saves_cookies)
   testFile >> in;
   testFile.close();
   EXPECT_EQ(requestHeader, in);
+}
+
+TEST_F(CookieTest, doesnt_save_session_cookies)
+{
+  m_cookieJar->setAcceptCookies("example.com");
+  URI uri("http://example.com/accounts/foo");
+  string requestHeader = "mycookie=foo\r\n";
+  m_cookieJar->addCookieHeader(uri, requestHeader);
+  ifstream testFile;
+  testFile.open("data/bunjalloo/cookies/example.com", ios::in);
+  EXPECT_FALSE(testFile.is_open());
 }
