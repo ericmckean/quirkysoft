@@ -327,13 +327,28 @@ TEST_F(CookieTest, Expires)
   EXPECT_EQ("", resultHeader);
 }
 
+TEST_F(CookieTest, cookie_to_string)
+{
+  m_cookieJar->setAcceptCookies("example.com");
+  string requestHeader = "mycookie=foo";
+  URI uri("http://example.com/accounts/foo");
+  m_cookieJar->addCookieHeader(uri, requestHeader + "\r\n");
+  Cookie *c(m_cookieJar->hasCookieForDomain(uri, "mycookie"));
+  EXPECT_EQ(requestHeader, c->asString());
+
+  requestHeader = "mycookie=foo;Expires=Sat, 04 Jul 2009 12:01:12 GMT";
+  m_cookieJar->addCookieHeader(uri, requestHeader + "\r\n");
+  c = m_cookieJar->hasCookieForDomain(uri, "mycookie");
+  EXPECT_EQ(requestHeader, c->asString());
+}
+
 TEST_F(CookieTest, writes_to_file)
 {
   Cookie c("bla", "buzz", 80, "example.com", "/", 99, false);
   nds::File file;
   CookieWriter cw;
   cw(&c);
-  EXPECT_TRUE(nds::File::exists("data/bunjalloo/cookie/example.com"));
+  EXPECT_TRUE(nds::File::exists("data/bunjalloo/cookies/example.com"));
 }
 
 TEST_F(CookieTest, loads_cookies)
@@ -363,12 +378,14 @@ TEST_F(CookieTest, saves_cookies)
   URI uri("http://example.com/accounts/foo");
   string requestHeader = "mycookie=foo;Expires=Sat, 04 Jul 2009 12:01:12 GMT\r\n";
   m_cookieJar->addCookieHeader(uri, requestHeader);
-  ifstream testFile;
-  testFile.open("data/bunjalloo/cookies/example.com", ios::in);
-  string in;
-  testFile >> in;
-  testFile.close();
-  EXPECT_EQ(requestHeader, in);
+  nds::File f;
+  f.open("data/bunjalloo/cookies/example.com", "r");
+  EXPECT_TRUE(f.is_open());
+  std::vector<std::string> lines;
+  f.readlines(lines);
+  f.close();
+  EXPECT_EQ(1U, lines.size());
+  EXPECT_EQ(requestHeader.substr(0, requestHeader.length() - 2), lines[0]);
 }
 
 TEST_F(CookieTest, doesnt_save_session_cookies)
@@ -377,7 +394,7 @@ TEST_F(CookieTest, doesnt_save_session_cookies)
   URI uri("http://example.com/accounts/foo");
   string requestHeader = "mycookie=foo\r\n";
   m_cookieJar->addCookieHeader(uri, requestHeader);
-  ifstream testFile;
-  testFile.open("data/bunjalloo/cookies/example.com", ios::in);
-  EXPECT_FALSE(testFile.is_open());
+  nds::File f;
+  f.open("data/bunjalloo/cookies/example.com", "r");
+  EXPECT_FALSE(f.is_open());
 }

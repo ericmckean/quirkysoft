@@ -114,10 +114,22 @@ class Cookie
       return not session() and (now > m_expires);
     }
 
+    void setExpires(time_t expires)
+    {
+      m_expires = expires;
+    }
+
     bool session() const
     {
       return m_expires == -1;
     }
+
+    const std::string &domain() const
+    {
+      return m_domain;
+    }
+
+    std::string asString() const;
 
   private:
     std::string m_name;
