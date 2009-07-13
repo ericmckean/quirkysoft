@@ -13,6 +13,15 @@ TEST(DateUtils, parse_date)
   EXPECT_EQ(expected, result);
 }
 
+TEST(DateUtils, parse_date_with_dashes)
+{
+  // with dashes should work too!
+  time_t expected(1246817488);
+  time_t result = DateUtils::parseDate("Sun, 05-Jul-2009 19:11:28 GMT");
+
+  EXPECT_EQ(expected, result);
+}
+
 TEST(DateUtils, zero_time)
 {
   time_t expected(0);
