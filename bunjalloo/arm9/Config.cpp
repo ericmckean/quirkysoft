@@ -39,6 +39,7 @@ const char Config::USECACHE[] = "usecache";
 const char Config::CLEARCACHE[] = "clearcache";
 const char Config::DOWNLOAD[] = "download";
 const char Config::UPDATE[] = "update";
+const char Config::USER_AGENT_STR[] = "useragent";
 const char Config::FULL_REF[] = "fullref";
 const char Config::SHOW_IMAGES[] = "images";
 const char Config::BOOKMARK_FILE[] = "/"DATADIR"/user/bookmarks.html";
