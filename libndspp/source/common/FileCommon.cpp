@@ -36,9 +36,12 @@ void nds::File::readlines(std::vector<std::string> & lines)
     {
       if (data[i] == '\n')
       {
-        lines.push_back( string(&data[startOfLine], i-startOfLine));
+        lines.push_back(string(&data[startOfLine], i-startOfLine));
         startOfLine = i+1;
       }
+    }
+    if (startOfLine == 0 && size > 0 && lines.empty()) {
+      lines.push_back(string(&data[0], size));
     }
     delete [] data;
   }
