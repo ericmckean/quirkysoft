@@ -775,13 +775,22 @@ void HttpClient::get(const URI & uri)
     s += "Accept-encoding: gzip,deflate\r\n";
     s += "Accept: text/html,image/png,image/jpeg,image/gif,text/plain\r\n";
 
-    s += "User-Agent: Bunjalloo/";
-    s+= VERSION;
-    s+= "(";
-    s+= nds::System::uname();
-    s+= ";U;";
-    s+= Language::instance().currentLanguage();
-    s += ")\r\n";
+    s += "User-Agent: ";
+    std::string useragent;
+    if (m_controller->config().resource(Config::USER_AGENT_STR, useragent))
+    {
+      s += useragent;
+    }
+    else {
+      s += "Bunjalloo/";
+      s+= VERSION;
+      s+= "(";
+      s+= nds::System::uname();
+      s+= ";U;";
+      s+= Language::instance().currentLanguage();
+      s += ")";
+    }
+    s += "\r\n";
 
     s += cookieString;
     if (uri.requestHeader().empty())
