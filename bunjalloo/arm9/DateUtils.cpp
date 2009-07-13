@@ -16,3 +16,12 @@ time_t DateUtils::parseDate(const char *date)
   }
   return mktime(&val) - timezone;
 }
+
+std::string DateUtils::formatTime(time_t t)
+{
+  char buffer[140];
+  t -= timezone;
+  struct tm *val = gmtime(&t);
+  strftime(buffer, sizeof(buffer), FORMAT, val);
+  return buffer;
+}

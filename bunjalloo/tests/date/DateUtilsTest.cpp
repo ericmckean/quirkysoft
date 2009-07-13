@@ -33,4 +33,9 @@ TEST(DateUtils, parse_bogus)
   EXPECT_EQ(expected, result);
 }
 
-
+TEST(DateUtils, format_time)
+{
+  time_t tzero(-3600);
+  std::string result = DateUtils::formatTime(tzero);
+  EXPECT_EQ("Thu, 01 Jan 1970 00:00:00 GMT", result);
+}
