@@ -70,6 +70,10 @@ void CookieJar::loadDomainCookies(const URI &uri)
     m_domain = domain;
     string cookietemp(DATADIR);
     cookietemp += "/cookies/";
+    if (!nds::File::exists(cookietemp.c_str()))
+    {
+      nds::File::mkdir(cookietemp.c_str());
+    }
     cookietemp += domain;
     if (nds::File::exists(cookietemp.c_str()) != nds::File::F_NONE)
     {

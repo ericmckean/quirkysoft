@@ -40,8 +40,8 @@ void nds::File::readlines(std::vector<std::string> & lines)
         startOfLine = i+1;
       }
     }
-    if (startOfLine == 0 && size > 0 && lines.empty()) {
-      lines.push_back(string(&data[0], size));
+    if (startOfLine < size) {
+      lines.push_back(string(&data[startOfLine], size - startOfLine));
     }
     delete [] data;
   }
