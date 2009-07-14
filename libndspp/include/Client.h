@@ -19,6 +19,7 @@
 
 #include "util/classhelper.h"
 struct sockaddr_in;
+struct hostent;
 namespace nds {
   class Client
   {
@@ -95,8 +96,27 @@ namespace nds {
       //! The time to wait between selects (in seconds)
       int m_timeout;
 
-      bool connect(sockaddr_in & socketAddress);
+      enum ClientConnectState {
+        CLIENT_CONNECT_INITIAL, // not started
+        CLIENT_CONNECT_READY_TO_CONNECT, // initialised, now can call ::connect()
+        CLIENT_CONNECT_EINPROGRESS, // not connected, need to wait
+        CLIENT_CONNECT_TRY_NEXT_HADDR, // failed to connect, try next host address
+        CLIENT_CONNECT_DONE  // tried all addresses *or* connected
+                             // check the m_connected flag for result
+      };
+      ClientConnectState m_connectState;
+
+      sockaddr_in *m_socketAddress;
+      hostent *m_hostByNameEntry;
+      int m_hostAddrIndex;
+
+
+      bool tryConnect(sockaddr_in &socketAddress);
       void makeNonBlocking();
+      void connectInitial();
+      void connectReadyToConnect();
+      void connectInprogress();
+      void connectTryNextHaddr();
 
       DISALLOW_COPY_AND_ASSIGN(Client);
   };
