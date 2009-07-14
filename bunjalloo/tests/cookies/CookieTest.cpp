@@ -408,6 +408,16 @@ TEST_F(CookieTest, cookie_to_string_2)
   EXPECT_EQ(requestHeader, c->asString());
 }
 
+TEST_F(CookieTest, cookie_to_string_3)
+{
+  string requestHeader = "mycookie2=bar;domain=.example.com;Expires=Sat, 04 Jul 2009 12:01:12 GMT;path=/;secure";
+  URI uri("http://sub.example.com/");
+  m_cookieJar->addCookieHeader(uri, requestHeader + "\r\n");
+  uri.setUri("http://example.com/");
+  Cookie *c(m_cookieJar->hasCookieForDomain(uri, "mycookie2"));
+  EXPECT_EQ(requestHeader, c->asString());
+}
+
 TEST_F(CookieTest, writes_to_file)
 {
   Cookie c("bla", "buzz", 80, "example.com", "/", 99, false);
@@ -483,11 +493,28 @@ TEST_F(CookieTest, save_domain_cookies)
   m_cookieJar->addCookieHeader(uri, requestHeader);
 
   ResultList expected;
-  expected.push_back("mycookie=foo;domain=.example.com;Expires=Sat, 04 Jul 2009 12:01:12 GMT");
+  expected.push_back("mycookie=foo;domain=.example.com;Expires=Sat, 04 Jul 2009 12:01:12 GMT;path=/");
   TestCookieFile("example.com", expected);
 
   expected.clear();
-  expected.push_back("mycookie2=bar;Expires=Sat, 04 Jul 2009 12:01:12 GMT");
+  expected.push_back("mycookie2=bar;Expires=Sat, 04 Jul 2009 12:01:12 GMT;path=/");
+  TestCookieFile("www.example.com", expected);
+}
+
+TEST_F(CookieTest, refreshes_persistent_cookies)
+{
+  URI uri("http://www.example.com/");
+  string requestHeader = "mycookie=foo;Expires=Sat, 04 Jul 2009 12:01:12 GMT\r\n";
+  m_cookieJar->addCookieHeader(uri, requestHeader);
+  ResultList expected;
+  expected.push_back("mycookie=foo;Expires=Sat, 04 Jul 2009 12:01:12 GMT;path=/");
+  TestCookieFile("www.example.com", expected);
+
+  requestHeader = "mycookie=bar;Expires=Sun, 19 Jul 2009 12:01:12 GMT\r\n";
+  m_cookieJar->addCookieHeader(uri, requestHeader);
+
+  expected.clear();
+  expected.push_back("mycookie=bar;Expires=Sun, 19 Jul 2009 12:01:12 GMT;path=/");
   TestCookieFile("www.example.com", expected);
 }
 

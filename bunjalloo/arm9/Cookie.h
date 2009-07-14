@@ -27,7 +27,7 @@ class Cookie
   public:
     /** Create an empty Cookie.*/
     Cookie()
-      : m_port(80), m_expires(-1), m_secure(false)
+      : m_port(80), m_expires(-1), m_secure(false), m_saved(false)
     {}
 
     /** Create a Cookie from parameters.
@@ -52,12 +52,9 @@ class Cookie
         m_domain(domain),
         m_path(path),
         m_expires(expires),
-        m_secure(secure)
+        m_secure(secure),
+        m_saved(false)
     {
-      if (m_domain[0] == '.')
-      {
-        m_domain = CookieJar::topLevel(m_domain);
-      }
     }
 
     /** Check if a domain name matches this Cookie's domain field.
@@ -66,7 +63,9 @@ class Cookie
      */
     bool matchesDomain(const std::string & domain) const
     {
-      return (domain == m_domain or CookieJar::topLevel(domain) == m_domain);
+      return (domain == m_domain or CookieJar::topLevel(domain) == m_domain
+          or (m_domain[0] == '.'
+            and CookieJar::topLevel(m_domain) == CookieJar::topLevel(domain)));
     }
 
     /** Get the name of the Cookie.
@@ -131,6 +130,14 @@ class Cookie
 
     std::string asString() const;
 
+    void setSaved(bool saved) {
+      m_saved = saved;
+    }
+
+    bool saved() const {
+      return m_saved;
+    }
+
   private:
     std::string m_name;
     std::string m_value;
@@ -139,6 +146,7 @@ class Cookie
     std::string m_path;
     int m_expires;
     bool m_secure;
+    bool m_saved;
 
 };
 #endif

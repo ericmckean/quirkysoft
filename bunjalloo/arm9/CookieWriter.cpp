@@ -10,14 +10,22 @@ void CookieWriter::operator()(Cookie *cookie)
 {
   if (cookie->session())
     return;
+  if (cookie->saved())
+    return;
   std::string filename(COOKIE_DIR);
-  filename += cookie->domain();
+  const std::string &domain(cookie->domain());
+  if (domain[0] == '.')
+    filename += domain.substr(1, domain.size()-1);
+  else
+    filename += domain;
+
   nds::File f;
   f.open(filename.c_str(), "a");
   if (f.is_open()) {
     f.write(cookie->asString().c_str());
     f.write("\n");
   }
+  cookie->setSaved(true);
 }
 
 void CookieWriter::remove(const char *domain)
