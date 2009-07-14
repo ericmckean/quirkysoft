@@ -24,6 +24,7 @@
 
 using namespace std;
 
+typedef  std::vector<std::string> ResultList;
 class CookieTest : public testing::Test
 {
   protected:
@@ -37,6 +38,22 @@ class CookieTest : public testing::Test
     void TearDown() {
       nds::File::rmrf("data");
       delete m_cookieJar;
+    }
+
+    void TestCookieFile(const std::string &domain, const ResultList &expected)
+    {
+      nds::File f;
+      std::string name("data/bunjalloo/cookies/");
+      name += domain;
+      f.open(name.c_str(), "r");
+      EXPECT_TRUE(f.is_open());
+      std::vector<std::string> lines;
+      f.readlines(lines);
+      f.close();
+      ASSERT_EQ(expected.size(), lines.size());
+      for (size_t i = 0; i < expected.size(); ++i) {
+        EXPECT_EQ(expected[i], lines[i]);
+      }
     }
 };
 
@@ -398,14 +415,9 @@ TEST_F(CookieTest, saves_cookies)
   URI uri("http://example.com/accounts/foo");
   string requestHeader = "mycookie=foo;Expires=Sat, 04 Jul 2009 12:01:12 GMT\r\n";
   m_cookieJar->addCookieHeader(uri, requestHeader);
-  nds::File f;
-  f.open("data/bunjalloo/cookies/example.com", "r");
-  EXPECT_TRUE(f.is_open());
-  std::vector<std::string> lines;
-  f.readlines(lines);
-  f.close();
-  EXPECT_EQ(1U, lines.size());
-  EXPECT_EQ(requestHeader.substr(0, requestHeader.length() - 2) + ";path=/accounts", lines[0]);
+  ResultList expected;
+  expected.push_back(requestHeader.substr(0, requestHeader.length() - 2) + ";path=/accounts");
+  TestCookieFile("example.com", expected);
 }
 
 TEST_F(CookieTest, does_not_duplicate_entries)
@@ -425,14 +437,9 @@ TEST_F(CookieTest, does_not_duplicate_entries)
     string requestHeader = "mycookie2=bar;Expires=Sun, 11 Jul 2009 18:01:12 GMT\r\n";
     m_cookieJar->addCookieHeader(uri, requestHeader);
   }
-  nds::File f;
-  f.open("data/bunjalloo/cookies/example.com", "r");
-  EXPECT_TRUE(f.is_open());
-  std::vector<std::string> lines;
-  f.readlines(lines);
-  f.close();
-  EXPECT_EQ(1U, lines.size());
-  EXPECT_EQ("mycookie=foo;Expires=Sat, 04 Jul 2009 12:01:12 GMT;path=/", lines[0]);
+  ResultList expected;
+  expected.push_back("mycookie=foo;Expires=Sat, 04 Jul 2009 12:01:12 GMT;path=/");
+  TestCookieFile("example.com", expected);
 }
 
 TEST_F(CookieTest, doesnt_save_session_cookies)
@@ -454,15 +461,10 @@ TEST_F(CookieTest, saves_multiple_cookies)
   m_cookieJar->addCookieHeader(uri, requestHeader);
   requestHeader = "mycookie2=bar;Expires=Sun, 05 Jul 2009 13:22:00 GMT;path=/\r\n";
   m_cookieJar->addCookieHeader(uri, requestHeader);
-  nds::File f;
-  f.open("data/bunjalloo/cookies/example.com", "r");
-  EXPECT_TRUE(f.is_open());
-  std::vector<std::string> lines;
-  f.readlines(lines);
-  f.close();
-  ASSERT_EQ(2U, lines.size());
-  EXPECT_EQ("mycookie=foo;Expires=Sat, 04 Jul 2009 12:01:12 GMT;path=/accounts", lines[0]);
-  EXPECT_EQ("mycookie2=bar;Expires=Sun, 05 Jul 2009 13:22:00 GMT;path=/", lines[1]);
+  ResultList expected;
+  expected.push_back("mycookie=foo;Expires=Sat, 04 Jul 2009 12:01:12 GMT;path=/accounts");
+  expected.push_back("mycookie2=bar;Expires=Sun, 05 Jul 2009 13:22:00 GMT;path=/");
+  TestCookieFile("example.com", expected);
 
   string resultHeader;
   m_cookieJar->cookiesForRequest(uri, resultHeader, 0);
