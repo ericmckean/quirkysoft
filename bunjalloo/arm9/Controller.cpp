@@ -233,7 +233,7 @@ void Controller::loadError()
 {
   m_document->reset();
   m_document->appendLocalData(s_errorText, strlen(s_errorText));
-  string errorStr(T(UNABLE_TO_LOAD), true);
+  string errorStr(T(UNABLE_TO_LOAD));
   m_document->appendLocalData(errorStr.c_str(), errorStr.length());
   string href("<a href='");
   href += m_document->uri();
@@ -241,7 +241,7 @@ void Controller::loadError()
   href += m_document->uri();
   href += "</a>";
   m_document->appendLocalData(href.c_str(), href.length());
-  m_document->setStatus(Document::LOADED_PAGE);
+  m_document->setStatus(Document::LOADED_HTML);
 }
 
 void Controller::configureUrl(const std::string & fileName)
