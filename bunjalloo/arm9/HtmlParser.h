@@ -107,6 +107,7 @@ class HtmlParser
     static const char * IMAGE_JPG_STR;
 
     MimeType mimeType() const;
+    std::string mimeTypeValue() const;
   protected:
     enum ContentModel {
       PCDATA,
@@ -116,6 +117,7 @@ class HtmlParser
     };
 
     MimeType m_mimeType;
+    std::string m_mimeTypeValue;
 
     friend class HtmlParserImpl;
     /** Called when a start-end tag is found.
@@ -151,6 +153,6 @@ class HtmlParser
     //! Nothing to see here.
     HtmlParserImpl* m_details;
 
-    void setMimeType(ParameterSet & paramSet);
+    void setMimeType(const std::string &paramSet);
 };
 #endif

@@ -1432,7 +1432,10 @@ void HtmlParser::parseContentType(const std::string & value)
     }
   }
 
-  setMimeType(paramSet);
+  std::vector<std::string> segments;
+  split(value, segments, ";");
+  if (not segments.empty())
+    setMimeType(segments[0]);
 
   if (m_mimeType == TEXT_PLAIN)
   {
@@ -1456,35 +1459,29 @@ std::string HtmlParser::getContentDisposition() const
   return m_details->getContentDisposition();
 }
 
-void HtmlParser::setMimeType(ParameterSet & paramSet)
+void HtmlParser::setMimeType(const std::string &mt)
 {
   m_mimeType = OTHER;
+  m_mimeTypeValue = mt;
   // mime type is set to a parameter name...
-  if (paramSet.hasParameter("text/plain"))
-  {
+  if (mt == "text/plain") {
     m_mimeType = TEXT_PLAIN;
   }
-  else if (paramSet.hasParameter("text/html")
-      or paramSet.hasParameter("application/xhtml+xml")
-      or paramSet.hasParameter("application/xhtml")
-      )
-  {
+  else if (mt == "text/html"
+      or mt == "application/xhtml+xml"
+      or mt == "application/xhtml") {
     m_mimeType = TEXT_HTML;
   }
-  else if (paramSet.hasParameter("image/png"))
-  {
+  else if (mt == "image/png") {
     m_mimeType = IMAGE_PNG;
   }
-  else if (paramSet.hasParameter("image/gif"))
-  {
+  else if (mt == "image/gif") {
     m_mimeType = IMAGE_GIF;
   }
-  else if (paramSet.hasParameter(IMAGE_JPEG_STR) or paramSet.hasParameter(IMAGE_JPG_STR))
-  {
+  else if (mt == IMAGE_JPEG_STR or mt == IMAGE_JPG_STR) {
     m_mimeType = IMAGE_JPEG;
   }
-  else if (paramSet.hasParameter("application/zip"))
-  {
+  else if (mt == "application/zip") {
     m_mimeType = ZIP;
   }
 }
@@ -1548,4 +1545,9 @@ void HtmlParser::setCacheFile(const std::string & filename)
 HtmlParser::MimeType HtmlParser::mimeType() const
 {
   return m_mimeType;
+}
+
+std::string HtmlParser::mimeTypeValue() const
+{
+  return m_mimeTypeValue;
 }

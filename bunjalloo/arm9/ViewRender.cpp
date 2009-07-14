@@ -234,6 +234,8 @@ void ViewRender::render()
     {
       clear();
       textArea()->appendText(T(NOT_VIEWABLE));
+      textArea()->appendText(": ");
+      textArea()->appendText(m_self->m_document.htmlDocument()->mimeTypeValue());
       useScrollPane = false;
     }
     else
