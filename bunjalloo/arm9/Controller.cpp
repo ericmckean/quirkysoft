@@ -375,7 +375,6 @@ void Controller::fetchHttp(const URI & uri)
       m_view->tick();
       if (m_stop)
       {
-        loadError();
         return;
       }
       swiWaitForVBlank();

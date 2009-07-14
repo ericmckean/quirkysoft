@@ -139,8 +139,10 @@ void CookieJar::addCookieHeader(
   {
     lowCaseParamSet.parameter(DOMAIN_STR, domain);
     // reject domains that do not start with a dot
-    if (domain[0] != '.')
+    /*if (domain[0] != '.') {
+      printf("Reject cookie for %s\n", domain.c_str());
       return;
+    }*/
   }
   if ( lowCaseParamSet.hasParameter(SECURE_STR) )
   {

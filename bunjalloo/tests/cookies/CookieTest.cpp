@@ -138,7 +138,7 @@ TEST_F(CookieTest, CalcTopLevel)
   EXPECT_EQ(expected, result);
 }
 
-TEST_F(CookieTest, reject_domain_no_dot)
+TEST_F(CookieTest, DISABLED_reject_domain_no_dot)
 {
   /*
    * If domain=something where something does not start with a dot,
