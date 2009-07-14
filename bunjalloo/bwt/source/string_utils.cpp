@@ -48,17 +48,6 @@ void stripWhitespace(std::string & modify)
     modify = modify.substr(firstNonBlank, (lastNonBlank-firstNonBlank+1));
 }
 
-#if 0
-void stripWhitespace(UnicodeString & modify)
-{
-  if (modify.empty())
-    return;
-  static const UnicodeString delimter(string2unicode(" \r\n	"));
-  int firstNonBlank = modify.find_first_not_of(delimter);
-  int lastNonBlank = modify.find_last_not_of(delimter);
-  modify = modify.substr(firstNonBlank, (lastNonBlank-firstNonBlank+1));
-}
-#endif
 void tokenize(const std::string &str,
               std::vector<std::string> &tokens,
               const std::string &delimiters)
