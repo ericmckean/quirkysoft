@@ -171,6 +171,7 @@ void CookieJar::addCookieHeader(const URI & uri, const std::string & request)
       // replace with new value
       existingCookie->setValue(it->second);
       existingCookie->setExpires(expires);
+      existingCookie->setSaved(false);
     }
     else
     {
@@ -187,9 +188,6 @@ void CookieJar::addCookieHeader(const URI & uri, const std::string & request)
 void CookieJar::saveCookiesToDisk()
 {
   CookieWriter cw;
-  if (not m_domain.empty()) {
-    cw.remove(m_domain.c_str());
-  }
   for_each(m_cookies.begin(), m_cookies.end(), cw);
 }
 
