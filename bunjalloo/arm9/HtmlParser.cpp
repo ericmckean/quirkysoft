@@ -200,6 +200,9 @@ class HtmlParserImpl
     void handleDoctypeName();
     void handleAfterDoctypeName();
     void handleBogusDoctype();
+
+    void appendValueToAttributeName();
+    void appendValueToAttributeValue();
 };
 
 void HtmlParserImpl::next()
@@ -464,15 +467,6 @@ void HtmlParserImpl::handleTagName()
 void HtmlParserImpl::addAttribute()
 {
   if (m_attribute) {
-    if (m_encoding == HtmlParser::ISO_ENCODING) {
-      std::string tmp;
-      for (std::string::const_iterator it(m_attribute->value.begin());
-          it != m_attribute->value.end();
-          ++it) {
-        utf8::unchecked::append((*it)&0xff, back_inserter(tmp));
-      }
-      m_attribute->value.swap(tmp);
-    }
     m_tagAttributes.push_back(m_attribute);
   }
   m_attribute = 0;
@@ -517,6 +511,18 @@ void HtmlParserImpl::handleBeforeAttributeName()
   }
 }
 
+void HtmlParserImpl::appendValueToAttributeName()
+{
+  if (m_attribute != 0)
+    utf8::unchecked::append(m_value, back_inserter(m_attribute->name));
+}
+
+void HtmlParserImpl::appendValueToAttributeValue()
+{
+  if (m_attribute != 0)
+    utf8::unchecked::append(m_value, back_inserter(m_attribute->value));
+}
+
 void HtmlParserImpl::handleAttributeName()
 {
   next();
@@ -551,7 +557,7 @@ void HtmlParserImpl::handleAttributeName()
         {
           m_value = ::tolower(m_value);
         }
-        m_attribute->name+=m_value;
+        appendValueToAttributeName();
       }
       break;
   }
@@ -647,9 +653,7 @@ void HtmlParserImpl::handleBeforeAttributeValue()
       break;
     default:
       {
-        if (m_attribute) {
-          m_attribute->value += m_value;
-        }
+        appendValueToAttributeValue();
         m_state = ATTRIBUTE_VALUE_UNQUOTED;
       }
       break;
@@ -679,9 +683,7 @@ void HtmlParserImpl::handleAttributeValueQuote()
         m_state = DATA;
         break;
       default:
-        if (m_attribute) {
-          m_attribute->value += m_value;
-        }
+        appendValueToAttributeValue();
         break;
     }
   }
@@ -713,9 +715,7 @@ void HtmlParserImpl::handleAttributeValueUnquoted()
       m_state = DATA;
       break;
     default:
-      if (m_attribute) {
-        m_attribute->value += m_value;
-      }
+      appendValueToAttributeValue();
       break;
   }
 }
@@ -776,7 +776,7 @@ unsigned int HtmlParserImpl::consumeEntity()
       next();
       if (filter(m_value))
       {
-        entity+=m_value;
+        entity += m_value;
       } else {
         break;
       }
