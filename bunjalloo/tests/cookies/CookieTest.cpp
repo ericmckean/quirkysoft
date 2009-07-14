@@ -56,6 +56,21 @@ class CookieTest : public testing::Test
         EXPECT_EQ(expected[i], lines[i]);
       }
     }
+
+    void CreateFakePersistentCookie(const std::string &domain, const ResultList &setcookie)
+    {
+      ofstream testFile;
+      std::string name("data/bunjalloo/cookies/");
+      name += domain;
+      testFile.open(name.c_str(), ios::out);
+      for (ResultList::const_iterator it(setcookie.begin());
+        it != setcookie.end();
+        ++it) {
+        testFile << *it;
+        testFile << "\r\n";
+      }
+      testFile.close();
+    }
 };
 
 TEST_F(CookieTest, Basic)
@@ -405,10 +420,9 @@ TEST_F(CookieTest, writes_to_file)
 TEST_F(CookieTest, loads_cookies)
 {
   // create a fake cookie file
-  ofstream testFile;
-  testFile.open("data/bunjalloo/cookies/example.com", ios::out);
-  testFile << "mycookie=foo;Expires=Sat, 04 Jul 2009 12:01:12 GMT\r\n";
-  testFile.close();
+  ResultList headers;
+  headers.push_back("mycookie=foo;Expires=Sat, 04 Jul 2009 12:01:12 GMT");
+  CreateFakePersistentCookie("example.com", headers);
 
   URI uri("http://example.com/accounts/foo");
   string expectedHeader = "Cookie: mycookie=foo\r\n";
@@ -483,6 +497,19 @@ TEST_F(CookieTest, load_domain_cookies)
    * Visiting www.example.com should load cookies for www.example.com
    * and also those for the top level domain example.com
    */
+  ResultList headers;
+  headers.push_back("mycookie=foo;Expires=Sat, 04 Jul 2009 12:01:12 GMT");
+  CreateFakePersistentCookie("example.com", headers);
+  headers.clear();
+  headers.push_back("mycookie2=bar;Expires=Sun, 12 Jul 2009 19:01:12 GMT");
+  CreateFakePersistentCookie("sub.example.com", headers);
+
+
+  URI uri("http://sub.example.com/");
+  string resultHeader;
+  m_cookieJar->cookiesForRequest(uri, resultHeader, 0);
+  string expectedHeader = "Cookie: mycookie=foo; mycookie2=bar\r\n";
+  EXPECT_EQ(expectedHeader, resultHeader);
 }
 
 TEST_F(CookieTest, doesnt_save_session_cookies)
