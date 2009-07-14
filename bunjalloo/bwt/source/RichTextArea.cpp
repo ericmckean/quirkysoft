@@ -301,6 +301,7 @@ unsigned int RichTextArea::documentSize(int endLine) const
 
 void RichTextArea::paint(const nds::Rectangle & clip)
 {
+  nds::Canvas::instance().setClip(clip);
   m_dirty = false;
   // ensure we switch off links
   setTextColor(0);
@@ -319,7 +320,6 @@ void RichTextArea::paint(const nds::Rectangle & clip)
     m_nextEvent = totalCharacters();
     m_nextEventType = Link::STATE_PLAIN;
   }
-  nds::Canvas::instance().setClip(clip);
   m_paintPosition = 0;
   m_lineNumber = 0;
   // work out what happens when we skip lines.

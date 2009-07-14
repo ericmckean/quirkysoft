@@ -352,9 +352,7 @@ void View::editConfig()
 {
   // show a config page with values for the configuration :-/
   URI configFile("config://index.html");
-  m_document.setHistoryEnabled(false);
   m_controller.doUri(configFile);
-  m_document.setHistoryEnabled(true);
 }
 
 void View::bookmarkCurrentPage()
@@ -384,7 +382,11 @@ void View::bookmarkCurrentPage()
 void View::addCookie()
 {
   // add cookie for the current page.
+  // endBookmark() // doesn't work
+  m_document.clearConfigHistory();
+  m_document.setHistoryEnabled(true);
   URI uri(m_document.uri());
+  m_document.setHistoryEnabled(false);
   if (uri.protocol() == URI::HTTPS_PROTOCOL or
       uri.protocol() == URI::HTTP_PROTOCOL)
   {

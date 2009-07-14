@@ -234,7 +234,7 @@ void ViewRender::render()
     {
       clear();
       textArea()->appendText(T(NOT_VIEWABLE));
-      useScrollPane = true;
+      useScrollPane = false;
     }
     else
     {
