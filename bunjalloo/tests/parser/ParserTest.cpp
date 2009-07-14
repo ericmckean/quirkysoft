@@ -227,16 +227,20 @@ TEST_F(ParserTest, iso_entity_mix)
   EXPECT_EQ("€ óóo" , text);
 }
 
-/*
-TEST_F(ParserTest, Cookies)
+TEST_F(ParserTest, utf_value)
 {
-  readFile("cookies.txt");
-  m_headerParser->feed(m_data, m_length);
-  std::vector<std::string> cookies;
-  m_headerParser->cookieHeaders(cookies);
-  size_t expected = 2;
-  EXPECT_EQ(expected, cookies.size());
-  EXPECT_EQ(std::string("path=/; domain=example.com; secure"), cookies[0]);
-  EXPECT_EQ(std::string("path=/foobar; domain=example.com; httponly"), cookies[1]);
+  string data(
+      "HTTP/1.1 200 OK\r\n"
+      "Content-type: text/html; charset=utf-8\r\n"
+      "\r\n"
+      "<html><form><input value='señal'/></form>"
+  );
+  m_headerParser->feed(data.c_str(), data.size());
+  int size = m_htmlParser->m_attributes.size();
+  ASSERT_EQ(3, size);
+
+  const AttributeVector &inputAttrs(m_htmlParser->m_attributes[2]);
+  EXPECT_EQ(1U , inputAttrs.size());
+  std::string expectedInputValueUtf8("señal");
+  EXPECT_EQ(expectedInputValueUtf8 , inputAttrs[0]->value);
 }
-*/
