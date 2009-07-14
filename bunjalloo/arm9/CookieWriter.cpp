@@ -6,6 +6,9 @@
 
 static const char COOKIE_DIR[] = DATADIR"/cookies/";
 
+CookieWriter::CookieWriter(time_t now)
+  : m_now(now) {}
+
 static void linesToSave(const std::string &filename,
     Cookie *cookie, std::vector<std::string> *wanted)
 {
@@ -54,8 +57,10 @@ void CookieWriter::operator()(Cookie *cookie)
       f.write(it->c_str());
       f.write("\n");
     }
-    f.write(cookie->asString().c_str());
-    f.write("\n");
+    if (not cookie->expired(m_now)) {
+      f.write(cookie->asString().c_str());
+      f.write("\n");
+    }
   }
   cookie->setSaved(true);
 }
