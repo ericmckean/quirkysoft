@@ -862,7 +862,7 @@ void HttpClient::handleNextState()
 
     case CONNECT_SOCKET:
       // connect to the socket.
-      setTimeout(5);
+      setTimeout(1);
       this->connect();
       if (isConnected())
       {
