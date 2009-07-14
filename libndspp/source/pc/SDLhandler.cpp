@@ -154,7 +154,7 @@ int SDLhandler::init()
   if (SDL_Init(initFlags) < 0)
   {
     sprintf (msg, "Couldn't initialize SDL: %s\n", SDL_GetError ());
-    printf(msg);
+    printf("%s", msg);
     return 1;
   }
 
@@ -170,7 +170,7 @@ int SDLhandler::init()
   {
     sprintf (msg, "Couldn't set 16 bit video mode: %s\n",
         SDL_GetError ());
-    printf(msg);
+    printf("%s", msg);
     return 2;
   }
 
@@ -194,7 +194,7 @@ int SDLhandler::init()
     {
       sprintf (msg, "Couldn't create 16 bit video surface: %s\n",
           SDL_GetError ());
-      printf(msg);
+      printf("%s", msg);
       return 2;
     }
   }
@@ -256,7 +256,7 @@ int SDLhandler::initSound(int freq, int format)
     char msg[256];
     sprintf (msg, "Couldn't start sound: %s\n",
         SDL_GetError ());
-    printf(msg);
+    printf("%s", msg);
   }
   soundOK = true;
   SDL_PauseAudio(0);
