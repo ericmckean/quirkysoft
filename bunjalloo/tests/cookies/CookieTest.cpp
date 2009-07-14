@@ -147,7 +147,7 @@ TEST_F(CookieTest, reject_domain_no_dot)
   URI uri("http://www.example.com/");
   string requestHeader = "mycookie=1;domain=example.com\r\n";
   m_cookieJar->addCookieHeader(uri, requestHeader);
-  EXPECT_TRUE(m_cookieJar->hasCookieForDomain(URI("example.com"), "mycookie") == 0);
+  EXPECT_TRUE(m_cookieJar->hasCookieForDomain("example.com", "mycookie") == 0);
 }
 
 TEST_F(CookieTest, SubDomain)
@@ -177,7 +177,7 @@ TEST_F(CookieTest, SubDomain)
   resultHeader = "";
   m_cookieJar->cookiesForRequest(uri, resultHeader);
   expectedHeader = "";
-  EXPECT_TRUE(m_cookieJar->hasCookieForDomain(URI("sub.domain.com"),"subcount") != 0);
+  EXPECT_TRUE(m_cookieJar->hasCookieForDomain("sub.domain.com","subcount") != 0);
   EXPECT_EQ(expectedHeader, resultHeader);
 
   // check that setting a cookie readable across all domains works
@@ -188,8 +188,8 @@ TEST_F(CookieTest, SubDomain)
   uri.setUri("http://some.domain.com");
   resultHeader = "";
   m_cookieJar->cookiesForRequest(uri, resultHeader);
-  EXPECT_TRUE(m_cookieJar->hasCookieForDomain(URI("domain.com"),"topcount") != 0);
-  EXPECT_TRUE(m_cookieJar->hasCookieForDomain(URI("domain.com"),"subcount") == 0);
+  EXPECT_TRUE(m_cookieJar->hasCookieForDomain("domain.com","topcount") != 0);
+  EXPECT_TRUE(m_cookieJar->hasCookieForDomain("domain.com","subcount") == 0);
   EXPECT_EQ(expectedHeader, resultHeader);
 
   // test that for domain.com it includes the top level cookie
@@ -237,7 +237,7 @@ TEST_F(CookieTest, Path)
   resultHeader = "";
   m_cookieJar->cookiesForRequest(uri, resultHeader);
   expectedHeader = "Cookie: topcount=2\r\n";
-  EXPECT_TRUE(m_cookieJar->hasCookieForDomain(uri,"topcount") != 0);
+  EXPECT_TRUE(m_cookieJar->hasCookieForDomain(uri.server(),"topcount") != 0);
   EXPECT_EQ(expectedHeader, resultHeader);
 
   // test adding some unrelated site's cookie
@@ -348,7 +348,7 @@ TEST_F(CookieTest, cookie_expired)
   Cookie c;
   EXPECT_FALSE(c.expired(1));
 
-  Cookie c2("bla", "buzz", 80, "example.com", "/", 99, false);
+  Cookie c2("bla", "buzz", "example.com", "/", 99, false);
   EXPECT_FALSE(c2.expired(98));
   EXPECT_FALSE(c2.expired(99));
   EXPECT_TRUE(c2.expired(100));
@@ -359,7 +359,7 @@ TEST_F(CookieTest, is_session)
   Cookie c;
   EXPECT_TRUE(c.session());
 
-  Cookie c2("bla", "buzz", 80, "example.com", "/", 99, false);
+  Cookie c2("bla", "buzz", "example.com", "/", 99, false);
   EXPECT_FALSE(c2.session());
 }
 
@@ -374,7 +374,7 @@ TEST_F(CookieTest, Expires)
   time_t when = 1246611088; // Fri 03 Jul
   m_cookieJar->cookiesForRequest(uri, resultHeader, when);
   EXPECT_EQ(expectedHeader, resultHeader);
-  Cookie *c(m_cookieJar->hasCookieForDomain(uri, "mycookie"));
+  Cookie *c(m_cookieJar->hasCookieForDomain(uri.server(), "mycookie"));
   EXPECT_NE((void*)0, c);
   EXPECT_FALSE(c->expired(when - 1));
   EXPECT_TRUE(c->expired(1246705272 + 1));
@@ -390,12 +390,12 @@ TEST_F(CookieTest, cookie_to_string)
   string requestHeader = "mycookie=foo";
   URI uri("http://example.com/");
   m_cookieJar->addCookieHeader(uri, requestHeader + "\r\n");
-  Cookie *c(m_cookieJar->hasCookieForDomain(uri, "mycookie"));
+  Cookie *c(m_cookieJar->hasCookieForDomain(uri.server(), "mycookie"));
   EXPECT_EQ(requestHeader + ";path=/", c->asString());
 
   requestHeader = "mycookie=foo;Expires=Sat, 04 Jul 2009 12:01:12 GMT";
   m_cookieJar->addCookieHeader(uri, requestHeader + "\r\n");
-  c = m_cookieJar->hasCookieForDomain(uri, "mycookie");
+  c = m_cookieJar->hasCookieForDomain(uri.server(), "mycookie");
   EXPECT_EQ(requestHeader+ ";path=/", c->asString());
 }
 
@@ -404,7 +404,7 @@ TEST_F(CookieTest, cookie_to_string_2)
   string requestHeader = "mycookie=foo;Expires=Sat, 04 Jul 2009 12:01:12 GMT;path=/;secure";
   URI uri("http://example.com/accounts/foo");
   m_cookieJar->addCookieHeader(uri, requestHeader + "\r\n");
-  Cookie *c(m_cookieJar->hasCookieForDomain(uri, "mycookie"));
+  Cookie *c(m_cookieJar->hasCookieForDomain(uri.server(), "mycookie"));
   EXPECT_EQ(requestHeader, c->asString());
 }
 
@@ -414,13 +414,13 @@ TEST_F(CookieTest, cookie_to_string_3)
   URI uri("http://sub.example.com/");
   m_cookieJar->addCookieHeader(uri, requestHeader + "\r\n");
   uri.setUri("http://example.com/");
-  Cookie *c(m_cookieJar->hasCookieForDomain(uri, "mycookie2"));
+  Cookie *c(m_cookieJar->hasCookieForDomain(uri.server(), "mycookie2"));
   EXPECT_EQ(requestHeader, c->asString());
 }
 
 TEST_F(CookieTest, writes_to_file)
 {
-  Cookie c("bla", "buzz", 80, "example.com", "/", 99, false);
+  Cookie c("bla", "buzz", "example.com", "/", 99, false);
   nds::File file;
   CookieWriter cw;
   cw(&c);
@@ -525,7 +525,7 @@ TEST_F(CookieTest, load_domain_cookies)
    * and also those for the top level domain example.com
    */
   ResultList headers;
-  headers.push_back("mycookie=foo;Expires=Sat, 04 Jul 2009 12:01:12 GMT");
+  headers.push_back("mycookie=foo;domain=.example.com;Expires=Sat, 04 Jul 2009 12:01:12 GMT");
   CreateFakePersistentCookie("example.com", headers);
   headers.clear();
   headers.push_back("mycookie2=bar;Expires=Sun, 12 Jul 2009 19:01:12 GMT");
@@ -535,7 +535,7 @@ TEST_F(CookieTest, load_domain_cookies)
   URI uri("http://sub.example.com/");
   string resultHeader;
   m_cookieJar->cookiesForRequest(uri, resultHeader, 0);
-  string expectedHeader = "Cookie: mycookie=foo; mycookie2=bar\r\n";
+  string expectedHeader = "Cookie: mycookie2=bar; mycookie=foo\r\n";
   EXPECT_EQ(expectedHeader, resultHeader);
 }
 
