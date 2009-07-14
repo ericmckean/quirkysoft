@@ -363,7 +363,8 @@ bool URI::operator!=(const URI & other) const
 static bool isEscapable(unsigned int value)
 {
   return ::isblank(value) or value == '&' or value == '#' or value == '?'
-    or value == '=' or value == '/' or value == ':' or value == '@' or value == '%';
+    or value == '=' or value == '/' or value == ':' or value == '@' or value == '%'
+    or value == '+';
 }
 
 std::string URI::escape(const std::string &input)
