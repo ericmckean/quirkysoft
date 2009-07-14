@@ -3,9 +3,7 @@
 
 std::string Cookie::asString() const
 {
-  std::string result(m_name);
-  result += "=";
-  result += m_value;
+  std::string result(m_name + "=" + m_value);
   if (m_expires != -1)
     result += ";Expires=" + DateUtils::formatTime(m_expires);
   if (not m_path.empty())
