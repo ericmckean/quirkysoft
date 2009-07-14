@@ -129,6 +129,9 @@ void CookieJar::addCookieHeader(const URI & uri, const std::string & request)
   if ( lowCaseParamSet.hasParameter(DOMAIN_STR) )
   {
     lowCaseParamSet.parameter(DOMAIN_STR, domain);
+    // reject domains that do not start with a dot
+    if (domain[0] != '.')
+      return;
   }
   if ( lowCaseParamSet.hasParameter(SECURE_STR) )
   {

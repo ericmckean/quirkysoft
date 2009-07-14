@@ -32,6 +32,7 @@ class CookieTest : public testing::Test
 
     void SetUp() {
       m_cookieJar = new CookieJar();
+      m_cookieJar->setAcceptCookies("example.com");
       nds::File::mkdir("data/bunjalloo/cookies");
     }
 
@@ -122,6 +123,18 @@ TEST_F(CookieTest, CalcTopLevel)
   EXPECT_EQ(expected, result);
 }
 
+TEST_F(CookieTest, reject_domain_no_dot)
+{
+  /*
+   * If domain=something where something does not start with a dot,
+   * then the cookie is rejected
+   */
+  URI uri("http://www.example.com/");
+  string requestHeader = "mycookie=1;domain=example.com\r\n";
+  m_cookieJar->addCookieHeader(uri, requestHeader);
+  EXPECT_TRUE(m_cookieJar->hasCookieForDomain(URI("example.com"), "mycookie") == 0);
+}
+
 TEST_F(CookieTest, SubDomain)
 {
   const string settingServer("www.domain.com");
@@ -153,8 +166,8 @@ TEST_F(CookieTest, SubDomain)
   EXPECT_EQ(expectedHeader, resultHeader);
 
   // check that setting a cookie readable across all domains works
-  // set for uri www.domain.com, but with domain=domain.com, ie. top level.
-  requestHeader = "topcount=2;domain=domain.com;path=/\r\n";
+  // set for uri www.domain.com, but with domain=.domain.com, ie. top level.
+  requestHeader = "topcount=2;domain=.domain.com;path=/\r\n";
   expectedHeader = "Cookie: topcount=2\r\n";
   m_cookieJar->addCookieHeader(uri, requestHeader);
   uri.setUri("http://some.domain.com");
@@ -186,7 +199,7 @@ TEST_F(CookieTest, Path)
   const string subDomain("sub.domain.com");
   // accept cookies for all *.domain.com pages
   m_cookieJar->setAcceptCookies("domain.com");
-  string requestHeader = "topcount=2;domain=domain.com;path=/accounts/\r\n";
+  string requestHeader = "topcount=2;domain=.domain.com;path=/accounts/\r\n";
 
   // add a path specific cookie
   URI uri("http://sub.domain.com/accounts/");
@@ -214,7 +227,7 @@ TEST_F(CookieTest, Path)
 
   // test adding some unrelated site's cookie
   m_cookieJar->setAcceptCookies("elsewhere.com");
-  requestHeader = "SD=richard;domain=elsewhere.com;path=/\r\n";
+  requestHeader = "SD=richard;domain=.elsewhere.com;path=/\r\n";
   uri.setUri("http://www.elsewhere.com/login");
   m_cookieJar->addCookieHeader(uri, requestHeader);
 
@@ -262,7 +275,7 @@ TEST_F(CookieTest, Secure)
   m_cookieJar->setAcceptCookies("domain.com");
 
   URI uri("https://sub.domain.com/accounts/");
-  string requestHeader = "LSID=ff9123;domain=domain.com;path=/accounts/;secure\r\n";
+  string requestHeader = "LSID=ff9123;domain=.domain.com;path=/accounts/;secure\r\n";
   m_cookieJar->addCookieHeader(uri, requestHeader);
   string expectedHeader = "Cookie: LSID=ff9123\r\n";
   string resultHeader;
@@ -279,7 +292,6 @@ TEST_F(CookieTest, Secure)
 
 TEST_F(CookieTest, ignore_httponly)
 {
-  m_cookieJar->setAcceptCookies("example.com");
   URI uri("http://example.com/");
   string requestHeader = "mycookie=1234;path=/;HttpOnly\r\n";
   m_cookieJar->addCookieHeader(uri, requestHeader);
@@ -338,7 +350,6 @@ TEST_F(CookieTest, is_session)
 
 TEST_F(CookieTest, Expires)
 {
-  m_cookieJar->setAcceptCookies("example.com");
   // check that cookies expire when they should
   URI uri("http://example.com/");
   string requestHeader = "mycookie=foo;Expires=Sat, 04 Jul 2009 12:01:12 GMT\r\n";
@@ -361,7 +372,6 @@ TEST_F(CookieTest, Expires)
 
 TEST_F(CookieTest, cookie_to_string)
 {
-  m_cookieJar->setAcceptCookies("example.com");
   string requestHeader = "mycookie=foo";
   URI uri("http://example.com/");
   m_cookieJar->addCookieHeader(uri, requestHeader + "\r\n");
@@ -376,7 +386,6 @@ TEST_F(CookieTest, cookie_to_string)
 
 TEST_F(CookieTest, cookie_to_string_2)
 {
-  m_cookieJar->setAcceptCookies("example.com");
   string requestHeader = "mycookie=foo;Expires=Sat, 04 Jul 2009 12:01:12 GMT;path=/;secure";
   URI uri("http://example.com/accounts/foo");
   m_cookieJar->addCookieHeader(uri, requestHeader + "\r\n");
@@ -395,7 +404,6 @@ TEST_F(CookieTest, writes_to_file)
 
 TEST_F(CookieTest, loads_cookies)
 {
-  m_cookieJar->setAcceptCookies("example.com");
   // create a fake cookie file
   ofstream testFile;
   testFile.open("data/bunjalloo/cookies/example.com", ios::out);
@@ -411,7 +419,6 @@ TEST_F(CookieTest, loads_cookies)
 
 TEST_F(CookieTest, saves_cookies)
 {
-  m_cookieJar->setAcceptCookies("example.com");
   URI uri("http://example.com/accounts/foo");
   string requestHeader = "mycookie=foo;Expires=Sat, 04 Jul 2009 12:01:12 GMT\r\n";
   m_cookieJar->addCookieHeader(uri, requestHeader);
@@ -425,8 +432,6 @@ TEST_F(CookieTest, does_not_duplicate_entries)
   // check that if we have persistent cookies for example.com
   // and we go to example2.com, that the cookies for example.com are removed
   // this prevents the list of in-memory cookies from becoming huge.
-  m_cookieJar->setAcceptCookies("example.com");
-  m_cookieJar->setAcceptCookies("two.example.com");
   {
     URI uri("http://example.com/");
     string requestHeader = "mycookie=foo;Expires=Sat, 04 Jul 2009 12:01:12 GMT\r\n";
@@ -434,17 +439,54 @@ TEST_F(CookieTest, does_not_duplicate_entries)
   }
   {
     URI uri("http://two.example.com/");
-    string requestHeader = "mycookie2=bar;Expires=Sun, 11 Jul 2009 18:01:12 GMT\r\n";
+    string requestHeader = "mycookie2=bar;Expires=Sun, 12 Jul 2009 18:01:12 GMT\r\n";
     m_cookieJar->addCookieHeader(uri, requestHeader);
   }
+  {
+    ResultList expected;
+    expected.push_back("mycookie=foo;Expires=Sat, 04 Jul 2009 12:01:12 GMT;path=/");
+    TestCookieFile("example.com", expected);
+  }
+  {
+    ResultList expected;
+    expected.push_back("mycookie2=bar;Expires=Sun, 12 Jul 2009 18:01:12 GMT;path=/");
+    TestCookieFile("two.example.com", expected);
+  }
+}
+
+TEST_F(CookieTest, save_domain_cookies)
+{
+  /*
+   * Should save the cookies for domain when set on a sub domain
+   * e.g. www.example.com sets foo for domain=example.com
+   * This should be saved in example.com cookie file
+   * But setting just to www should not be saved to domain
+   */
+  URI uri("http://www.example.com/");
+  string requestHeader = "mycookie=foo;domain=.example.com;Expires=Sat, 04 Jul 2009 12:01:12 GMT\r\n";
+  m_cookieJar->addCookieHeader(uri, requestHeader);
+  requestHeader = "mycookie2=bar;Expires=Sat, 04 Jul 2009 12:01:12 GMT\r\n";
+  m_cookieJar->addCookieHeader(uri, requestHeader);
+
   ResultList expected;
-  expected.push_back("mycookie=foo;Expires=Sat, 04 Jul 2009 12:01:12 GMT;path=/");
+  expected.push_back("mycookie=foo;domain=.example.com;Expires=Sat, 04 Jul 2009 12:01:12 GMT");
   TestCookieFile("example.com", expected);
+
+  expected.clear();
+  expected.push_back("mycookie2=bar;Expires=Sat, 04 Jul 2009 12:01:12 GMT");
+  TestCookieFile("www.example.com", expected);
+}
+
+TEST_F(CookieTest, load_domain_cookies)
+{
+  /*
+   * Visiting www.example.com should load cookies for www.example.com
+   * and also those for the top level domain example.com
+   */
 }
 
 TEST_F(CookieTest, doesnt_save_session_cookies)
 {
-  m_cookieJar->setAcceptCookies("example.com");
   URI uri("http://example.com/accounts/foo");
   string requestHeader = "mycookie=foo\r\n";
   m_cookieJar->addCookieHeader(uri, requestHeader);
@@ -455,7 +497,6 @@ TEST_F(CookieTest, doesnt_save_session_cookies)
 
 TEST_F(CookieTest, saves_multiple_cookies)
 {
-  m_cookieJar->setAcceptCookies("example.com");
   URI uri("http://example.com/accounts/foo");
   string requestHeader = "mycookie=foo;Expires=Sat, 04 Jul 2009 12:01:12 GMT\r\n";
   m_cookieJar->addCookieHeader(uri, requestHeader);
