@@ -236,7 +236,8 @@ bool Toolbar::stylusUp(const Stylus * stylus)
     {
       handlePress(m_touchedIndex);
     }
-    m_sprites[m_touchedIndex]->setTranslucent(false);
+    if (m_touchedIndex >= 0)
+      m_sprites[m_touchedIndex]->setTranslucent(false);
   }
   setBlendHelper(8, 8);
   return false;
