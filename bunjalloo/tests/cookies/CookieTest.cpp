@@ -422,7 +422,7 @@ TEST_F(CookieTest, writes_to_file)
 {
   Cookie c("bla", "buzz", "example.com", "/", 99, false);
   nds::File file;
-  CookieWriter cw;
+  CookieWriter cw(0);
   cw(&c);
   EXPECT_TRUE(nds::File::exists("data/bunjalloo/cookies/example.com"));
 }
@@ -565,4 +565,27 @@ TEST_F(CookieTest, saves_multiple_cookies)
   m_cookieJar->cookiesForRequest(uri, resultHeader, 0);
   string expectedHeader = "Cookie: mycookie=foo; mycookie2=bar\r\n";
   EXPECT_EQ(expectedHeader, resultHeader);
+}
+
+TEST_F(CookieTest, gc_removes_expired_cookies)
+{
+  // create an expired cookie
+  ResultList headers;
+  headers.push_back("mycookie=foo;Expires=Sun, 02 Jan 2000 11:04:48");
+  CreateFakePersistentCookie("example.com", headers);
+  // first check that starting at 0 they aren't expired.
+  URI uri("http://example.com/");
+  string resultHeader;
+  m_cookieJar->cookiesForRequest(uri, resultHeader, 0);
+  EXPECT_EQ("Cookie: mycookie=foo\r\n", resultHeader);
+
+  // now see if running gcExpiredCookies() deletes the cookie
+  time_t when = 1246611088; // Fri 03 Jul 2009
+  resultHeader = "";
+  m_cookieJar->cookiesForRequest(uri, resultHeader, when);
+  EXPECT_EQ("", resultHeader);
+
+  // now check to see if the cookie is still on disk (it shouldn't be)
+  ResultList expected;
+  TestCookieFile("example.com", expected);
 }

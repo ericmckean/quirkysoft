@@ -193,7 +193,7 @@ void CookieJar::addCookieHeader(
 
 void CookieJar::saveCookiesToDisk()
 {
-  CookieWriter cw;
+  CookieWriter cw(0);
   for_each(m_cookies.begin(), m_cookies.end(), cw);
 }
 
@@ -279,17 +279,20 @@ void CookieJar::gcExpiredCookies(time_t now)
   // there are expired cookies
   // remove them from memory and disk
   std::vector<Cookie *> tmp;
+  std::vector<Cookie *> expired;
   std::vector<Cookie *>::const_iterator it(m_cookies.begin());
   for (; it != m_cookies.end(); ++it)
   {
     Cookie *c(*it);
     if (c->expired(now)) {
-      delete c;
+      expired.push_back(c);
       continue;
     }
     tmp.push_back(c);
   }
   m_cookies.swap(tmp);
+  for_each(expired.begin(), expired.end(), CookieWriter(now));
+  for_each(expired.begin(), expired.end(), delete_ptr());
 }
 
 std::string CookieJar::topLevel(const std::string & sub)
