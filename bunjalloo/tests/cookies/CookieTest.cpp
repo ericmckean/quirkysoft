@@ -390,11 +390,6 @@ TEST_F(CookieTest, loads_cookies)
   string resultHeader;
   m_cookieJar->cookiesForRequest(uri, resultHeader, 99);
   EXPECT_EQ(expectedHeader, resultHeader);
-
-  // check that if we have persistent cookies for example.com
-  // and we go to example2.com, that the cookies for example.com are removed
-  // this prevents the list of in-memory cookies from becoming huge.
-
 }
 
 TEST_F(CookieTest, saves_cookies)
@@ -411,6 +406,33 @@ TEST_F(CookieTest, saves_cookies)
   f.close();
   EXPECT_EQ(1U, lines.size());
   EXPECT_EQ(requestHeader.substr(0, requestHeader.length() - 2) + ";path=/accounts", lines[0]);
+}
+
+TEST_F(CookieTest, does_not_duplicate_entries)
+{
+  // check that if we have persistent cookies for example.com
+  // and we go to example2.com, that the cookies for example.com are removed
+  // this prevents the list of in-memory cookies from becoming huge.
+  m_cookieJar->setAcceptCookies("example.com");
+  m_cookieJar->setAcceptCookies("two.example.com");
+  {
+    URI uri("http://example.com/");
+    string requestHeader = "mycookie=foo;Expires=Sat, 04 Jul 2009 12:01:12 GMT\r\n";
+    m_cookieJar->addCookieHeader(uri, requestHeader);
+  }
+  {
+    URI uri("http://two.example.com/");
+    string requestHeader = "mycookie2=bar;Expires=Sun, 11 Jul 2009 18:01:12 GMT\r\n";
+    m_cookieJar->addCookieHeader(uri, requestHeader);
+  }
+  nds::File f;
+  f.open("data/bunjalloo/cookies/example.com", "r");
+  EXPECT_TRUE(f.is_open());
+  std::vector<std::string> lines;
+  f.readlines(lines);
+  f.close();
+  EXPECT_EQ(1U, lines.size());
+  EXPECT_EQ("mycookie=foo;Expires=Sat, 04 Jul 2009 12:01:12 GMT;path=/", lines[0]);
 }
 
 TEST_F(CookieTest, doesnt_save_session_cookies)
