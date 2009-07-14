@@ -81,8 +81,9 @@ void EditPopup::postEdit(const std::string & val)
   using std::vector;
   using std::string;
   vector<std::string> tokens;
-  const char newline[] = "\n";
-  tokenize(val, tokens, std::string(newline));
+  tokenize(val, tokens, "\n");
+  if (tokens.size() != 2)
+    return;
   m_element->setAttribute("href", tokens[0]);
   std::string & t(m_element->firstChild()->text());
   t = tokens[1];
