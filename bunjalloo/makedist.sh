@@ -35,7 +35,7 @@ if [ $? != 0 ] ; then
   exit 1
 fi
 
-last=$(git tag | tail -1)
+last=$(hg tags | awk '!/^tip/ {print $1; exit}')
 
 eval set -- "$TEMP"
 
@@ -87,7 +87,7 @@ src=$project-$VERSION
 src_tarname=$project-src-$VERSION.tar
 src_tgzname=$project-src-$VERSION.tar.gz
 pushd .. >/dev/null
-git archive --prefix=$src/ HEAD > $src_tarname || die "Unable to create $src_tarname"
+hg archive --prefix=$src/ -r tip --type=tar $src_tarname || die "Unable to create $src_tarname"
 mkdir $src -p
 tar xf $src_tarname && rm $src_tarname
 cp $WAF_SCRIPT $src
@@ -95,15 +95,15 @@ tar czf $src_tgzname $src && rm -rf $src
 mv $src_tgzname $makedistdir/ || die "Unable to mv $src_tgzname to $makedistdir"
 echo "Created $src_tgzname"
 
-git log --pretty=format:"  * %s" --no-merges HEAD ^$last -- bunjalloo libndspp \
-                > $makedistdir/ShortLog-$VERSION || die "Unable to create ChangeLog"
-git log --no-merges HEAD ^$last -- bunjalloo libndspp \
+hg log -M --template="  * {desc|firstline|strip}\n" -r tip:$last bunjalloo libndspp \
+                > $makedistdir/ShortLog-$VERSION || die "Unable to create ShortLog"
+hg log -M --style changelog -r tip:$last bunjalloo libndspp \
                 > $makedistdir/ChangeLog-$VERSION || die "Unable to create ChangeLog"
 echo "Created ChangeLog-$VERSION and ShortLog-$VERSION"
 popd > /dev/null
 
 if test "$tag" = "yes" ; then
-  git tag -m "Bunjalloo release ${VERSION}" v${VERSION}
+  hg tag -m "Bunjalloo release ${VERSION}" v${VERSION}
 fi
 
 if test "$upload" = "yes" ; then
