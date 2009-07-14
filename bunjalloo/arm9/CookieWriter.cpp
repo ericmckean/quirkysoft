@@ -6,6 +6,30 @@
 
 static const char COOKIE_DIR[] = DATADIR"/cookies/";
 
+static void linesToSave(const std::string &filename,
+    Cookie *cookie, std::vector<std::string> *wanted)
+{
+  nds::File f;
+  f.open(filename.c_str(), "r");
+  if (f.is_open()) {
+    // grep out the line that starts with the cookie name
+    // write back all lines
+    std::vector<std::string> lines;
+    f.readlines(lines);
+    std::string match(cookie->name() + "=");
+    size_t sz(match.size());
+    for (std::vector<std::string>::const_iterator it(lines.begin());
+        it != lines.end();
+        ++it) {
+      const std::string &line(*it);
+      const std::string &first(line.substr(0, sz));
+      if (first == match)
+        continue;
+      wanted->push_back(line);
+    }
+  }
+}
+
 void CookieWriter::operator()(Cookie *cookie)
 {
   if (cookie->session())
@@ -19,9 +43,17 @@ void CookieWriter::operator()(Cookie *cookie)
   else
     filename += domain;
 
+  std::vector<std::string> wanted;
+  linesToSave(filename, cookie, &wanted);
   nds::File f;
-  f.open(filename.c_str(), "a");
+  f.open(filename.c_str(), "w");
   if (f.is_open()) {
+    for (std::vector<std::string>::const_iterator it(wanted.begin());
+      it != wanted.end();
+      ++it) {
+      f.write(it->c_str());
+      f.write("\n");
+    }
     f.write(cookie->asString().c_str());
     f.write("\n");
   }

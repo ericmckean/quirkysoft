@@ -50,7 +50,7 @@ class CookieJar
      * @param uri The uri of the page that is sending the cookie set request.
      * @param request Set-Cookie request header value.
      */
-    void addCookieHeader(const URI & uri, const std::string & request);
+    void addCookieHeader(const URI &uri, const std::string &request);
 
     /** Given a request, fill the headers with the defined cookies.
      * @param request the request string.
@@ -73,7 +73,9 @@ class CookieJar
      * @param name the cookie name.
      * @return pointer to a cookie from the domain with the given name, 0 otherwise.
      */
-    Cookie * hasCookieForDomain(const URI & uri, const std::string & name) const;
+    Cookie * hasCookieForDomain(
+            const std::string &server,
+            const std::string &name) const;
 
     /** Check if we should accept cookies from the given domain.
      * @param domain the domain that has sent the cookie.
@@ -107,7 +109,12 @@ class CookieJar
 
     void gcExpiredCookies(time_t now);
     void saveCookiesToDisk();
-    void loadDomainCookies(const URI &uri);
+    void loadDomainCookies(const std::string &domain);
+
+    void addCookieHeader(
+            const std::string &domain,
+            const std::string &path_in,
+            const std::string &request);
 };
 
 #endif

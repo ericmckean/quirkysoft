@@ -47,14 +47,14 @@ CookieJar::~CookieJar()
 }
 
 
-Cookie * CookieJar::hasCookieForDomain(const URI & uri, const std::string & name) const
+Cookie * CookieJar::hasCookieForDomain(const std::string &server, const std::string & name) const
 {
   vector<Cookie *>::const_iterator it(m_cookies.begin());
   vector<Cookie *>::const_iterator end(m_cookies.end());
   for (; it != end; ++it)
   {
     Cookie * c(*it);
-    if (c->matchesDomain(uri.server()) and c->name() == name)
+    if (c->matchesDomain(server) and c->name() == name)
     {
       return c;
     }
@@ -62,10 +62,9 @@ Cookie * CookieJar::hasCookieForDomain(const URI & uri, const std::string & name
   return 0;
 }
 
-void CookieJar::loadDomainCookies(const URI &uri)
+void CookieJar::loadDomainCookies(const std::string &domain)
 {
   // load cookies for the domain
-  string domain = uri.server();
   if (m_domain != domain)
   {
     m_domain = domain;
@@ -87,20 +86,30 @@ void CookieJar::loadDomainCookies(const URI &uri)
         for (std::vector<std::string>::const_iterator line(lines.begin());
             line != lines.end(); ++line)
         {
-          addCookieHeader(uri, *line);
+          addCookieHeader(domain, "/", *line);
         }
       }
     }
   }
 }
 
-void CookieJar::addCookieHeader(const URI & uri, const std::string & request)
+void CookieJar::addCookieHeader(const URI &uri, const std::string &request)
 {
-  // printf("addCookieHeader: %s \nFrom: %s\n",request.c_str(), uri.asString().c_str());
-  int port = uri.port();
   string domain = uri.server();
-  string top(topLevel(domain));
   string path = uri.fileName();
+  addCookieHeader(domain, path, request);
+  m_domain = domain;
+  saveCookiesToDisk();
+}
+
+void CookieJar::addCookieHeader(
+    const std::string &domain_in,
+    const std::string &path_in,
+    const std::string &request)
+{
+  // printf("addCookieHeader: %s \nFrom: %s\n",request.c_str(), domain_in.c_str());
+  std::string path(path_in);
+  std::string domain(domain_in);
   bool secure(false);
 
   if (not acceptCookies(domain))
@@ -165,24 +174,21 @@ void CookieJar::addCookieHeader(const URI & uri, const std::string & request)
     {
       continue;
     }
-    Cookie * existingCookie = hasCookieForDomain(uri, name);
+    Cookie * existingCookie = hasCookieForDomain(domain, name);
+    const string &value(it->second);
     if (existingCookie != 0)
     {
       // replace with new value
-      existingCookie->setValue(it->second);
+      existingCookie->setValue(value);
       existingCookie->setExpires(expires);
       existingCookie->setSaved(false);
     }
     else
     {
-      string value = it->second;
-      Cookie * cookie = new Cookie(name, value, port, domain, path, expires, secure);
-      // printf("set cookie for %s: %s = %s\n", domain.c_str(), name.c_str(), value.c_str());
+      Cookie * cookie(new Cookie(name, value, domain, path, expires, secure));
       m_cookies.push_back(cookie);
     }
   }
-  m_domain = uri.server();
-  saveCookiesToDisk();
 }
 
 void CookieJar::saveCookiesToDisk()
@@ -203,7 +209,8 @@ void CookieJar::cookiesForRequest(
     std::string &headers,
     time_t now)
 {
-  loadDomainCookies(request);
+  loadDomainCookies(request.server());
+  loadDomainCookies(topLevel(request.server()));
   // printf("cookiesForRequest: %s \n",request.asString().c_str());
   string domain(request.server());
   // find a cookie in the jar that corresponds to the requested domain...

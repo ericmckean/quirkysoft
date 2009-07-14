@@ -27,20 +27,18 @@ class Cookie
   public:
     /** Create an empty Cookie.*/
     Cookie()
-      : m_port(80), m_expires(-1), m_secure(false), m_saved(false)
+      : m_expires(-1), m_secure(false), m_saved(false)
     {}
 
     /** Create a Cookie from parameters.
      * @param name the name of the parameter.
      * @param value the value to give it.
-     * @param port the server port that set the cookie.
      * @param domain the domain name
      * @param path the path that the cookie applies to.
      * @param secure true if this cookie only applies to secure connections.
      */
     Cookie(const std::string & name,
            const std::string & value,
-           int                 port,
            const std::string & domain,
            const std::string & path,
            int                 expires,
@@ -48,7 +46,6 @@ class Cookie
         )
       : m_name(name),
         m_value(value),
-        m_port(port),
         m_domain(domain),
         m_path(path),
         m_expires(expires),
@@ -141,7 +138,6 @@ class Cookie
   private:
     std::string m_name;
     std::string m_value;
-    int m_port;
     std::string m_domain;
     std::string m_path;
     int m_expires;
