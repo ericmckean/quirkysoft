@@ -2,7 +2,7 @@
 
 # Download, unpack, compile and install dependencies to $DEVKITPRO directory
 
-LIBPNG=libpng-1.2.37
+LIBPNG=libpng-1.2.38
 ZLIB=zlib-1.2.3
 GIFLIB=giflib-4.1.6
 JPEGLIB=jpegsrc.v6b
