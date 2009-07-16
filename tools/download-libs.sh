@@ -10,6 +10,8 @@ MATRIXLIB=matrixssl-1.8.7b
 
 tooldir=$(dirname "$0")
 . ${tooldir}/shell_functions.sh
+cd ${tooldir}
+tooldir=$(pwd)
 
 check_devkitpro
 cd $DEVKITPRO
@@ -62,7 +64,7 @@ echo "Also needed for SDL build:"
 echo "sudo make -C zlib/contrib/minizip -f Makefile.linux clean install"
 make -C libpng -f Makefile.ds clean install || die "Problems building libpng"
 make -C giflib -f Makefile.ds clean install || die "Problems building giflib"
-make -C ${MATRIXLIB}/src -f Makefile.ds clean install || die "Problems building matrixSSL"
+make -C ${MATRIXLIB}/matrixssl/src -f Makefile.ds clean install || die "Problems building matrixSSL"
 cd jpeglib
 patch -i ${tooldir}/otherlibs/jpeglib/jmorecfg-remove-float.patch -p1 || die "Unable to patch JPEG to remove floats"
 CFLAGS="-Dsprintf=siprintf -Dfprintf=fiprintf -DNO_GETENV \
