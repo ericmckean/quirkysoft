@@ -29,12 +29,6 @@ create_deps.sh
 Create a tar of dependencies, for uploading to the web. You probably don't
 need to use this.
 
-issues.py
-=========
-
-Parse the issues page on google code to get a comma separated list of open
-issues.
-
 test-time.sh
 ============
 
@@ -54,6 +48,11 @@ script.
 
 This will download the devkitProUpdate.ini that is used for the Windows
 installer, and install the relevant files for Nintendo DS development.
+
+shell_functions.sh
+==================
+
+Helper shell functions used in other scripts
 
 wikify.py
 =========

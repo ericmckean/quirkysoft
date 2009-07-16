@@ -1,9 +1,38 @@
 #!/bin/sh
 
-if test -z "$DEVKITPRO" ; then
-  echo "No DEVKITPRO variable set. Set the path to devkit pro."
+tooldir=$(dirname $0)
+. $tooldir/shell_functions.sh
+
+check_devkitpro
+
+upload="no"
+VERSION=$(grep -i version $tooldir/../bunjalloo/arm9/version_number.c  | sed 's/.*"\(.*\)".*/\1/g')
+TEMP=$(getopt -o huv: --long version:,upload,help -- "$@")
+if [ $? != 0 ] ; then
+  echo "Try '$0 --help' for more information"
   exit 1
 fi
+
+eval set -- "$TEMP"
+
+while true ; do
+  case $1 in
+    -v|--ve|--ver|--vers|--versi|--versio|--version ) VERSION=$2 ; shift 2 ;;
+    -u|--up|--upl|--uplo|--uploa|--upload ) upload="yes" ; shift ;;
+    -h|--help )
+    echo "Create and optionally upload dependencies tarball."
+    echo ""
+    echo "Usage: $(basename $0) [OPTION]... "
+    echo "Options available are:"
+    echo "-v, --version=VERSION    Set this version number"
+    echo "-u, --upload             Upload the files too"
+    echo "-h, --help               This message."
+    exit 0
+    ;;
+    --) shift ;  break ;;
+    *) echo "Internal error! " >&2 ; exit 1 ;;
+  esac
+done
 
 # copy the files
 filenames="
@@ -57,8 +86,13 @@ do
   done
 done
 EOF
+deptar=bunjalloo-deps-${VERSION}.tar.gz
 
 chmod +x install.sh
-tar czvf ../bunjalloo-deps-0.6.1.tar.gz install.sh lib include
+tar czvf ../$deptar install.sh lib include
 cd ..
 rm -rf .create_deps
+
+if [ "$upload" = "yes" ] ; then
+  upload_file quirkysoft "Precompiled dependencies for bunjalloo release $VERSION" "Type-Archive,OpSys-NDS" ${deptar}
+fi

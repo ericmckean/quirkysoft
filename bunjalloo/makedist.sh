@@ -1,17 +1,11 @@
 #!/bin/bash
-UPLOAD="googlecode_upload.py"
 
-repo=https://quirkysoft.googlecode.com/svn
 project=bunjalloo
 upload="no"
 tag="no"
 makedistdir=$(dirname $0)
+. ${makedistdir}/../tools/shell_functions.sh
 pushd $makedistdir > /dev/null
-
-die() {
-  echo >&2 "$@"
-  exit 1
-}
 
 if test "x$WAFDIR" = x ; then
   WAF_SCRIPT=$(which waf)
@@ -107,14 +101,6 @@ if test "$tag" = "yes" ; then
 fi
 
 if test "$upload" = "yes" ; then
-  authfile=$(grep $(dirname $repo) $HOME/.subversion/auth/svn.simple/* -l)
-  user=$(grep username -2 $authfile | tail -1)
-  pass=$(grep password -2 $authfile | tail -1)
-  $UPLOAD -s "Source code for $project release $VERSION" --project=quirkysoft --user=$user --password=$pass \
-     -l Type-Source,Program-Bunjalloo $src_tgzname \
-    || die "Unable to upload $src_tgzname"
-
-  $UPLOAD -s "$project release $VERSION" --project=quirkysoft --user=$user --password=$pass \
-   -l Type-Archive,Program-Bunjalloo,OpSys-NDS ${zipname} \
-    || die "Unable to upload ${zipname}"
+  upload_file quirkysoft "Source code for $project release $VERSION" "Type-Source,Program-Bunjalloo" $src_tgzname
+  upload_file quirkysoft "$project release $VERSION" "Type-Archive,Program-Bunjalloo,OpSys-NDS" ${zipname}
 fi

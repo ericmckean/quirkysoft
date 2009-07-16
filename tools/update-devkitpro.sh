@@ -1,26 +1,18 @@
 #!/bin/sh
 
-die() {
-    echo $@
-    exit 1
-}
-
 g() {
     python <<EOF
 import ConfigParser
 c = ConfigParser.ConfigParser()
-c.readfp(open("$here/" + 'devkitProUpdate.ini'))
+c.readfp(open("$DEVKITPRO/" + 'devkitProUpdate.ini'))
 print c.get("$1", "$2")
 EOF
 }
 
-if [ -z $DEVKITPRO ] ; then
-    die "Set DEVKITPRO"
-fi
+. $(dirname $0)/shell_functions.sh
 
-if [ ! -d $DEVKITPRO ] ; then
-    mkdir $DEVKITPRO
-fi
+check_devkitpro
+
 cd $DEVKITPRO
 here=$(pwd)
 url="http://devkitpro.sourceforge.net/devkitProUpdate.ini"
