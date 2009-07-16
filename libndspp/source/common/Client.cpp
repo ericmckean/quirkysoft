@@ -140,7 +140,8 @@ void Client::connectInitial()
 
 void Client::connectReadyToConnect()
 {
-  memcpy(&m_socketAddress->sin_addr, m_hostByNameEntry->h_addr_list[m_hostAddrIndex], sizeof(struct in_addr));
+  if (m_hostByNameEntry)
+    memcpy(&m_socketAddress->sin_addr, m_hostByNameEntry->h_addr_list[m_hostAddrIndex], sizeof(struct in_addr));
   if (tryConnect(*m_socketAddress)) {
     m_connectState = CLIENT_CONNECT_DONE;
   }
