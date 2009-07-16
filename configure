@@ -88,6 +88,7 @@ checkWAF()
 	else
 	  printf "$GREEN$WAF$NORMAL\n"
 	fi
+	WAF="$PYTHON $WAF"
 }
 
 # Generates a Makefile. Requires that $WAF is set.
