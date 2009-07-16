@@ -8,14 +8,10 @@ GIFLIB=giflib-4.1.6
 JPEGLIB=jpegsrc.v6b
 MATRIXLIB=matrixssl-1.8.7b
 
-die() {
-  echo >&2 "$@"
-  exit 1
-}
-
 tooldir=$(dirname "$0")
+. ${tooldir}/shell_functions.sh
 
-test -z $DEVKITPRO && die "Set DEVKITPRO"
+check_devkitpro
 cd $DEVKITPRO
 
 if [ ! -e ${LIBPNG}.tar.bz2 ] ; then
