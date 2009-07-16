@@ -2,6 +2,8 @@
 
 tooldir=$(dirname $0)
 . $tooldir/shell_functions.sh
+cd $tooldir
+tooldir=$(pwd)
 
 check_devkitpro
 
