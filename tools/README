@@ -58,3 +58,10 @@ wikify.py
 =========
 
 Offline wiki to html converter
+
+google-test.awk
+===============
+
+Script to convert unit tests written for CppUnit to google-test syntax. It is
+not exhaustive and only covered the parts of CppUnit I used in the tests
+written for Bunjalloo.
