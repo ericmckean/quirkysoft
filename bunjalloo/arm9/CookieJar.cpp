@@ -96,6 +96,11 @@ void CookieJar::loadDomainCookies(const std::string &domain)
 void CookieJar::addCookieHeader(const URI &uri, const std::string &request)
 {
   string domain = uri.server();
+  if (not acceptCookies(domain))
+  {
+    // this server is blocked.
+    return;
+  }
   string path = uri.fileName();
   addCookieHeader(domain, path, request);
   m_domain = domain;
@@ -112,11 +117,6 @@ void CookieJar::addCookieHeader(
   std::string domain(domain_in);
   bool secure(false);
 
-  if (not acceptCookies(domain))
-  {
-    // this server is blocked.
-    return;
-  }
   string lowCaseRequest(request);
   transform(lowCaseRequest.begin(), lowCaseRequest.end(), lowCaseRequest.begin(), ::tolower);
 
@@ -275,6 +275,19 @@ void CookieJar::cookiesForRequest(
     gcExpiredCookies(now);
   }
 }
+
+#if 0
+void CookieJar::dumpCookieList()
+{
+  printf("Cookies: %d\n", m_cookies.size());
+  std::vector<Cookie *>::const_iterator it(m_cookies.begin());
+  for (; it != m_cookies.end(); ++it)
+  {
+    Cookie *c(*it);
+    printf("%s\n", c->asString().c_str());
+  }
+}
+#endif
 
 void CookieJar::gcExpiredCookies(time_t now)
 {
