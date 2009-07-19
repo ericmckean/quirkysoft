@@ -688,3 +688,18 @@ TEST_F(DocumentTest, Entities)
   EXPECT_TRUE(body->isa("body"));
 }
 
+TEST_F(DocumentTest, redirect)
+{
+  const string data(
+      "HTTP/1.1 302 MOVED TEMPORARILY\r\n"
+      "content-type:text/html; charset=UTF-8\r\n"
+      "location:/new/location/\r\n"
+      "\r\n"
+      "<html>test</html>");
+  const string initial("http://www.example.com/foo/bar");
+  m_document->setUri(initial);
+  m_document->appendData(data.c_str(), data.length());
+  string result = m_document->uri();
+  EXPECT_EQ(Document::REDIRECTED, m_document->status());
+  EXPECT_EQ("http://www.example.com/new/location/", result);
+}
