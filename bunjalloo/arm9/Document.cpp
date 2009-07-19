@@ -199,7 +199,8 @@ void Document::appendData(const char * data, int size)
     {
       if (m_historyEnabled)
       {
-        currentHistoryUri() = m_headerParser->redirect();
+        URI tmp(currentHistoryUri());
+        currentHistoryUri() = tmp.navigateTo(m_headerParser->redirect()).asString();
       }
       setStatus(REDIRECTED);
     }
