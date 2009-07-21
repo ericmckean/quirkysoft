@@ -97,6 +97,7 @@ void Config::reload()
 
   string cfgTemplate(DOCS_DIR);
   cfgTemplate += s_templateName;
+  string update;
   if (nds::File::exists(cfgFilename.c_str()) == nds::File::F_NONE)
   {
     // write default config file
@@ -106,9 +107,12 @@ void Config::reload()
   {
     // load new values.
     parseFile(cfgTemplate.c_str());
+    resource(UPDATE, update);
   }
 
   parseFile(cfgFilename.c_str());
+  if (not update.empty())
+    callback(UPDATE, update);
 
   if (nds::File::exists(USER_DIR) == nds::File::F_NONE)
   {
