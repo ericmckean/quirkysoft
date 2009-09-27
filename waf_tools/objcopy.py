@@ -1,96 +1,75 @@
-#! /usr/bin/env python
-# encoding: utf-8
-
-import os
+#!/usr/bin/python
+from TaskGen import feature, before
 import Task
+import os
 import Utils
-import TaskGen
-import Options
+from scwaf import build, apply_env_values, parse_task_gen_args
 
-def detect(conf):
-  env = conf.env
-  dka_bin = '%s/bin' % (Options.options.devkitarm)
-  arm_eabi = 'arm-eabi-objcopy'
-  objcopy = conf.find_program(arm_eabi, path_list=[dka_bin], var='OBJCOPY')
-  if not objcopy:
-    conf.fatal('objcopy was not found')
-  env['OBJCOPY'] = objcopy
-  copy = conf.find_program('cp', var='COPY')
-  env['COPY'] = copy
+@feature('objcopy')
+@before('apply_core')
+def apply_objcopy(self):
+    self.meths.remove('apply_core')
+    task = self.create_task('objcopy')
+    node = self.path.find_or_declare(self.source)
+    task.set_inputs(node)
+    task.set_outputs(node.change_ext('.o'))
+    self.compiled_tasks = [task]
 
-def build_h(task):
-  """ build h file from input file names """
-  env = task.env
-  filename = task.outputs[0].abspath(env)
-  hfile  = open(filename, 'w')
-  target = os.path.basename(filename).replace('.', '_')
-  hfile.write("""#ifndef %s_seen
+@build
+def objcopy(self, source, **kwargs):
+    env, attr = parse_task_gen_args(kwargs)
+    tg = self.new_task_gen(features='objcopy', source=source, **attr)
+    apply_env_values(tg, env)
+    return tg
+
+@feature('name2h')
+@before('apply_core')
+def apply_name2h(self):
+    self.meths.remove('apply_core')
+    find_resource = self.path.find_resource
+    find_target = self.path.find_or_declare
+    task = self.create_task('name2h')
+    task.set_inputs([find_target(filename) for filename in self.to_list(self.source)])
+    task.set_outputs(find_target(self.target))
+
+header_template = '''\
+#ifndef %s_seen
 #define %s_seen
 #ifdef __cplusplus
 extern "C" {
-#endif\n"""%(target, target))
-  for i in task.inputs:
-    symbol = os.path.basename(i.srcpath(env)).replace('.', '_')
-    hfile.write("""
-	extern const u16 _binary_%s_bin_end[];
-	extern const u16 _binary_%s_bin_start[];
-	extern const u32 _binary_%s_bin_size[];
-"""%(symbol, symbol, symbol))
-  hfile.write("""
+#endif
+'''
+
+binary_template = """
+    extern const u16 _binary_%s_end[];
+    extern const u16 _binary_%s_start[];
+    extern const u32 _binary_%s_size[];
+"""
+
+footer_template = """
 #ifdef __cplusplus
 };
 #endif
 #endif
-""")
-  return 0
+"""
 
-class name2h_taskgen(TaskGen.task_gen):
-  def apply(self):
-    find_resource = self.path.find_resource
-    task = self.create_task('name2h', self.env)
-    task.set_inputs([find_resource(Utils.split_path(filename))
-                    for filename in self.to_list(self.source)])
-    task.set_outputs(self.path.find_or_declare(Utils.split_path(self.target)))
+def build_h(task):
+    env = task.env
+    filename = task.outputs[0].abspath(env)
+    hfile = open(filename, 'w')
+    guard = os.path.basename(filename).replace('.', '_')
+    hfile.write(header_template % ((guard,)*2))
+    symbols = sorted(os.path.basename(i.srcpath(env)).replace('.', '_')
+            for i in task.inputs)
+    for symbol in symbols:
+        hfile.write(binary_template % ((symbol,)*3))
+    hfile.write(footer_template)
+    return 0
 
 def setup(bld):
-  # declare the Task Generators
-  # objcopy
-  # copies file.ext to file.ext.bin, then file.ext.bin to file.ext.o
-  bin2o_str = 'cd ${SRC[0].bld_dir(env)} && ${OBJCOPY} ${OBJCOPYFLAGS} ${SRC[0].name} ${TGT[0].name}'
-  copy_str = '${COPY} ${SRC} ${TGT}'
+    objcopy_str = 'cd ${SRC[0].bld_dir(env)} && ${OBJCOPY} ${OBJCOPYFLAGS} ${SRC[0].name} ${TGT[0].name}'
+    Task.simple_task_type('objcopy', objcopy_str, color='YELLOW', before='cxx cc', after='padbin copy')
+    Task.task_type_from_func('name2h', vars=[], func=build_h, before='cc cxx', after='padbin copy')
 
-  # pal -> pal.bin
-  for i in """
-        .img
-        .pal
-        .map
-        .snd
-      """.split():
-    TaskGen.declare_chain(
-        name='in2bin',
-        action=copy_str,
-        ext_in=i,
-        ext_out=i+'.bin')
-  # pal.bin -> pal.bin.o
-  TaskGen.declare_chain(
-      name='bin2o',
-      action=bin2o_str,
-      ext_in='.bin',
-      ext_out='.o',
-      after="in2bin",
-      reentrant=0)
-
-  # bin2o
-  # copies file.elf to file.arm
-  objcopy_str = '${OBJCOPY} -O binary ${SRC} ${TGT}'
-  TaskGen.declare_chain(
-      name='objcopy',
-      action=objcopy_str,
-      ext_in='.elf',
-      ext_out='.arm',
-      before='ndstool_9 ndstool_9_b',
-      after='cc_link cxx_link',
-      reentrant=0)
-
-  # name2h
-  Task.task_type_from_func('name2h', vars=[], func=build_h, before='cc cxx')
+def detect(conf):
+    conf.find_program('objcopy', var='OBJCOPY', mandatory=True)
