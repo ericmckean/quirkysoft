@@ -106,6 +106,8 @@ def _create_cproject(executable, waf, appname, workspace_includes,
         GASErrorParser
         GLDErrorParser
     """.split()
+    ext = add(doc, extensions, 'extension',
+                {'id': cdt_core + '.ELF', 'point':cdt_core + '.BinaryParser'})
     for e in extension_list:
         ext = add(doc, extensions, 'extension',
                 {'id': cdt_core + '.' + e, 'point':cdt_core + '.ErrorParser'})
@@ -127,7 +129,8 @@ def _create_cproject(executable, waf, appname, workspace_includes,
              'superClass': cdt_bld + '.prefbase.toolchain'})
 
     targetPlatform = add(doc, toolChain, 'targetPlatform',
-                    {'id': cdt_bld + '.prefbase.toolchain.1', 'name': ''})
+            { 'binaryParser': 'org.eclipse.cdt.core.ELF',
+              'id': cdt_bld + '.prefbase.toolchain.1', 'name': ''})
 
     waf_build = '"%s" build'%(waf)
     waf_clean = '"%s" clean'%(waf)
@@ -304,7 +307,8 @@ def builder(f):
 def check_generate_eclipse(self, projectname=None, pythonpath=[]):
     try:
         if Options.options.generate_eclipse:
-            appname = getattr(Utils.g_module, APPNAME, 'noname')
+            appname = getattr(Utils.g_module, APPNAME,
+                    os.path.basename(self.srcnode.abspath()))
             self.env['ECLIPSE_CDT_PROJECT'] = appname
             self.env['ECLIPSE_PYTHON_PATH'] = pythonpath
             self.add_pre_fun(pre_build)

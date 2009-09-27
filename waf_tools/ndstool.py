@@ -1,60 +1,91 @@
+#!/usr/bin/python
 """
 Waf tool for generating a .nds file from 1 or 2 arm cores, optionally using a
 banner.
 """
-import TaskGen
+import os
+import sys
+from scwaf import build, apply_env_values, parse_task_gen_args
+from TaskGen import feature, after, before
 import Task
-import Options
-from Logs import warn
-import sys, os
+import Utils
+import devkitarm
 
-class ndstool_taskgen(TaskGen.task_gen):
-  def apply(self):
-    find_build = self.path.find_or_declare
-    input_nodes = [find_build(filename) for filename in
-                                self.to_list(self.source)]
-    taskname = 'ndstool'
-    banner = getattr(self, 'banner', False)
-    if banner:
-      taskname += '_banner'
-      self.env['NDSTOOL_BANNER'] = banner
-      icon = getattr(self, 'icon', '')
-      node = self.path.find_resource(icon)
-      if not node:
-        warn('ndstool: icon "%s" not found'%icon)
-        sys.exit(1)
-      input_nodes.append(node)
+@build
+def create_nds(self, target, source, **kwargs):
+    env, attr = parse_task_gen_args(kwargs)
+    tg = self.new_task_gen(
+            features='nds',
+            target=target,
+            source=source,
+            **attr)
+    apply_env_values(tg, env)
+
+@feature('nds')
+@before('apply_core')
+def create_nds_feature(self):
+    """
+    build/target.arm: build/target
+        objcopy flags $< $@
+    build/target.nds: build/target.arm [source/icon banner]
+        ndstool -c $@ -9 $<  [-b source/icon banner]
+    """
+    self.meths.remove('apply_core')
+
+    get_node = self.path.find_or_declare
+    get_source = self.path.find_resource
+    elf2bin_in = [get_node(filename) for filename in
+            Utils.to_list(self.source)]
+    binfile = elf2bin_in[0].change_ext('.arm')
+    ndstask_inputs = [binfile]
+
+    ndstask = 'ndstool'
+    if getattr(self, 'banner', None):
+        ndstask += '_banner'
+        self.env['NDSTOOL_BANNER'] = self.banner
+        if getattr(self, 'icon', None):
+            ndstask_inputs += [get_source(self.icon)]
+        else:
+            raise Utils.WscriptError("ndstool requires an icon with the banner")
+
+    task = self.create_task('elf2bin')
+    task.set_inputs(elf2bin_in)
+    task.set_outputs(binfile)
+    self.tasks.append(task)
+
     os.environ['DEVKITPRO'] = self.env['DEVKITPRO']
-    task = self.create_task(taskname, self.env)
-    task.set_inputs(input_nodes)
-    task.set_outputs(find_build(self.target))
-
-def detect(conf):
-  dka_bin = os.path.join(Options.options.devkitarm, 'bin')
-  ndstool = 'ndstool'
-  ndstool = conf.find_program(ndstool, path_list=[dka_bin], var='NDSTOOL')
-  if not ndstool:
-    conf.fatal('ndstool was not found')
-  conf.env['NDSTOOL'] = ndstool
+    task = self.create_task(ndstask)
+    task.set_inputs(ndstask_inputs)
+    task.set_outputs(get_node(self.target))
+    self.tasks.append(task)
 
 def setup(bld):
-  outfile = ''
-  if sys.platform.startswith('linux'):
-    outfile = ' > /dev/null'
-  ndstool_str = '${NDSTOOL} -c ${TGT} -9 ${SRC[0].bldpath(env)} %s '+outfile
-  Task.simple_task_type('ndstool', ndstool_str%'', color='BLUE', after="objcopy", before="unit_test")
-  Task.simple_task_type('ndstool_banner', ndstool_str%' -b ${SRC[1].srcpath(env)} ${NDSTOOL_ICON} \'${NDSTOOL_BANNER}\'',
-      color='BLUE', after="objcopy", before="unit_test")
+    outfile = ''
+    if sys.platform.startswith('linux'):
+        outfile = ' > /dev/null'
+    ndstool_str = '${NDSTOOL} -c ${TGT} -9 ${SRC[0].bldpath(env)} %s '+outfile
+    Task.simple_task_type('ndstool', ndstool_str%'', before='unit_test', after='elf2bin')
+    Task.simple_task_type('ndstool_banner',
+            ndstool_str%" -b ${SRC[1].srcpath(env)} '${NDSTOOL_BANNER}'",
+            before='unit_test',
+            after='elf2bin')
+    Task.simple_task_type('elf2bin',
+            '${OBJCOPY} -O binary ${SRC} ${TGT}',
+            after='cc_link cxx_link')
 
-def generate_banner(app, comment="", author=None):
-  if author == None:
-    author = '?'
-    try:
-      import pwd
-      author = pwd.getpwnam(os.getlogin()).pw_gecos.split(',')[0]
-    except:
-      pass
-  banner = '%s;%s;By %s'%(app.title(), comment, author)
-  if sys.platform.startswith('win'):
-    banner = banner.replace(' ', '_')
-  return banner
+def detect(conf):
+    dka_bin = devkitarm.get_devkitarm_bin()
+    ndstool = conf.find_program('ndstool', path_list=[dka_bin], var='NDSTOOL', mandatory=True)
+
+def generate_banner(app, comment='', author=None):
+    if author == None:
+        author = '?'
+        try:
+            import pwd
+            author = pwd.getpwnam(os.getlogin()).pw_gecos.split(',')[0]
+        except:
+            pass
+    banner = '%s;%s;By %s'%(app.title(), comment, author)
+    if sys.platform.startswith('win'):
+        banner = banner.replace(' ', '_')
+    return banner
