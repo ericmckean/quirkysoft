@@ -279,6 +279,19 @@ URI URI::navigateTo(const std::string & newFile ) const
       newURI += tmp.m_address.substr(0,lastHash) + newFile;
     }
   }
+  else if (newFile[0] == '?')
+  {
+    // internal link, add newFile to the existing address
+    size_t lastQuestionMark(tmp.m_address.rfind("?"));
+    if (lastQuestionMark == string::npos)
+    {
+      newURI = tmp.m_address.substr(0,tmp.m_address.rfind("#")) + newFile;
+    }
+    else
+    {
+      newURI += tmp.m_address.substr(0,lastQuestionMark) + newFile;
+    }
+  }
   else
   {
     // strip off last part of file and go here.
