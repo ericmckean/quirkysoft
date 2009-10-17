@@ -321,3 +321,19 @@ TEST(UriTest, Port3)
   int expected = 1234;
   EXPECT_EQ(expected, uri.port());
 }
+
+TEST(UriTest, relative_query)
+{
+  URI uri("http://www.example.com/test.php");
+  uri = uri.navigateTo("?a");
+  string expected("http://www.example.com/test.php?a");
+  EXPECT_EQ(expected, uri.asString());
+}
+
+TEST(UriTest, relativeQueryInternal)
+{
+  URI uri("http://www.example.com/test.php#a");
+  uri = uri.navigateTo("?c");
+  string expected("http://www.example.com/test.php?c");
+  EXPECT_EQ(expected, uri.asString());
+}
