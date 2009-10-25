@@ -8,6 +8,7 @@ bld.new_task_gen(features='cc',
     source='source/common/minimessage_data.c')
 
 lib = bld.static_library('ndspp', 'source/common',
+        install_path=0,
         add_objects='minimessage_data')
 lib.include_directories('include')
 

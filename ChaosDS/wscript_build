@@ -11,4 +11,11 @@ bld.add_subdirs('common/img')
 
 bld.program('ChaosDS', 'arm9/source',
         uselib=host_libs,
+        install_path=0,
         uselib_local='ndspp pal snd')
+
+if bld.env.variant().startswith('nds'):
+    import ndstool
+    bld.create_nds('chaos.nds', 'ChaosDS',
+            banner=ndstool.generate_banner('Chaos DS', 'Battle of Wizards'),
+            icon='common/data/icon_palette.bmp')

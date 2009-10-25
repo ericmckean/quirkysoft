@@ -2,7 +2,7 @@
 import Scripting
 
 bld.add_subdirs('bwt')
-lib = bld.static_library('bunjalloo', 'arm9', uselib_local='bwt')
+lib = bld.static_library('bunjalloo', 'arm9', uselib_local='bwt', install_path=0)
 lib.source.remove('arm9/Main.cpp')
 
 host_libs = ''
@@ -16,6 +16,7 @@ host_libs += 'Z PNG JPEG GIF UNZIP MATRIXSSLSTATIC'
 
 prog = bld.program('bunjalloo', 'arm9/Main.cpp',
         uselib_local='bunjalloo',
+        install_path=0,
         uselib=host_libs)
 
 if is_nds:
@@ -23,6 +24,11 @@ if is_nds:
     bld.create_nds('bunjalloo.nds', 'bunjalloo',
             banner=ndstool.generate_banner('bunjalloo', 'Web Browser'),
             icon='common/data/icon.bmp')
+    bld.install_files('${PREFIX}', 'bunjalloo.nds')
+    for d in ('config', 'docs', 'fonts', 'cert'):
+        bld.install_files(
+            '${PREFIX}/data/bunjalloo/%s'%d,
+            'data/bunjalloo/%s/*'%d)
 
 if 'check' in Scripting.commands:
     bld.add_subdirs('tests')
