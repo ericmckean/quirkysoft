@@ -23,13 +23,13 @@ TEST(TextTest, Simple)
   std::string::const_iterator it(s.begin());
   std::string::const_iterator end_it(s.end());
 
-  std::string result = nextWordAdvanceWord(&it, end_it, false);
+  std::string result = nextWordAdvanceWord(&it, end_it);
   EXPECT_EQ(std::string("this "), result);
-  result = nextWordAdvanceWord(&it, end_it, false);
+  result = nextWordAdvanceWord(&it, end_it);
   EXPECT_EQ(std::string("is "), result);
-  result = nextWordAdvanceWord(&it, end_it, false);
+  result = nextWordAdvanceWord(&it, end_it);
   EXPECT_EQ(std::string("a "), result);
-  result = nextWordAdvanceWord(&it, end_it, false);
+  result = nextWordAdvanceWord(&it, end_it);
   EXPECT_EQ(std::string("string"), result);
 }
 
@@ -38,15 +38,15 @@ TEST(TextTest, Unicode) {
   std::string::const_iterator it(s.begin());
   std::string::const_iterator end_it(s.end());
 
-  std::string result = nextWordAdvanceWord(&it, end_it, false);
+  std::string result = nextWordAdvanceWord(&it, end_it);
   EXPECT_EQ(std::string("thís "), result);
-  result = nextWordAdvanceWord(&it, end_it, false);
+  result = nextWordAdvanceWord(&it, end_it);
   EXPECT_EQ(std::string("ís "), result);
-  result = nextWordAdvanceWord(&it, end_it, false);
+  result = nextWordAdvanceWord(&it, end_it);
   EXPECT_EQ(std::string("à "), result);
-  result = nextWordAdvanceWord(&it, end_it, false);
+  result = nextWordAdvanceWord(&it, end_it);
   EXPECT_EQ(std::string("üniÇod€ "), result);
-  result = nextWordAdvanceWord(&it, end_it, false);
+  result = nextWordAdvanceWord(&it, end_it);
   EXPECT_EQ(std::string("strîñg"), result);
 }
 
@@ -54,7 +54,7 @@ TEST(TextTest, Crap) {
   std::string s("\"«»\n");
   std::string::const_iterator it(s.begin());
   std::string::const_iterator end_it(s.end());
-  std::string result = nextWordAdvanceWord(&it, end_it, false);
+  std::string result = nextWordAdvanceWord(&it, end_it);
   EXPECT_EQ(s, result);
 }
 
@@ -80,13 +80,13 @@ TEST(TextTest, Newline) {
   std::string s("line with\nnew line");
   std::string::const_iterator it(s.begin());
   std::string::const_iterator end_it(s.end());
-  std::string result = nextWordAdvanceWord(&it, end_it, false);
+  std::string result = nextWordAdvanceWord(&it, end_it);
   EXPECT_EQ(std::string("line "), result);
-  result = nextWordAdvanceWord(&it, end_it, false);
+  result = nextWordAdvanceWord(&it, end_it);
   EXPECT_EQ(std::string("with\n"), result);
-  result = nextWordAdvanceWord(&it, end_it, false);
+  result = nextWordAdvanceWord(&it, end_it);
   EXPECT_EQ(std::string("new "), result);
-  result = nextWordAdvanceWord(&it, end_it, false);
+  result = nextWordAdvanceWord(&it, end_it);
   EXPECT_EQ(std::string("line"), result);
 }
 
@@ -94,9 +94,9 @@ TEST(TextTest, ReallyLongLine) {
   std::string s("[http://code.google.com/p/gdata-python-client gdata-python-client]");
   std::string::const_iterator it(s.begin());
   std::string::const_iterator end_it(s.end());
-  std::string result = nextWordAdvanceWord(&it, end_it, false);
+  std::string result = nextWordAdvanceWord(&it, end_it);
   EXPECT_EQ(std::string("[http://code.google.com/p/gdata-python-client "), result);
-  result = nextWordAdvanceWord(&it, end_it, false);
+  result = nextWordAdvanceWord(&it, end_it);
   EXPECT_EQ(std::string("gdata-python-client]"), result);
 }
 

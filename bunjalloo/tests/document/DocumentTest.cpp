@@ -577,11 +577,11 @@ TEST_F(DocumentTest, ActiveFormatters)
   EXPECT_TRUE(bold->isa("b"));
 
   ElementList pNodes = bold->elementsByTagName("p");
-  EXPECT_TRUE(pNodes.size() == 2);
+  EXPECT_EQ(2, pNodes.size());
 
   // now see if the 2nd p node has multiple children
   const HtmlElement * p = pNodes.back();
-  EXPECT_TRUE(p->children().size() == 1);
+  EXPECT_EQ(1, p->children().size());
 
 
   const HtmlElement * child = p->firstChild();
@@ -592,8 +592,7 @@ TEST_F(DocumentTest, ActiveFormatters)
     child = child->firstChild();
     depth++;
   }
-  int expectedDepth = 1;
-  EXPECT_EQ(expectedDepth, depth);
+  EXPECT_EQ(1, depth);
 }
 
 TEST_F(DocumentTest, History)
@@ -702,4 +701,33 @@ TEST_F(DocumentTest, redirect)
   string result = m_document->uri();
   EXPECT_EQ(Document::REDIRECTED, m_document->status());
   EXPECT_EQ("http://www.example.com/new/location/", result);
+}
+
+TEST_F(DocumentTest, issue112_no_space_after_link)
+{
+  readFile("issue112.html");
+  m_document->appendLocalData(m_data, m_length);
+  m_document->setStatus(Document::LOADED_HTML);
+  const HtmlElement * root = m_document->rootNode();
+  EXPECT_TRUE(root != 0);
+  EXPECT_TRUE(root->isa("html"));
+  const HtmlElement * body = root->lastChild();
+  EXPECT_TRUE(body != 0);
+  EXPECT_TRUE(body->isa("body"));
+  const ElementList &nodes = body->children();
+  std::vector<const HtmlElement*> elements;
+  copy(nodes.begin(), nodes.end(), back_inserter(elements));
+  EXPECT_EQ(3, elements.size());
+  const HtmlElement *a(elements[0]);
+  EXPECT_EQ("a", a->tagName());
+  const HtmlElement *text(elements[1]);
+  EXPECT_EQ("#TEXT", text->tagName());
+  const HtmlElement *br(elements[2]);
+  EXPECT_EQ("br", br->tagName());
+
+  std::string linkText = a->firstChild()->text();
+  EXPECT_EQ("'foo'", linkText);
+
+  std::string postLinkText = text->text();
+  EXPECT_EQ(" bar", postLinkText);
 }

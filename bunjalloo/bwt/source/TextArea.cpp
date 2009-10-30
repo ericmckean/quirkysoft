@@ -158,7 +158,7 @@ void TextArea::appendText(const std::string &unicodeString)
   {
 
     std::string::const_iterator backup_it(it);
-    std::string word(nextWordAdvanceWord(&it, end_it, m_parseNewline));
+    std::string word(nextWordAdvanceWord(&it, end_it));
     int size = textSize(word);
     if (size > width() and word.size() > 1)
     {
