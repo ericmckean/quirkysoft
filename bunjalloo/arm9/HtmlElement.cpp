@@ -90,8 +90,11 @@ void HtmlElement::appendText(unsigned int value)
     if (m_children.back()->isa(HtmlConstants::TEXT))
     {
       std::string & text(m_children.back()->m_text);
-      if (not isWhitespace(value) or (isWhitespace(value) and not isWhitespace(text[text.length()-1])))
-      {
+      if (isWhitespace(value)) {
+        if (not isWhitespace(text[text.length()-1]))
+          text += ' ';
+      }
+      else {
         utf8::unchecked::append(value, back_inserter(text));
       }
       return;

@@ -731,3 +731,20 @@ TEST_F(DocumentTest, issue112_no_space_after_link)
   std::string postLinkText = text->text();
   EXPECT_EQ(" bar", postLinkText);
 }
+
+TEST_F(DocumentTest, tabs_are_spaces)
+{
+  readFile("paragraphs.html");
+  m_document->appendLocalData(m_data, m_length);
+  m_document->setStatus(Document::LOADED_HTML);
+  const HtmlElement * root = m_document->rootNode();
+  EXPECT_TRUE(root->hasChildren());
+  const HtmlElement * body = root->lastChild();
+  EXPECT_NE((const HtmlElement*)0, body);
+  ElementList pNodes = body->elementsByTagName("p");
+  EXPECT_FALSE(pNodes.empty());
+  HtmlElement *p = *pNodes.begin();
+  EXPECT_TRUE(p->hasChildren());
+  EXPECT_EQ("Start, End.", p->firstChild()->text());
+}
+
