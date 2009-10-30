@@ -92,15 +92,21 @@ void HtmlElement::appendText(unsigned int value)
       std::string & text(m_children.back()->m_text);
       if (not isWhitespace(value) or (isWhitespace(value) and not isWhitespace(text[text.length()-1])))
       {
-        utf8::unchecked::append(value, back_inserter(m_children.back()->m_text));
+        utf8::unchecked::append(value, back_inserter(text));
       }
       return;
     }
   }
   // ignore spaces at the start.
-  if (isWhitespace(value))
+  if (isWhitespace(value)) {
+    utf8::unchecked::append(value, back_inserter(m_text));
     return;
+  }
   HtmlElement* textNode = new HtmlElement(HtmlConstants::TEXT);
+  if (!m_text.empty()) {
+    utf8::unchecked::append(' ', back_inserter(textNode->m_text));
+    m_text.clear();
+  }
   utf8::unchecked::append(value, back_inserter(textNode->m_text));
   append(textNode);
 }

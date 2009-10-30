@@ -95,8 +95,7 @@ void split(const std::string &str,
 
 std::string nextWordAdvanceWord(
     std::string::const_iterator *it,
-    const std::string::const_iterator &end_it,
-    bool parseNewline)
+    const std::string::const_iterator &end_it)
 {
   // set up delimeter set
   std::set<uint32_t> delimeters;
@@ -106,16 +105,6 @@ std::string nextWordAdvanceWord(
   }
   std::set<uint32_t>::const_iterator set_end(delimeters.end());
 
-  // skip whitespace at the start of the word
-  if (!parseNewline) {
-    while (*it != end_it) {
-      uint32_t value = utf8::peek_next(*it, end_it);
-      if (delimeters.find(value) == set_end) {
-        break;
-      }
-      utf8::next(*it, end_it);
-    }
-  }
   // find the end of the word
   std::string::const_iterator start(*it);
   while (*it != end_it) {
