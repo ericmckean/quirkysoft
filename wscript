@@ -5,13 +5,7 @@ import scwaf
 import Scripting
 import UnitTest
 import Options
-from TaskGen import before, feature
 blddir = '_build_'
-
-@before('add_as_needed')
-@feature('cshlib', 'cprogram')
-def remove_as_needed(self):
-    self.meths.remove('add_as_needed')
 
 def set_options(opt):
     opt.tool_options('compiler_cxx')
