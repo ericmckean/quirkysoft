@@ -714,3 +714,28 @@ TEST_F(DocumentTest, tabs_are_spaces)
   EXPECT_TRUE(p->hasChildren());
   EXPECT_EQ("Start, End.", p->firstChild()->text());
 }
+
+TEST_F(DocumentTest, lists_on_new_line)
+{
+  loadHtml("test-ul.html");
+  /*
+   * text
+   *   ul
+   *     li
+   *     li
+   */
+  const HtmlElement * root = m_document->rootNode();
+  EXPECT_TRUE(root != 0);
+  EXPECT_TRUE(root->isa("html"));
+  HtmlElement * body = root->lastChild();
+  EXPECT_TRUE(body != 0);
+  EXPECT_TRUE(body->isa("body"));
+  EXPECT_TRUE(body->hasChildren());
+  ElementList children(body->children());
+  EXPECT_EQ(2, children.size());
+  HtmlElement *ul(body->lastChild());
+  EXPECT_TRUE(ul->isa("ul"));
+  ElementList listItems(ul->children());
+  EXPECT_EQ(2, listItems.size());
+
+}
