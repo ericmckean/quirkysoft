@@ -36,6 +36,8 @@ class DocumentTest : public testing::Test
     unsigned int m_length;
 
     void readFile(const char * fileName);
+    void loadHtml(const char * fileName);
+    void loadData(const char * fileName);
 
     void TearDown() {
       delete m_document;
@@ -70,6 +72,20 @@ void DocumentTest::readFile(const char * fileName)
   EXPECT_TRUE(m_length != 0);
 }
 
+void DocumentTest::loadHtml(const char *filename)
+{
+  readFile(filename);
+  m_document->appendLocalData(m_data, m_length);
+  m_document->setStatus(Document::LOADED_HTML);
+}
+
+void DocumentTest::loadData(const char *filename)
+{
+  readFile(filename);
+  m_document->appendData(m_data, m_length);
+  m_document->setStatus(Document::LOADED_HTML);
+}
+
 TEST_F(DocumentTest, 0)
 {
   const string expected("file:///test0.txt");
@@ -80,9 +96,7 @@ TEST_F(DocumentTest, 0)
 
 TEST_F(DocumentTest, 1)
 {
-  readFile("test1.txt");
-  m_document->appendData(m_data, m_length);
-  m_document->setStatus(Document::LOADED_HTML);
+  loadData("test1.txt");
   const HtmlElement * result = m_document->rootNode();
   EXPECT_TRUE( result != 0);
 }
@@ -157,9 +171,7 @@ TEST_F(DocumentTest, Head3)
 
 TEST_F(DocumentTest, Title)
 {
-  readFile("title.html");
-  m_document->appendLocalData(m_data, m_length);
-  m_document->setStatus(Document::LOADED_HTML);
+  loadHtml("title.html");
   const HtmlElement * root = m_document->rootNode();
   EXPECT_TRUE(root->hasChildren());
   const HtmlElement * child = root->firstChild();
@@ -255,17 +267,13 @@ TEST_F(DocumentTest, BrokenAnchor)
 
 TEST_F(DocumentTest, CharacterStart)
 {
-  readFile("character-start.html");
-  m_document->appendLocalData(m_data, m_length);
-  m_document->setStatus(Document::LOADED_HTML);
+  loadHtml("character-start.html");
   const HtmlElement * root = m_document->rootNode();
   EXPECT_TRUE(root != 0);
 }
 TEST_F(DocumentTest, EndTagStart)
 {
-  readFile("endtag-start.html");
-  m_document->appendLocalData(m_data, m_length);
-  m_document->setStatus(Document::LOADED_HTML);
+  loadHtml("endtag-start.html");
   const HtmlElement * root = m_document->rootNode();
   EXPECT_TRUE(root != 0);
   string rootType = root->tagName();
@@ -275,9 +283,7 @@ TEST_F(DocumentTest, EndTagStart)
 
 TEST_F(DocumentTest, SimpleBodyA)
 {
-  readFile("simple.html");
-  m_document->appendLocalData(m_data, m_length);
-  m_document->setStatus(Document::LOADED_HTML);
+  loadHtml("simple.html");
   const HtmlElement * root = m_document->rootNode();
   EXPECT_TRUE(root != 0);
   string expected("html");
@@ -316,7 +322,7 @@ TEST_F(DocumentTest, SimpleBodyA)
 
 TEST_F(DocumentTest, MismatchFormat)
 {
-  readFile("mismatch-format.html");
+  loadHtml("mismatch-format.html");
   // should produce this:
   // html >
   //   head >
@@ -333,8 +339,6 @@ TEST_F(DocumentTest, MismatchFormat)
   //        #text  ()
   //        a >
   //            #text ()
-  m_document->appendLocalData(m_data, m_length);
-  m_document->setStatus(Document::LOADED_HTML);
   const HtmlElement * root = m_document->rootNode();
   EXPECT_TRUE(root != 0);
   string rootType = root->tagName();
@@ -345,9 +349,7 @@ TEST_F(DocumentTest, MismatchFormat)
 
 TEST_F(DocumentTest, Li)
 {
-  readFile("test-li.html");
-  m_document->appendLocalData(m_data, m_length);
-  m_document->setStatus(Document::LOADED_HTML);
+  loadHtml("test-li.html");
   const HtmlElement * root = m_document->rootNode();
   EXPECT_TRUE(root != 0);
   EXPECT_TRUE(root->isa("html"));
@@ -359,9 +361,7 @@ TEST_F(DocumentTest, Li)
 
 TEST_F(DocumentTest, DD)
 {
-  readFile("test-dd.html");
-  m_document->appendLocalData(m_data, m_length);
-  m_document->setStatus(Document::LOADED_HTML);
+  loadHtml("test-dd.html");
   const HtmlElement * root = m_document->rootNode();
   EXPECT_TRUE(root != 0);
   EXPECT_TRUE(root->isa("html"));
@@ -373,9 +373,7 @@ TEST_F(DocumentTest, DD)
 
 TEST_F(DocumentTest, Plaintext)
 {
-  readFile("plaintext.html");
-  m_document->appendLocalData(m_data, m_length);
-  m_document->setStatus(Document::LOADED_HTML);
+  loadHtml("plaintext.html");
   const HtmlElement * root = m_document->rootNode();
   EXPECT_TRUE(root != 0);
   EXPECT_TRUE(root->isa("html"));
@@ -384,9 +382,7 @@ TEST_F(DocumentTest, Plaintext)
 
 TEST_F(DocumentTest, Font)
 {
-  readFile("font.html");
-  m_document->appendLocalData(m_data, m_length);
-  m_document->setStatus(Document::LOADED_HTML);
+  loadHtml("font.html");
   const HtmlElement * root = m_document->rootNode();
   EXPECT_TRUE(root != 0);
   EXPECT_TRUE(root->isa("html"));
@@ -394,9 +390,7 @@ TEST_F(DocumentTest, Font)
 
 TEST_F(DocumentTest, Font2)
 {
-  readFile("font2.html");
-  m_document->appendLocalData(m_data, m_length);
-  m_document->setStatus(Document::LOADED_HTML);
+  loadHtml("font2.html");
   const HtmlElement * root = m_document->rootNode();
   EXPECT_TRUE(root != 0);
   EXPECT_TRUE(root->isa("html"));
@@ -404,10 +398,8 @@ TEST_F(DocumentTest, Font2)
 
 TEST_F(DocumentTest, Pin8)
 {
-  readFile("pineight.txt");
+  loadData("pineight.txt");
   // tests for end script tag after end of chunk
-  m_document->appendData(m_data, m_length);
-  m_document->setStatus(Document::LOADED_HTML);
   const HtmlElement * root = m_document->rootNode();
   EXPECT_TRUE(root != 0);
   EXPECT_TRUE(root->isa("html"));
@@ -456,10 +448,8 @@ TEST_F(DocumentTest, Clarin)
 
 TEST_F(DocumentTest, Adoption)
 {
-  readFile("adoption.html");
+  loadHtml("adoption.html");
   // test the adoption algorithm
-  m_document->appendLocalData(m_data, m_length);
-  m_document->setStatus(Document::LOADED_HTML);
   const HtmlElement * root = m_document->rootNode();
   EXPECT_TRUE(root != 0);
   EXPECT_TRUE(root->isa("html"));
@@ -471,10 +461,7 @@ TEST_F(DocumentTest, Adoption)
 
 TEST_F(DocumentTest, Adoption2)
 {
-  readFile("adoption2.html");
-  // test the adoption algorithm
-  m_document->appendLocalData(m_data, m_length);
-  m_document->setStatus(Document::LOADED_HTML);
+  loadHtml("adoption2.html");
   const HtmlElement * root = m_document->rootNode();
   EXPECT_TRUE(root != 0);
   EXPECT_TRUE(root->isa("html"));
@@ -482,10 +469,7 @@ TEST_F(DocumentTest, Adoption2)
 
 TEST_F(DocumentTest, Header)
 {
-  readFile("header1.html");
-  // test the adoption algorithm
-  m_document->appendLocalData(m_data, m_length);
-  m_document->setStatus(Document::LOADED_HTML);
+  loadHtml("header1.html");
   const HtmlElement * root = m_document->rootNode();
   EXPECT_TRUE(root != 0);
   EXPECT_TRUE(root->isa("html"));
@@ -509,10 +493,7 @@ TEST_F(DocumentTest, Header)
 
 TEST_F(DocumentTest, Header2)
 {
-  readFile("header2.html");
-  // test the adoption algorithm
-  m_document->appendLocalData(m_data, m_length);
-  m_document->setStatus(Document::LOADED_HTML);
+  loadHtml("header2.html");
   const HtmlElement * root = m_document->rootNode();
   EXPECT_TRUE(root != 0);
   EXPECT_TRUE(root->isa("html"));
@@ -540,9 +521,7 @@ TEST_F(DocumentTest, Header2)
 
 TEST_F(DocumentTest, Attribs)
 {
-  readFile("attrib.html");
-  m_document->appendLocalData(m_data, m_length);
-  m_document->setStatus(Document::LOADED_HTML);
+  loadHtml("attrib.html");
   const HtmlElement * root = m_document->rootNode();
   EXPECT_TRUE(root != 0);
   EXPECT_TRUE(root->isa("html"));
@@ -561,9 +540,7 @@ TEST_F(DocumentTest, Unicode2String)
 
 TEST_F(DocumentTest, ActiveFormatters)
 {
-  readFile("issue29.html");
-  m_document->appendLocalData(m_data, m_length);
-  m_document->setStatus(Document::LOADED_HTML);
+  loadHtml("issue29.html");
   const HtmlElement * root = m_document->rootNode();
   EXPECT_TRUE(root != 0);
   EXPECT_TRUE(root->isa("html"));
@@ -625,9 +602,7 @@ TEST_F(DocumentTest, History)
 
 TEST_F(DocumentTest, BodyEnd)
 {
-  readFile("body.html");
-  m_document->appendLocalData(m_data, m_length);
-  m_document->setStatus(Document::LOADED_HTML);
+  loadHtml("body.html");
   const HtmlElement * root = m_document->rootNode();
   EXPECT_TRUE(root != 0);
   EXPECT_TRUE(root->isa("html"));
@@ -664,10 +639,8 @@ TEST_F(DocumentTest, Tokenize)
 
 TEST_F(DocumentTest, NoCacheHtml)
 {
-  readFile("nocache.txt");
+  loadData("nocache.txt");
   // tests for no-cache and mime type breakage
-  m_document->appendData(m_data, m_length);
-  m_document->setStatus(Document::LOADED_HTML);
   HtmlParser::MimeType mimeType = m_document->htmlDocument()->mimeType();
   HtmlParser::MimeType expected = HtmlParser::TEXT_HTML;
   EXPECT_EQ(expected, mimeType);
@@ -675,10 +648,8 @@ TEST_F(DocumentTest, NoCacheHtml)
 
 TEST_F(DocumentTest, Entities)
 {
-  readFile("entities.html");
+  loadHtml("entities.html");
   // tests for entities that are nasty
-  m_document->appendLocalData(m_data, m_length);
-  m_document->setStatus(Document::LOADED_HTML);
   const HtmlElement * root = m_document->rootNode();
   EXPECT_TRUE(root != 0);
   EXPECT_TRUE(root->isa("html"));
@@ -705,9 +676,7 @@ TEST_F(DocumentTest, redirect)
 
 TEST_F(DocumentTest, issue112_no_space_after_link)
 {
-  readFile("issue112.html");
-  m_document->appendLocalData(m_data, m_length);
-  m_document->setStatus(Document::LOADED_HTML);
+  loadHtml("issue112.html");
   const HtmlElement * root = m_document->rootNode();
   EXPECT_TRUE(root != 0);
   EXPECT_TRUE(root->isa("html"));
@@ -734,9 +703,7 @@ TEST_F(DocumentTest, issue112_no_space_after_link)
 
 TEST_F(DocumentTest, tabs_are_spaces)
 {
-  readFile("paragraphs.html");
-  m_document->appendLocalData(m_data, m_length);
-  m_document->setStatus(Document::LOADED_HTML);
+  loadHtml("paragraphs.html");
   const HtmlElement * root = m_document->rootNode();
   EXPECT_TRUE(root->hasChildren());
   const HtmlElement * body = root->lastChild();
@@ -747,4 +714,3 @@ TEST_F(DocumentTest, tabs_are_spaces)
   EXPECT_TRUE(p->hasChildren());
   EXPECT_EQ("Start, End.", p->firstChild()->text());
 }
-
