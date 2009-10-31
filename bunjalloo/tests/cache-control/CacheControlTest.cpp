@@ -90,10 +90,8 @@ TEST(CacheControl, test_expires)
 {
   CacheControl cc;
   time_t expire, date;
-  cc.setExpires(expire);
-  cc.setDate(date);
-  expire = 1246817488; // 5/7 19:11:28 GMT
-  date = 0; // 1/1/1970 01:00:00 GMT
+  cc.setExpires(0);
+  cc.setDate(0);
   EXPECT_FALSE(cc.shouldCache(1));
 
   cc.reset();
