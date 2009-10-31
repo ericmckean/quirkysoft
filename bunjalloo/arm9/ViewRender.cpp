@@ -554,8 +554,8 @@ void ViewRender::begin(HtmlElement & element)
   {
     // FIXME!!
     /** m_self->m_textArea->increaseIndent(); */
-    if (not element.isBlock() and element.parent()->isa(HtmlConstants::LI_TAG))
-      textArea()->insertNewline();
+    //if (not element.isBlock() and element.parent()->isa(HtmlConstants::LI_TAG))
+    textArea()->insertNewline();
   }
   else if (element.isa(HtmlConstants::LI_TAG)) {
     const HtmlElement * prev(element.parent()->previousSibling(&element));
