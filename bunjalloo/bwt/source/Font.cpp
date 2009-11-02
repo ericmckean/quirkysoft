@@ -185,7 +185,7 @@ void Font::textSize(const char * text, int amount, int & width, int & height, co
       t_prerenderedGlyph *g(glyph(value));
       width += g->advanceX;
     }
-    if (width >= maxWidth) {
+    if (width > maxWidth) {
       maxWidth = width;
     }
   }
@@ -330,8 +330,9 @@ int Font::doSingleChar(unsigned int value, int cursorx, int cursory, int right, 
   if (value == 0xfffd)
     value = '?';
   t_prerenderedGlyph *g(glyph(value));
-  if ((cursorx + g->advanceX) > right)
+  if (((cursorx + g->advanceX)>>8) > (right>>8)) {
     return -2;
+  }
   printAt(*g, cursorx, cursory, color, bgcolor);
   return g->advanceX;
 }

@@ -139,7 +139,6 @@ class TextArea : public Component
 
   protected:
     //! Position that the current line is at.
-    int m_appendPosition;
     int m_cursorx;
     int m_cursory;
     int m_initialCursorx;
@@ -157,6 +156,8 @@ class TextArea : public Component
 
   private:
     Font * m_font;
+    int m_appendPosition;
+    unsigned int m_preferredWidthFixed;
     // unsigned short * m_palette;
     // unsigned short * m_basePalette;
     // int m_paletteLength;
