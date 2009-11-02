@@ -131,6 +131,7 @@ namespace nds
       void renderLine(const unsigned char * line, int n);
       void calculateScale();
       void allocData();
+      void allocPalette(size_t size);
 
       DISALLOW_COPY_AND_ASSIGN(Image);
   }; //tolua_export
