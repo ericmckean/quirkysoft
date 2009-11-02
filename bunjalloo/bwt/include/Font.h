@@ -32,17 +32,9 @@ class Font
 {
   public:
 
-    /** Construct a font from a file name. The filename should be the base name,
-     * .pal, .img and .map extensions are added to read in the appropriate sections.
-     * @param fileName the base file name to use.
+    /** Construct a font. You should call init() afterwards. @see FontFactory
      */
-    Font(const std::string & fileName);
-
-    /** Construct a font from raw data.
-     * @param setData the font image set data representing the way to draw glyphs.
-     * @param mapData the data to map to glyph sizes and positions.
-     */
-    Font(const unsigned char * setData, const unsigned char * mapData);
+    Font();
 
     //! Destructor.
     ~Font();
@@ -111,15 +103,21 @@ class Font
      * @return -1 if a new line, else the size of the value advance.
      */
     int doSingleChar(unsigned int value, int x, int y, int right, int color, int bgcolor);
+
+    /** Initialise the font.
+     * @param imageData the glyph image data
+     * @param mapData the glyph index to image data map
+     */
+    void init(const unsigned char * imageData, const unsigned char * mapData);
+
   private:
 
     //! Total width of the image.
     unsigned int m_width;
+    //! Total width of the image.
     unsigned int m_height;
-    unsigned short *m_palette;
     t_prerenderedSet *m_prerenderedSet;
     t_charMap *m_charMap;
-    std::string m_encoding;
 
     /** For a given character code, get the equivalent glyph data.
      * @param charCode the character code
@@ -128,7 +126,6 @@ class Font
     t_prerenderedGlyph *glyph(unsigned int charCode) const;
     int valueToIndex(unsigned int codepoint) const;
     int minGlyph() const;
-    void init(const unsigned char * imageData, const unsigned char * mapData);
     void printAt(t_prerenderedGlyph &g, int xPosition, int yPosition, int color, int bg);
 
     DISALLOW_COPY_AND_ASSIGN(Font);

@@ -25,7 +25,7 @@ TEST(DateUtils, parse_date_with_dashes)
 TEST(DateUtils, zero_time)
 {
   time_t result = DateUtils::parseDate("Thu, 01 Jan 1970 00:00:00 GMT");
-  EXPECT_EQ(timezone, result);
+  EXPECT_EQ(0, result);
 }
 
 

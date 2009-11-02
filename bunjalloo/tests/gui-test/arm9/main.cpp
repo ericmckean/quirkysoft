@@ -23,6 +23,7 @@
 #include "ComboBox.h"
 #include "EditableTextArea.h"
 #include "Font.h"
+#include "FontFactory.h"
 #include "Keyboard.h"
 #include "RadioButton.h"
 #include "RichTextArea.h"
@@ -38,8 +39,10 @@ extern const char _binary_test_map_bin_start[];
 using namespace nds;
 int main(int argc, char * argv[])
 {
-  static Font font((unsigned char*)_binary_sans_set_bin_start, (unsigned char*)_binary_sans_map_bin_start);
-  TextAreaFactory::setFont(&font);
+  Font *font(FontFactory::create(
+        (unsigned char*)_binary_sans_set_bin_start,
+        (unsigned char*)_binary_sans_map_bin_start));
+  TextAreaFactory::setFont(font);
   //TextAreaFactory::usePaletteData((const char*)_binary_vera_pal_bin_start, 32);
   Keyboard * keyBoard = new Keyboard();
   ScrollPane scrollPane;

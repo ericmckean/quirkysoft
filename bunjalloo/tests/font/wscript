@@ -1,4 +1,0 @@
-#!/usr/bin/env python
-# encoding: utf-8
-def build(bld):
-  bld.build_test(uselibs="bwt sans")
