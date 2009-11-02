@@ -76,25 +76,13 @@ void TextContainer::layout()
   }
   std::string::const_iterator it(m_text.begin());
   std::string::const_iterator end_it(m_text.end());
-  std::string::const_iterator start(m_text.begin());
   int size(0);
-  for (; it != end_it and size <= textArea()->width();)
-  {
-    uint32_t value = utf8::next(it, end_it);
-    Font::Glyph g;
-    textArea()->font().glyph(value, g);
-    if ((size + g.width) <= textArea()->width()) {
-      size += g.width;
-    } else {
-      break;
-    }
-  }
-  std::string subs(start, it);
+  std::string subs(textArea()->font().shorterWordFromLong(&it, end_it, textArea()->width(), &size));
   textArea()->clearText();
   textArea()->appendText(subs);
   if (width() == 0)
   {
-    m_bounds.w = size + BORDER_WIDTH;
+    m_bounds.w = (size >> 8) + BORDER_WIDTH;
     m_preferredWidth = m_bounds.w;
     m_bounds.h = textArea()->font().height() + BORDER_HEIGHT;
     m_preferredHeight = m_bounds.h;

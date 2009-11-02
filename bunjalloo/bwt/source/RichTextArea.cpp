@@ -189,9 +189,7 @@ void RichTextArea::printu(const std::string & unicodeString)
       continue;
     }
     if (doSingleChar(value))
-    {
       break;
-    }
     ++i;
   }
 }
@@ -420,29 +418,20 @@ int RichTextArea::lineAt(int y) const
 
 int RichTextArea::pointToCharIndex(int x, int y) const
 {
+  if (x < m_bounds.x)
+    return NO_INDEX;
+
   unsigned int lineNum = lineAt(y);
   if (lineNum >= m_document.size())
     return NO_INDEX;
-  unsigned int charNumber = documentSize(lineNum);
-  const std::string & line(m_document[lineNum]);
-  int caretChar = NO_INDEX;
-  for (int i = 0, size = m_bounds.x; i < (int)line.length(); ++i, ++charNumber)
-  {
-    unsigned int value(line[i]);
-    if (value == 0xfffd)
-      value = '?';
-    Font::Glyph g;
-    font().glyph(value, g);
-    size += g.width;
-    if (size > x)
-    {
-      size -= g.width;
-      caretChar = i;
-      break;
-    }
-  }
 
-  if (caretChar != NO_INDEX and lineNum > 0)
+  //unsigned int charNumber = documentSize(lineNum);
+  const std::string & line(m_document[lineNum]);
+
+  unsigned int caretChar, size;
+  bool ended(font().findEnd(line, x - m_bounds.x, 0, &size, &caretChar));
+
+  if (not ended and lineNum > 0)
   {
     int charsToLine = documentSize(lineNum);
     caretChar += charsToLine;

@@ -1,9 +1,8 @@
 #!/usr/bin/python
 
 sources = '''
-    vera.img
-    vera.map
-    vera.pal
+    sans.set
+    sans.map
 '''.split()
 
 objects = []
@@ -24,5 +23,5 @@ bld.new_task_gen(
 
 bld.new_task_gen(
     features='name2h',
-    target='vera.h',
+    target='sans.h',
     source=(src+'.bin' for src in sources))

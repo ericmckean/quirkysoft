@@ -40,15 +40,11 @@ static const int INDENT(16);
 TextArea::TextArea(Font * font) :
   m_appendPosition(0),
   m_font(0),
-  m_palette(0),
-  m_basePalette(0),
-  m_paletteLength(0),
   m_parseNewline(true),
-  m_bgCol(0),
-  m_fgCol(0),
   m_underLine(false)
 {
   setFont(font);
+  setDefaultColor();
   m_document.clear();
   m_preferredHeight = m_font->height();
   m_preferredWidth = Canvas::instance().width();
@@ -59,35 +55,6 @@ TextArea::TextArea(Font * font) :
 void TextArea::setFont(Font * font)
 {
   m_font = font;
-}
-
-void TextArea::printAt(Font::Glyph & g, int xPosition, int yPosition)
-{
-  const unsigned char * data = g.data;
-  int dataInc = (m_font->totalWidth() - g.width)/2;
-  for (int y = 0; y < g.height; ++y)
-  {
-    for (int x = 0; x < g.width/2; ++x)
-    {
-      unsigned char pixelPair = *data++;
-      int pix1 = ((pixelPair)&0xf);
-      if (pix1)
-        Canvas::instance().drawPixel(xPosition+(x*2), yPosition+y, m_palette[pix1]);
-      int pix2 = ((pixelPair>>4)&0xf);
-      if (pix2)
-        Canvas::instance().drawPixel(xPosition+(x*2)+1, yPosition+y, m_palette[pix2]);
-    }
-    data += dataInc;
-  }
-  if (m_underLine)
-  {
-    // draw underline
-    Canvas::instance().horizontalLine(xPosition,
-                                      yPosition+m_font->height()-1,
-                                      g.width,
-                                      m_palette[m_paletteLength-1]);
-
-  }
 }
 
 void TextArea::document(std::string & returnString) const
@@ -111,38 +78,6 @@ void TextArea::clearText()
   currentLine();
 }
 
-static std::string shorterWordFromLong(
-    std::string::const_iterator *it,
-    const std::string::const_iterator &end_it,
-    int width,
-    Font *font,
-    int *size)
-{
-  // This is a very long word, split it up
-  std::string shorterWord;
-  *size = 0;
-  while (*it != end_it)
-  {
-    // store the start of the unicode code point
-    std::string::const_iterator a(*it);
-    uint32_t value = utf8::next(*it, end_it);
-    if (value == 0xfffd)
-      value = '?';
-    Font::Glyph g;
-    font->glyph(value, g);
-    if ( (*size + g.width) >= width) {
-      // rewind to the start of that last code point
-      *it = a;
-      return shorterWord;
-    }
-    for (; a != *it; ++a) {
-      shorterWord += *a;
-    }
-    *size += g.width;
-  }
-  return shorterWord;
-}
-
 void TextArea::appendText(const std::string &unicodeString)
 {
   if (m_document.empty())
@@ -163,7 +98,7 @@ void TextArea::appendText(const std::string &unicodeString)
     if (size > width() and word.size() > 1)
     {
       it = backup_it;
-      word = shorterWordFromLong(&it, end_it, width(), m_font, &size);
+      word = m_font->shorterWordFromLong(&it, end_it, width(), &size);
     }
 
     // if the word ends with a new line, then increment the height.
@@ -221,9 +156,9 @@ void TextArea::setSize(unsigned int w, unsigned int h)
 
 void TextArea::setCursor(int x, int y)
 {
-  m_cursorx = x;
+  m_cursorx = x << 8;
   m_cursory = y;
-  m_initialCursorx = x;
+  m_initialCursorx = x << 8;
 }
 
 void TextArea::incrLine()
@@ -232,12 +167,38 @@ void TextArea::incrLine()
   m_cursory += m_font->height();
 }
 
-void TextArea::checkLetter(Font::Glyph & g)
+
+bool TextArea::doSingleChar(int value)
 {
-  if ( (m_cursorx + g.width) > m_bounds.right())
-  {
+  int advance = m_font->doSingleChar(
+      value,
+      m_cursorx,
+      m_cursory,
+      m_bounds.right() << 8,
+      m_fgCol,
+      m_bgCol);
+  if (advance == -2) {
+    // requires more space
     incrLine();
+    advance = m_font->doSingleChar(
+        value,
+        m_cursorx,
+        m_cursory,
+        m_bounds.right() << 8,
+        m_fgCol,
+        m_bgCol);
+    if (advance < 0)
+      return false;
   }
+  if (m_underLine) {
+    // draw underline
+    Canvas::instance().horizontalLine(m_cursorx >> 8,
+                                      m_cursory + m_font->height(),
+                                      advance >> 8,
+                                      m_fgCol);
+  }
+  m_cursorx += advance;
+  return m_cursory > m_bounds.bottom();
 }
 
 void TextArea::printu(const std::string & unicodeString)
@@ -247,64 +208,29 @@ void TextArea::printu(const std::string & unicodeString)
   {
     uint32_t value = utf8::next(it, unicodeString.end());
     if (doSingleChar(value))
-    {
       break;
-    }
   }
 }
 
 int TextArea::textSize(const std::string &unicodeString) const
 {
-  std::string::const_iterator it(unicodeString.begin());
-  std::string::const_iterator end_it(unicodeString.end());
-  int size(0);
-  while (it != end_it)
-  {
-    uint32_t value = utf8::next(it, end_it);
-    if (value != NEWLINE)
-    {
-      if (value == 0xfffd)
-        value = '?';
-      Font::Glyph g;
-      m_font->glyph(value, g);
-      size += g.width;
-    }
-  }
-  return size;
-}
+  int width(0);
+  int height(0);
+  m_font->textSize(unicodeString.c_str(), unicodeString.length(),
+      width, height, "utf-8");
 
-bool TextArea::doSingleChar(unsigned int value)
-{
-  if (value == 0xfffd) {
-    value = '?';
-  }
-  Font::Glyph g;
-  m_font->glyph(value, g);
-  if (value != NEWLINE) {
-    checkLetter(g);
-    if (g.data) {
-      printAt(g, m_cursorx, m_cursory);
-    }
-    m_cursorx += g.width;
-  }
-  // else ignore new line character. New lines are parsed at entry time
-  return (m_cursory > m_bounds.bottom());
+  return width>>8;
 }
 
 void TextArea::setDefaultColor()
 {
-  m_bgCol = m_basePalette[0];
+  m_bgCol = RGB5(31, 31, 31);
   m_fgCol = 0;
-  setTextColor(m_fgCol);
 }
 
 void TextArea::setBackgroundColor(unsigned short color)
 {
-  if (color != m_bgCol)
-  {
-    m_bgCol = color;
-    setTextColor(m_fgCol);
-  }
+  m_bgCol = color;
 }
 
 unsigned short TextArea::backgroundColor() const
@@ -315,6 +241,7 @@ unsigned short TextArea::backgroundColor() const
 void TextArea::setTextColor(unsigned short color)
 {
   m_fgCol = color;
+  /*
   Color newColor(color);
   Color bgCol(m_bgCol);
   // assuming m_basePalette is black and white...
@@ -341,52 +268,13 @@ void TextArea::setTextColor(unsigned short color)
     c.red(yred);
     c.green(ygreen);
     c.blue(yblue);
-
     m_palette[i] = c;
-
   }
-}
-
-void TextArea::setPalette(const std::string & fileName)
-{
-  File palFile;
-  palFile.open(fileName.c_str());
-  // read the lot
-  if (palFile.is_open())
-  {
-    int size = palFile.size();
-    char * data = new char[size+2];
-    palFile.read(data);
-    data[size] = 0;
-    m_palette = (unsigned short*) data;
-    char * baseData = new char[size+2];
-    copy(data, data+size, baseData);
-    m_basePalette = (unsigned short*)baseData;
-    m_paletteLength = size/2;
-    setBackgroundColor(m_palette[0]);
-  } else {
-    /* If the font is not opened, then set the background red */
-    Canvas::instance().fillRectangle(0,0,256,192,Color(31,0,0));
-    setBackgroundColor(Color(31,0,0));
-  }
-}
-
-void TextArea::setPalette(const char * data, unsigned int size)
-{
-  m_palette = new unsigned short[size/2];
-  copy(data, data+size, (char*)m_palette);
-  char * baseData = new char[size+2];
-  copy(data, data+size, baseData);
-  m_basePalette = (unsigned short*)baseData;
-  m_paletteLength = size/2;
-  setBackgroundColor(m_palette[0]);
+  */
 }
 
 TextArea::~TextArea()
 {
-  //delete m_font;
-  delete [] m_basePalette;
-  delete [] m_palette;
 }
 
 int TextArea::linesToSkip() const

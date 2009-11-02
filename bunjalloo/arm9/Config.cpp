@@ -79,7 +79,7 @@ void Config::checkPost()
   }
   // check font exists
   {
-    bool exists = (nds::File::exists((font+".img").c_str()) == nds::File::F_REG);
+    bool exists = (nds::File::exists((font+".set").c_str()) == nds::File::F_REG);
     nds::MiniMessage msg("Font exists");
     if (exists)
       msg.ok();

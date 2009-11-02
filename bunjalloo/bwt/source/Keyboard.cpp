@@ -65,8 +65,6 @@ const static int TICK_COUNT = 20;
 const static int SCROLLBAR_DECOR = 7;
 
 Keyboard::Keyboard():
-  Component(),
-  m_extra(false),
   m_shift(false),
   m_capsLock(false),
   m_selectedStatus(OK),

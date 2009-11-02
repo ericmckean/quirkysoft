@@ -15,7 +15,6 @@
   along with this program.  If not, see <http://www.gnu.org/licenses/>.
 */
 #include <algorithm>
-#include <cstdio>
 #include "config_defs.h"
 #include "DateUtils.h"
 #include "Config.h"

@@ -18,7 +18,6 @@
 #include <set>
 #include <algorithm>
 #include <functional>
-#include <cstdio>
 #include "Canvas.h"
 #include "BoxLayout.h"
 #include "Delete.h"
