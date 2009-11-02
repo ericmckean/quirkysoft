@@ -273,6 +273,16 @@ void Image::allocData()
   memset(m_data, 0, size);
 }
 
+void Image::allocPalette(size_t size)
+{
+  if (!m_palette) {
+    m_palette = (unsigned short*)malloc(size);
+  }
+  else {
+    m_palette = (unsigned short*)realloc(m_palette, size);
+  }
+}
+
 static void user_read_fn(png_structp png_ptr, unsigned char *data, png_size_t size)
 {
   nds::File * f = (nds::File*)png_get_io_ptr(png_ptr);
@@ -341,7 +351,7 @@ void Image::readPng()
        int palette_entries;
        png_get_PLTE(png_ptr,info_ptr, &png_palette, &palette_entries);
        m_paletteSize = palette_entries;
-       m_palette = (unsigned short*)malloc(sizeof(unsigned short) * palette_entries);
+       allocPalette(sizeof(unsigned short) * palette_entries);
        for (int i = 0; i < palette_entries; ++i)
        {
          m_palette[i] = RGB8(png_palette[i].red, png_palette[i].green, png_palette[i].blue);
@@ -464,7 +474,7 @@ void Image::readGif()
   if (!colorMap)
     return;
   m_paletteSize = colorMap->ColorCount;
-  m_palette = (unsigned short*)malloc(sizeof(unsigned short) * m_paletteSize);
+  allocPalette(sizeof(unsigned short) * m_paletteSize);
   if (!m_palette)
   {
     return;
