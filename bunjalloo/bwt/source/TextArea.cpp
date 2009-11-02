@@ -38,8 +38,8 @@ static const std::string s_delimiters(intDelimiters,6);
 static const int INDENT(16);
 
 TextArea::TextArea(Font * font) :
-  m_appendPosition(0),
   m_font(0),
+  m_appendPosition(0),
   m_parseNewline(true),
   m_underLine(false)
 {
@@ -48,6 +48,7 @@ TextArea::TextArea(Font * font) :
   m_document.clear();
   m_preferredHeight = m_font->height();
   m_preferredWidth = Canvas::instance().width();
+  m_preferredWidthFixed = m_preferredWidth << 8;
   m_bounds.w = Canvas::instance().width();
 }
 
@@ -74,6 +75,7 @@ void TextArea::clearText()
   m_document.swap(tmp);
   m_appendPosition = 0;
   m_preferredWidth = -1;
+  m_preferredWidthFixed = 0;
   m_preferredHeight = m_font->height();
   currentLine();
 }
@@ -83,19 +85,21 @@ void TextArea::appendText(const std::string &unicodeString)
   if (m_document.empty())
   {
     m_preferredWidth = 0;
+    m_preferredWidthFixed = 0;
   }
   // append text, adding in new lines as needed to wrap.
   // int currPosition = 0;
   // find the next space character
   std::string::const_iterator it = unicodeString.begin();
   std::string::const_iterator end_it = unicodeString.end();
+  int widthFixed = width() << 8;
   while (it != end_it)
   {
 
     std::string::const_iterator backup_it(it);
     std::string word(nextWordAdvanceWord(&it, end_it));
     int size = textSize(word);
-    if (size > width() and word.size() > 1)
+    if ((size>>8) > width() and word.size() > 1)
     {
       it = backup_it;
       word = m_font->shorterWordFromLong(&it, end_it, width(), &size);
@@ -103,7 +107,7 @@ void TextArea::appendText(const std::string &unicodeString)
 
     // if the word ends with a new line, then increment the height.
     // otherwise, if we go off the end of the line, increment the height.
-    if ((m_appendPosition + size) > width())
+    if (((m_appendPosition + size)>>8) > width())
     {
       // trim spaces from the end of the line
       // this word overflows the line - make a new line to hold the text.
@@ -111,9 +115,11 @@ void TextArea::appendText(const std::string &unicodeString)
       m_appendPosition = 0;
       m_preferredHeight += m_font->height();
     }
-    if (m_preferredWidth < 0)
+    if (m_preferredWidth < 0) {
       m_preferredWidth = 0;
-    m_preferredWidth += size;
+    }
+    m_preferredWidthFixed += size;
+    m_preferredWidth = (m_preferredWidthFixed >> 8);
     if (not m_parseNewline and word[word.length()-1] == NEWLINE) {
       word[word.length() - 1] = ' ';
     }
@@ -167,7 +173,6 @@ void TextArea::incrLine()
   m_cursory += m_font->height();
 }
 
-
 bool TextArea::doSingleChar(int value)
 {
   int advance = m_font->doSingleChar(
@@ -219,7 +224,7 @@ int TextArea::textSize(const std::string &unicodeString) const
   m_font->textSize(unicodeString.c_str(), unicodeString.length(),
       width, height, "utf-8");
 
-  return width>>8;
+  return width;
 }
 
 void TextArea::setDefaultColor()
