@@ -5,7 +5,7 @@ TEST(DateUtils, parse_date)
 {
   /*
      from time import strftime, strptime
-     strftime('%s', strptime("Sun, 05 Jul 2009 19:11:28 GMT", "%a, %d %b %Y %H:%M:%S %Z"))
+     strftime('%s', strptime("Sun, 05 Jul 2009 19:11:28 GMT", "%a, %d %b %Y %H:%M:%S GMT"))
   */
   time_t expected(1246817488);
   time_t result = DateUtils::parseDate("Sun, 05 Jul 2009 19:11:28 GMT");
@@ -25,16 +25,12 @@ TEST(DateUtils, parse_date_with_dashes)
 TEST(DateUtils, zero_time)
 {
   time_t result = DateUtils::parseDate("Thu, 01 Jan 1970 00:00:00 GMT");
-  EXPECT_EQ(0, result);
+  EXPECT_EQ(timezone, result);
 }
 
 
 TEST(DateUtils, parse_bogus)
 {
-  /*
-     from time import strftime, strptime
-     strftime('%s', strptime("Sun, 05 Jul 2009 19:11:28 GMT", "%a, %d %b %Y %H:%M:%S %Z"))
-  */
   time_t expected(0);
   time_t result = DateUtils::parseDate("KKKKK");
 
@@ -43,7 +39,7 @@ TEST(DateUtils, parse_bogus)
 
 TEST(DateUtils, format_time)
 {
-  time_t tzero(-3600);
+  time_t tzero(0 + timezone);
   std::string result = DateUtils::formatTime(tzero);
   EXPECT_EQ("Thu, 01 Jan 1970 00:00:00 GMT", result);
 }
