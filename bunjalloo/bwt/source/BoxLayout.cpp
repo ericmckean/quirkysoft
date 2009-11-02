@@ -285,9 +285,9 @@ void BoxLayout::setLocation(int x, int y)
   }
 }
 
-void BoxLayout::setSize(int w, int h)
+void BoxLayout::setSize(unsigned int w, unsigned int h)
 {
-  if (w != m_bounds.w)
+  if (static_cast<int>(w) != m_bounds.w)
   {
     m_bounds.w = w;
     doLayout(true);

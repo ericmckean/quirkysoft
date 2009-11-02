@@ -38,7 +38,7 @@ class BoxLayout: public Component
 
     // Reimplement Component methods.
     virtual void setLocation(int x, int y);
-    virtual void setSize(int w, int h);
+    virtual void setSize(unsigned int w, unsigned int h);
     virtual void add(Component *child);
     virtual void paint(const nds::Rectangle & clip);
 
