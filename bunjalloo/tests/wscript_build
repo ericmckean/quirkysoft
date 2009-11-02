@@ -13,6 +13,7 @@ cookies
 date
 document
 element
+font
 parameters
 parser
 searcher
@@ -22,6 +23,9 @@ uri
 versions
 zipfile
 '''.split()
+
+# special flags required for some tests
+has_uselib_locals = { 'font': 'vera bunjalloo'}
 
 api_tests = '''
 gui-test
@@ -45,13 +49,17 @@ host_libs += 'UNZIP PNG Z GIF JPEG'
 
 here = bld.path.abspath()
 for ut in unit_tests:
+    uselib_local = 'bunjalloo'
+    if ut in has_uselib_locals:
+        uselib_local = has_uselib_locals[ut]
+
     bld.new_task_gen(
         features='cxx cprogram unit_test',
         source=bld.glob(ut+'/*.cpp'),
         target=ut+'-test',
         uselib=host_libs + ' GTEST',
         run_from_dir=os.path.join(here, ut),
-        uselib_local='bunjalloo')
+        uselib_local=uselib_local)
 
 for t in api_tests:
     tgt = t+'-test'

@@ -20,7 +20,7 @@
 #include "libnds.h"
 #include "ndspp.h"
 #include "Canvas.h"
-#include "Font.h"
+#include "FontFactory.h"
 #include "RichTextArea.h"
 #include "ScrollPane.h"
 #include "TextAreaFactory.h"
@@ -34,8 +34,9 @@ using namespace nds;
 int main(int argc, char * argv[])
 {
   nds::File::exists("test.zip");
-  static Font font((unsigned char*)_binary_sans_set_bin_start, (unsigned char*)_binary_sans_map_bin_start);
-  TextAreaFactory::setFont(&font);
+  TextAreaFactory::setFont(FontFactory::create(
+        (unsigned char*)_binary_sans_set_bin_start,
+        (unsigned char*)_binary_sans_map_bin_start));
   ScrollPane scrollPane;
   Canvas &canvas(Canvas::instance());
   RichTextArea * rich = (RichTextArea*)TextAreaFactory::create(TextAreaFactory::TXT_RICH);

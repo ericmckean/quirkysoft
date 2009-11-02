@@ -22,6 +22,7 @@
 #include "Config.h"
 #include "ConfigParser.h"
 #include "CookieJar.h"
+#include "FontFactory.h"
 #include "HeaderParser.h"
 #include "Language.h"
 #include "Controller.h"
@@ -61,7 +62,7 @@ Controller::Controller()
   m_document->cookieJar()->loadAcceptList(*m_config);
   string font;
   m_config->resource(Config::FONT_STR, font);
-  TextAreaFactory::setFont(new Font(font));
+  TextAreaFactory::setFont(FontFactory::create(font.c_str()));
   m_view = new View(*m_document, *this);
   bool useCache(false);
   m_config->resource(Config::USECACHE, useCache);

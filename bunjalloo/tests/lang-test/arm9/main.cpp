@@ -18,7 +18,7 @@
 #include "libnds.h"
 #include "Button.h"
 #include "Canvas.h"
-#include "Font.h"
+#include "FontFactory.h"
 #include "RichTextArea.h"
 #include "ScrollPane.h"
 #include "Stylus.h"
@@ -35,8 +35,9 @@ int main(int argc, char * argv[])
   for (int i = 0; i < 120; ++i)
     swiWaitForVBlank();
 
-  static Font font((unsigned char*)_binary_sans_set_bin_start, (unsigned char*)_binary_sans_map_bin_start);
-  TextAreaFactory::setFont(&font);
+  TextAreaFactory::setFont(FontFactory::create(
+        (unsigned char*)_binary_sans_set_bin_start,
+        (unsigned char*)_binary_sans_map_bin_start));
   ScrollPane scrollPane;
   Language::instance().setDirectory("data/docs");
   TextField * tf = new TextField(T("text"));

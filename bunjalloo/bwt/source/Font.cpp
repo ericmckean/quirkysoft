@@ -18,7 +18,6 @@
 #include "libnds.h"
 #include "Font.h"
 #include "Palette.h"
-#include "File.h"
 #include "utf8.h"
 #include "ISO_8859_1.h"
 #include "Canvas.h"
@@ -59,12 +58,12 @@ struct t_prerenderedGlyph {
   uint16_t advanceX;
 };
 
-Font::Font(const unsigned char * setData,
-    const unsigned char * mapData):
+Font::Font():
   m_width(8),
-  m_height(8)
+  m_height(8),
+  m_prerenderedSet(0),
+  m_charMap(0)
 {
-  init(setData, mapData);
 }
 
 #define READ_U8(value, from)  { value = from[index]; index += 1; }
@@ -119,45 +118,6 @@ void Font::init(const unsigned char * setData, const unsigned char * mapData)
     READ_U32(entry->charCode, mapData);
     READ_U32(entry->glyphIndex, mapData);
   }
-}
-
-Font::Font(const std::string & fileName):
-  m_width(8),
-  m_height(8)
-{
-  File fontFile;
-  fontFile.open((fileName+".set").c_str());
-  // read the lot
-  unsigned char * glyphData(0);
-  unsigned char * data(0);
-  if (fontFile.is_open())
-  {
-    int size = fontFile.size();
-    glyphData = new unsigned char[size+1];
-    fontFile.read((char*)glyphData);
-    glyphData[size] = 0;
-    fontFile.close();
-  }
-
-  // read the map data too
-  File mapFile;
-  mapFile.open((fileName+".map").c_str());
-  // read the lot
-  if (mapFile.is_open())
-  {
-    int size = mapFile.size();
-    data = new unsigned char[size+2];
-    mapFile.read((char*)data);
-    data[size] = 0;
-    mapFile.close();
-  }
-  if (glyphData and data) {
-    init(glyphData, data);
-  }
-  if (data)
-    delete[] data;
-  if (glyphData)
-    delete[] glyphData;
 }
 
 Font::~Font()

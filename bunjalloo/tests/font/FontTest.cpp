@@ -1,5 +1,6 @@
 #include <gtest/gtest.h>
 #include "Font.h"
+#include "FontFactory.h"
 #include "libnds.h"
 #include "sans.h"
 
@@ -9,7 +10,7 @@ class FontTest: public testing::Test
     Font *m_font;
     void SetUp()
     {
-      m_font = new Font(reinterpret_cast<const unsigned char*>(_binary_sans_set_bin_start),
+      m_font = FontFactory::create(reinterpret_cast<const unsigned char*>(_binary_sans_set_bin_start),
           reinterpret_cast<const unsigned char*>(_binary_sans_map_bin_start));
     }
 
