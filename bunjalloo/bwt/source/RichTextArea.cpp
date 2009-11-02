@@ -167,12 +167,10 @@ void RichTextArea::printu(const std::string & unicodeString)
   static const std::string delimeter(" \r\n\t");
   unsigned int lastPosition = findLastNotOf(unicodeString, delimeter);
   unsigned int i = 0;
-  bool centred(m_centred);
-  if (centred)
-  {
+  if (m_centred) {
     // find size of line, change m_cursorx accordingly
     int w = textSize(unicodeString.substr(0, lastPosition));
-    m_cursorx = m_bounds.x + ((m_bounds.w - w)/2);
+    m_cursorx = (m_bounds.x + ((m_bounds.w - w)/2)) << 8;
   }
 
   std::string::const_iterator it(unicodeString.begin());
