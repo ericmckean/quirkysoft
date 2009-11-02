@@ -1,4 +1,3 @@
-#include <cstdio>
 #include "CookieWriter.h"
 #include "Cookie.h"
 #include "File.h"

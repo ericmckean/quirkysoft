@@ -25,3 +25,10 @@ DSWifi Project - sgIP Internet Protocol Stack Implementation
 
 libFAT Simple functionality for startup, mounting and unmounting of FAT-based devices.
   Copyright (c) 2006 Michael "Chishm" Chisholm
+
+Includes font code from Okiwi - a free NDS browser - version 0.2-Alpha
+  Copyright 2006, 2007 Pedro J. Estébanez.
+
+Vera font family from the Gnome Project (http://www.gnome.org/fonts/)
+Copyright (c) 2003 by Bitstream, Inc. All Rights Reserved.
+Bitstream Vera is a trademark of Bitstream, Inc.

@@ -4,6 +4,7 @@ syntax: glob
 waf
 Makefile
 _build_
+build
 bunjalloo/data/bunjalloo/cache
 bunjalloo/data/bunjalloo/config.ini
 bunjalloo/data/bunjalloo/user/bookmarks.html

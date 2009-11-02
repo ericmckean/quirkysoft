@@ -36,13 +36,13 @@ class TextArea : public Component
     /** Set the palette.
      * @param fileName the name of the font palette.
      */
-    void setPalette(const std::string & fileName);
+    //void setPalette(const std::string & fileName);
 
     /** Set the palette.
      * @param data the palette data
      * @param size the size of the palette data
      */
-    void setPalette(const char * data, unsigned int size);
+    //void setPalette(const char * data, unsigned int size);
 
     /** Append text to the text area.
      * @param unicodeString the text to append.
@@ -134,8 +134,8 @@ class TextArea : public Component
 
     /** Called for each line of text that is visible. */
     virtual void printu(const std::string & unicodeString);
-    /** Print a single character. */
-    bool doSingleChar(unsigned int value);
+
+    bool doSingleChar(int value);
 
   protected:
     //! Position that the current line is at.
@@ -157,16 +157,13 @@ class TextArea : public Component
 
   private:
     Font * m_font;
-    unsigned short * m_palette;
-    unsigned short * m_basePalette;
-    int m_paletteLength;
+    // unsigned short * m_palette;
+    // unsigned short * m_basePalette;
+    // int m_paletteLength;
     bool m_parseNewline;
     unsigned short m_bgCol;
     unsigned short m_fgCol;
     bool m_underLine;
-
-    void printAt(Font::Glyph & g, int xPosition, int yPosition);
-    inline void checkLetter(Font::Glyph & g);
 
     DISALLOW_COPY_AND_ASSIGN(TextArea);
 };

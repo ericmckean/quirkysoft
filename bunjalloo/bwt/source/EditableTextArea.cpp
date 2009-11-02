@@ -76,17 +76,9 @@ void EditableTextArea::paint(const nds::Rectangle & clip)
           std::string(characters(m_caretLine), '*').swap(tmp);
         }
         const std::string &line(echoText()?m_document[m_caretLine]:tmp);
-        std::string::const_iterator it(line.begin());
-        std::string::const_iterator end(line.end());
-        for (int i = 0; it != end and i < m_caretChar; ++i)
-        {
-          unsigned int value(utf8::next(it, end));
-          if (value == 0xfffd)
-            value = '?';
-          Font::Glyph g;
-          font().glyph(value, g);
-          m_caretPixelX += g.width;
-        }
+        unsigned int pix;
+        font().findEnd(line, 0, m_caretChar, &pix, 0);
+        m_caretPixelX = pix >> 8;
       }
       Canvas::instance().verticalLine(m_caretPixelX, caretLinePos, font().height(), Color(31,0,0));
     }
@@ -316,28 +308,10 @@ void EditableTextArea::setCaret(int x, int y)
       std::string(lineLength, '*').swap(tmp);
     }
     const std::string & line(echoText()?m_document[m_caretLine]:tmp);
-    int size = 0;
-    int character = 0;
-    std::string::const_iterator end(line.end());
-    for (std::string::const_iterator it(line.begin());
-        it != end; character++)
-    {
-      unsigned int value(utf8::next(it, end));
-      if (value == 0xfffd)
-        value = '?';
-      Font::Glyph g;
-      font().glyph(value, g);
-      size += g.width;
-      if (size > x)
-      {
-        size -= g.width;
-        m_caretChar = character;
-        m_caretPixelX = size;
-        return;
-      }
-    }
-    m_caretChar = lineLength;
-    m_caretPixelX = size;
+    unsigned int s, c;
+    font().findEnd(line, x, 0, &s, &c);
+    m_caretPixelX = s >> 8;
+    m_caretChar = c;
   }
 }
 

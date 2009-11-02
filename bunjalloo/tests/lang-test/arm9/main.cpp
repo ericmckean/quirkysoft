@@ -26,7 +26,7 @@
 #include "TextArea.h"
 #include "TextField.h"
 #include "Language.h"
-#include "vera.h"
+#include "sans.h"
 
 using namespace nds;
 int main(int argc, char * argv[])
@@ -35,9 +35,8 @@ int main(int argc, char * argv[])
   for (int i = 0; i < 120; ++i)
     swiWaitForVBlank();
 
-  static Font font((unsigned char*)_binary_vera_img_bin_start, (unsigned char*)_binary_vera_map_bin_start);
+  static Font font((unsigned char*)_binary_sans_set_bin_start, (unsigned char*)_binary_sans_map_bin_start);
   TextAreaFactory::setFont(&font);
-  TextAreaFactory::usePaletteData((const char*)_binary_vera_pal_bin_start, 32);
   ScrollPane scrollPane;
   Language::instance().setDirectory("data/docs");
   TextField * tf = new TextField(T("text"));

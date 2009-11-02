@@ -16,7 +16,6 @@
 */
 #include <algorithm>
 #include <functional>
-#include <cstdio>
 #include "BookmarkToolbar.h"
 #include "Sprite.h"
 #include "View.h"
