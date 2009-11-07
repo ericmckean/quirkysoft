@@ -256,7 +256,7 @@ inline int M(const Color &fg, const Color &bg)
 void Font::printAt(t_prerenderedGlyph &g, int xPosition, int yPosition, int color, int bgcolor)
 {
   const unsigned char * data = g.image.bitmap;
-  xPosition += g.deltaX << 8;
+  xPosition += g.deltaX << 7;
   yPosition = yPosition + base() + g.deltaY;
   Color fg(color);
   Color bg(bgcolor);
