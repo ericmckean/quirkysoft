@@ -60,7 +60,6 @@ struct t_prerenderedGlyph {
 
 Font::Font():
   m_width(8),
-  m_height(8),
   m_prerenderedSet(0),
   m_charMap(0)
 {
@@ -94,8 +93,6 @@ void Font::init(const unsigned char * setData, const unsigned char * mapData)
     // read bitmap data
     READ_U8(glyph->image.width, setData);
     READ_U8(glyph->image.height, setData);
-    if (glyph->image.height > m_height)
-      m_height = glyph->image.height;
     // read data:
     int size((glyph->image.width * glyph->image.height) / 4);
     glyph->image.bitmap = static_cast<uint8_t*>(malloc(size));
@@ -162,7 +159,7 @@ void Font::textSize(const char * text, int amount, int & width, int & height, co
   // length of text in bytes.
   bool utf8(encoding == "utf-8");
   width = 0;
-  height = m_height;
+  height = this->height();
   int maxWidth = 0;
   const char *end(text + amount);
   while (text != end)
@@ -179,7 +176,7 @@ void Font::textSize(const char * text, int amount, int & width, int & height, co
     }
     if (value == '\n')
     {
-      height += m_height;
+      height += this->height();
       width = 0;
     } else {
       t_prerenderedGlyph *g(glyph(value));
@@ -259,9 +256,8 @@ inline int M(const Color &fg, const Color &bg)
 void Font::printAt(t_prerenderedGlyph &g, int xPosition, int yPosition, int color, int bgcolor)
 {
   const unsigned char * data = g.image.bitmap;
-  //int dataInc = (m_font->totalWidth() - g.image.width)/2;
   xPosition += g.deltaX << 8;
-  yPosition = yPosition + height() + g.deltaY;
+  yPosition = yPosition + base() + g.deltaY;
   Color fg(color);
   Color bg(bgcolor);
   int colors[4] = {
@@ -337,3 +333,12 @@ int Font::doSingleChar(unsigned int value, int cursorx, int cursory, int right, 
   return g->advanceX;
 }
 
+int Font::height() const
+{
+  return m_prerenderedSet->maxDescender - m_prerenderedSet->minAscender;
+}
+
+int Font::base() const
+{
+  return 2 + ((height() * 5) / 7);
+}
