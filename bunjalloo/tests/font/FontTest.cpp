@@ -23,7 +23,7 @@ class FontTest: public testing::Test
 TEST_F(FontTest, check_height_is_overall_max)
 {
   int result = m_font->height();
-  EXPECT_EQ(11, result);
+  EXPECT_EQ(12, result);
 }
 
 TEST_F(FontTest, findEnd_no_limits)

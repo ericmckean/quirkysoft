@@ -58,6 +58,8 @@ class RichTextArea: public TextArea
     void setCentred(bool centre=true);
     bool outlined() const;
     void setOutlined(bool outline=true);
+    void setUnderline(bool underline=true);
+    bool underline() const;
 
     /** Given a link index, find where abouts in the text area it is.
      */
@@ -97,6 +99,9 @@ class RichTextArea: public TextArea
 
     bool m_centred;
     bool m_outlined;
+    int m_startUnderlineX;
+    int m_startUnderlineY;
+    bool m_underLine;
 
     Link * m_linkTouched;
     int m_downCount;
@@ -123,6 +128,8 @@ class RichTextArea: public TextArea
     Link * linkAt(int index);
 
     unsigned int charIndexToLine(unsigned int charIndex) const;
+    void startUnderline();
+    void endUnderline();
     DISALLOW_COPY_AND_ASSIGN(RichTextArea);
 };
 #endif
