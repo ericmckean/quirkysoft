@@ -27,6 +27,7 @@ def configure(conf):
     conf.check_tool('compiler_cxx')
     conf.check_tool('compiler_cc')
     conf.check_tool('objcopy')
+    conf.env['CXXFLAGS'] = '-g -O0'.split()
     conf.env['OBJCOPYFLAGS'] = ' -I binary -O elf32-i386 -B i386 '.split()
     conf.define('sprintf_platform', 'sprintf', quote=False)
     conf.define('sscanf_platform', 'sscanf', quote=False)
