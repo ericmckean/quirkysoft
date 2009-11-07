@@ -92,7 +92,6 @@ void TextArea::appendText(const std::string &unicodeString)
   // find the next space character
   std::string::const_iterator it = unicodeString.begin();
   std::string::const_iterator end_it = unicodeString.end();
-  int widthFixed = width() << 8;
   while (it != end_it)
   {
 
@@ -198,7 +197,7 @@ bool TextArea::doSingleChar(int value)
   if (m_underLine) {
     // draw underline
     Canvas::instance().horizontalLine(m_cursorx >> 8,
-                                      m_cursory + m_font->height(),
+                                      m_cursory + m_font->base(),
                                       advance >> 8,
                                       m_fgCol);
   }

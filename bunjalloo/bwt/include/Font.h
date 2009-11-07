@@ -75,10 +75,16 @@ class Font
      */
     inline int totalWidth() const;
 
-    /** Get the font height. This is fixed.
+    /** Get the font height. This is fixed and is the distance from the max
+     * descending character to the min ascending one.
      * @return font height.
      */
-    inline int height() const;
+    int height() const;
+
+    /** Get the font base line, where y rests on the "line".
+     * @return font height.
+     */
+    int base() const;
 
     /** Get a shorter word that will fit in a given width.
      * @param it start of the word
@@ -114,8 +120,6 @@ class Font
 
     //! Total width of the image.
     unsigned int m_width;
-    //! Total width of the image.
-    unsigned int m_height;
     t_prerenderedSet *m_prerenderedSet;
     t_charMap *m_charMap;
 
@@ -134,9 +138,5 @@ class Font
 inline int Font::totalWidth() const
 {
   return m_width;
-}
-inline int Font::height() const
-{
-  return m_height;
 }
 #endif

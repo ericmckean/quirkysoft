@@ -170,7 +170,7 @@ void RichTextArea::printu(const std::string & unicodeString)
   if (m_centred) {
     // find size of line, change m_cursorx accordingly
     int w = textSize(unicodeString.substr(0, lastPosition));
-    m_cursorx = (m_bounds.x + ((m_bounds.w - w)/2)) << 8;
+    m_cursorx = ((m_bounds.x << 8) + (((m_bounds.w << 8) - w)/2));
   }
 
   std::string::const_iterator it(unicodeString.begin());
