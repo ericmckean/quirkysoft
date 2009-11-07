@@ -38,6 +38,7 @@ RichTextArea::RichTextArea(Font * font) :
   m_linkListener(0),
   m_centred(false),
   m_outlined(false),
+  m_underLine(false),
   m_linkTouched(0),
   m_downCount(0)
 {
@@ -158,7 +159,13 @@ void RichTextArea::endImage()
 
 void RichTextArea::incrLine()
 {
-  TextArea::incrLine();
+  if (underline()) {
+    endUnderline();
+    TextArea::incrLine();
+    startUnderline();
+  } else {
+    TextArea::incrLine();
+  }
   m_lineNumber++;
 }
 
@@ -205,24 +212,12 @@ void RichTextArea::handleNextEvent()
   switch (m_nextEventType)
   {
     case Link::STATE_LINK:
-      if (not currentLink->href().empty())
-      {
-        if (currentLink->clicked())
-        {
-          setTextColor(WidgetColors::LINK_CLICKED);
-        }
-        else
-        {
-          setTextColor(currentLink->color());
-        }
-        setUnderline();
-      }
+      startUnderline();
       m_nextEvent = currentLink->textEnd();
       m_nextEventType = Link::STATE_PLAIN;
       break;
     case Link::STATE_PLAIN:
-      setTextColor(0);
-      setUnderline(false);
+      endUnderline();
       if (m_currentLink != m_links.end())
         ++m_currentLink;
       if (m_currentLink != m_links.end())
@@ -615,4 +610,45 @@ void RichTextArea::setOutlined(bool outline)
 unsigned int RichTextArea::linkCount() const
 {
   return m_links.size();
+}
+
+void RichTextArea::endUnderline()
+{
+  if (underline()) {
+    Canvas::instance().horizontalLine(
+        m_startUnderlineX>>8,
+        m_cursory + font().base(),
+        (m_cursorx - m_startUnderlineX) >>8,
+        foregroundColor());
+  }
+  setTextColor(0);
+  setUnderline(false);
+}
+
+void RichTextArea::startUnderline()
+{
+  Link * currentLink(*m_currentLink);
+  if (not currentLink->href().empty())
+  {
+    if (currentLink->clicked())
+    {
+      setTextColor(WidgetColors::LINK_CLICKED);
+    }
+    else
+    {
+      setTextColor(currentLink->color());
+    }
+    m_startUnderlineX = m_cursorx;
+    m_startUnderlineY = m_cursory;
+    setUnderline();
+  }
+}
+
+void RichTextArea::setUnderline(bool underline)
+{
+  m_underLine = underline;
+}
+bool RichTextArea::underline() const
+{
+  return m_underLine;
 }

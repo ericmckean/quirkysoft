@@ -74,6 +74,7 @@ class TextArea : public Component
     void setDefaultColor();
 
     unsigned short backgroundColor() const;
+    unsigned short foregroundColor() const;
 
     /** Get the size of the text in pixels using the current font.
      * @param unicodeString the string to check the size of.
@@ -95,8 +96,6 @@ class TextArea : public Component
 
     inline bool parseNewline() const;
     inline void setParseNewline(bool parse=true);
-    inline void setUnderline(bool underline=true);
-    inline bool underline() const;
 
     // Component method reimplementation.
     virtual void setSize(unsigned int w, unsigned int h);
@@ -150,7 +149,6 @@ class TextArea : public Component
     bool m_parseNewline;
     unsigned short m_bgCol;
     unsigned short m_fgCol;
-    bool m_underLine;
 
     DISALLOW_COPY_AND_ASSIGN(TextArea);
 };
@@ -173,14 +171,6 @@ int TextArea::cursorY() const
 int TextArea::cursorX() const
 {
   return m_cursory;
-}
-void TextArea::setUnderline(bool underline)
-{
-  m_underLine = underline;
-}
-bool TextArea::underline() const
-{
-  return m_underLine;
 }
 bool TextArea::parseNewline() const
 {

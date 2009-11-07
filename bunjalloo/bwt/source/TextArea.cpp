@@ -40,8 +40,7 @@ static const int INDENT(16);
 TextArea::TextArea(Font * font) :
   m_font(0),
   m_appendPosition(0),
-  m_parseNewline(true),
-  m_underLine(false)
+  m_parseNewline(true)
 {
   setFont(font);
   setDefaultColor();
@@ -194,13 +193,6 @@ bool TextArea::doSingleChar(int value)
     if (advance < 0)
       return false;
   }
-  if (m_underLine) {
-    // draw underline
-    Canvas::instance().horizontalLine(m_cursorx >> 8,
-                                      m_cursory + m_font->base(),
-                                      advance >> 8,
-                                      m_fgCol);
-  }
   m_cursorx += advance;
   return m_cursory > m_bounds.bottom();
 }
@@ -245,36 +237,11 @@ unsigned short TextArea::backgroundColor() const
 void TextArea::setTextColor(unsigned short color)
 {
   m_fgCol = color;
-  /*
-  Color newColor(color);
-  Color bgCol(m_bgCol);
-  // assuming m_basePalette is black and white...
-  int mred = bgCol.red() - newColor.red();
-  int mgreen = bgCol.green() - newColor.green();
-  int mblue = bgCol.blue() - newColor.blue();
+}
 
-  for (int i = 0; i < m_paletteLength; ++i)
-  {
-    // convert from grey scale to colour scale.
-    Color c(m_basePalette[i]);
-
-    // y |       ____   y = mx+c
-    //  c|___----
-    //   |___________
-    //                x
-    //  c = initial colour      (intercept)
-    //  m = 31 - initial  / 32  (gradient)
-    //  x = grey value
-
-    int yred   = (mred * c.red())/32 + newColor.red();
-    int ygreen = (mgreen * c.green())/32 + newColor.green();
-    int yblue  = (mblue * c.blue())/32 + newColor.blue();
-    c.red(yred);
-    c.green(ygreen);
-    c.blue(yblue);
-    m_palette[i] = c;
-  }
-  */
+unsigned short TextArea::foregroundColor() const
+{
+  return m_fgCol;
 }
 
 TextArea::~TextArea()
