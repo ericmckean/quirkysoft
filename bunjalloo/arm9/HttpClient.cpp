@@ -89,7 +89,7 @@ class SslClient
 
     void handle(void * bufferIn, int amountRead);
 
-    void freeConnection();
+    void freeSession();
 
   private:
 
@@ -118,6 +118,8 @@ class SslClient
     int writeBuffer(sslBuf_t * out);
 
     int sslRead(char * buf, int len);
+
+    void freeConnection();
 };
 
 const int SslClient::SSL_BUFFER_SIZE(HttpClient::BUFFER_SIZE);
@@ -129,23 +131,35 @@ SslClient::~SslClient()
   delete [] m_buffer;
 }
 
-void SslClient::freeConnection()
+void SslClient::freeSession()
 {
-  if (not m_conn)
-  {
+  if (not m_conn) {
     return;
   }
-
   matrixSslFreeSessionId(m_sessionId);
-  matrixSslDeleteSession(m_conn->ssl); // mem leak, but this crashes
+  matrixSslDeleteSession(m_conn->ssl);
   m_conn->ssl = 0;
-  free(m_conn->insock.buf);
-  m_conn->insock.buf = 0;
-  free(m_conn->outsock.buf);
-  m_conn->outsock.buf = 0;
-  free(m_conn->inbuf.buf);
-  m_conn->inbuf.buf = 0;
-  // none of the above works > 1 time.
+}
+
+void SslClient::freeConnection()
+{
+  if (not m_conn) {
+    return;
+  }
+  freeSession();
+
+  if (m_conn->insock.buf) {
+    free(m_conn->insock.buf);
+    m_conn->insock.buf = 0;
+  }
+  if (m_conn->outsock.buf) {
+    free(m_conn->outsock.buf);
+    m_conn->outsock.buf = 0;
+  }
+  if (m_conn->inbuf.buf) {
+    free(m_conn->inbuf.buf);
+    m_conn->inbuf.buf = 0;
+  }
   free(m_conn);
   m_conn = 0;
 }
@@ -209,11 +223,11 @@ int SslClient::sslHandshake()
   m_conn->insock.size = SSL_BUFFER_SIZE;
   m_conn->insock.start =
     m_conn->insock.end =
-    m_conn->insock.buf = (unsigned char *)malloc(m_conn->insock.size);
+    m_conn->insock.buf = (unsigned char *)realloc(m_conn->insock.buf, m_conn->insock.size);
   m_conn->outsock.size = SSL_BUFFER_SIZE;
   m_conn->outsock.start =
     m_conn->outsock.end =
-    m_conn->outsock.buf = (unsigned char *)malloc(m_conn->outsock.size);
+    m_conn->outsock.buf = (unsigned char *)realloc(m_conn->outsock.buf, m_conn->outsock.size);
   m_conn->inbuf.size = 0;
   m_conn->inbuf.start =
     m_conn->inbuf.end =
@@ -221,10 +235,6 @@ int SslClient::sslHandshake()
 
   int bytes = matrixSslEncodeClientHello(m_conn->ssl, &m_conn->outsock, m_cipherSuite);
   if (bytes < 0) {
-    free(m_conn->insock.buf);
-    m_conn->insock.buf = 0;
-    free(m_conn->outsock.buf);
-    m_conn->outsock.buf = 0;
     return -1;
   }
   // write the hello bytes.
@@ -233,10 +243,6 @@ int SslClient::sslHandshake()
   m_httpClient.print("sslHandshake - after write");
   if (written < 0)
   {
-    free(m_conn->insock.buf);
-    m_conn->insock.buf = 0;
-    free(m_conn->outsock.buf);
-    m_conn->outsock.buf = 0;
     return -1;
   }
   m_conn->outsock.start = m_conn->outsock.end = m_conn->outsock.buf;
@@ -930,7 +936,7 @@ void HttpClient::handleNextState()
 
     case FINISHED:
       m_finished = true;
-      m_sslClient->freeConnection();
+      m_sslClient->freeSession();
       break;
 
     case FAILED:
