@@ -148,8 +148,7 @@ t_prerenderedGlyph *Font::glyph(unsigned int value) const
     if (min == -1) {
       return &m_prerenderedSet->glyphs[0];
     }
-    value = min;
-    glyphIndex = valueToIndex(value);
+    glyphIndex = min;
   }
   return &m_prerenderedSet->glyphs[glyphIndex];
 }
