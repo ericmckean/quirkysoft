@@ -11,6 +11,9 @@ if is_nds:
     host_libs = 'NDS DSWIFI9 '
 else:
     host_libs = 'GL SDL '
+    if type(bld.env['USE_PROFILER']) == str:
+        host_libs += bld.env['USE_PROFILER']
+    host_libs += ' '
 
 host_libs += 'Z PNG JPEG GIF UNZIP MATRIXSSLSTATIC'
 
