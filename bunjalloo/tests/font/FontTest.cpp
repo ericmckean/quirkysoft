@@ -135,4 +135,8 @@ TEST_F(FontTest, test_valueToIndex) {
   TestCodePointToIndex(185, 9674);
   TestCodePointToIndex(192, 64257);
   TestCodePointToIndex(193, 64258);
+  TestCodePointToIndex(-1, 1);
+  TestCodePointToIndex(-1, 256);
+  TestCodePointToIndex(-1, 264);
+  TestCodePointToIndex(-1, 64259);
 }

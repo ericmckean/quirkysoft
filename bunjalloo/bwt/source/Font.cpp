@@ -130,11 +130,27 @@ int Font::minGlyph() const
 
 int Font::valueToIndex(unsigned int codepoint) const
 {
+  //  use a binary search as charCode is ordered
   t_charMapEntry *entry(m_charMap->entries);
-  // TODO: change this from O(n) to O(log n) as charCode is ordered
-  for (int i = 0; i < m_charMap->size; ++i, ++entry) {
-    if (entry->charCode == codepoint)
-      return entry->glyphIndex;
+  uint32_t lower = 0;
+  uint32_t upper = m_charMap->size;
+  while (true) {
+    uint32_t key = (upper + lower) / 2;
+    if (entry[key].charCode > codepoint) {
+      if (upper == key) {
+        break;
+      }
+      upper = key;
+    }
+    else if (entry[key].charCode < codepoint) {
+      if (lower == key) {
+        break;
+      }
+      lower = key;
+    }
+    else {
+      return entry[key].glyphIndex;
+    }
   }
   return -1;
 }
