@@ -71,6 +71,9 @@ static bool isEmpty(const std::string & line)
 
 void RichTextArea::appendText(const std::string & unicodeString)
 {
+  if (m_document.empty()) {
+    m_documentSize = 0;
+  }
   if (m_document.size() > 1
       and isEmpty(unicodeString)
       and isEmpty(currentLine())
@@ -81,7 +84,7 @@ void RichTextArea::appendText(const std::string & unicodeString)
   }
   TextArea::appendText(unicodeString);
   // recalculate document size
-  m_documentSize = 0;
+  m_documentSize += utf8::distance(unicodeString.begin(), unicodeString.end());
   if (m_centred)
   {
     m_preferredWidth = m_bounds.w;
