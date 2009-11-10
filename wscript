@@ -11,6 +11,9 @@ def set_options(opt):
     opt.tool_options('compiler_cxx')
     opt.tool_options('compiler_cc')
     opt.tool_options('eclipse_cdt')
+    opt.tool_options('google_profiler')
+    opt.tool_options('gprof')
+    opt.tool_options('gcov')
     opt.sub_options('waf_tools')
 
 def configure(conf):
@@ -27,7 +30,10 @@ def configure(conf):
     conf.check_tool('compiler_cxx')
     conf.check_tool('compiler_cc')
     conf.check_tool('objcopy')
-    conf.env['CXXFLAGS'] = '-g -O0'.split()
+    conf.check_tool('google_profiler')
+    conf.check_tool('gprof')
+    conf.check_tool('gcov')
+    conf.env['CXXFLAGS'] += '-g -O0'.split()
     conf.env['OBJCOPYFLAGS'] = ' -I binary -O elf32-i386 -B i386 '.split()
     conf.define('sprintf_platform', 'sprintf', quote=False)
     conf.define('sscanf_platform', 'sscanf', quote=False)
