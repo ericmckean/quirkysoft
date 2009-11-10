@@ -1,4 +1,5 @@
 #include <gtest/gtest.h>
+#define private public
 #include "Font.h"
 #include "FontFactory.h"
 #include "libnds.h"
@@ -17,6 +18,11 @@ class FontTest: public testing::Test
     void TearDown()
     {
       delete m_font;
+    }
+
+    void TestCodePointToIndex(int expected, unsigned int codepoint) {
+      int result = m_font->valueToIndex(codepoint);
+      EXPECT_EQ(expected, result);
     }
 };
 
@@ -115,4 +121,18 @@ TEST_F(FontTest, findEnd_both_limit)
   EXPECT_FALSE(m_font->findEnd(test, 37, 9, &result, &lastChar));
   EXPECT_EQ(9436, (int)result);
   EXPECT_EQ(6U, lastChar);
+}
+
+TEST_F(FontTest, test_valueToIndex) {
+  TestCodePointToIndex(3, ' ');
+  TestCodePointToIndex(36, 'A');
+  TestCodePointToIndex(245, 190);
+  TestCodePointToIndex(186, 255);
+  TestCodePointToIndex(226, 322);
+  TestCodePointToIndex(155, 960);
+  TestCodePointToIndex(178, 8211);
+  TestCodePointToIndex(156, 8747);
+  TestCodePointToIndex(185, 9674);
+  TestCodePointToIndex(192, 64257);
+  TestCodePointToIndex(193, 64258);
 }
