@@ -68,9 +68,10 @@ void Canvas::horizontalLine(int x, int y, int length, int colour)
   unsigned short * gfx(vram(y));
   if (y >= 192)
     y -= 192;
-  unsigned short * dest = &gfx[x+y*width()];
+  unsigned short *dest = &gfx[x+y*width()];
+  unsigned short *end = dest + length;
 
-  for (int i = 0 ; i < length; ++i)
+  while (dest != end)
   {
     // drawPixel(x+i, y, colour);
     *dest++ = colour
