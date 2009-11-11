@@ -1018,7 +1018,6 @@ void HtmlDocument::handleData(unsigned int ucodeChar)
       // if an end tag appears first, then append a html tag and redo this tag,
       m_state = MAIN;
       m_insertionMode = BEFORE_HEAD;
-      assert(m_openElements.size() == 0);
       m_openElements.push_back(ElementFactory::create(HtmlConstants::HTML_TAG));
       m_isFirst = true;
       /* FALL THROUGH */
@@ -1184,7 +1183,7 @@ bool HtmlDocument::isPhrasing(HtmlElement * node)
 
 void HtmlDocument::reconstructActiveFormatters()
 {
-  if (m_activeFormatters.size() == 0)
+  if (m_activeFormatters.empty())
   {
     return;
   }
