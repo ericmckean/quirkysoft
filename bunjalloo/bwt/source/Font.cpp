@@ -281,6 +281,7 @@ void Font::printAt(t_prerenderedGlyph &g, int xPosition, int yPosition, int colo
     M(fg, bg),
     fg
   };
+  Canvas &canvas(Canvas::instance());
   for (int y = 0; y < g.image.height; ++y)
   {
     // width is not a multiple of 4 necessarily
@@ -288,16 +289,16 @@ void Font::printAt(t_prerenderedGlyph &g, int xPosition, int yPosition, int colo
     while (x != g.image.width)
     {
       unsigned char pixelCuartet = *data++;
-      putPixel(Canvas::instance(), xPosition + (x<<8), yPosition + y, pixelCuartet>>6, colors);
+      putPixel(canvas, xPosition + (x<<8), yPosition + y, pixelCuartet>>6, colors);
       x++;
       if (x == g.image.width) break;
-      putPixel(Canvas::instance(), xPosition + (x<<8), yPosition + y, pixelCuartet>>4, colors);
+      putPixel(canvas, xPosition + (x<<8), yPosition + y, pixelCuartet>>4, colors);
       x++;
       if (x == g.image.width) break;
-      putPixel(Canvas::instance(), xPosition + (x<<8), yPosition + y, pixelCuartet>>2, colors);
+      putPixel(canvas, xPosition + (x<<8), yPosition + y, pixelCuartet>>2, colors);
       x++;
       if (x == g.image.width) break;
-      putPixel(Canvas::instance(), xPosition + (x<<8), yPosition + y, pixelCuartet>>0, colors);
+      putPixel(canvas, xPosition + (x<<8), yPosition + y, pixelCuartet>>0, colors);
       x++;
     }
   }
