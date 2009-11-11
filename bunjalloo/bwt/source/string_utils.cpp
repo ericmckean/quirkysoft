@@ -34,6 +34,7 @@ bool isWhitespace(unsigned int value)
       or value == 0x000A  // LINE FEED
       or value == 0x000B  // LINE TABULATION
       or value == 0x000C  // FORM FEED
+      or value == 0x000D  // FORM FEED
       );
 }
 
@@ -97,19 +98,11 @@ std::string nextWordAdvanceWord(
     std::string::const_iterator *it,
     const std::string::const_iterator &end_it)
 {
-  // set up delimeter set
-  std::set<uint32_t> delimeters;
-  static const char intDelimiters[] = {0x20, 0x09, 0x0a, 0x0b, 0x0c, 0x0d, 0x0};
-  for (const char *d(intDelimiters); *d != 0; ++d) {
-    delimeters.insert(*d);
-  }
-  std::set<uint32_t>::const_iterator set_end(delimeters.end());
-
   // find the end of the word
   std::string::const_iterator start(*it);
   while (*it != end_it) {
     uint32_t value = utf8::next(*it, end_it);
-    if (delimeters.find(value) != set_end) {
+    if (isWhitespace(value)) {
       break;
     }
   }
