@@ -18,6 +18,7 @@
 #define HtmlElement_h_seen
 
 #include <string>
+#include <cstring>
 #include "ElementList.h"
 
 class Visitor;
@@ -136,6 +137,7 @@ class HtmlElement
      * @return true if the tag name matches the given name.
      */
     inline bool isa(const std::string & name) const;
+    inline bool isa(const char *name) const;
 
     /** Is this element a particular type?. This ptr variation is for use as a
      * matching function in find_if. @see isa() for the preferred version.
@@ -199,6 +201,12 @@ bool HtmlElement::isa(const std::string & name) const
 {
   return m_tagName == name;
 }
+
+bool HtmlElement::isa(const char *name) const
+{
+  return strcmp(name, m_tagName.c_str()) == 0;
+}
+
 bool HtmlElement::isa_ptr(const std::string * name) const
 {
   return name and isa(*name);
