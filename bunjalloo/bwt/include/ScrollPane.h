@@ -125,6 +125,7 @@ class ScrollPane: public Component
   private:
     static Component * s_popup;
     int m_scrollIncrement;
+    int m_distanceScrolled;
     bool m_topLevel;
     bool m_canScrollUp;
     bool m_canScrollDown;

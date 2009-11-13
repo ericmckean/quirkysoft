@@ -39,6 +39,18 @@ namespace nds   // tolua_export
 
       void unsafeDrawPixel(int x, int y, int color);
 
+      /** 
+       *  Copy a block of vram at x1, y1 to the new area at x2, y2
+       * @param x1 the absolute start coordinate in pixels
+       * @param y1 the absolute start coordinate in pixels
+       * @param w the width of the area to copy in pixels
+       * @param h the height of the area to copy in pixels
+       * @param x2 the absolute target coordinate in pixels
+       * @param y2 the absolute target coordinate in pixels
+       */
+      void copyBlock(int x1, int y1, int w, int h,
+                     int x2, int y2);
+
       /** Fill a rectangle at the given position with the given dimensions.
        * @param x the x position.
        * @param y the y position. 0 is the tpo of the screen, 383 is the bottom
@@ -101,6 +113,7 @@ namespace nds   // tolua_export
 
       unsigned short * vram();
       unsigned short * vram(int y);
+      unsigned short * frontVram(int y);
       void init();
 
       DISALLOW_COPY_AND_ASSIGN(Canvas);

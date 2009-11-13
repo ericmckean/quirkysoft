@@ -35,6 +35,7 @@ using nds::Rectangle;
 ScrollPane::ScrollPane()
 :
   m_scrollIncrement(1),
+  m_distanceScrolled(0),
   m_topLevel(false),
   m_canScrollUp(false),
   m_canScrollDown(false),
@@ -235,6 +236,7 @@ void ScrollPane::up(ScrollType type)
     c->setLocation(c->x(), newY);
   }
   calculateScrollBar();
+  m_distanceScrolled = -scrollIncrement;
 }
 
 void ScrollPane::screenDown()
@@ -280,6 +282,7 @@ void ScrollPane::down(ScrollType type)
     c->setLocation(c->x(), newY);
   }
   calculateScrollBar();
+  m_distanceScrolled = scrollIncrement;
 }
 
 bool ScrollPane::isScrollBarShowing() const
@@ -313,16 +316,47 @@ void ScrollPane::paint(const nds::Rectangle & clip)
   if (not visible()) {
     return;
   }
+  nds::Rectangle realClip = clip;
   if (m_topLevel) {
-    nds::Canvas::instance().fillRectangle(clip.x, clip.y, clip.w, clip.h, m_backgroundColour);
+    if ( m_distanceScrolled == 0) {
+      nds::Canvas::instance().fillRectangle(clip.x, clip.y, clip.w, clip.h, m_backgroundColour);
+    } else {
+      // scrolled by m_distanceScrolled
+      /*         ...
+       *  xxx    xxx
+       *  xxx    xxx
+       *  xxx => xxx
+       *  xxx    xxx
+       *  xxx    NNN
+       *
+       * where NNN is the new area to paint
+       */
+      nds::Canvas::instance().copyBlock(0, 0, clip.w - SCROLLER_WIDTH, clip.h,
+          0, -m_distanceScrolled);
+      if (m_distanceScrolled > 0) {
+        // scrolled screen up
+        // 0 -> -m_distanceScrolled
+        // height - m_distanceScrolled is the new y pos
+        nds::Canvas::instance().fillRectangle(clip.x, clip.h - m_distanceScrolled, clip.w, m_distanceScrolled, m_backgroundColour);
+        nds::Rectangle r = {clip.x, clip.h - m_distanceScrolled, clip.w, m_distanceScrolled};
+        nds::Canvas::instance().setClip(r);
+        realClip = r;
+      }
+      else {
+        nds::Canvas::instance().fillRectangle(clip.x, clip.y, clip.w, -m_distanceScrolled, m_backgroundColour);
+        nds::Rectangle r = {clip.x, clip.y, clip.w, -m_distanceScrolled};
+        nds::Canvas::instance().setClip(r);
+        realClip = r;
+      }
+    }
   }
 
   if (s_popup != 0 and this == s_popup)
   {
     nds::Canvas::instance().fillRectangle(clip.x, clip.y, clip.w, clip.h, m_backgroundColour);
   }
+  m_distanceScrolled = 0;
 
-  nds::Rectangle realClip = clip;
   realClip.w -= m_scrollBar->width();
 
   // paint the child components

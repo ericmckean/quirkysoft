@@ -321,7 +321,6 @@ void RichTextArea::paint(const nds::Rectangle & clip)
   int lineNum = lineAt(m_bounds.y, dy);
   std::vector<std::string>::const_iterator it(m_document.begin());
   int skipLines(lineNum);
-  // printf("Skip %d lines dy %d\n", skipLines, dy);
   if (skipLines > 0)
   {
     checkSkippedLines(skipLines);
@@ -333,7 +332,6 @@ void RichTextArea::paint(const nds::Rectangle & clip)
   {
     setCursor(m_bounds.x, m_bounds.y);
   }
-
   if (m_outlined)
   {
     nds::Canvas::instance().
@@ -343,6 +341,15 @@ void RichTextArea::paint(const nds::Rectangle & clip)
             m_bounds.w-1,
             m_bounds.h,
             WidgetColors::BUTTON_SHADOW);
+  }
+  if (m_cursory < clip.top()) {
+    // cursor is above the top of the clip area
+    int diff = (clip.top() - m_cursory) / font().height();
+    if (diff > 0) {
+      it += diff;
+      m_lineNumber += diff;
+      m_cursory += diff * font().height();
+    }
   }
 
   for (; it != m_document.end() and (m_cursory < m_bounds.bottom()) and (m_cursory < clip.bottom()); ++it)
@@ -617,7 +624,7 @@ unsigned int RichTextArea::linkCount() const
 
 void RichTextArea::endUnderline()
 {
-  if (underline()) {
+  if (underline() and (m_cursorx > m_startUnderlineX)) {
     Canvas::instance().horizontalLine(
         m_startUnderlineX>>8,
         m_cursory + font().base(),
