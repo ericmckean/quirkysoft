@@ -84,3 +84,15 @@ void Canvas::endPaint()
   SDLhandler::instance().swapMainBuffer();
   memcpy(m_frontSub, m_backSub, SCREEN_WIDTH*SCREEN_HEIGHT*2);
 }
+
+unsigned short * Canvas::frontVram(int y)
+{
+  int layer(y<192?1:0);
+  if (layer) {
+    return m_frontSub;
+  }
+  SDLhandler::instance().swapMainBuffer();
+  m_frontMain = SDLhandler::instance().vramMain(0);
+  SDLhandler::instance().swapMainBuffer();
+  return m_frontMain;
+}

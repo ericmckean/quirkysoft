@@ -93,7 +93,6 @@ void Canvas::drawPixel(int x, int y, int colour)
 {
   if (not m_clip.hit(x, y))
     return;
-  //uint16 * gfx( (y < 192) ? m_backMain:m_backSub );
   uint16 * gfx( vram(y));
   if (y >= 192)
     y -= 192;
@@ -117,4 +116,13 @@ void Canvas::endPaint()
 
   // copy sub screen - buffer size * 2 since is 16 bit
   memcpy(m_frontSub, m_backSub, SCREEN_WIDTH*SCREEN_HEIGHT*2);
+}
+
+unsigned short * Canvas::frontVram(int y)
+{
+  int layer(y<192?1:0);
+  if (layer) {
+    return m_frontSub;
+  }
+  return m_frontMain;
 }

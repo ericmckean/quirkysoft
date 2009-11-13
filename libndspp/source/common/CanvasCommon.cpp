@@ -14,8 +14,9 @@
   You should have received a copy of the GNU General Public License
   along with this program.  If not, see <http://www.gnu.org/licenses/>.
 */
-#include <stdio.h>
+#include <cstring>
 #include "Canvas.h"
+#include "Palette.h"
 #include "libnds.h"
 using namespace nds;
 
@@ -129,4 +130,34 @@ void Canvas::fillRectangle(int x, int y, int w, int h, int colour)
   }
 }
 
-
+void Canvas::copyBlock(int x1, int y1, int w, int h,
+                     int x2, int y2)
+{
+  // copy the data @ x1, y1 to x2, y2
+  // :-(
+  //fillRectangle(x2, y2, w, h, nds::Color(31, 31, 0));
+  for (int i = 0; i < h; ++i) {
+    int sourcey = y1 + i;
+    int targety = y2 + i;
+    if (sourcey < 0) {
+      continue;
+    }
+    if (targety < 0) {
+      continue;
+    }
+    if (targety > SCREEN_HEIGHT * 2) {
+      break;
+    }
+    unsigned short *source(frontVram(sourcey));
+    unsigned short *target(vram(targety));
+    if (sourcey >= SCREEN_HEIGHT) {
+      sourcey -= SCREEN_HEIGHT;
+    }
+    if (targety >= SCREEN_HEIGHT) {
+      targety -= SCREEN_HEIGHT;
+    }
+    source = &source[x1 + sourcey*SCREEN_WIDTH];
+    target = &target[x2 + targety*SCREEN_WIDTH];
+    memcpy(target, source, w*2);
+  }
+}
