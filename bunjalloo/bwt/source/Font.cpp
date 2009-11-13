@@ -204,6 +204,14 @@ void Font::textSize(const char * text, int amount, int & width, int & height, co
   width = maxWidth;
 }
 
+static int round_down(int value) {
+  return value >> 8;
+}
+
+static int round_up(int value) {
+  return value << 8;
+}
+
 bool Font::findEnd(
     const std::string &text,
     unsigned int maxSize,
@@ -215,7 +223,7 @@ bool Font::findEnd(
   std::string::const_iterator end(text.end());
   unsigned int size = 0;
   unsigned int character = 0;
-  maxSize <<= 8;
+  maxSize = round_up(maxSize);
 
   for (; it != end and (!maxSize or size < maxSize) and (!maxLastChar or character < maxLastChar); character++)
   {
@@ -234,13 +242,11 @@ bool Font::findEnd(
   return it == end;
 }
 
-static void putPixel(Canvas &canvas, int x, int y, int pixel,
-    int *colors)
+static void putPixel(Canvas &canvas, int x, int y, int color)
 {
-  int color = colors[pixel&3];
-  canvas.drawPixel(x>>8, y, color);
+  //int color = colors[pixel&3];
+  canvas.unsafeDrawPixel(round_down(x), y, color);
 }
-
 
 inline int LC(int fg, int bg) {
   return ((3 * bg ) + fg) / 4;
@@ -267,38 +273,49 @@ inline int M(const Color &fg, const Color &bg)
   int blue = MC(fg.blue(), bg.blue());
   return RGB5(red, green, blue);
 }
+static int colors[4] = { 0 };
 
 void Font::printAt(t_prerenderedGlyph &g, int xPosition, int yPosition, int color, int bgcolor)
 {
   const unsigned char * data = g.image.bitmap;
   xPosition += g.deltaX << 7;
   yPosition = yPosition + base() + g.deltaY;
-  Color fg(color);
-  Color bg(bgcolor);
-  int colors[4] = {
-    bg,
-    L(fg, bg),
-    M(fg, bg),
-    fg
-  };
+  if ( (colors[0] != color) or (colors[3] != bgcolor)) {
+    Color fg(color);
+    Color bg(bgcolor);
+    colors[0] = bg;
+    colors[1] = L(fg, bg);
+    colors[2] = M(fg, bg);
+    colors[3] = fg;
+  }
   Canvas &canvas(Canvas::instance());
-  for (int y = 0; y < g.image.height; ++y)
+  const nds::Rectangle &clip(canvas.clip());
+  int xbounds = g.image.width;
+  if ((xPosition + round_up(g.image.width)) > round_up(clip.right())) {
+    xbounds = clip.right() - round_down(xPosition);
+  }
+  int ybounds = g.image.height;
+  if ((yPosition + ybounds) > clip.bottom()) {
+    ybounds = clip.bottom() - yPosition;
+  }
+  int ystart = 0;
+  if (yPosition < 0) {
+    if ((yPosition + ybounds) < 0) return;
+    ystart = -yPosition;
+    data += ystart * (g.image.width / 4);
+  }
+  for (int y = ystart; y < ybounds; ++y)
   {
     // width is not a multiple of 4 necessarily
     int x = 0;
-    while (x != g.image.width)
+    unsigned char pixelCuartet;
+    while (x != xbounds)
     {
-      unsigned char pixelCuartet = *data++;
-      putPixel(canvas, xPosition + (x<<8), yPosition + y, pixelCuartet>>6, colors);
-      x++;
-      if (x == g.image.width) break;
-      putPixel(canvas, xPosition + (x<<8), yPosition + y, pixelCuartet>>4, colors);
-      x++;
-      if (x == g.image.width) break;
-      putPixel(canvas, xPosition + (x<<8), yPosition + y, pixelCuartet>>2, colors);
-      x++;
-      if (x == g.image.width) break;
-      putPixel(canvas, xPosition + (x<<8), yPosition + y, pixelCuartet>>0, colors);
+      if ((x&3) == 0)
+        pixelCuartet = *data++;
+      int pixel = pixelCuartet >> (6 - (2*(x&3)));
+      int color = colors[pixel&3];
+      putPixel(canvas, xPosition + round_up(x), yPosition + y, color);
       x++;
     }
   }
@@ -313,7 +330,7 @@ std::string Font::shorterWordFromLong(
   // This is a very long word, split it up
   std::string shorterWord;
   *size = 0;
-  width <<= 8;
+  width = round_up(width);
   while (*it != end_it)
   {
     // store the start of the unicode code point
@@ -342,7 +359,7 @@ int Font::doSingleChar(unsigned int value, int cursorx, int cursory, int right, 
   if (value == 0xfffd)
     value = '?';
   t_prerenderedGlyph *g(glyph(value));
-  if (((cursorx + g->advanceX)>>8) > (right>>8)) {
+  if (round_down(cursorx + g->advanceX) > round_down(right)) {
     return -2;
   }
   printAt(*g, cursorx, cursory, color, bgcolor);
