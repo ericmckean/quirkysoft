@@ -16,6 +16,7 @@
 */
 #include <stdio.h>
 #include "Canvas.h"
+#include "libnds.h"
 using namespace nds;
 
 void Canvas::setClip(const Rectangle & clip)
@@ -50,6 +51,19 @@ void Canvas::verticalLine(int x, int y, int length, int colour)
   {
     drawPixel(x, y+i, colour);
   }
+}
+
+void Canvas::unsafeDrawPixel(int x, int y, int color)
+{
+  unsigned short *gfx(vram(y));
+  if (y >= 192)
+    y -= 192;
+  unsigned short *dest = &gfx[x+y*SCREEN_WIDTH];
+  *dest = color
+#ifdef ARM9
+      | (1<<15)
+#endif
+      ;
 }
 
 void Canvas::horizontalLine(int x, int y, int length, int colour)

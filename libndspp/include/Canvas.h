@@ -37,6 +37,8 @@ namespace nds   // tolua_export
        */
       void drawPixel(int x, int y, int color);
 
+      void unsafeDrawPixel(int x, int y, int color);
+
       /** Fill a rectangle at the given position with the given dimensions.
        * @param x the x position.
        * @param y the y position. 0 is the tpo of the screen, 383 is the bottom
