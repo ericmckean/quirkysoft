@@ -32,7 +32,8 @@ def configure(conf):
     conf.check_tool('objcopy')
     conf.check_tool('google_profiler')
     conf.check_tool('gprof')
-    conf.check_tool('gcov')
+    if Options.options.with_gcov:
+        conf.check_tool('gcov')
     conf.env['CXXFLAGS'] += '-g -O0'.split()
     conf.env['OBJCOPYFLAGS'] = ' -I binary -O elf32-i386 -B i386 '.split()
     conf.define('sprintf_platform', 'sprintf', quote=False)
