@@ -44,13 +44,11 @@ TextArea::TextArea(Font * font) :
 {
   setFont(font);
   setDefaultColor();
-  m_document.clear();
   m_preferredHeight = m_font->height();
-  m_preferredWidth = Canvas::instance().width();
+  m_preferredWidth = SCREEN_WIDTH;
   m_preferredWidthFixed = m_preferredWidth << 8;
-  m_bounds.w = Canvas::instance().width();
+  m_bounds.w = SCREEN_WIDTH;
 }
-
 
 void TextArea::setFont(Font * font)
 {
