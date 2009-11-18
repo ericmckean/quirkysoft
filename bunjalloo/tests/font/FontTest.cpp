@@ -140,3 +140,9 @@ TEST_F(FontTest, test_valueToIndex) {
   TestCodePointToIndex(-1, 264);
   TestCodePointToIndex(-1, 64259);
 }
+
+TEST_F(FontTest, nonvalid) {
+  t_prerenderedGlyph *space = m_font->glyph(' ');
+  t_prerenderedGlyph *result = m_font->glyph(1);
+  EXPECT_TRUE(space == result);
+}
