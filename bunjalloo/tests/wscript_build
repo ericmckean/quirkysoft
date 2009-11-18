@@ -16,6 +16,7 @@ element
 font
 parameters
 parser
+richtextarea
 searcher
 stylus
 textfiddling
@@ -25,7 +26,11 @@ zipfile
 '''.split()
 
 # special flags required for some tests
-has_uselib_locals = { 'font': 'vera bunjalloo'}
+veralibs = 'vera bunjalloo'
+has_uselib_locals = {
+    'font': veralibs,
+    'richtextarea': veralibs
+}
 
 api_tests = '''
 gui-test
