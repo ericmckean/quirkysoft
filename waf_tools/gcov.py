@@ -14,6 +14,7 @@ Generate the coverage files:
     $ genhtml coverage.info
 """
 import Options
+import Task
 
 def set_options(opt):
     opt.add_option(
