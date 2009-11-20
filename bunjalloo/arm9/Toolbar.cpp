@@ -202,10 +202,9 @@ int Toolbar::touchedIndex(int x, int y) const
 
   nds::Sprite * first(m_sprites.front());
   nds::Sprite * last(m_sprites.back());
-  nds::Rectangle touchZone = { first->x(), first->y()+SCREEN_HEIGHT,
+  nds::Rectangle touchZone(first->x(), first->y()+SCREEN_HEIGHT,
     last->x() - first->x() + first->width(),
-    last->y() - first->y() + first->height()
-    };
+    last->y() - first->y() + first->height());
   if (touchZone.hit(x, y))
   {
     int index = 0;
@@ -214,7 +213,7 @@ int Toolbar::touchedIndex(int x, int y) const
         ++it, ++index)
     {
       nds::Sprite * sprite(*it);
-      nds::Rectangle rect = { sprite->x(), sprite->y()+SCREEN_HEIGHT, sprite->width(), sprite->height() };
+      nds::Rectangle rect(sprite->x(), sprite->y()+SCREEN_HEIGHT, sprite->width(), sprite->height());
       if (sprite->enabled() and rect.hit(x, y))
       {
         return index;

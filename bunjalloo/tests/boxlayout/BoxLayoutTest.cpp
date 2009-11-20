@@ -74,7 +74,7 @@ TEST_F(BoxLayoutTest, Simple)
   MockComponent *comp2 = new MockComponent;
 
   using nds::Rectangle;
-  Rectangle r1 = { 0, 0, 250, 14 };
+  Rectangle r1(0, 0, 250, 14);
   comp1->setSize(r1.w, r1.h);
   comp2->setSize(r1.w, r1.h);
 
@@ -107,7 +107,7 @@ TEST_F(BoxLayoutTest, Packed)
   MockComponent *comp2 = new MockComponent;
 
   using nds::Rectangle;
-  Rectangle r1 = { 0, 0, 60, 14 };
+  Rectangle r1(0, 0, 60, 14);
   comp1->setSize(r1.w, r1.h);
   comp2->setSize(r1.w, r1.h);
 
@@ -143,8 +143,8 @@ TEST_F(BoxLayoutTest, Packed2)
   MockComponent *comp3 = new MockComponent;
 
   using nds::Rectangle;
-  Rectangle r1 = { 0, 0, 60, 14 };
-  Rectangle r2 = { 0, 0, 60, 40 };
+  Rectangle r1(0, 0, 60, 14);
+  Rectangle r2(0, 0, 60, 40);
   comp1->setSize(r1.w, r1.h);
   comp2->setSize(r2.w, r2.h);
   comp3->setSize(r1.w, r1.h);
@@ -194,9 +194,9 @@ TEST_F(BoxLayoutTest, Packed3)
   MockComponent *comp4 = new MockComponent;
 
   using nds::Rectangle;
-  Rectangle r1 = { 0, 0, 60, 14 };
-  Rectangle r2 = { 0, 0, 60, 40 };
-  Rectangle larger = { 0, 0, 230, 20 };
+  Rectangle r1(0, 0, 60, 14);
+  Rectangle r2(0, 0, 60, 40);
+  Rectangle larger(0, 0, 230, 20);
   comp1->setSize(r1.w, r1.h);
   comp2->setSize(r2.w, r2.h);
   comp3->setSize(r1.w, r1.h);
@@ -247,8 +247,8 @@ TEST_F(BoxLayoutTest, Resize)
   MockComponent *comp2 = new MockComponent;
 
   using nds::Rectangle;
-  Rectangle r1 = { 0, 0, 250, 14 };
-  Rectangle small = { 0, 0, 0, 0 };
+  Rectangle r1(0, 0, 250, 14);
+  Rectangle small;
   comp1->setSize(r1.w, r1.h);
   comp2->setSize(small.w, small.h);
 
@@ -297,7 +297,7 @@ TEST_F(BoxLayoutTest, SetLocation)
   MockComponent *comp2 = new MockComponent;
 
   using nds::Rectangle;
-  Rectangle r1 = { 0, 0, 250, 14 };
+  Rectangle r1(0, 0, 250, 14 );
   comp1->setSize(r1.w, r1.h);
   comp2->setSize(r1.w, r1.h);
 
@@ -338,7 +338,7 @@ TEST_F(BoxLayoutTest, NastySize)
   MockComponent *comp2 = new MockComponent;
 
   using nds::Rectangle;
-  Rectangle r1 = { 0, 0, 230, 14 };
+  Rectangle r1(0, 0, 230, 14 );
   comp1->setSize(r1.w, r1.h);
   comp2->setSize(r1.w, r1.h);
 
@@ -397,8 +397,8 @@ TEST_F(BoxLayoutTest, ResizeImages)
   MockComponent *c5 = new MockComponent;
 
   using nds::Rectangle;
-  Rectangle r1 = { 0, 0, 249, 13 };
-  Rectangle image = { 0, 0, 0, 0 };
+  Rectangle r1(0, 0, 249, 13 );
+  Rectangle image;
   c1->setSize(r1.w, r1.h);
   c1->setPreferredSize(300, 26);
   c2->setSize(image.w, image.h);
@@ -416,10 +416,10 @@ TEST_F(BoxLayoutTest, ResizeImages)
 
   m_layout->setSize(249, 26);
   {
-    Rectangle ex1 = {0, 0, m_layout->width(), 26};
-    Rectangle ex2 = {ex1.right(), 0, 0, 0};
-    Rectangle ex3 = {0, 26, m_layout->width(), 52};
-    Rectangle ex4 = {ex3.right(), 26, 0, 0};
+    Rectangle ex1(0, 0, m_layout->width(), 26);
+    Rectangle ex2(ex1.right(), 0, 0, 0);
+    Rectangle ex3(0, 26, m_layout->width(), 52);
+    Rectangle ex4(ex3.right(), 26, 0, 0);
     Rectangle ex5 = ex1; ex5.y = ex3.bottom();
 
     EXPECT_TRUE(ex1 == c1->bounds());
@@ -449,10 +449,10 @@ TEST_F(BoxLayoutTest, ResizeImages)
   m_layout->setLocation(0, 192);
   m_layout->doLayout();
   {
-    Rectangle ex1 = {0, m_layout->y(), m_layout->width(), 26};
-    Rectangle ex2 = {0, ex1.bottom(), 249, 94};
-    Rectangle ex3 = {0, ex2.bottom(), m_layout->width(), 52};
-    Rectangle ex4 = {ex3.right(), ex2.bottom(), 0, 0};
+    Rectangle ex1(0, m_layout->y(), m_layout->width(), 26);
+    Rectangle ex2(0, ex1.bottom(), 249, 94);
+    Rectangle ex3(0, ex2.bottom(), m_layout->width(), 52);
+    Rectangle ex4(ex3.right(), ex2.bottom(), 0, 0);
     Rectangle ex5 = ex1; ex5.y = ex3.bottom();
 
     EXPECT_TRUE(ex1 == c1->bounds());
@@ -484,10 +484,10 @@ TEST_F(BoxLayoutTest, ResizeImages)
   c4->setSize(249, 232);
   m_layout->doLayout();
   {
-    Rectangle ex1 = {0, m_layout->y(), m_layout->width(), 26};
-    Rectangle ex2 = {0, ex1.bottom(), 249, 94};
-    Rectangle ex3 = {0, ex2.bottom(), m_layout->width(), 52};
-    Rectangle ex4 = {0, ex3.bottom(), 249, 232};
+    Rectangle ex1(0, m_layout->y(), m_layout->width(), 26);
+    Rectangle ex2(0, ex1.bottom(), 249, 94);
+    Rectangle ex3(0, ex2.bottom(), m_layout->width(), 52);
+    Rectangle ex4(0, ex3.bottom(), 249, 232);
     Rectangle ex5 = ex1; ex5.y = ex4.bottom();
 
     EXPECT_TRUE(ex1 == c1->bounds());
@@ -528,8 +528,8 @@ TEST_F(BoxLayoutTest, Newline)
   MockComponent *c4 = new MockComponent;
 
   using nds::Rectangle;
-  Rectangle r1 = { 0, 0, 40, 14 };
-  Rectangle r2 = { 0, 0, 0, 0 };
+  Rectangle r1(0, 0, 40, 14 );
+  Rectangle r2;
   c1->setSize(r1.w, r1.h);
   c2->setSize(r2.w, r2.h);
   c3->setSize(r1.w, r1.h);
