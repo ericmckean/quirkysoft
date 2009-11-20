@@ -35,7 +35,7 @@ TEST_F(RichTextAreaTest, check_lineAt)
   m_text->appendText("line 3\n");
   m_text->appendText("line 4\n");
   int result = m_text->lineAt(m_font->height());
-  EXPECT_EQ(0, result);
+  EXPECT_EQ(1, result);
 
   result = m_text->lineAt(m_font->height() + 1);
   EXPECT_EQ(1, result);
@@ -46,8 +46,11 @@ TEST_F(RichTextAreaTest, check_lineAt)
   result = m_text->lineAt(m_font->height() + 2);
   EXPECT_EQ(1, result);
 
-  result = m_text->lineAt((m_font->height() * 2));
+  result = m_text->lineAt((m_font->height() * 2) - 1);
   EXPECT_EQ(1, result);
+
+  result = m_text->lineAt((m_font->height() * 2));
+  EXPECT_EQ(2, result);
 
   result = m_text->lineAt((m_font->height() * 2) + 1);
   EXPECT_EQ(2, result);

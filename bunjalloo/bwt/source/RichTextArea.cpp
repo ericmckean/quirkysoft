@@ -387,24 +387,12 @@ void RichTextArea::checkSkippedLines(int skipLines)
     m_nextEventType = Link::STATE_PLAIN;
   }
 }
-
-int RichTextArea::lineAt(int y, int &leftover) const
-{
-  int dy = (y - m_bounds.y);
-  int lineNum = 0;
-  for (; dy > font().height();)
-  {
-    dy -= font().height();
-    lineNum++;
-  }
-  leftover = dy;
-  return lineNum;
-}
-
 int RichTextArea::lineAt(int y) const
 {
-  int tmp;
-  return lineAt(y, tmp);
+  int fh = font().height();
+  int bnds = y - m_bounds.y;
+  int lineNum = bnds / fh;
+  return lineNum;
 }
 
 int RichTextArea::pointToCharIndex(int x, int y) const
