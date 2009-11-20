@@ -249,6 +249,7 @@ void Keyboard::applyResult()
   tick();
   m_topLevel->setVisible();
   m_topLevel->screenUp();
+  m_topLevel->forceRedraw();
   this->setVisible(false);
   if (m_selectedStatus == OK)
   {
@@ -270,6 +271,10 @@ void Keyboard::paint(const nds::Rectangle & clip)
     nds::Canvas::instance().setClip(clip);
     nds::Canvas::instance().fillRectangle(m_richTextArea->bounds().left(), m_richTextArea->bounds().top(), clip.right(), clip.bottom(),
         nds::Color(31,31,31));
+    // FIXME: this is a hack to get the edit area to repaint
+    // really we should only redraw what is necessary each time
+    // eg. clear once at the start only.
+    m_scrollPane->forceRedraw();
     std::vector<Component*>::iterator it(m_children.begin());
     for (; it != m_children.end(); ++it)
     {
@@ -282,12 +287,11 @@ void Keyboard::paint(const nds::Rectangle & clip)
 
 void Keyboard::editText(TextEntryI * entry)
 {
-  m_topLevel->setVisible(false);
   m_topLevel->screenDown();
+  m_topLevel->forceRedraw();
   this->setVisible();
   m_initialText.clear();
   entry->text(m_initialText);
-  //m_textArea->clearText();
   m_textArea->setEchoText(entry->echoText());
   m_textArea->setText(m_initialText);
   m_entry = entry;

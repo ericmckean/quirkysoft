@@ -306,7 +306,6 @@ void View::setToolbar(Toolbar * toolbar)
 
 void View::endBookmark()
 {
-  m_state = BROWSE;
   m_document.clearConfigHistory();
   m_document.setHistoryEnabled(false);
   m_controller.clearReferer();
@@ -587,7 +586,7 @@ void View::browse()
   Stylus * stylus(Stylus::instance());
   if (stylus->touchType() != Stylus::NOTHING)
   {
-    m_dirty = m_keyboard->dirty();
+    m_dirty = m_keyboard->visible() and m_keyboard->dirty();
     if (not m_dirty) {
       m_dirty = m_scrollPane->dirty();
       if (m_dirty)
@@ -724,6 +723,7 @@ void View::tick()
   m_dirty |= m_scrollPane->dirty();
   m_dirty |= m_progress->visible() and m_progress->dirty();
   m_toolbar->tick();
+  m_toolbar->updateIcons();
 
   if (m_dirty) {
     const static nds::Rectangle clip(0, 0, nds::Canvas::instance().width(), nds::Canvas::instance().height());
@@ -734,7 +734,7 @@ void View::tick()
     m_progress->paint(m_progress->bounds());
     nds::Canvas::instance().endPaint();
     m_dirty = false;
-    m_toolbar->updateIcons();
+    m_scrollPane->setVisible(not m_keyboard->visible());
   }
 
   if (m_state != BROWSE and not m_keyboard->visible())
@@ -754,7 +754,6 @@ void View::tick()
   if (( m_state == SAVE_CURRENT_FILE or m_state == SAVE_DOWNLOADING )
     and not m_keyboard->visible()) {
     m_toolbar->setVisible(true);
-    m_scrollPane->forceRedraw();
     doSaveAs();
   }
 
