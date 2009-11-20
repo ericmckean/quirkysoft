@@ -308,8 +308,7 @@ void ScrollPane::showScrollBar(const nds::Rectangle & clip)
 void ScrollPane::paint(const nds::Rectangle & clip)
 {
   nds::Canvas::instance().setClip(clip);
-  if (not dirty())
-  {
+  if (not dirty()) {
     return;
   }
   m_dirty = false;
@@ -318,7 +317,7 @@ void ScrollPane::paint(const nds::Rectangle & clip)
   }
   nds::Rectangle realClip = clip;
   if (m_topLevel) {
-    if ( m_distanceScrolled == 0) {
+    if (m_distanceScrolled == 0) {
       nds::Canvas::instance().fillRectangle(clip.x, clip.y, clip.w, clip.h, m_backgroundColour);
     } else {
       // scrolled by m_distanceScrolled
@@ -437,7 +436,6 @@ bool ScrollPane::stylusDownFirst(const Stylus * stylus)
     return false;
   }
 
-  m_dirty = true;
   if (m_scrollBar->stylusDownFirst(stylus))
   {
     return true;
@@ -465,7 +463,6 @@ bool ScrollPane::stylusDownRepeat(const Stylus * stylus)
   {
     return false;
   }
-  m_dirty = true;
   if (m_scrollBar->stylusDownRepeat(stylus))
   {
     return true;
@@ -481,7 +478,7 @@ bool ScrollPane::stylusDown(const Stylus * stylus)
   {
     return false;
   }
-  m_dirty = true;
+
   if (m_scrollBar->stylusDown(stylus))
   {
     return true;
@@ -626,6 +623,7 @@ void ScrollPane::removePopup(Component * popup)
 void ScrollPane::forceRedraw()
 {
   m_dirty = true;
+  m_distanceScrolled = 0;
 }
 
 int ScrollPane::visibleHeight() const
