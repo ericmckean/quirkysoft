@@ -122,7 +122,6 @@ class RichTextArea: public TextArea
     int pointToCharIndex(int x, int y) const;
 
     // get the document line at the clicked y position
-    int lineAt(int y, int & leftover) const;
     int lineAt(int y) const;
 
     Link * linkAt(int index);
