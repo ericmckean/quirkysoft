@@ -27,6 +27,8 @@
 using nds::Canvas;
 using nds::Color;
 
+static const char PASSWORD_MASK[] = "●";
+
 EditableTextArea::EditableTextArea(Font * font) :
   TextArea(font),
   m_caretLine(-1),
@@ -39,16 +41,24 @@ EditableTextArea::EditableTextArea(Font * font) :
 {
 }
 
+static std::string createPasswordMask(size_t length) {
+  std::string tmp;
+  for (int i = 0; i < length; ++i) {
+    tmp += PASSWORD_MASK;
+  }
+  return tmp;
+}
+
 void EditableTextArea::printu(const std::string & unicodeString)
 {
-  if (m_echoText)
+  if (echoText())
   {
     TextArea::printu(unicodeString);
   }
   else
   {
-    std::string tmp(utf8::distance(unicodeString.begin(), unicodeString.end()), '*');
-    TextArea::printu(tmp);
+    TextArea::printu(createPasswordMask(
+          utf8::distance(unicodeString.begin(), unicodeString.end())));
   }
 }
 
@@ -70,12 +80,9 @@ void EditableTextArea::paint(const nds::Rectangle & clip)
       if (m_caretPixelX == -1)
       {
         m_caretPixelX = 0;
-        std::string tmp;
-        if (not echoText())
-        {
-          std::string(characters(m_caretLine), '*').swap(tmp);
-        }
-        const std::string &line(echoText()?m_document[m_caretLine]:tmp);
+        const std::string & line(
+            echoText() ? m_document[m_caretLine] :
+            createPasswordMask(characters(m_caretLine)));
         unsigned int pix;
         font().findEnd(line, 0, m_caretChar, &pix, 0);
         m_caretPixelX = pix >> 8;
@@ -301,13 +308,9 @@ void EditableTextArea::setCaret(int x, int y)
     }
     m_caretChar = 0;
     m_caretPixelX = -1;
-    std::string tmp;
-    size_t lineLength(characters(m_caretLine));
-    if (not echoText())
-    {
-      std::string(lineLength, '*').swap(tmp);
-    }
-    const std::string & line(echoText()?m_document[m_caretLine]:tmp);
+    const std::string & line(
+        echoText() ? m_document[m_caretLine] :
+        createPasswordMask(characters(m_caretLine)));
     unsigned int s, c;
     font().findEnd(line, x, 0, &s, &c);
     m_caretPixelX = s >> 8;
