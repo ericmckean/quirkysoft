@@ -27,6 +27,10 @@ namespace nds
     int w; //!< width
     int h; //!< height
 
+    Rectangle();
+
+    Rectangle(int x, int y, int w, int h);
+
     /** Hit test.
      * @param x x position to check
      * @param y y position to check

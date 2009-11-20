@@ -17,6 +17,20 @@
 #include "Rectangle.h"
 #include <algorithm>
 
+nds::Rectangle::Rectangle()
+: x(0),
+  y(0),
+  w(0),
+  h(0)
+{ }
+
+nds::Rectangle::Rectangle(int x, int y, int w, int h)
+: x(x),
+  y(y),
+  w(w),
+  h(h)
+{ }
+
 bool nds::Rectangle::hit(int testx, int testy) const
 {
   return ( (testx >= x and testx < (x + w))
@@ -47,7 +61,7 @@ nds::Rectangle nds::Rectangle::intersect(const nds::Rectangle & r2) const
       or r1.top() > r2.bottom() 
       or r1.bottom() < r2.top()
       );
-  Rectangle rect = {0, 0, 0, 0};
+  Rectangle rect;
   if (not haveIntersect)
   {
     return rect;

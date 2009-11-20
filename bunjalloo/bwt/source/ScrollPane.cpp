@@ -338,13 +338,13 @@ void ScrollPane::paint(const nds::Rectangle & clip)
         // 0 -> -m_distanceScrolled
         // height - m_distanceScrolled is the new y pos
         nds::Canvas::instance().fillRectangle(clip.x, clip.h - m_distanceScrolled, clip.w, m_distanceScrolled, m_backgroundColour);
-        nds::Rectangle r = {clip.x, clip.h - m_distanceScrolled, clip.w, m_distanceScrolled};
+        nds::Rectangle r(clip.x, clip.h - m_distanceScrolled, clip.w, m_distanceScrolled);
         nds::Canvas::instance().setClip(r);
         realClip = r;
       }
       else {
         nds::Canvas::instance().fillRectangle(clip.x, clip.y, clip.w, -m_distanceScrolled, m_backgroundColour);
-        nds::Rectangle r = {clip.x, clip.y, clip.w, -m_distanceScrolled};
+        nds::Rectangle r(clip.x, clip.y, clip.w, -m_distanceScrolled);
         nds::Canvas::instance().setClip(r);
         realClip = r;
       }

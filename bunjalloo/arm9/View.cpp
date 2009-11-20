@@ -726,7 +726,7 @@ void View::tick()
   m_toolbar->tick();
 
   if (m_dirty) {
-    const static nds::Rectangle clip = {0, 0, nds::Canvas::instance().width(), nds::Canvas::instance().height()};
+    const static nds::Rectangle clip(0, 0, nds::Canvas::instance().width(), nds::Canvas::instance().height());
     m_scrollPane->paint(clip);
     m_keyboard->paint(clip);
     m_linkHandler->paint(clip);

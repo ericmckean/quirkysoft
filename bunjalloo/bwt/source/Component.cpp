@@ -27,12 +27,7 @@ Component::Component() :
   m_preferredHeight(NO_PREFERRED_SIZE),
   m_visible(true),
   m_dirty(true)
-{
-  m_bounds.x = 0;
-  m_bounds.y = 0;
-  m_bounds.w = 0;
-  m_bounds.h = 0;
-}
+{ }
 
 Component::~Component()
 {
@@ -69,7 +64,7 @@ nds::Rectangle Component::bounds() const
 
 nds::Rectangle Component::preferredSize() const
 {
-  nds::Rectangle r = {0, 0, m_preferredWidth, m_preferredHeight};
+  nds::Rectangle r(0, 0, m_preferredWidth, m_preferredHeight);
   if (m_preferredWidth == NO_PREFERRED_SIZE)
   {
     r.w = m_bounds.w;

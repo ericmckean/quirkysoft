@@ -89,7 +89,7 @@ void ProgressBar::paint(const nds::Rectangle & clip)
   {
      range = (clip.w * m_value) / (m_max-m_min);
   }
-  nds::Rectangle progress = {clip.x+1,clip.y+1, range, clip.h};
+  nds::Rectangle progress(clip.x+1,clip.y+1, range, clip.h);
   if (m_showString)
   {
     TextContainer::paint(progress);
