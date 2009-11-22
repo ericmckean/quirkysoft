@@ -88,6 +88,7 @@ class TestWaf:
             sys.stderr = mystderr
             import Scripting
             import Utils
+            import Constants
             Utils.get_term_cols = lambda: 80
             wafdir = os.environ['WAFDIR']
             tools = os.path.join(wafdir, 'Tools')
@@ -95,7 +96,7 @@ class TestWaf:
             if args:
                 sys.argv += args
             sys.path = [wafdir, tools] + sys.path
-            Scripting.prepare(tools, cwd, '1.5.9', wafdir)
+            Scripting.prepare(tools, cwd, Constants.WAFVERSION, wafdir)
         except SystemExit:
             raise WafTestException(mystderr.getvalue())
         finally:
