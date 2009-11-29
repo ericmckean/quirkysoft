@@ -43,3 +43,15 @@ TEST(DateUtils, format_time)
   std::string result = DateUtils::formatTime(tzero);
   EXPECT_EQ("Thu, 01 Jan 1970 00:00:00 GMT", result);
 }
+
+TEST(DateUtils, parse_time)
+{
+  time_t result = DateUtils::parseTime("100");
+  EXPECT_EQ(100, result);
+
+  result = DateUtils::parseTime("-1");
+  EXPECT_EQ(0, result);
+
+  result = DateUtils::parseTime("not a number");
+  EXPECT_EQ(0, result);
+}

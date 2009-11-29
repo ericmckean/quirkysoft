@@ -8,6 +8,7 @@ class DateUtils
 {
   public:
     static time_t parseDate(const char *date);
+    static time_t parseTime(const char *time);
     static std::string formatTime(time_t t);
 };
 #endif
