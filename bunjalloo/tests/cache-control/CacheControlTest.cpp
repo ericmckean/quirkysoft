@@ -131,3 +131,26 @@ TEST(CacheControl, test_age_changes_cache)
   cc.setResponseTime(now - 10);
   EXPECT_FALSE(cc.shouldCache(now));
 }
+
+TEST(CacheControl, test_last_modified)
+{
+  CacheControl cc;
+  cc.reset();
+  // date: Sat, 21 Nov 2009 18:19:58 GMT
+  // last-modified: Sat, 10 Mar 2007 18:01:49 GMT
+  time_t date = DateUtils::parseDate("Sat, 21 Nov 2009 18:19:58 GMT");
+  time_t last = DateUtils::parseDate("Sat, 10 Mar 2007 18:01:49 GMT");
+  time_t now = date + 30;
+
+  cc.setDate(date);
+  cc.setRequestTime(date + 20);
+  cc.setResponseTime(date + 30);
+  EXPECT_TRUE(cc.shouldCache(now));
+
+  // should not cache some minutes from now
+  EXPECT_FALSE(cc.shouldCache(now + 240));
+
+  // but if we set the last-modified header, it should cache it
+  cc.setLastModified(last);
+  EXPECT_TRUE(cc.shouldCache(now + 240));
+}
