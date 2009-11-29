@@ -90,12 +90,21 @@ bool CacheControl::shouldCache(time_t now) const
       freshness_lifetime = m_maxAge;
     }
     else {
+      if (m_expires == -1) {
+        // no expires, so no way to know how long to keep for
+        goto default_cache;
+      }
       freshness_lifetime = m_expires - m_date;
     }
     return freshness_lifetime > current_age;
-  } else {
-    // server didn't send the date header.
-    // Cache for half a minute.
-    return (m_responseTime + m_maxAge + 30) > now;
   }
+  // else server didn't send the date header.
+
+default_cache:
+  // Cache for 2 minutes.
+  return (m_responseTime + m_maxAge + 120) > now;
+}
+
+void CacheControl::setLastModified(time_t lastmodified)
+{
 }

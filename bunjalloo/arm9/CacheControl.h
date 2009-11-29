@@ -51,6 +51,12 @@ class CacheControl
     void setResponseTime(time_t response);
 
     /**
+     * Set the last-modified header
+     * @param lastmodified the last modified date
+     */
+    void setLastModified(time_t lastmodified);
+
+    /**
      * Find out if we should be caching the page based on what we know.
      * @param now the current time (for dependency injection reasons...)
      * @returns true if we should cache the page
@@ -62,6 +68,7 @@ class CacheControl
     int m_date;
     int m_expires;
     int m_maxAge;
+    int m_lastModified;
     time_t m_requestTime;
     time_t m_responseTime;
 };
