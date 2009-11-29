@@ -41,3 +41,11 @@ std::string DateUtils::formatTime(time_t t)
   strftime(buffer, sizeof(buffer), FORMAT, val);
   return buffer;
 }
+
+time_t DateUtils::parseTime(const char *time)
+{
+  time_t result = strtol(time, 0, 0);
+  if (result < 0)
+    return 0;
+  return result;
+}

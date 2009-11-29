@@ -197,7 +197,7 @@ void HeaderParser::handleHeader(const std::string & field, const std::string & v
   }
   else if (field == "age")
   {
-    m_cacheControl->setAge(DateUtils::parseDate(value.c_str()));
+    m_cacheControl->setAge(DateUtils::parseTime(value.c_str()));
   }
   else if (field == "set-cookie")
   {
