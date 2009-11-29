@@ -6,7 +6,6 @@
 
 CacheControl::CacheControl()
 : m_noCache(false),
-  m_noStore(false),
   m_ageValue(-1),
   m_date(-1),
   m_expires(-1),
@@ -26,7 +25,6 @@ void CacheControl::reset()
   m_requestTime = 0;
   m_responseTime = 0;
   m_noCache = false;
-  m_noStore = false;
 }
 
 void CacheControl::setAge(time_t age)
@@ -50,8 +48,7 @@ void CacheControl::setCacheControl(const std::string &value)
     }
   }
 
-  m_noCache = paramSet.hasParameter("no-cache");
-  m_noStore = paramSet.hasParameter("no-store");
+  m_noCache = paramSet.hasParameter("no-cache") or paramSet.hasParameter("no-store");
 }
 
 void CacheControl::setDate(time_t date)
@@ -77,9 +74,6 @@ void CacheControl::setResponseTime(time_t response)
 bool CacheControl::shouldCache(time_t now) const
 {
   if (m_noCache) {
-    return false;
-  }
-  if (m_noStore) {
     return false;
   }
 
