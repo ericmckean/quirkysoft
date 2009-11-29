@@ -14,6 +14,7 @@
   You should have received a copy of the GNU General Public License
   along with this program.  If not, see <http://www.gnu.org/licenses/>.
 */
+#include "DateUtils.h"
 #define private public
 #include "CacheControl.h"
 #undef private
@@ -102,4 +103,31 @@ TEST(CacheControl, test_expires)
   cc.setExpires(expire);
   cc.setDate(date);
   EXPECT_TRUE(cc.shouldCache(1246731088));
+}
+
+TEST(CacheControl, test_age_changes_cache)
+{
+  CacheControl cc;
+  cc.reset();
+  // Age: 100
+  // Date: Sat, 21 Nov 2009 18:19:58 GMT
+  time_t now = DateUtils::parseDate("Sat, 21 Nov 2009 18:19:58 GMT");
+  cc.setAge(100);
+  cc.setDate(now - 30);
+  cc.setRequestTime(now - 50);
+  cc.setResponseTime(now - 1);
+  // should cache if the freshness lifetime is greater than the
+  // current age. Freshness lifetime is the "age" from setAge.
+  // current age is: 
+  // int current_age = max(0L, m_responseTime - m_date, m_ageValue) + m_requestTime + now;
+  EXPECT_TRUE(cc.shouldCache(now));
+
+  cc.reset();
+
+  cc.setAge(100);
+  cc.setDate(now);
+  cc.setExpires(now + 100);
+  cc.setRequestTime(now - 50);
+  cc.setResponseTime(now - 10);
+  EXPECT_FALSE(cc.shouldCache(now));
 }
