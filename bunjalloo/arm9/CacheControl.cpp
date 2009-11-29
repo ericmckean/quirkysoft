@@ -10,6 +10,7 @@ CacheControl::CacheControl()
   m_date(-1),
   m_expires(-1),
   m_maxAge(-1),
+  m_lastModified(-1),
   m_requestTime(0),
   m_responseTime(0)
 {}
@@ -22,6 +23,7 @@ void CacheControl::reset()
   m_date = -1;
   m_expires = -1;
   m_maxAge = -1;
+  m_lastModified = -1;
   m_requestTime = 0;
   m_responseTime = 0;
   m_noCache = false;
@@ -86,8 +88,12 @@ bool CacheControl::shouldCache(time_t now) const
     int resident_time = now - m_responseTime;
     int current_age = corrected_initial_age + resident_time;
     int freshness_lifetime = -1;
-    if (m_maxAge != -1) {
-      freshness_lifetime = m_maxAge;
+    int maxAge = m_maxAge;
+    if (maxAge == -1 and m_lastModified != -1) {
+      maxAge = std::max(-1L, (now - m_lastModified) / 8);
+    }
+    if (maxAge != -1) {
+      freshness_lifetime = maxAge;
     }
     else {
       if (m_expires == -1) {
@@ -107,4 +113,5 @@ default_cache:
 
 void CacheControl::setLastModified(time_t lastmodified)
 {
+  m_lastModified = lastmodified;
 }
