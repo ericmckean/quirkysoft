@@ -58,7 +58,6 @@ class CacheControl
     bool shouldCache(time_t now) const;
   private:
     bool m_noCache;
-    bool m_noStore;
     int m_ageValue;
     int m_date;
     int m_expires;
