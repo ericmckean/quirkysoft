@@ -15,7 +15,7 @@
   along with this program.  If not, see <http://www.gnu.org/licenses/>.
 */
 #include <assert.h>
-#include <utf8.h>
+#include "utf8.h"
 #include "libnds.h"
 #include "ndspp.h"
 #include "File.h"
@@ -116,13 +116,15 @@ void TextArea::appendText(const std::string &unicodeString)
     }
     m_preferredWidthFixed += size;
     m_preferredWidth = (m_preferredWidthFixed >> 8);
-    if (not m_parseNewline and word[word.length()-1] == NEWLINE) {
-      word[word.length() - 1] = ' ';
+    size_t last = word.length() - 1;
+    if (not m_parseNewline and word[last] == NEWLINE) {
+      // skip empty new lines
+      word[last] = ' ';
     }
     currentLine().append(word);
     m_appendPosition += size;
     // if the word ended in a NEWLINE, then go onto the next line.
-    if (m_parseNewline and word[word.length()-1] == NEWLINE)
+    if (m_parseNewline and word[last] == NEWLINE)
     {
       m_appendPosition = 0;
       m_document.push_back(std::string());

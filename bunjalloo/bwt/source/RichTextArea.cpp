@@ -316,7 +316,6 @@ void RichTextArea::paint(const nds::Rectangle & clip)
   }
   m_paintPosition = 0;
   m_lineNumber = 0;
-  std::vector<std::string>::const_iterator it(m_document.begin());
   setCursor(m_bounds.x, m_bounds.y);
   if (m_outlined)
   {
@@ -329,9 +328,12 @@ void RichTextArea::paint(const nds::Rectangle & clip)
             WidgetColors::BUTTON_SHADOW);
   }
   // work out what happens when we skip lines.
+  std::vector<std::string>::const_iterator it(m_document.begin());
   if (m_cursory < clip.top()) {
     // cursor is above the top of the clip area
     int diff = (clip.top() - m_cursory) / font().height();
+    if (diff > m_document.size())
+      return;
     if (diff > 0) {
       checkSkippedLines(diff);
       it += diff;
