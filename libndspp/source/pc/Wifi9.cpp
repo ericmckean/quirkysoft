@@ -50,17 +50,7 @@ Wifi9::WifiStatus Wifi9::status() const
 {
   if (m_connected)
   {
-    static WifiStatus s = DISCONNECTED;
-    switch (s)
-    {
-      case ASSOCIATING:
-        s = ASSOCIATED;
-        break;
-      default:
-        s = ASSOCIATING;
-        break;
-    }
-    return s;
+    return ASSOCIATED;
   }
   else
   {
