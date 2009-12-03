@@ -312,6 +312,7 @@ void View::endBookmark()
   if (m_linkHref.empty())
     m_linkHref = m_document.uri();
   m_document.setHistoryEnabled(true);
+  m_state = BROWSE;
 
   setToolbar(m_browseToolbar);
   m_renderer->setUpdater(0);
