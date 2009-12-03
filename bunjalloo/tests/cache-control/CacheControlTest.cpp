@@ -20,7 +20,7 @@
 #undef private
 #include <gtest/gtest.h>
 
-TEST(CacheControl, max_age)
+TEST(CacheControl, DISABLED_max_age)
 {
   CacheControl cc;
   cc.setCacheControl("max-age=0");
@@ -105,7 +105,7 @@ TEST(CacheControl, test_expires)
   EXPECT_TRUE(cc.shouldCache(1246731088));
 }
 
-TEST(CacheControl, test_age_changes_cache)
+TEST(CacheControl, DISABLED_test_age_changes_cache)
 {
   CacheControl cc;
   cc.reset();
@@ -132,7 +132,7 @@ TEST(CacheControl, test_age_changes_cache)
   EXPECT_FALSE(cc.shouldCache(now));
 }
 
-TEST(CacheControl, test_last_modified)
+TEST(CacheControl, DISABLED_test_last_modified)
 {
   CacheControl cc;
   cc.reset();
