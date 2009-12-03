@@ -337,3 +337,11 @@ TEST(UriTest, relativeQueryInternal)
   string expected("http://www.example.com/test.php?c");
   EXPECT_EQ(expected, uri.asString());
 }
+
+TEST(UriTest, relative_item)
+{
+  URI uri("http://www.example.com/");
+  uri = uri.navigateTo("item?id=123");
+  string expected("http://www.example.com/item?id=123");
+  EXPECT_EQ(expected, uri.asString());
+}
