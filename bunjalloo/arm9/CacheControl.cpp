@@ -73,24 +73,41 @@ void CacheControl::setResponseTime(time_t response)
   m_responseTime = response;
 }
 
+int calculateCurrentAge(
+    time_t responseTime,
+    time_t date,
+    time_t ageValue,
+    time_t requestTime)
+{
+  // http://www.w3.org/Protocols/rfc2616/rfc2616-sec13.html#sec13.2
+  time_t apparent_age = std::max(0L, responseTime - date);
+  int corrected_received_age = std::max(apparent_age, ageValue);
+  int response_delay = responseTime - requestTime;
+  int corrected_initial_age = corrected_received_age + response_delay;
+  return corrected_initial_age - responseTime;
+}
+
 bool CacheControl::shouldCache(time_t now) const
 {
   if (m_noCache) {
     return false;
   }
+  /*
+  printf("arg now: %ld\n", now);
+  printf("m_responseTime: %ld\n", m_responseTime);
+  printf("m_date: %d\n", m_date);
+  printf("m_ageValue: %d\n", m_ageValue);
+  printf("m_requestTime: %ld\n", m_requestTime);
+  printf("m_maxAge: %d\n", m_maxAge);
+  printf("m_lastModified: %d\n", m_lastModified);
+  */
 
   if (m_date != -1) {
-    // http://www.w3.org/Protocols/rfc2616/rfc2616-sec13.html#sec13.2
-    int apparent_age = std::max(0L, m_responseTime - m_date);
-    int corrected_received_age = std::max(apparent_age, m_ageValue);
-    int response_delay = m_responseTime - m_requestTime;
-    int corrected_initial_age = corrected_received_age + response_delay;
-    int resident_time = now - m_responseTime;
-    int current_age = corrected_initial_age + resident_time;
+    int current_age = calculateCurrentAge(m_responseTime, m_date, m_ageValue, m_requestTime) + now;
     int freshness_lifetime = -1;
-    int maxAge = m_maxAge;
-    if (maxAge == -1 and m_lastModified != -1) {
-      maxAge = std::max(-1L, (now - m_lastModified) / 8);
+    int maxAge = m_maxAge + now;
+    if (m_maxAge == -1 and m_lastModified != -1) {
+      maxAge = std::max(-1L, now + ((now - m_lastModified) / 8));
     }
     if (maxAge != -1) {
       freshness_lifetime = maxAge;
@@ -102,6 +119,9 @@ bool CacheControl::shouldCache(time_t now) const
       }
       freshness_lifetime = m_expires - m_date;
     }
+    //printf("freshness_lifetime %d vs current_age %d => %s\n",
+    //  freshness_lifetime, current_age,
+    //  freshness_lifetime > current_age ?"YES": "NO");
     return freshness_lifetime > current_age;
   }
   // else server didn't send the date header.
