@@ -577,17 +577,6 @@ bool ViewRender::visit(HtmlElement & element)
   {
     insertNewline();
   }
-  else if (element.isa(HtmlConstants::TEXTAREA_TAG))
-  {
-    renderTextArea(&element);
-  }
-  /*else if (element.isa(HtmlConstants::TITLE_TAG))
-  {
-    if (element.hasChildren())
-    {
-      visit(*element.firstChild());
-    }
-  }*/
   return true;
 }
 void ViewRender::end(HtmlElement & element)
@@ -707,7 +696,7 @@ void ViewRender::begin(HtmlTextAreaElement & element)
 bool ViewRender::visit(HtmlTextAreaElement & element)
 {
   renderTextArea(&element);
-  return true;
+  return false;
 }
 void ViewRender::end(HtmlTextAreaElement & element)
 {

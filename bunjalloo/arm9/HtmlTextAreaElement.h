@@ -30,6 +30,8 @@ class HtmlTextAreaElement:public HtmlElement
     int rows() const;
     int cols() const;
 
+    virtual void appendText(unsigned int value);
+
     DEFINE_ACCEPT();
   protected:
     int m_rows;
