@@ -739,3 +739,33 @@ TEST_F(DocumentTest, lists_on_new_line)
   EXPECT_EQ(2, listItems.size());
 
 }
+
+TEST_F(DocumentTest, textarea)
+{
+  loadHtml("textarea.html");
+  /*
+   * body
+   *   form
+   *     textarea
+   *           foo bar
+   */
+  const HtmlElement * root = m_document->rootNode();
+  EXPECT_TRUE(root != 0);
+  EXPECT_TRUE(root->isa("html"));
+  HtmlElement * body = root->lastChild();
+  EXPECT_TRUE(body != 0);
+  EXPECT_TRUE(body->isa("body"));
+  EXPECT_TRUE(body->hasChildren());
+  ElementList children(body->children());
+  EXPECT_EQ(1, children.size());
+  HtmlElement *form(body->lastChild());
+  EXPECT_TRUE(form->isa("form"));
+  ElementList listItems(form->children());
+  EXPECT_EQ(1, listItems.size());
+  HtmlElement *textarea(form->lastChild());
+  EXPECT_TRUE(textarea->isa("textarea"));
+  HtmlElement *text(textarea->firstChild());
+  EXPECT_TRUE(text->isa("#TEXT"));
+  EXPECT_EQ(std::string("foo bar\nbaz\n"), text->text());
+
+}

@@ -30,11 +30,12 @@ FormTextArea::FormTextArea(HtmlElement * element) :
   setStretchChildren();
   add(text);
   int fontSize(text->font().height());
-  setSize(nds::Canvas::instance().width(), fontSize);
   text->setText(textNode()->text());
   HtmlTextAreaElement * textElement((HtmlTextAreaElement*)m_element);
-  text->setSize(fontSize * textElement->cols(), fontSize * textElement->rows());
-  m_preferredHeight = fontSize * textElement->rows();
+  m_preferredHeight = fontSize * std::max(3, textElement->rows());
+  m_preferredWidth = fontSize * std::max(6, textElement->cols());
+  setSize(m_preferredWidth, m_preferredHeight);
+  text->setSize(m_preferredWidth, m_preferredHeight);
   text->setListener(this);
   text->setParentScroller(this);
   layoutViewer();

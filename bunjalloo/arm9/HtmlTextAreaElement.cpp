@@ -16,7 +16,9 @@
 */
 #include <cstdlib>
 #include "HtmlTextAreaElement.h"
+#include "HtmlConstants.h"
 #include "Visitor.h"
+#include "utf8.h"
 IMPLEMENT_ACCEPT(HtmlTextAreaElement);
 
 static const int MINIMUM_ROWS(4);
@@ -63,4 +65,21 @@ int HtmlTextAreaElement::cols() const
     return MINIMUM_COLS;
   }
   return m_cols;
+}
+
+void HtmlTextAreaElement::appendText(unsigned int value)
+{
+  if (m_children.size())
+  {
+    if (m_children.back()->isa(HtmlConstants::TEXT))
+    {
+      std::string & text(m_children.back()->text());
+      utf8::unchecked::append(value, back_inserter(text));
+      return;
+    }
+  }
+  HtmlElement* textNode = new HtmlElement(HtmlConstants::TEXT);
+  if (value != '\n')
+    utf8::unchecked::append(value, back_inserter(textNode->text()));
+  append(textNode);
 }
