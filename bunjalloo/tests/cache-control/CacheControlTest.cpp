@@ -154,3 +154,30 @@ TEST(CacheControl, test_last_modified)
   cc.setLastModified(last);
   EXPECT_TRUE(cc.shouldCache(now + 240));
 }
+
+TEST(CacheControl, real_life)
+{
+  CacheControl cc;
+  cc.reset();
+  cc.setDate(DateUtils::parseDate("Tue, 1 Dec 2009 19:08:29 GMT"));
+  cc.setRequestTime(0);
+  cc.setResponseTime(DateUtils::parseDate("Thu, 3 Dec 2009 21:45:36 GMT"));
+  cc.setLastModified(DateUtils::parseDate("Sat, 12 Aug 2006 18:09:51 GMT"));
+  EXPECT_TRUE(cc.shouldCache(DateUtils::parseDate("Thu, 3 Dec 2009 21:45:36 GMT")));
+}
+
+TEST(CacheControl, real_life_age)
+{
+  /*
+     arg now: 1259832688
+     m_responseTime: 1259882663
+     m_date: 1259821234
+     m_ageValue: -1
+     m_requestTime: 0
+     m_maxAge: 86400
+     m_lastModified: 1258050929
+     freshness_lifetime 86400 vs current_age 1259844117 => NO
+     should be yes
+  */
+  // do it
+}

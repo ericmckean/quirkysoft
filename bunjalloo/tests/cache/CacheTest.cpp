@@ -82,9 +82,9 @@ TEST_F(CacheTest, LoadCheck)
 {
   URI uri("http://www.google.com");
   bool contains(m_cache->contains(uri));
-  EXPECT_TRUE(!contains);
+  EXPECT_FALSE(contains);
   bool result = m_cache->load(uri);
-  EXPECT_TRUE(!result);
+  EXPECT_FALSE(result);
 
   // now that it is in the cache, contains should be true
   contains = m_cache->contains(uri);
