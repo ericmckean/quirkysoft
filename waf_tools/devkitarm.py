@@ -37,7 +37,7 @@ def detect(conf):
         warn("`DEVKITPRO' variable is not set, libraries may not be found")
 
     ARCH = '-mthumb -mthumb-interwork'.split()
-    CFLAGS = '''-ffast-math -Wall -march=armv5te -mtune=arm946e-s
+    CFLAGS = '''-O2 -ffast-math -Wall -march=armv5te -mtune=arm946e-s
                 -Wno-array-bounds -fomit-frame-pointer'''.split()
     CFLAGS += ARCH
     CXXFLAGS = CFLAGS + '-fno-rtti -fno-exceptions'.split()
