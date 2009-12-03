@@ -568,7 +568,7 @@ void ViewRender::begin(HtmlElement & element)
 
 bool ViewRender::visit(HtmlElement & element)
 {
-  if (not element.text().empty())
+  if (not element.text().empty() and element.isa(HtmlConstants::TEXT))
   {
     const std::string &et(element.text());
     textArea()->appendText(et.c_str());

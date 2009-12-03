@@ -37,6 +37,7 @@ void HtmlDocument::walkNode(const HtmlElement * node)
   if (node->hasChildren())
   {
     cout << "+ " << node->tagName() << (node->isBlock()?" (Block)":"") << endl;
+
     m_depth++;
     const ElementList & theChildren = node->children();
     ElementList::const_iterator it(theChildren.begin());
@@ -48,7 +49,12 @@ void HtmlDocument::walkNode(const HtmlElement * node)
   }
   else
   {
-    cout << node->tagName() << endl;;
+    cout << node->tagName();
+    if (node->isa(HtmlConstants::TEXT)) {
+      cout << " " << node->text().substr(0, std::min(size_t(30), node->text().size())) << endl;
+    } else {
+      cout << endl;
+    }
   }
 }
 
