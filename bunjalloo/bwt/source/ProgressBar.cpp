@@ -19,24 +19,11 @@
 #include "TextArea.h"
 #include "ProgressBar.h"
 
-ProgressBar::ProgressBar(int min, int max): TextContainer(),
+ProgressBar::ProgressBar(int min, int max): Component(),
   m_min(min),
   m_max(max),
-  m_value(min),
-  m_showString(false)
+  m_value(min)
 {
-  setBackgroundColor(nds::Color(0,29,10));
-}
-
-void ProgressBar::setShowString(bool show)
-{
-  m_showString = show;
-  m_dirty = true;
-}
-
-bool ProgressBar::showString() const
-{
-  return m_showString;
 }
 
 void ProgressBar::setValue(int val)
@@ -83,21 +70,13 @@ void ProgressBar::paint(const nds::Rectangle & clip)
   // min = x
   // max = x+w
   // val = x + ( (w*val) / (max-min))
-  nds::Canvas::instance().drawRectangle(clip.x, clip.y, clip.w-1, clip.h, 0);
   unsigned int range = clip.w;
   if (m_max > m_min)
   {
      range = (clip.w * m_value) / (m_max-m_min);
   }
   nds::Rectangle progress(clip.x+1,clip.y+1, range, clip.h);
-  if (m_showString)
-  {
-    TextContainer::paint(progress);
-  }
-  else
-  {
-    nds::Canvas::instance().fillRectangle(progress.x, progress.y,
-        progress.w, progress.h, textArea()->backgroundColor());
-  }
+  nds::Canvas::instance().fillRectangle(progress.x, progress.y,
+      progress.w, progress.h, nds::Color(0,29,10));
 }
 

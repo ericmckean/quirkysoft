@@ -135,9 +135,8 @@ View::View(Document & doc, Controller & c):
     }
     m_search = new SearchEntry(searchFile);
   }
-  m_progress->setShowString();
-  m_progress->setSize(250, 40);
-  m_progress->setLocation(2, 2);
+  m_progress->setSize(250, 10);
+  m_progress->setLocation(2, 172);
 }
 
 View::~View()
@@ -242,7 +241,6 @@ void View::notify()
         string s(m_filenameForProgress);
         sprintf_platform(buffer, " %d%%", pc);
         s += buffer;
-        m_progress->setText(s);
         m_progress->setVisible();
         m_keyboard->forceRedraw();
         m_scrollPane->forceRedraw();

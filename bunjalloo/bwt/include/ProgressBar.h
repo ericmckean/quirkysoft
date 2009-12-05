@@ -17,18 +17,15 @@
 #ifndef ProgressBar_h_seen
 #define ProgressBar_h_seen
 
-#include "TextContainer.h"
+#include "Component.h"
 
 /** Implement the typical funny coloured bar that tells us how long 
  * we are going to have to wait for something to finish
  */
-class ProgressBar: public TextContainer
+class ProgressBar: public Component
 {
   public:
     ProgressBar(int min, int max);
-
-    void setShowString(bool show=true);
-    bool showString() const;
 
     void setValue(int val);
     unsigned int value() const;
@@ -47,7 +44,6 @@ class ProgressBar: public TextContainer
     unsigned int m_min;
     unsigned int m_max;
     unsigned int m_value;
-    bool m_showString;
 
     DISALLOW_COPY_AND_ASSIGN(ProgressBar);
 };

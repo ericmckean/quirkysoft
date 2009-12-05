@@ -111,8 +111,6 @@ void ZipViewer::pressed(ButtonI * button)
 
 void ZipViewer::before(const char * name)
 {
-  ProgressBar & progressBar(m_view.progressBar());
-  progressBar.setText(name);
   m_view.tick();
 }
 
