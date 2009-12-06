@@ -263,14 +263,15 @@ void TextArea::paint(const nds::Rectangle & clip)
   //
   // Theres "width" which is the possible width (wraps at)
   // then theres clip-width which is where it should draw to.
-  setCursor(m_bounds.x, m_bounds.y);
+  int startPos = m_bounds.x + 2;
+  setCursor(startPos, m_bounds.y);
   Canvas::instance().fillRectangle(clip.x, clip.y, clip.w, clip.h, m_bgCol);
   // work out the number of lines to skip
   std::vector<std::string>::const_iterator it(m_document.begin());
   int skipLines = linesToSkip();
   if (skipLines > 0)
   {
-    setCursor(m_bounds.x, m_bounds.y + skipLines*m_font->height());
+    setCursor(startPos, m_bounds.y + skipLines*m_font->height());
     it += skipLines;
     if (skipLines >= (int)m_document.size())
     {
