@@ -312,7 +312,7 @@ void Font::printAt(t_prerenderedGlyph &g, int xPosition, int yPosition, int colo
   {
     // width is not a multiple of 4 necessarily
     int x = 0;
-    unsigned char pixelCuartet;
+    unsigned char pixelCuartet(0);
     while (x != xbounds)
     {
       if ((x&3) == 0)
