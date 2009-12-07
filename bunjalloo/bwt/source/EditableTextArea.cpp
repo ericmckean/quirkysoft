@@ -43,7 +43,7 @@ EditableTextArea::EditableTextArea(Font * font) :
 
 static std::string createPasswordMask(size_t length) {
   std::string tmp;
-  for (int i = 0; i < length; ++i) {
+  for (unsigned int i = 0; i < length; ++i) {
     tmp += PASSWORD_MASK;
   }
   return tmp;
