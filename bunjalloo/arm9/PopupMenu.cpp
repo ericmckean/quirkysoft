@@ -87,7 +87,10 @@ bool PopupMenu::stylusUp(const Stylus * stylus)
   {
     return false;
   }
-  FOR_EACH_CHILD(stylusUp);
+  if (FOR_EACH_CHILD(stylusUp)) {
+    m_dirty = true;
+    return true;
+  }
   return false;
 }
 
@@ -97,7 +100,10 @@ bool PopupMenu::stylusDownFirst(const Stylus * stylus)
   {
     return false;
   }
-  FOR_EACH_CHILD(stylusDownFirst);
+  if (FOR_EACH_CHILD(stylusDownFirst)) {
+    m_dirty = true;
+    return true;
+  }
   // nothing hit? hide me then
   setVisible(false);
   return false;

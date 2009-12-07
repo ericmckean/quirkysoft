@@ -442,8 +442,7 @@ bool Keyboard::stylusUp(const Stylus * stylus)
   if (not visible())
     return false;
   m_dirty = true;
-  FOR_EACH_CHILD(stylusUp);
-  return false;
+  return FOR_EACH_CHILD(stylusUp);
 }
 
 bool Keyboard::stylusDownFirst(const Stylus * stylus)
@@ -451,23 +450,20 @@ bool Keyboard::stylusDownFirst(const Stylus * stylus)
   if (not visible())
     return false;
   m_dirty = true;
-  FOR_EACH_CHILD(stylusDownFirst);
-  return false;
+  return FOR_EACH_CHILD(stylusDownFirst);
 }
 bool Keyboard::stylusDownRepeat(const Stylus * stylus)
 {
   if (not visible())
     return false;
   m_dirty = true;
-  FOR_EACH_CHILD(stylusDownRepeat);
-  return false;
+  return FOR_EACH_CHILD(stylusDownRepeat);
 }
 bool Keyboard::stylusDown(const Stylus * stylus)
 {
   if (not visible())
     return false;
-  FOR_EACH_CHILD(stylusDown);
-  return false;
+  return FOR_EACH_CHILD(stylusDown);
 }
 
 void Keyboard::setTopLevel(ScrollPane * topLevel)

@@ -425,10 +425,13 @@ bool ScrollPane::stylusUp(const Stylus * stylus)
   {
     // do not process other events if we hit the pop-up menu.
     // call stylusUp on children too
-    FOR_EACH_CHILD(stylusUp);
+    bool result = FOR_EACH_CHILD(stylusUp);
+    m_dirty = result or m_dirty;
+    return result;
   }
   return false;
 }
+
 bool ScrollPane::stylusDownFirst(const Stylus * stylus)
 {
   if (not visible())
@@ -443,6 +446,7 @@ bool ScrollPane::stylusDownFirst(const Stylus * stylus)
 
   if (m_topLevel and s_popup and s_popup->stylusDownFirst(stylus))
   {
+    m_dirty = true;
     return true;
   }
 
@@ -450,7 +454,9 @@ bool ScrollPane::stylusDownFirst(const Stylus * stylus)
   if (m_touchedMe)
   {
     // call stylusDownFirst on children too
-    FOR_EACH_CHILD(stylusDownFirst);
+    bool result = FOR_EACH_CHILD(stylusDownFirst);
+    m_dirty = result or m_dirty;
+    return result;
   }
   // No! If this is invisible, unregister children so it doesn't do naughty
   // stylus stuff on things that are invisible.
@@ -467,7 +473,13 @@ bool ScrollPane::stylusDownRepeat(const Stylus * stylus)
   {
     return true;
   }
-  FOR_EACH_CHILD(stylusDownRepeat);
+
+  if (FOR_EACH_CHILD(stylusDownRepeat)) {
+    m_dirty = true;
+    return true;
+  }
+  if (m_topLevel and s_popup)
+    return false;
   showScrollAnywhere(stylus);
   return false;
 }
@@ -483,7 +495,10 @@ bool ScrollPane::stylusDown(const Stylus * stylus)
   {
     return true;
   }
-  FOR_EACH_CHILD(stylusDown);
+  if (FOR_EACH_CHILD(stylusDown)) {
+    m_dirty = true;
+    return true;
+  }
   return anywhereScroll(stylus);
 }
 
