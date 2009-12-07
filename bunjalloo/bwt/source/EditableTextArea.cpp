@@ -24,10 +24,9 @@
 #include "utf8.h"
 #include "WidgetColors.h"
 #include "string_utils.h"
+#include "password_mask.h"
 using nds::Canvas;
 using nds::Color;
-
-static const char PASSWORD_MASK[] = "●";
 
 EditableTextArea::EditableTextArea(Font * font) :
   TextArea(font),
@@ -39,14 +38,6 @@ EditableTextArea::EditableTextArea(Font * font) :
   //m_layingOut(false),
   m_scrollPane(0)
 {
-}
-
-static std::string createPasswordMask(size_t length) {
-  std::string tmp;
-  for (unsigned int i = 0; i < length; ++i) {
-    tmp += PASSWORD_MASK;
-  }
-  return tmp;
 }
 
 void EditableTextArea::printu(const std::string & unicodeString)
