@@ -22,6 +22,8 @@
 #include "Palette.h"
 #include "WidgetColors.h"
 #include "Stylus.h"
+#include "utf8.h"
+#include "password_mask.h"
 
 TextField::TextField(const std::string & text) :
   TextContainer(text), m_touched(false)
@@ -30,10 +32,17 @@ TextField::TextField(const std::string & text) :
 
 void TextField::paint(const nds::Rectangle & clip)
 {
-  TextContainer::paint(clip);
   // if it is a password field, and not empty, then set yellow to mask the password.
   if (not TextContainer::text().empty() and not echoText()) {
-    nds::Canvas::instance().fillRectangle(m_bounds.x+1, m_bounds.y+1, m_bounds.w-1, m_bounds.h-2, nds::Color(29,29,10));
+    std::string tmp(TextContainer::text());
+    textArea()->clearText();
+    textArea()->appendText(createPasswordMask(utf8::distance(tmp.begin(), tmp.end())));
+    TextContainer::paint(clip);
+    textArea()->clearText();
+    textArea()->appendText(tmp);
+  }
+  else {
+    TextContainer::paint(clip);
   }
 
   nds::Canvas::instance().horizontalLine(m_bounds.x, m_bounds.top(), m_bounds.w,
