@@ -281,7 +281,6 @@ void Keyboard::paint(const nds::Rectangle & clip)
       Component * c(*it);
       c->paint(c->bounds());
     }
-    m_scrollPane->paint(m_scrollPane->bounds());
   }
 }
 
@@ -293,7 +292,8 @@ void Keyboard::editText(TextEntryI * entry)
   m_initialText.clear();
   entry->text(m_initialText);
   m_textArea->setEchoText(entry->echoText());
-  m_textArea->setText(m_initialText);
+  m_textArea->setText("");
+  m_textArea->appendText(m_initialText);
   m_entry = entry;
   layoutViewer();
 }

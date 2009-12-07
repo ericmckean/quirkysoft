@@ -134,8 +134,6 @@ void Canvas::copyBlock(int x1, int y1, int w, int h,
                      int x2, int y2)
 {
   // copy the data @ x1, y1 to x2, y2
-  // :-(
-  //fillRectangle(x2, y2, w, h, nds::Color(31, 31, 0));
   for (int i = 0; i < h; ++i) {
     int sourcey = y1 + i;
     int targety = y2 + i;
