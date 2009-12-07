@@ -331,7 +331,7 @@ void RichTextArea::paint(const nds::Rectangle & clip)
   std::vector<std::string>::const_iterator it(m_document.begin());
   if (m_cursory < clip.top()) {
     // cursor is above the top of the clip area
-    int diff = (clip.top() - m_cursory) / font().height();
+    unsigned int diff = (clip.top() - m_cursory) / font().height();
     if (diff > m_document.size())
       return;
     if (diff > 0) {
@@ -479,7 +479,7 @@ bool RichTextArea::stylusUp(const Stylus * stylus)
   }
   m_linkTouched = 0;
   if (not consumed)
-    FOR_EACH_CHILD(stylusUp);
+    return FOR_EACH_CHILD(stylusUp);
   return consumed;
 }
 
@@ -503,7 +503,7 @@ bool RichTextArea::stylusDownFirst(const Stylus * stylus)
     }
     else
     {
-      FOR_EACH_CHILD(stylusDownFirst);
+      return FOR_EACH_CHILD(stylusDownFirst);
     }
   }
   return consumed;
@@ -550,7 +550,7 @@ bool RichTextArea::stylusDown(const Stylus * stylus)
     else
     {
       m_downCount = 0;
-      FOR_EACH_CHILD(stylusDown);
+      return FOR_EACH_CHILD(stylusDown);
     }
   }
   else if (m_linkTouched)

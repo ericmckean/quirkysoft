@@ -346,8 +346,7 @@ bool BoxLayout::stylusUp(const Stylus * stylus)
   if (not visible())
     return false;
   m_dirty = true;
-  FOR_EACH_CHILD(stylusUp);
-  return false;
+  return FOR_EACH_CHILD(stylusUp);
 }
 
 bool BoxLayout::stylusDownFirst(const Stylus * stylus)
@@ -355,8 +354,7 @@ bool BoxLayout::stylusDownFirst(const Stylus * stylus)
   if (not visible())
     return false;
   m_dirty = true;
-  FOR_EACH_CHILD(stylusDownFirst);
-  return false;
+  return FOR_EACH_CHILD(stylusDownFirst);
 }
 
 bool BoxLayout::stylusDownRepeat(const Stylus * stylus)
@@ -364,8 +362,7 @@ bool BoxLayout::stylusDownRepeat(const Stylus * stylus)
   if (not visible())
     return false;
   m_dirty = true;
-  FOR_EACH_CHILD(stylusDownRepeat);
-  return false;
+  return FOR_EACH_CHILD(stylusDownRepeat);
 }
 
 bool BoxLayout::stylusDown(const Stylus * stylus)
@@ -373,7 +370,6 @@ bool BoxLayout::stylusDown(const Stylus * stylus)
   if (not visible())
     return false;
   m_dirty = true;
-  FOR_EACH_CHILD(stylusDown);
-  return false;
+  return FOR_EACH_CHILD(stylusDown);
 }
 
