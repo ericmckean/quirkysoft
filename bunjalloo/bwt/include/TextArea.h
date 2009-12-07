@@ -91,8 +91,6 @@ class TextArea : public Component
 
     inline int cursorY() const;
     inline int cursorX() const;
-    /** Get the number of lines that will be skipped when painting.*/
-    virtual int linesToSkip() const;
 
     inline bool parseNewline() const;
     inline void setParseNewline(bool parse=true);

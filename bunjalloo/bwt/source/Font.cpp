@@ -299,6 +299,10 @@ void Font::printAt(t_prerenderedGlyph &g, int xPosition, int yPosition, int colo
     ybounds = clip.bottom() - yPosition;
   }
   int ystart = 0;
+  if (clip.top() > yPosition) {
+    ystart = clip.top() - yPosition;
+    data += ystart * (g.image.width / 4);
+  }
   if (yPosition < 0) {
     if ((yPosition + ybounds) < 0) return;
     ystart = -yPosition;
