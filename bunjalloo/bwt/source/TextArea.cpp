@@ -248,11 +248,6 @@ TextArea::~TextArea()
 {
 }
 
-int TextArea::linesToSkip() const
-{
-  return - ( (m_bounds.y-(m_font->height()/2))/m_font->height() );
-}
-
 /** Paint the text area. */
 void TextArea::paint(const nds::Rectangle & clip)
 {
@@ -268,14 +263,14 @@ void TextArea::paint(const nds::Rectangle & clip)
   Canvas::instance().fillRectangle(clip.x, clip.y, clip.w, clip.h, m_bgCol);
   // work out the number of lines to skip
   std::vector<std::string>::const_iterator it(m_document.begin());
-  int skipLines = linesToSkip();
-  if (skipLines > 0)
-  {
-    setCursor(startPos, m_bounds.y + skipLines*m_font->height());
-    it += skipLines;
-    if (skipLines >= (int)m_document.size())
-    {
+  if (m_cursory < clip.top()) {
+    // cursor is above the top of the clip area
+    unsigned int diff = (clip.top() - m_cursory) / font().height();
+    if (diff >= m_document.size())
       return;
+    if (diff > 0) {
+      it += diff;
+      m_cursory += diff * font().height();
     }
   }
 

@@ -316,7 +316,7 @@ void RichTextArea::paint(const nds::Rectangle & clip)
   }
   m_paintPosition = 0;
   m_lineNumber = 0;
-  setCursor(m_bounds.x, m_bounds.y);
+  setCursor(m_bounds.x + 2, m_bounds.y);
   if (m_outlined)
   {
     nds::Canvas::instance().
