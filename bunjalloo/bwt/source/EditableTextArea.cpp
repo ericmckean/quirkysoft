@@ -78,7 +78,7 @@ void EditableTextArea::paint(const nds::Rectangle & clip)
         font().findEnd(line, 0, m_caretChar, &pix, 0);
         m_caretPixelX = pix >> 8;
       }
-      Canvas::instance().verticalLine(m_caretPixelX, caretLinePos, font().height(), Color(31,0,0));
+      Canvas::instance().verticalLine(m_caretPixelX + 2, caretLinePos, font().height(), Color(31,0,0));
     }
 
   }
