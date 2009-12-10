@@ -113,6 +113,7 @@ void TextArea::appendText(const std::string &unicodeString)
     }
     if (m_preferredWidth < 0) {
       m_preferredWidth = 0;
+      m_preferredWidthFixed = 2<<8;
     }
     m_preferredWidthFixed += size;
     m_preferredWidth = (m_preferredWidthFixed >> 8);
