@@ -687,9 +687,6 @@ void View::linkPopup(Link * link)
 void View::keyboard()
 {
   updateInput();
-  m_dirty = m_keyboard->dirty();
-  if (not m_dirty)
-    m_dirty = m_scrollPane->dirty();
 }
 
 void View::tick()
@@ -719,7 +716,7 @@ void View::tick()
   }
   m_dirty |= m_keyboard->tick();
   m_dirty |= m_cookieHandler->tick();
-  m_dirty |= m_scrollPane->dirty();
+  m_dirty |= m_scrollPane->visible() and m_scrollPane->dirty();
   m_dirty |= m_progress->visible() and m_progress->dirty();
   m_toolbar->tick();
   m_toolbar->updateIcons();
