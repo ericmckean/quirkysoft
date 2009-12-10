@@ -277,7 +277,6 @@ static int colors[4] = { 0 };
 
 void Font::printAt(t_prerenderedGlyph &g, int xPosition, int yPosition, int color, int bgcolor)
 {
-  const unsigned char * data = g.image.bitmap;
   xPosition += g.deltaX << 7;
   yPosition = yPosition + base() + g.deltaY;
   if ( (colors[0] != color) or (colors[3] != bgcolor)) {
@@ -301,13 +300,12 @@ void Font::printAt(t_prerenderedGlyph &g, int xPosition, int yPosition, int colo
   int ystart = 0;
   if (clip.top() > yPosition) {
     ystart = clip.top() - yPosition;
-    data += ystart * (g.image.width / 4);
   }
   if (yPosition < 0) {
     if ((yPosition + ybounds) < 0) return;
     ystart = -yPosition;
-    data += ystart * (g.image.width / 4);
   }
+  const unsigned char *data = &g.image.bitmap[ystart * (g.image.width / 4)];
   for (int y = ystart; y < ybounds; ++y)
   {
     // width is not a multiple of 4 necessarily
