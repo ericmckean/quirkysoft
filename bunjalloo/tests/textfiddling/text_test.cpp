@@ -140,3 +140,10 @@ TEST(TextTest, removes_character_inline_unicode)
   removeOneCharacter(s, 5);
   EXPECT_EQ("some text", s);
 }
+
+TEST(TextTest, test_stripWhitespace)
+{
+  std::string s("foo  \n");
+  stripWhitespace(s);
+  EXPECT_EQ("foo", s);
+}
