@@ -160,9 +160,8 @@ void ViewRender::clear()
   m_textArea = 0;
   m_richTextAreas.clear();
   m_pendingNewline = false;
-  m_box = new BoxLayout;
-  m_box->setSize(m_self->m_scrollPane->width(),
-      m_self->m_scrollPane->height());
+  m_box = new BoxLayout();
+  m_box->setSize(249, 192);
 }
 
 void ViewRender::renderImage()
