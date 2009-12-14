@@ -43,8 +43,8 @@ class DocumentHeaderListener: public HeaderListener
 
 Document::Document():
   m_amount(0),
-  m_cookieJar(new CookieJar),
-  m_htmlDocument(new HtmlDocument),
+  m_cookieJar(new CookieJar()),
+  m_htmlDocument(new HtmlDocument()),
   m_headerParser(new HeaderParser(m_htmlDocument,m_cookieJar, new CacheControl())),
   m_headerListener(new DocumentHeaderListener(*this)),
   m_historyEnabled(true)

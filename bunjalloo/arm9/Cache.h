@@ -71,6 +71,11 @@ class Cache
      */
     inline bool useCache() const;
 
+    /**
+     * @param useCache use the cache
+     */
+    void setUseCache(bool useCache);
+
   private:
     Document & m_document;
     bool m_useCache;

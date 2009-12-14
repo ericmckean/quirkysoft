@@ -36,6 +36,7 @@ class Controller
     static const char LICENCE_URL[];
     //!Constructor.
     Controller();
+    void initialise();
     //! Destructor
     ~Controller();
 
@@ -100,6 +101,8 @@ class Controller
     void saveCookieSettings();
 
     URI downloadingFile() const;
+
+    void waitVBlank() const;
 
   private:
     Document * m_document;

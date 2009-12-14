@@ -24,6 +24,7 @@ using namespace nds;
 int main(int argc, char * argv[])
 {
   Controller * c = new Controller();
+  c->initialise();
   if (argc > 1) {
     std::string fileName(argv[1]);
     File check;

@@ -30,6 +30,12 @@ Cache::Cache(Document & document, bool useCache)
 : m_document(document), m_useCache(useCache)
 {
   m_fileIds.clear();
+  setUseCache(useCache);
+}
+
+void Cache::setUseCache(bool useCache)
+{
+  m_useCache = useCache;
   if (m_useCache)
   {
     if (nds::File::exists(CACHE_DIR) == nds::File::F_NONE and not nds::File::mkdir(CACHE_DIR) )
