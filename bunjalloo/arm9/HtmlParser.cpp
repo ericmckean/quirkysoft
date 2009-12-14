@@ -1379,10 +1379,8 @@ void HtmlParser::feed(const char * data, unsigned int length)
 {
   m_details->initialise(data, length);
   if (mimeType() == HtmlParser::TEXT_HTML
-      or mimeType() == HtmlParser::TEXT_PLAIN
       or mimeType() == HtmlParser::UNINITIALISED)
   {
-    //printf("%s", data);
     while (m_details->position() < m_details->end()) {
       m_details->fire();
     }
