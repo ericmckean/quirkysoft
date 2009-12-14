@@ -907,8 +907,8 @@ void HttpClient::handleNextState()
         else
         {
           m_state = GET_URL;
-          swiWaitForVBlank();
-          swiWaitForVBlank();
+          m_controller->waitVBlank();
+          m_controller->waitVBlank();
         }
         m_connectAttempts = 0;
       }
@@ -942,8 +942,8 @@ void HttpClient::handleNextState()
     case GET_URL:
       setTimeout(5);
       get(m_uri);
-      swiWaitForVBlank();
-      swiWaitForVBlank();
+      m_controller->waitVBlank();
+      m_controller->waitVBlank();
       m_state = READING_FIRST;
       break;
 
@@ -1013,16 +1013,16 @@ void HttpClient::readFirst()
             m_state = FAILED;
           }
         }
-        swiWaitForVBlank();
-        swiWaitForVBlank();
+        m_controller->waitVBlank();
+        m_controller->waitVBlank();
       }
       break;
 
     case RETRY_LATER:
       /* Keep going! */
       debug("RETRY_LATER readFirst");
-      swiWaitForVBlank();
-      swiWaitForVBlank();
+      m_controller->waitVBlank();
+      m_controller->waitVBlank();
       m_connectAttempts++;
       if (m_connectAttempts == m_maxConnectAttempts) {
         m_state = FAILED;
@@ -1074,8 +1074,8 @@ void HttpClient::readAll()
         debug("m_maxConnectAttempts reached - surely it is done...");
         m_state = FINISHED;
       } else {
-        swiWaitForVBlank();
-        swiWaitForVBlank();
+        m_controller->waitVBlank();
+        m_controller->waitVBlank();
       }
       break;
 

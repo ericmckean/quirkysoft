@@ -52,11 +52,20 @@ const static int MAX_REDIRECTS(7);
 
 Controller::Controller()
 : m_document(new Document()),
-  m_httpClient(new HttpClient),
+  m_view(0),
+  m_config(0),
+  m_cache(new Cache(*m_document, false)),
+  m_httpClient(new HttpClient()),
   m_wifiInit(false),
+  m_stop(false),
   m_redirected(0),
   m_maxRedirects(MAX_REDIRECTS),
+  m_saveAs(NO_SAVE),
   m_checkingQueue(false)
+{
+}
+
+void Controller::initialise()
 {
   m_config = new Config();
   m_config->checkPre();
@@ -66,11 +75,11 @@ Controller::Controller()
   string font;
   m_config->resource(Config::FONT_STR, font);
   TextAreaFactory::setFont(FontFactory::create(font.c_str()));
-  m_view = new View(*m_document, *this);
   bool useCache(false);
-  m_config->resource(Config::USECACHE, useCache);
+  if (m_config->resource(Config::USECACHE, useCache))
+    m_cache->setUseCache(useCache);
 
-  m_cache = new Cache(*m_document, useCache);
+  m_view = new View(*m_document, *this);
   m_config->resource("redirects", m_maxRedirects);
   m_httpClient->setController(this);
 }
@@ -375,12 +384,13 @@ void Controller::fetchHttp(const URI & uri)
       {
         m_wifiInit = true;
       }
-      m_view->tick();
+      if (m_view)
+        m_view->tick();
       if (m_stop)
       {
         return;
       }
-      swiWaitForVBlank();
+      waitVBlank();
     }
     hasPage = m_httpClient->hasPage();
     m_httpClient->disconnect();
@@ -417,8 +427,8 @@ void Controller::finishFetchHttp(const URI & uri)
   {
     // redirected.
     m_redirected++;
-    swiWaitForVBlank();
-    swiWaitForVBlank();
+    waitVBlank();
+    waitVBlank();
     m_document->reset();
     m_document->setStatus(Document::REDIRECTED);
   }
@@ -532,4 +542,9 @@ void Controller::checkDownloadQueue()
   m_document->setHistoryEnabled(true);
   m_document->setStatus(Document::LOADED_PAGE);
   m_checkingQueue = false;
+}
+
+void Controller::waitVBlank() const
+{
+  if (m_view) swiWaitForVBlank();
 }
