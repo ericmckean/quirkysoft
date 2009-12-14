@@ -769,3 +769,19 @@ TEST_F(DocumentTest, textarea)
   EXPECT_EQ(std::string("foo bar\nbaz\n"), text->text());
 
 }
+
+TEST_F(DocumentTest, mime_type_text_plain)
+{
+  loadData("plaintext.txt");
+  const HtmlElement * root = m_document->rootNode();
+  EXPECT_TRUE(root != 0);
+  EXPECT_TRUE(root->isa("html"));
+  HtmlElement * body = root->lastChild();
+  EXPECT_TRUE(body != 0);
+  EXPECT_TRUE(body->isa("body"));
+  HtmlElement *text(body->firstChild());
+  EXPECT_TRUE(text != 0);
+  EXPECT_TRUE(text->isa("#TEXT"));
+  EXPECT_EQ("this is plain text\nline 2\nline 3\n\nend",
+      text->text());
+}
