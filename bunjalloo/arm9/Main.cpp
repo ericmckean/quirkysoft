@@ -23,7 +23,7 @@
 using namespace nds;
 int main(int argc, char * argv[])
 {
-  Controller * c = new Controller;
+  Controller * c = new Controller();
   if (argc > 1) {
     std::string fileName(argv[1]);
     File check;
