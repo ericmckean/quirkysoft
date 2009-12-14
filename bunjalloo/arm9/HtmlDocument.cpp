@@ -22,6 +22,8 @@
 #include "HtmlConstants.h"
 #include "HtmlDocument.h"
 #include "string_utils.h"
+#include "ISO_8859_1.h"
+#include "utf8.h"
 
 using namespace std;
 
@@ -686,6 +688,12 @@ void HtmlDocument::eofInBody()
   }
 }
 
+void HtmlDocument::appendTextToCurrentNode(unsigned int ucodeChar)
+{
+  m_dataGot++;
+  currentNode()->appendText(ucodeChar);
+}
+
 void HtmlDocument::inBody(unsigned int ucodeChar)
 {
   if ((int)ucodeChar == EOF)
@@ -695,8 +703,7 @@ void HtmlDocument::inBody(unsigned int ucodeChar)
   else
   {
     reconstructActiveFormatters();
-    m_dataGot++;
-    currentNode()->appendText(ucodeChar);
+    appendTextToCurrentNode(ucodeChar);
   }
 }
 
@@ -996,8 +1003,7 @@ void HtmlDocument::mainPhase(unsigned int ucodeChar)
           eofInBody();
         }
         else {
-          m_dataGot++;
-          currentNode()->appendText(ucodeChar);
+          appendTextToCurrentNode(ucodeChar);
         }
       }
       break;
@@ -1051,18 +1057,30 @@ void HtmlDocument::handleData(unsigned int ucodeChar)
       }
       else
       {
-        m_dataGot++;
-        currentNode()->appendText(ucodeChar);
+        appendTextToCurrentNode(ucodeChar);
       }
       break;
 
   }
-  // m_data += ucodeChar;
 }
 
 void HtmlDocument::handleBinaryData(const void * data, unsigned int length)
 {
   m_dataGot += length;
+  if (m_mimeType == TEXT_PLAIN)
+  {
+    if (encoding() == HtmlParser::UTF8_ENCODING) {
+      m_data += static_cast<const char*>(data);
+    }
+    else {
+      const char *start(static_cast<const char*>(data));
+      const char *end(start + length);
+      for (; start != end; ++start) {
+        unsigned short value = ISO_8859_1::decode((*start)&0xff);
+        utf8::unchecked::append(value, back_inserter(m_data));
+      }
+    }
+  }
 }
 
 const HtmlElement * HtmlDocument::rootNode() const

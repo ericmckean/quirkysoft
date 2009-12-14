@@ -40,10 +40,6 @@ TEST(UpdaterTest, test_updates)
   EXPECT_EQ(HtmlParser::TEXT_PLAIN, c->m_document->htmlDocument()->mimeType());
 
   EXPECT_TRUE(c->m_httpClient->hasPage());
-  const HtmlElement *root = c->m_document->rootNode();
-  EXPECT_TRUE(root != 0);
-  HtmlElement *body(root->lastChild());
-  HtmlElement *text(body->firstChild());
-  EXPECT_EQ("#TEXT", text->tagName());
-  EXPECT_EQ("# update file\nversion=0.8\n\nURL=http://localhost/data/newversion", text->text());
+  EXPECT_EQ("# update file\nversion=0.8\n\nURL=http://localhost/data/newversion\n",
+      c->m_document->htmlDocument()->data());
 }

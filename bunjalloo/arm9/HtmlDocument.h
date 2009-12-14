@@ -163,6 +163,7 @@ class HtmlDocument : public HtmlParser
     void startScopeClosedElement(const std::string & tag, const std::string & alternate="");
 
     bool headerInScope() const;
+    void appendTextToCurrentNode(unsigned int ucodeChar);
     // disable copies
     HtmlDocument (const HtmlDocument&);
     const HtmlDocument& operator=(const HtmlDocument&);

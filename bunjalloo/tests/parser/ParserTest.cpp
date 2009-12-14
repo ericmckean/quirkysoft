@@ -100,7 +100,7 @@ TEST_F(ParserTest, NotHtml)
   int expected = 0;
   EXPECT_EQ( expected , result);
   result =  m_htmlParser->m_data.size();
-  expected = 48;
+  expected = 49;
   EXPECT_EQ( expected , result);
 }
 

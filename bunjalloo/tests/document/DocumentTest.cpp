@@ -127,7 +127,7 @@ TEST_F(DocumentTest, Empty)
   readFile("empty.html");
   m_document->appendLocalData(m_data, m_length);
   const HtmlElement * result = m_document->rootNode();
-  EXPECT_TRUE(result != 0);
+  EXPECT_TRUE(result == 0);
 }
 
 TEST_F(DocumentTest, Head2)
@@ -773,15 +773,9 @@ TEST_F(DocumentTest, textarea)
 TEST_F(DocumentTest, mime_type_text_plain)
 {
   loadData("plaintext.txt");
-  const HtmlElement * root = m_document->rootNode();
-  EXPECT_TRUE(root != 0);
-  EXPECT_TRUE(root->isa("html"));
-  HtmlElement * body = root->lastChild();
-  EXPECT_TRUE(body != 0);
-  EXPECT_TRUE(body->isa("body"));
-  HtmlElement *text(body->firstChild());
-  EXPECT_TRUE(text != 0);
-  EXPECT_TRUE(text->isa("#TEXT"));
-  EXPECT_EQ("this is plain text\nline 2\nline 3\n\nend",
-      text->text());
+  HtmlDocument *htmlDocument = m_document->htmlDocument();
+  HtmlParser::MimeType mt = htmlDocument->mimeType();
+  EXPECT_EQ(HtmlParser::TEXT_PLAIN, mt);
+  EXPECT_EQ("this is plain text\nline 2\nline 3\n\nend\n",
+      htmlDocument->data());
 }

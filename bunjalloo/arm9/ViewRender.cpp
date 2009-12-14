@@ -96,6 +96,26 @@ void ViewRender::setBgColor(const HtmlElement * body)
   }
 }
 
+static std::string uri2filename(const URI &uri) {
+  std::string filename;
+  switch (uri.protocol())
+  {
+    case URI::FILE_PROTOCOL:
+    case URI::CONFIG_PROTOCOL:
+      filename = uri.fileName();
+      break;
+    case URI::HTTPS_PROTOCOL:
+    case URI::HTTP_PROTOCOL:
+      filename = Cache::CACHE_DIR;
+      filename += "/";
+      filename += uri.crc32();
+      break;
+    default:
+      break;
+  }
+  return filename;
+}
+
 void ViewRender::doImage(const std::string & imgStr,
     const std::string & src)
 {
@@ -108,22 +128,9 @@ void ViewRender::doImage(const std::string & imgStr,
     {
       URI uri(m_self->document().uri());
       const URI &imgUri(uri.navigateTo(src));
-      std::string filename;
-      switch (imgUri.protocol())
-      {
-        case URI::FILE_PROTOCOL:
-        case URI::CONFIG_PROTOCOL:
-          filename = imgUri.fileName();
-          break;
-        case URI::HTTPS_PROTOCOL:
-        case URI::HTTP_PROTOCOL:
-          filename = Cache::CACHE_DIR;
-          filename += "/";
-          filename += imgUri.crc32();
-          break;
-        default:
-          return;
-      }
+      const std::string &filename(uri2filename(imgUri));
+      if (filename.empty())
+        return;
       nds::Image *image = new nds::Image(filename.c_str());
       ImageComponent *imageComponent = new ImageComponent(image, m_box, &m_self->document());
       add(imageComponent);
@@ -236,6 +243,12 @@ void ViewRender::render()
       textArea()->appendText(": ");
       textArea()->appendText(m_self->m_document.htmlDocument()->mimeTypeValue());
       useScrollPane = false;
+    }
+    else if (mimeType == HtmlParser::TEXT_PLAIN)
+    {
+      clear();
+      textArea()->appendText(m_self->document().htmlDocument()->data());
+      useScrollPane = true;
     }
     else
     {

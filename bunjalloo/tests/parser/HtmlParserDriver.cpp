@@ -56,3 +56,8 @@ void HtmlParserDriver::handleData(unsigned int ucodeChar)
     return;
   utf8::unchecked::append(ucodeChar, back_inserter(m_data));
 }
+
+void HtmlParserDriver::handleBinaryData(const void * data, unsigned int len)
+{
+  m_data += static_cast<const char*>(data);
+}
