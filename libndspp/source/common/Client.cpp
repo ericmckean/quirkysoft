@@ -168,6 +168,7 @@ void Client::connectInprogress()
   else if (retval) {
     debug("connect - Data is available now.");
     m_connected = true;
+    m_connectState = CLIENT_CONNECT_DONE;
   }
 }
 
