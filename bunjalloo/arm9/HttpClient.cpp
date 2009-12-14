@@ -605,6 +605,7 @@ HttpClient::HttpClient():
   m_finished(false),
   m_connectAttempts(0),
   m_state(WIFI_OFF),
+  m_controller(0),
   m_maxConnectAttempts(MAX_CONNECT_ATTEMPTS),
   m_hasSsl(true),
   m_sslClient(new SslClient(*this)),
@@ -617,11 +618,21 @@ HttpClient::~HttpClient()
   delete m_sslClient;
 }
 
+std::string HttpClient::proxyString() const
+{
+  string proxy;
+  if (m_controller
+      and m_controller->config().resource(Config::PROXY_STR, proxy)) {
+    return proxy;
+  }
+  return "";
+}
+
 void HttpClient::setController(Controller * c)
 {
   m_controller = c;
-  string proxy;
-  if (m_controller->config().resource(Config::PROXY_STR, proxy))
+  const string &proxy(proxyString());
+  if (not proxy.empty())
   {
     URI uri(proxy);
     setConnection(uri.server().c_str(), uri.port());
@@ -666,7 +677,7 @@ void HttpClient::handleRaw(void * bufferIn, int amountRead)
   char * buffer = (char*)bufferIn;
   buffer[amountRead] = 0;
   // printf("%s", buffer);
-  m_controller->m_document->appendData(buffer, amountRead);
+  if (m_controller) m_controller->m_document->appendData(buffer, amountRead);
   m_total += amountRead;
   // FIXME: cache this?
   if (m_uri.method() == "HEAD")
@@ -686,7 +697,8 @@ void HttpClient::finish() {
   //printf("%d\n",m_total);
   if (m_total == 0)
   {
-    m_controller->loadError();
+    if (m_controller)
+      m_controller->loadError();
   }
   else
   {
@@ -707,13 +719,12 @@ void HttpClient::debug(const char * s)
     log.write("\n");
     //printf("debug:%s\n",s);
   }
-  //m_controller->m_document->appendLocalData(s, strlen(s));
 }
 
 void HttpClient::proxyConnect()
 {
-  string proxy;
-  if (isSsl() and m_controller->config().resource(Config::PROXY_STR, proxy))
+  const string &proxy(proxyString());
+  if (isSsl() and not proxy.empty())
   {
     // need to trick the proxy into providing the TCP/IP tunnel.
     string s;
@@ -736,27 +747,54 @@ void HttpClient::proxyConnect()
   }
 }
 
+std::string HttpClient::cookieString(const URI &uri) const
+{
+  string cookies;
+  if (m_controller) {
+    m_controller->m_document->cookieJar()->cookiesForRequest(uri, cookies);
+  }
+  return cookies;
+}
+
+std::string HttpClient::filenamePart(const URI &uri) const
+{
+  const string &proxy(proxyString());
+  if (not isSsl() and not proxy.empty())
+  {
+    // for proxy connection, need to send the whole request:
+    return uri.asString();
+  }
+  return uri.fileName();
+}
+
+std::string HttpClient::userAgent() const
+{
+  std::string useragent;
+  if (m_controller and m_controller->config().resource(Config::USER_AGENT_STR, useragent))
+  {
+    return useragent;
+  }
+  else {
+    useragent += "Bunjalloo/";
+    useragent += VERSION;
+    useragent += "(";
+    useragent += nds::System::uname();
+    useragent += ";U;";
+    useragent += Language::instance().currentLanguage();
+    useragent += ")";
+    return useragent;
+  }
+}
+
 // GET stuff
 void HttpClient::get(const URI & uri)
 {
   if (isConnected())
   {
-    string cookieString;
-    m_controller->m_document->cookieJar()->cookiesForRequest(uri, cookieString);
-
-    string proxy;
     string s;
     s += uri.method();
     s += " ";
-    if (not isSsl() and m_controller->config().resource(Config::PROXY_STR, proxy))
-    {
-      // for proxy connection, need to send the whole request:
-      s += uri.asString();
-    }
-    else
-    {
-      s += uri.fileName();
-    }
+    s += filenamePart(uri);
     s += " HTTP/1.1\r\n";
     s += "Host:" + uri.server()+"\r\n";
     if (uri.method() != "HEAD")
@@ -784,23 +822,10 @@ void HttpClient::get(const URI & uri)
     s += "Accept: text/html,image/png,image/jpeg,image/gif,text/plain\r\n";
 
     s += "User-Agent: ";
-    std::string useragent;
-    if (m_controller->config().resource(Config::USER_AGENT_STR, useragent))
-    {
-      s += useragent;
-    }
-    else {
-      s += "Bunjalloo/";
-      s+= VERSION;
-      s+= "(";
-      s+= nds::System::uname();
-      s+= ";U;";
-      s+= Language::instance().currentLanguage();
-      s += ")";
-    }
+    s += userAgent();
     s += "\r\n";
 
-    s += cookieString;
+    s += cookieString(uri);
     if (uri.requestHeader().empty())
     {
       s += "\r\n";
@@ -1077,9 +1102,9 @@ void HttpClient::setUri(const URI & uri)
   m_uri = uri;
   m_state = GET_URL;
   m_finished = false;
-  string proxy;
-  if (!m_controller->config().resource(Config::PROXY_STR, proxy))
-  {
+  const string &proxy(proxyString());
+  if (proxy.empty()) {
+    // when no proxy, connect directly to the remote http server
     setConnection(uri.server().c_str(), uri.port());
   }
 }
@@ -1097,10 +1122,6 @@ void HttpClient::reset()
   m_connectAttempts = 0;
   m_state = WIFI_OFF;
   m_maxConnectAttempts = MAX_CONNECT_ATTEMPTS;
-  /*delete m_sslClient;
-  m_sslClient = new SslClient(*this);
-  m_log = false;
-  */
 }
 
 void HttpClient::setReferer(const URI & referer)
