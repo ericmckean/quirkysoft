@@ -51,11 +51,14 @@ const static char * UNABLE_TO_LOAD = "cannot_load";
 const static int MAX_REDIRECTS(7);
 
 Controller::Controller()
-  : m_document(new Document()),
+: m_document(new Document()),
   m_httpClient(new HttpClient),
-  m_wifiInit(false),m_redirected(0),m_maxRedirects(MAX_REDIRECTS), m_checkingQueue(false)
+  m_wifiInit(false),
+  m_redirected(0),
+  m_maxRedirects(MAX_REDIRECTS),
+  m_checkingQueue(false)
 {
-  m_config = new Config;
+  m_config = new Config();
   m_config->checkPre();
   m_config->reload();
   m_config->checkPost();
