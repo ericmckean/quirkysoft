@@ -1,0 +1,4 @@
+# update file
+version=0.8
+
+URL=http://localhost/data/newversion

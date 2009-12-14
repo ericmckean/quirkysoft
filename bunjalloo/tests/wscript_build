@@ -20,6 +20,7 @@ richtextarea
 searcher
 stylus
 textfiddling
+updater
 uri
 versions
 zipfile
@@ -30,6 +31,9 @@ veralibs = 'vera bunjalloo'
 has_uselib_locals = {
     'font': veralibs,
     'richtextarea': veralibs
+}
+has_hostlib = {
+    'updater': ' MATRIXSSLSTATIC'
 }
 
 api_tests = '''
@@ -57,12 +61,15 @@ for ut in unit_tests:
     uselib_local = 'bunjalloo'
     if ut in has_uselib_locals:
         uselib_local = has_uselib_locals[ut]
+    hl = host_libs
+    if ut in has_hostlib:
+        hl += has_hostlib[ut]
 
     bld.new_task_gen(
         features='cxx cprogram unit_test',
         source=bld.glob(ut+'/*.cpp'),
         target=ut+'-test',
-        uselib=host_libs + ' GTEST',
+        uselib=hl + ' GTEST',
         run_from_dir=os.path.join(here, ut),
         uselib_local=uselib_local)
 
