@@ -1,4 +1,4 @@
 # update file
-version=0.8
+version=9.9
 
-URL=http://localhost/data/newversion
+URL=http://localhost:8000/data/newversion.zip
