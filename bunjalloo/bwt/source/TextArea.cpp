@@ -36,10 +36,11 @@ const static unsigned char NEWLINE('\n');
 static const char intDelimiters[] = {0x20, 0x09, 0x0a, 0x0b, 0x0c, 0x0d};
 static const std::string s_delimiters(intDelimiters,6);
 static const int INDENT(16);
+static int INITIAL_POSITION(2<<8);
 
 TextArea::TextArea(Font * font) :
   m_font(0),
-  m_appendPosition(0),
+  m_appendPosition(INITIAL_POSITION),
   m_parseNewline(true)
 {
   setFont(font);
@@ -70,7 +71,7 @@ void TextArea::clearText()
   // is a fair chance it will be reused anyway... speed vs memory again :-/
   std::vector<std::string> tmp;
   m_document.swap(tmp);
-  m_appendPosition = 0;
+  m_appendPosition = INITIAL_POSITION;
   m_preferredWidth = -1;
   m_preferredWidthFixed = 0;
   m_preferredHeight = m_font->height();
@@ -95,7 +96,8 @@ void TextArea::appendText(const std::string &unicodeString)
     std::string::const_iterator backup_it(it);
     std::string word(nextWordAdvanceWord(&it, end_it));
     int size = textSize(word);
-    if ((size>>8) > width() and word.size() > 1)
+    int width8 = width() << 8;
+    if (size > width8 and word.size() > 1)
     {
       it = backup_it;
       word = m_font->shorterWordFromLong(&it, end_it, width(), &size);
@@ -103,17 +105,17 @@ void TextArea::appendText(const std::string &unicodeString)
 
     // if the word ends with a new line, then increment the height.
     // otherwise, if we go off the end of the line, increment the height.
-    if (((m_appendPosition + size)>>8) > width())
+    if ((m_appendPosition + size) > width8)
     {
       // trim spaces from the end of the line
       // this word overflows the line - make a new line to hold the text.
       m_document.push_back(std::string());
-      m_appendPosition = 0;
+      m_appendPosition = INITIAL_POSITION;
       m_preferredHeight += m_font->height();
     }
     if (m_preferredWidth < 0) {
       m_preferredWidth = 0;
-      m_preferredWidthFixed = 2<<8;
+      m_preferredWidthFixed = INITIAL_POSITION;
     }
     m_preferredWidthFixed += size;
     m_preferredWidth = (m_preferredWidthFixed >> 8);
@@ -127,7 +129,7 @@ void TextArea::appendText(const std::string &unicodeString)
     // if the word ended in a NEWLINE, then go onto the next line.
     if (m_parseNewline and word[last] == NEWLINE)
     {
-      m_appendPosition = 0;
+      m_appendPosition = INITIAL_POSITION;
       m_document.push_back(std::string());
       m_preferredHeight += font().height();
     }
@@ -259,7 +261,7 @@ void TextArea::paint(const nds::Rectangle & clip)
   //
   // Theres "width" which is the possible width (wraps at)
   // then theres clip-width which is where it should draw to.
-  int startPos = m_bounds.x + 2;
+  int startPos = m_bounds.x + (INITIAL_POSITION>>8);
   setCursor(startPos, m_bounds.y);
   Canvas::instance().fillRectangle(clip.x, clip.y, clip.w, clip.h, m_bgCol);
   // work out the number of lines to skip
