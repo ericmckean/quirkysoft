@@ -30,7 +30,8 @@ zipfile
 veralibs = 'vera bunjalloo'
 has_uselib_locals = {
     'font': veralibs,
-    'richtextarea': veralibs
+    'richtextarea': veralibs,
+    'updater': veralibs
 }
 has_hostlib = {
     'updater': ' MATRIXSSLSTATIC'

@@ -84,61 +84,46 @@ void Updater::getZip()
 {
   m_state = INI_FAIL;
   if ((m_document.status() == Document::LOADED_HTML
-        or m_document.status() == Document::LOADED_ITEM)
+        or m_document.status() == Document::LOADED_PAGE)
       and not m_controller.stopped()
       and m_document.htmlDocument()->mimeType() == HtmlParser::TEXT_PLAIN)
   {
     // loaded. check it is what we expect
-    const HtmlElement * rootNode = m_document.rootNode();
-    if (rootNode->hasChildren())
+    const std::string &data(m_document.htmlDocument()->data());
+    vector<string> lines;
+    string download, size;
+    tokenize(data, lines, string("\n"));
+    for (vector<string>::const_iterator it(lines.begin()); it != lines.end(); ++it)
     {
-      const HtmlElement * body(rootNode->lastChild());
-      if (body and body->hasChildren())
+      ParameterSet set(*it);
+      if (set.hasParameter("version"))
       {
-        const HtmlElement * text(body->firstChild());
-        if (text->isa(HtmlConstants::TEXT))
-        {
-          // yipee
-          const string & data = text->text();
-          vector<string> lines;
-          string download, size;
-          tokenize(data, lines, string("\n"));
-          for (vector<string>::const_iterator it(lines.begin()); it != lines.end(); ++it)
-          {
-            ParameterSet set(*it);
-            if (set.hasParameter("version"))
-            {
-              set.parameter("version", m_newVersion);
-            }
-            if (set.hasParameter("URL"))
-            {
-              set.parameter("URL", download);
-            }
-            if (set.hasParameter("size"))
-            {
-              set.parameter("size", size);
-            }
-          }
-          Version current(VERSION);
-          Version online(m_newVersion.c_str());
-          m_state = GOT_ZIP;
-          if (online > current)
-          {
-            string update;
-            m_controller.config().resource(Config::UPDATE, update);
-            m_downloadUrl = URI(update).navigateTo(download);
-            m_document.setHistoryEnabled(false);
-            m_view.setSaveAsEnabled(false);
-            m_controller.doUri(m_downloadUrl);
-            m_view.setSaveAsEnabled(true);
-            m_document.setHistoryEnabled(true);
-          }
-          else
-          {
-            alreadyGotLatest();
-          }
-        }
+        set.parameter("version", m_newVersion);
       }
+      if (set.hasParameter("URL"))
+      {
+        set.parameter("URL", download);
+      }
+      if (set.hasParameter("size"))
+      {
+        set.parameter("size", size);
+      }
+    }
+    Version current(VERSION);
+    Version online(m_newVersion.c_str());
+    m_state = GOT_ZIP;
+    if (online > current) {
+      string update;
+      m_controller.config().resource(Config::UPDATE, update);
+      m_downloadUrl = URI(update).navigateTo(download);
+      m_document.setHistoryEnabled(false);
+      m_view.setSaveAsEnabled(false);
+      m_controller.doUri(m_downloadUrl);
+      m_view.setSaveAsEnabled(true);
+      m_document.setHistoryEnabled(true);
+    } else {
+      m_state = CANCELLED;
+      alreadyGotLatest();
     }
   }
   if (m_state == INI_FAIL)
@@ -223,7 +208,7 @@ void Updater::pressed(ButtonI * button)
 {
   if (m_state == GOT_ZIP)
   {
-    if (button == (ButtonI*)m_ok)
+    if (button == m_ok)
     {
       m_state = DO_UPDATE;
     }
