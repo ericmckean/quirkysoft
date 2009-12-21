@@ -29,13 +29,7 @@
 
 using namespace nds;
 using namespace std;
-const static nds::Color EDGE(20,20,20);
-const static nds::Color SHADOW(28,28,28);
 const static unsigned char NEWLINE('\n');
-
-static const char intDelimiters[] = {0x20, 0x09, 0x0a, 0x0b, 0x0c, 0x0d};
-static const std::string s_delimiters(intDelimiters,6);
-static const int INDENT(16);
 static int INITIAL_POSITION(2<<8);
 
 TextArea::TextArea(Font * font) :
