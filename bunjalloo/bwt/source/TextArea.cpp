@@ -90,8 +90,7 @@ void TextArea::appendText(const std::string &unicodeString)
     std::string::const_iterator backup_it(it);
     std::string word(nextWordAdvanceWord(&it, end_it));
     int size = textSize(word);
-    int width8 = width() << 8;
-    if (size > width8 and word.size() > 1)
+    if ((size>>8) > width() and word.size() > 1)
     {
       it = backup_it;
       word = m_font->shorterWordFromLong(&it, end_it, width(), &size);
@@ -99,7 +98,7 @@ void TextArea::appendText(const std::string &unicodeString)
 
     // if the word ends with a new line, then increment the height.
     // otherwise, if we go off the end of the line, increment the height.
-    if ((m_appendPosition + size) > width8)
+    if (((m_appendPosition + size)>>8) > width())
     {
       // trim spaces from the end of the line
       // this word overflows the line - make a new line to hold the text.
