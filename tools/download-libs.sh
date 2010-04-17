@@ -2,8 +2,8 @@
 
 # Download, unpack, compile and install dependencies to $DEVKITPRO directory
 
-LIBPNG=libpng-1.2.41
-ZLIB=zlib-1.2.3
+LIBPNG=libpng-1.2.43
+ZLIB=zlib-1.2.4
 GIFLIB=giflib-4.1.6
 JPEGLIB=jpegsrc.v6b
 MATRIXLIB=matrixssl-1.8.7b
@@ -20,8 +20,8 @@ if [ ! -e ${LIBPNG}.tar.bz2 ] ; then
   wget ftp://ftp.simplesystems.org/pub/libpng/png/src/${LIBPNG}.tar.bz2 || \
   die "Unable to download ${LIBPNG}"
 fi
-if [ ! -e ${ZLIB}.tar.gz ] ; then
-  wget http://www.zlib.net/${ZLIB}.tar.gz || \
+if [ ! -e ${ZLIB}.tar.bz2 ] ; then
+  wget http://www.zlib.net/${ZLIB}.tar.bz2 || \
   die "Unable to download ${ZLIB}"
 fi
 if [ ! -e ${GIFLIB}.tar.gz ] ; then
@@ -39,7 +39,7 @@ fi
 
 echo "Extracting downloaded libraries..."
 tar xjf ${LIBPNG}.tar.bz2 || die "Problems unpacking ${LIBPNG}"
-tar xzf ${ZLIB}.tar.gz    || die "Problems unpacking ${ZLIB}"
+tar xjf ${ZLIB}.tar.bz2    || die "Problems unpacking ${ZLIB}"
 tar xzf ${GIFLIB}.tar.gz  || die "Problems unpacking ${GIFLIB}"
 tar xzf ${JPEGLIB}.tar.gz  || die "Problems unpacking ${JPEGLIB}"
 tar xzf ${MATRIXLIB}.tar.gz  || die "Problems unpacking ${MATRIXLIB}"
