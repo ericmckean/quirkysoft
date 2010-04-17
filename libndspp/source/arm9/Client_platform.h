@@ -16,6 +16,8 @@
 */
 #ifndef Client_platform_h_seen
 #define Client_platform_h_seen
+// use the dswifi ESHUTDOWN
+#define ESHUTDOWN 108
 #include "nds.h"
 #define TIMEOUT 2
 #define closesocket_platform closesocket
