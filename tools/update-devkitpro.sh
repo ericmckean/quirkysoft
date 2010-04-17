@@ -42,6 +42,9 @@ while true ; do
 done
 
 cd $DEVKITPRO
+if [ $UPDATE = Y ] ; then
+    mv -f devkitProUpdate.ini devkitProUpdate.ini.old
+fi
 here=$(pwd)
 url="http://devkitpro.sourceforge.net/devkitProUpdate.ini"
 if [ "$UPDATE" = "Y" ] || [ ! -e devkitProUpdate.ini ] ; then
