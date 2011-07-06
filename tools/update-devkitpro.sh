@@ -55,7 +55,7 @@ url=$(g devkitProUpdate URL)
 platform=$(uname -m)-linux.tar.bz2
 actualversion=$($DEVKITARM/bin/arm-*-gcc --version | head -1 | sed 's/.*release \([0-9]\+\).*/\1/g')
 
-for item in devkitARM libnds libndsfat maxmodds dswifi filesystem defaultarm7 ndsexamples
+for item in devkitARM libnds libndsfat maxmodds dswifi filesystem defaultarm7 ndsexamples libgba maxmodgba libgbafat gbaexamples
 do
     dl=$(g $item File | sed "s/win32\.exe/$platform/g")
     v=$(g $item Version)
@@ -81,11 +81,16 @@ do
             touch $item-$v
             tar xf $dl
             ;;
-        ndsexamples)
+        gbaexamples|ndsexamples)
             mkdir -p $item-$v
             cd $item-$v
             tar xf ../$dl
             cd ..
+            ;;
+        libgbafat|*gba)
+            touch $item-$v
+            mkdir -p libgba
+            tar -C libgba -xf $dl
             ;;
         *)
             touch $item-$v
