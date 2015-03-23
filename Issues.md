@@ -1,0 +1,3 @@
+<u><font size='5'><a href='http://groups.google.com/group/bunjalloo-discussion'>Forum</a></font></u> for discussing problems with Bunjalloo. Installation issues, cookies, ~~bugs~~ features...
+
+<font size='0'>If you really want to <a href='http://code.google.com/p/quirkysoft/issues/list'>see the issues</a>, and maybe add a new one, then click that link.</font>
